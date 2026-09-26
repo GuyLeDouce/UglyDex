@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { z } from 'zod';
-import { setTimeout as delay } from 'node:timers/promises';
+import { runWorker } from '../src/server/worker-runtime';
 import { db } from '../src/server/db';
 import {
   seedProgression,
@@ -27,20 +27,18 @@ try {
     ))
       throw new Error('INVALID_ARGUMENT');
   }
-  await seedProgression();
+  if (command !== 'worker') await seedProgression();
   if (command === 'seed')
     console.log(JSON.stringify({ event: 'progression.seeded' }));
   else if (command === 'worker') {
-    const stop = new AbortController();
-    process.once('SIGTERM', () => stop.abort());
-    process.once('SIGINT', () => stop.abort());
-    do {
-      const result = await processProgression(50, () => stop.signal.aborted);
-      console.log(JSON.stringify({ event: 'progression.cycle', ...result }));
-      if (args.includes('--once') || stop.signal.aborted) break;
-      await delay(15000, undefined, { signal: stop.signal }).catch(() => {});
-      if (stop.signal.aborted) break;
-    } while (true);
+    await runWorker(
+      'progression',
+      async (signal) => {
+        await seedProgression();
+        return processProgression(50, () => signal.aborted);
+      },
+      { once: args.includes('--once') },
+    );
   } else if (command === 'rebuild') {
     const collector = value('--collector'),
       token = value('--squig');

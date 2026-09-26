@@ -37,6 +37,9 @@ model Collector {
   featuredSetIds String[] @default([])
   collectionVisibility CollectionVisibility @default(FULL)
   galleries CollectorGallery[]
+  displayPreferences SquigDisplayPreference[]
+  cosmeticPreferences CollectorCosmeticPreference[]
+  cosmeticEntitlements CosmeticEntitlement[]
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
   identities   ExternalIdentity[]
@@ -144,6 +147,9 @@ model Squig {
   collectorPeriods CollectorOwnershipPeriod[]
   provenance SquigProvenance?
   galleryItems CollectorGalleryItem[]
+  customs SquigCustom[]
+  editionRelations SquigEditionRelation[]
+  displayPreferences SquigDisplayPreference[]
 
   @@unique([chainId, contractAddress, tokenId])
   @@index([uglyPoints, tokenId])
@@ -203,6 +209,8 @@ model CollectorGalleryItem {
   caption String @default("")
   section String @default("")
   addedAt DateTime @default(now())
+  customId String? @db.Uuid
+  custom SquigCustom? @relation(fields: [customId], references: [id])
   @@id([galleryId, squigId])
   @@index([galleryId, sortOrder])
 }
@@ -854,4 +862,200 @@ model CollectionReplay {
  cursor String?
  completedAt DateTime?
  updatedAt DateTime @updatedAt
+}
+
+// Absent controls are disabled. Deployment never opts into historical scanning.
+model WorkerControl {
+ service String @id
+ mode String @default("DISABLED")
+ updatedBy String
+ updatedAt DateTime @updatedAt
+}
+
+model WorkerHeartbeat {
+ service String
+ instanceId String
+ state String
+ mode String
+ lockHeld Boolean @default(false)
+ lastHeartbeat DateTime @default(now())
+ lastSuccessAt DateTime?
+ errorCode String?
+ runId String?
+ @@id([service, instanceId])
+ @@index([lastHeartbeat])
+}
+
+model ProductionStage {
+ stage String @id
+ status String @default("PENDING")
+ attempts Int @default(0)
+ runId String?
+ counts Json @default("{}")
+ startedAt DateTime?
+ completedAt DateTime?
+ errorCode String?
+ updatedAt DateTime @updatedAt
+}
+
+model OperationalAudit {
+ id String @id @default(uuid()) @db.Uuid
+ actor String
+ action String
+ subject String
+ detail Json
+ createdAt DateTime @default(now())
+ @@index([createdAt])
+}
+
+enum CollectibleStatus {
+ DRAFT
+ VERIFIED
+ RETIRED
+}
+
+// Only immutable IPFS raster assets. Approval snapshots retain prior asset hashes.
+model CollectibleArtwork {
+ id String @id
+ uri String @unique
+ sha256 String
+ mime String
+ width Int
+ height Int
+ byteLength Int
+ validatedAt DateTime @default(now())
+ customs SquigCustom[]
+ editions SquigEdition[]
+}
+
+model SquigCustom {
+ id String @id @default(uuid()) @db.Uuid
+ key String @unique
+ squigId String @db.Uuid
+ squig Squig @relation(fields: [squigId], references: [id])
+ name String
+ description String @default("")
+ artist String?
+ issuedAt DateTime?
+ status CollectibleStatus @default(DRAFT)
+ source String
+ sourceReference String
+ artworkId String
+ artwork CollectibleArtwork @relation(fields: [artworkId], references: [id])
+ sortOrder Int @default(0)
+ revision Int @default(1)
+ verifiedAt DateTime?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ displayPreferences SquigDisplayPreference[]
+ galleryItems CollectorGalleryItem[]
+ @@index([squigId, status, sortOrder])
+}
+
+model SquigDisplayPreference {
+ collectorId String @db.Uuid
+ collector Collector @relation(fields: [collectorId], references: [id], onDelete: Cascade)
+ squigId String @db.Uuid
+ squig Squig @relation(fields: [squigId], references: [id])
+ customId String? @db.Uuid
+ custom SquigCustom? @relation(fields: [customId], references: [id])
+ ownershipKey String
+ updatedAt DateTime @updatedAt
+ @@id([collectorId, squigId])
+}
+
+model SquigEdition {
+ id String @id @default(uuid()) @db.Uuid
+ slug String @unique
+ name String
+ description String @default("")
+ artist String?
+ issuedAt DateTime?
+ supply Int?
+ status CollectibleStatus @default(DRAFT)
+ source String
+ sourceReference String
+ artworkId String
+ artwork CollectibleArtwork @relation(fields: [artworkId], references: [id])
+ // NONE means catalog only. Chain fields describe the reviewed contract, never Reloaded defaults.
+ standard String @default("NONE")
+ chainId Int?
+ contractAddress String?
+ tokenId String?
+ revision Int @default(1)
+ verifiedAt DateTime?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ relations SquigEditionRelation[]
+ ownership EditionOwnership[]
+ @@index([status, issuedAt])
+ @@unique([chainId, contractAddress, tokenId])
+}
+
+model SquigEditionRelation {
+ editionId String @db.Uuid
+ edition SquigEdition @relation(fields: [editionId], references: [id])
+ squigId String @db.Uuid
+ squig Squig @relation(fields: [squigId], references: [id])
+ relationType String @default("ASSOCIATED_CHARACTER")
+ @@id([editionId, squigId])
+ @@index([squigId])
+}
+
+model EditionOwnership {
+ editionId String @db.Uuid
+ edition SquigEdition @relation(fields: [editionId], references: [id])
+ walletAddress String
+ amount String
+ blockNumber BigInt
+ blockHash String
+ verifiedAt DateTime @default(now())
+ // A catalog revision invalidates evidence until read again.
+ editionRevision Int
+ @@id([editionId, walletAddress])
+ @@index([walletAddress, verifiedAt])
+}
+
+model CollectibleAudit {
+ id String @id @default(uuid()) @db.Uuid
+ kind String
+ entityId String @db.Uuid
+ actor String
+ action String
+ snapshot Json
+ createdAt DateTime @default(now())
+ @@index([kind, entityId, createdAt])
+}
+
+model CosmeticDefinition {
+ id String @id
+ catalogVersion String
+ kind String
+ name String
+ source String
+ requirement String?
+ enabled Boolean @default(true)
+ entitlements CosmeticEntitlement[]
+ preferences CollectorCosmeticPreference[]
+}
+
+model CosmeticEntitlement {
+ collectorId String @db.Uuid
+ collector Collector @relation(fields: [collectorId], references: [id], onDelete: Cascade)
+ cosmeticId String
+ cosmetic CosmeticDefinition @relation(fields: [cosmeticId], references: [id])
+ source String
+ grantedAt DateTime @default(now())
+ revokedAt DateTime?
+ @@id([collectorId, cosmeticId])
+}
+
+model CollectorCosmeticPreference {
+ collectorId String @db.Uuid
+ collector Collector @relation(fields: [collectorId], references: [id], onDelete: Cascade)
+ kind String
+ cosmeticId String
+ cosmetic CosmeticDefinition @relation(fields: [cosmeticId], references: [id])
+ updatedAt DateTime @updatedAt
+ @@id([collectorId, kind])
 }

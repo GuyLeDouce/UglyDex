@@ -15,6 +15,13 @@ import { squigProfile } from '@/server/profiles';
 import { Artwork } from '@/components/artwork';
 import { Passport } from '@/components/passport';
 import { passport } from '@/server/provenance';
+import {
+  publicCustoms,
+  displayCustom,
+  ownedSquig,
+} from '@/server/collectibles';
+import { currentSession } from '@/server/auth';
+import { DisplayArt } from '@/components/display-art';
 export default async function Squig({
   params,
   searchParams,
@@ -38,6 +45,15 @@ export default async function Squig({
     );
   const s = r.squig;
   const history = await passport(r.squigId, await searchParams);
+  const customs = await publicCustoms(s.tokenId),
+    session = await currentSession();
+  const owned = session
+    ? await ownedSquig(session.collectorId, s.tokenId)
+    : null;
+  const preferred =
+    session && owned
+      ? await displayCustom(session.collectorId, s.tokenId)
+      : null;
   return (
     <>
       <ShareControls
@@ -53,7 +69,14 @@ export default async function Squig({
         <span>/ Squig #{s.tokenId}</span>
       </div>
       <section className="specimen">
-        <Artwork src={s.image} alt={`Squig #${s.tokenId}`} priority />
+        <div>
+          <Artwork
+            src={s.image}
+            alt={`Original Squig #${s.tokenId}`}
+            priority
+          />
+          <p className="eyebrow">Original · canonical Reloaded artwork</p>
+        </div>
         <div className="specimen-info">
           <p className="eyebrow">SQUIGS RELOADED / ETHEREUM</p>
           <h1>
@@ -163,6 +186,56 @@ export default async function Squig({
         </section>
       </div>
       <Passport data={history} tokenId={s.tokenId} />
+      {customs.length > 0 && (
+        <section id="customs" className="gallery-room">
+          <p className="eyebrow">SAME SQUIG. ANOTHER SIDE.</p>
+          <h2>Official Customs</h2>
+          <p>
+            Verified alternate representations. Original metadata, traits,
+            UglyPoints and NFT ownership are unchanged.
+          </p>
+          {owned && (
+            <DisplayArt
+              tokenId={s.tokenId}
+              customs={customs}
+              selected={preferred?.key ?? null}
+            />
+          )}
+          <div className="exhibition exhibition-grid">
+            {customs.map((c) => (
+              <figure key={c.key}>
+                <Artwork
+                  src={c.image}
+                  alt={c.name + ' · Official Custom of Squig #' + s.tokenId}
+                />
+                <figcaption>
+                  <h3>{c.name}</h3>
+                  <span className="badge">Official Custom</span>
+                  <p>{c.description}</p>
+                  <p>
+                    {c.artist && 'Art by ' + c.artist}{' '}
+                    {c.issuedAt?.slice(0, 10)}
+                  </p>
+                  <ShareControls
+                    spec={{
+                      kind: 'custom',
+                      entity: String(s.tokenId),
+                      key: c.key,
+                    }}
+                    url={absoluteUrl(
+                      '/share?kind=custom&entity=' +
+                        s.tokenId +
+                        '&key=' +
+                        c.key,
+                    )}
+                    copy={c.name + ' — Official Custom of Squig #' + s.tokenId}
+                  />
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
       <Progression
         subject="SQUIG"
         id={r.squigId}

@@ -42,6 +42,7 @@ export function cardDTO(row: CardRow) {
   };
 }
 export type SquigCardData = ReturnType<typeof cardDTO> & {
+  representation?: string;
   personalization?: {
     discovered: boolean;
     owned: boolean;

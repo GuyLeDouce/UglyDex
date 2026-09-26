@@ -1,5 +1,7 @@
 # Integration operating contract
 
+Phase 7 rechecked upstream revisions and found no authoritative Customs/Edition issuance or contract registry. A marketplace product name or community image approval is insufficient evidence. Reviewed UglyDex-owned catalog imports remain separate from existing read-only adapters; no source schema/database write was introduced. See [collectible source findings](collectibles.md#source-evidence). Workers now require explicit enablement and validated sources; follow [production preflight and backfill](production-readiness.md).
+
 Phase 1 web pages use only the UglyDex projection database. They never fan out to legacy databases. All nine read-only source configurations remain optional and unchanged. No production credentials were available during Phase 1; production schema inspection and pilot imports still need to be run after Railway configuration. The live source verification performed in Phase 1 was public Ethereum tokenURI and IPFS metadata/artwork reading, documented in [the Phase 1 report](phase1-report.md#images).
 
 Current ownership refresh now has a durable `worker:ownership` queue in the UglyDex database. `sync:ownership` shares that worker/checkpoint implementation. `sync:transfers` remains a separate bounded, finalized event backfill. UI refresh requests never run historical scans. Configure an archive-capable RPC for historical ranges as needed; no paid NFT indexing API is required.

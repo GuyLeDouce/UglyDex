@@ -4,7 +4,13 @@ import { useRouter } from 'next/navigation';
 import type { z } from 'zod';
 import type { gallerySchema } from '@/domain/sharing';
 type Gallery = z.infer<typeof gallerySchema>;
-export function GalleryEditor({ initial }: { initial?: Gallery }) {
+export function GalleryEditor({
+  initial,
+  customs = [],
+}: {
+  initial?: Gallery;
+  customs?: { tokenId: number; key: string; name: string }[];
+}) {
   const [items, setItems] = useState(initial?.items ?? []),
     [message, setMessage] = useState(''),
     [busy, setBusy] = useState(false),
@@ -163,6 +169,30 @@ export function GalleryEditor({ initial }: { initial?: Gallery }) {
         {items.map((item, index) => (
           <li key={item.tokenId}>
             <strong>Squig #{item.tokenId}</strong>
+            <label>
+              Display artwork
+              <select
+                value={item.customKey ?? ''}
+                onChange={(e) =>
+                  setItems(
+                    items.map((i, n) =>
+                      n === index
+                        ? { ...i, customKey: e.target.value || null }
+                        : i,
+                    ),
+                  )
+                }
+              >
+                <option value="">Original</option>
+                {customs
+                  .filter((c) => c.tokenId === item.tokenId)
+                  .map((c) => (
+                    <option key={c.key} value={c.key}>
+                      Official Custom · {c.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
             <label>
               Caption
               <input

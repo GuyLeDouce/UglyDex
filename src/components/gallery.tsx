@@ -34,6 +34,7 @@ export function GalleryArt({ gallery }: { gallery: Gallery }) {
                     </span>
                   </div>
                   <p>{item.caption}</p>
+                  <p className="eyebrow">{item.representation}</p>
                   <small>
                     {item.uglyPoints !== null
                       ? item.uglyPoints + ' UglyPoints'

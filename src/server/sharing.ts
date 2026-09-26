@@ -16,6 +16,8 @@ import { dexView } from './dex';
 import { RULESET } from '@/domain/progression';
 import { COLLECTION_RULESET } from '@/domain/dex';
 import { ecosystemSummary } from './activity';
+import { appearance } from './cosmetics';
+import { displayCustom } from './collectibles';
 export function absoluteUrl(path: string) {
   return new URL(path, readEnv().PUBLIC_BASE_URL).href;
 }
@@ -31,6 +33,40 @@ export async function shareCard(
     tokens: [] as number[],
     indexable: true,
   };
+  if (q.kind === 'custom') {
+    const n = Number(q.entity);
+    if (!Number.isInteger(n) || n < 1 || n > 4444 || !q.key) return null;
+    const custom = await db().squigCustom.findFirst({
+      where: {
+        key: q.key,
+        status: 'VERIFIED',
+        squig: { ...catalogScope, tokenId: n },
+      },
+      select: {
+        key: true,
+        name: true,
+        artist: true,
+        description: true,
+        issuedAt: true,
+        artwork: { select: { uri: true, sha256: true } },
+      },
+    });
+    if (!custom) return null;
+    return {
+      ...generic,
+      title: 'Squig #' + n,
+      eyebrow: 'OFFICIAL CUSTOM',
+      description: custom.name,
+      stats: custom.artist ? ['Art by ' + custom.artist] : [],
+      badges: ['UglyDex presentation · original NFT unchanged'],
+      tokens: [n],
+      variants: { [n]: custom.artwork },
+      path:
+        '/share?' +
+        shareQuery({ kind: 'custom', entity: String(n), key: custom.key }),
+      ...(custom.issuedAt ? { date: custom.issuedAt.toISOString() } : {}),
+    };
+  }
   if (q.kind === 'squig' || q.kind === 'passport') {
     const n = Number(q.entity);
     if (!Number.isInteger(n) || n < 1 || n > 4444) return null;
@@ -116,6 +152,13 @@ export async function shareCard(
       ],
       path: base + '/gallery/' + g.slug,
       indexable: g.indexable,
+      variants: Object.fromEntries(
+        g.items.filter((i) => i.variant).map((i) => [i.tokenId, i.variant!]),
+      ),
+      appearance: { accent: g.appearance.accent, share: g.appearance.share },
+      badges: g.items.some((i) => i.variant)
+        ? ['Includes Official Custom artwork']
+        : [],
     };
   }
   // Only an explicit authenticated owner preview may use private projections.
@@ -382,6 +425,22 @@ export async function shareCard(
         '/share?' + shareQuery({ kind: q.kind, entity: c.slug, key: q.key }),
     };
   }
+  const style = await appearance(c.id);
+  card.appearance = { accent: style.accent, share: style.share };
+  // Selected artwork is a current-owner preference, never historical evidence.
+  const variants = await Promise.all(
+    card.tokens.map(async (n) => ({
+      token: n,
+      art: await displayCustom(c.id, n),
+    })),
+  );
+  card.variants = Object.fromEntries(
+    variants
+      .filter((v) => v.art)
+      .map((v) => [v.token, { uri: v.art!.uri, sha256: v.art!.sha256 }]),
+  );
+  if (variants.some((v) => v.art))
+    card.badges = [...card.badges.slice(0, 3), 'Official Custom artwork'];
   return card;
 }
 export async function shareMetadata(

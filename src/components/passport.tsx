@@ -17,6 +17,17 @@ export function Passport({ data, tokenId }: { data: Data; tokenId: number }) {
     <section id="passport" className="passport">
       <p className="eyebrow">CHAIN OF CUSTODY / ETHEREUM</p>
       <h2>Every Squig has a story.</h2>
+      {data.customs.length > 0 && (
+        <div className="panel">
+          <h3>Official Custom history</h3>
+          {data.customs.map((c) => (
+            <p key={c.key}>
+              <strong>CUSTOM VERIFIED</strong> · {c.name} · {date(c.verifiedAt)}{' '}
+              <Link href="#customs">View artwork ↗</Link>
+            </p>
+          ))}
+        </div>
+      )}
       {s ? (
         <>
           <p className="provenance-status">

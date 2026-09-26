@@ -1,5 +1,9 @@
 # Architecture
 
+Phase 7 extends existing engines with disabled-by-default worker controls, persisted heartbeats, audited operational changes and checkpointed production stages. `src/server/production*` composes catalog, chain, attribution, activity, progression and collection engines while preserving their cursors/locks. `/api/ready` adds migration readiness. See [production readiness](production-readiness.md).
+
+Official collectibles add immutable validated artwork, audited Customs/Editions, explicit Edition relationships, short-lived read-only Edition ownership and Collector-specific display preferences. Canonical Squig fields and completion rulesets are unchanged. Versioned cosmetic definitions, live eligibility and separate preferences produce safe public presentation. The centralized share renderer accepts verified asset/configuration DTOs. See [collectibles](collectibles.md).
+
 ## Phase 1 read models and refresh worker
 
 The modular monolith is retained. `server/collections.ts` queries only UglyDex-owned records and returns serializable card/summary projections. Explorer and collection pages use 24-item server pagination, stable token tie breakers, indexed points/rank, normalized trait predicates and database aggregates. Current membership is an EXISTS predicate over current ownership and all active proved Ethereum wallets; duplicated observations cannot duplicate cards. Unknown point totals remain unavailable. Slugs are presentation keys; UUIDs still own history.

@@ -5,6 +5,7 @@ import { shareCard, shareMetadata, absoluteUrl } from '@/server/sharing';
 import { ShareControls } from '@/components/share-controls';
 import { Artwork } from '@/components/artwork';
 import { resolveAsset, squigArtwork } from '@/domain/assets';
+import { collectibleImageUrl } from '@/domain/collectibles';
 type Props = { searchParams: Promise<Record<string, string | undefined>> };
 export async function generateMetadata({ searchParams }: Props) {
   const p = shareSchema.safeParse(await searchParams);
@@ -38,8 +39,20 @@ export default async function Page({ searchParams }: Props) {
       <div className="share-art-grid">
         {c.tokens.map((n) => (
           <Link key={n} href={'/squig/' + n}>
-            <Artwork src={resolveAsset(squigArtwork(n))} alt={'Squig #' + n} />
+            <Artwork
+              src={
+                c.variants?.[n]
+                  ? collectibleImageUrl(c.variants[n].uri)
+                  : resolveAsset(squigArtwork(n))
+              }
+              alt={
+                'Squig #' +
+                n +
+                (c.variants?.[n] ? ' · Official Custom' : ' · Original')
+              }
+            />
             <span>Squig #{n}</span>
+            {c.variants?.[n] && <span className="badge">Official Custom</span>}
           </Link>
         ))}
       </div>

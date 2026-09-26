@@ -20,6 +20,7 @@ export const gallerySchema = z
           tokenId: z.number().int().min(1).max(4444),
           caption: z.string().trim().max(180).default(''),
           section: z.string().trim().max(40).default(''),
+          customKey: slugSchema.nullable().optional(),
         }),
       )
       .max(100)
@@ -52,6 +53,7 @@ export const shareSchema = z
         'collage',
         'squig',
         'passport',
+        'custom',
         'achievement',
         'set',
         'gallery',
@@ -90,6 +92,8 @@ export const shareSchema = z
   .strict();
 export type ShareSpec = z.infer<typeof shareSchema>;
 export type ShareCard = {
+  appearance?: { accent: string; share: 'clean' | 'ugly' | 'stats' };
+  variants?: Record<number, { uri: string; sha256: string }>;
   title: string;
   eyebrow: string;
   description: string;

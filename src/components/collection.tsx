@@ -24,6 +24,9 @@ export function SquigCard({ item }: { item: SquigCardData }) {
     >
       <Artwork src={item.image} alt={`Squig #${item.tokenId}`} />
       <div className="card-body">
+        {item.representation && (
+          <p className="eyebrow">{item.representation}</p>
+        )}
         <div className="card-title">
           <h3>
             Squig <span>#{item.tokenId}</span>

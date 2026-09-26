@@ -1,5 +1,11 @@
 # Roadmap
 
+## Phase 7 delivered and exact recommended Phase 8
+
+Phase 7 adds safe deployment/backfill operations, worker controls/heartbeats, preflight/verification, an operational dashboard, audited official Custom/Edition catalogs, read-only supported Edition ownership, alternate-art showcases and free earned personalization. No authoritative official collectible records or production history were invented. See [Phase 7 report](phase7-report.md).
+
+Recommended Phase 8 scope: execute the documented Railway staging/production rollout and restore drill; validate real read-only sources/RPC and reconcile production identity/evidence counts; import the first reviewed official Custom/Edition manifests and confirm their real contract semantics; complete iOS/Android/desktop wallet/OAuth/share testing; measure query/render/worker budgets and resolve observed accessibility/reliability issues. Only then add an evidence-backed historical Edition transfer/discovery adapter for the specifically verified deployed contracts, with separate completeness and privacy projections. Keep Reloaded completion v1 unchanged. Quests, seasons, leaderboards, referrals, paid cosmetics, currencies, minting and automatic rewards remain outside this scope.
+
 Sequencing depends on verified data quality, not a promise to implement an economy before its inputs are trustworthy.
 
 Phase 1 now delivers the collector dashboard, privacy/editing, multiwallet settings, paginated collection/explorer, traits/points/rank, immutable artwork, discovery views and resumable refresh worker. See [Phase 1 report](phase1-report.md). Those UI/trait/discovery items originally proposed for Phase 2 moved forward because the canonical dataset was already available.
@@ -15,7 +21,7 @@ Phase 2 now implements Transfer indexing and completeness reporting, provable mi
 | 4 — progression                              | Versioned XP and level calculation, collector/Squig achievements, reproducible rebuilds, explainable earned events, anti-duplication and correction rules                                                                                                                            |
 | 5 — challenges                               | Implemented: versioned trait discovery, historical/current sets, completion snapshots, explorer gaps and opt-in showcases. Recurring quests remain deferred.                                                                                                                         |
 | 6 — public expression                        | Implemented: opt-in public/unlisted/private galleries, curated profiles, earned share cards, collages, privacy-safe Open Graph and admin rendering diagnostics. No leaderboards or paid features.                                                                                    |
-| 7 — verified expansion                       | Audit production data and mobile/Railway flows, then non-financial collector customization and verified Customs/Editions indexing. Paid features and currency utility require a separate approved design.                                                                            |
+| 7 — verified expansion                       | Implemented: production preflight/backfill/verification, disabled worker controls and heartbeats, audited Customs/Editions, verified read-only Edition ownership and free personalization. Real production rollout remains an operational gate.                                      |
 
 Phase 0 does not claim a production-data reconciliation, completed on-chain backfill, live Discord OAuth approval, deployed Railway service or complete ecosystem history. Those require credentials, provider setup and schema validation. The application and test fixtures are independently runnable today.
 

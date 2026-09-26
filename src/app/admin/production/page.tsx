@@ -1,0 +1,162 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { adminActor } from '@/server/admin';
+import { productionOverview } from '@/server/production';
+import { heartbeatState, backfillStages } from '@/domain/operations';
+import { WorkerControls } from '@/components/worker-controls';
+export default async function Page() {
+  if (!(await adminActor())) notFound();
+  const p = await productionOverview();
+  return (
+    <>
+      <h1>Production command centre</h1>
+      <p>
+        Release: <code>{p.version}</code>. External probes and schema drift
+        checks run through <code>npm run production:preflight</code>.
+      </p>
+      <nav className="tabs">
+        <Link href="/admin/integrations">Integrations</Link>
+        <Link href="/admin/provenance">Provenance</Link>
+        <Link href="/admin/sharing">Rendering</Link>
+        <Link href="/admin/collectibles">Collectibles</Link>
+      </nav>
+      <h2>Readiness</h2>
+      <ul>
+        {p.checks.map((c) => (
+          <li key={c.name}>
+            <strong>
+              {c.status} · {c.name}
+            </strong>{' '}
+            — {c.detail}
+          </li>
+        ))}
+      </ul>
+      <h2>Workers</h2>
+      <WorkerControls controls={p.controls} />
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>State</th>
+              <th>Mode / lock</th>
+              <th>Heartbeat</th>
+              <th>Last success / error</th>
+            </tr>
+          </thead>
+          <tbody>
+            {p.workers.map((w) => (
+              <tr key={w.service + w.instanceId}>
+                <td>{w.service}</td>
+                <td>{heartbeatState(w.lastHeartbeat, w.state)}</td>
+                <td>
+                  {w.mode} / {w.lockHeld ? 'held' : 'idle'}
+                </td>
+                <td>{w.lastHeartbeat.toISOString()}</td>
+                <td>
+                  {w.lastSuccessAt?.toISOString() ?? 'None'} {w.errorCode}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <h2>Backfill</h2>
+      <p>
+        Run <code>npm run production:backfill</code> for the safe plan. No scans
+        are launched by this page.
+      </p>
+      <ol>
+        {backfillStages.map((stage) => {
+          const s = p.stages.find((s) => s.stage === stage);
+          return (
+            <li key={stage}>
+              {stage}: {s?.status ?? 'NOT STARTED'} {s?.errorCode}{' '}
+              {s && <code>{JSON.stringify(s.counts)}</code>}
+            </li>
+          );
+        })}
+      </ol>
+      <h2>Evidence state</h2>
+      <p>
+        Chain: {p.chain?.blockNumber.toString() ?? 'Not indexed'} / finalized{' '}
+        {p.chain?.finalizedBlock?.toString() ?? 'unknown'}. Last success:{' '}
+        {p.chain?.lastSuccessAt?.toISOString() ?? 'none'}. {p.chain?.lastError}
+      </p>
+      <ul>
+        {p.provenance.map((v) => (
+          <li key={`${v.dirty}:${v.complete}`}>
+            {v._count} Squigs: {v.dirty ? 'pending derivation' : 'settled'},{' '}
+            {v.complete ? 'complete' : 'incomplete'} provenance
+          </li>
+        ))}
+      </ul>
+      <p>
+        {p.pendingIdentity} unresolved reconciliation cases. Progression jobs:{' '}
+        {p.progressionJobs.reduce((n, g) => n + g._count, 0)} (
+        {p.progressionJobs
+          .filter((g) => g.errorCode)
+          .reduce((n, g) => n + g._count, 0)}{' '}
+        failed). Collection jobs:{' '}
+        {p.collectionJobs.reduce((n, g) => n + g._count, 0)} (
+        {p.collectionJobs
+          .filter((g) => g.errorCode)
+          .reduce((n, g) => n + g._count, 0)}{' '}
+        failed).
+      </p>
+      <h2>External history</h2>
+      <ul>
+        {p.sources.map((s) => (
+          <li key={s.id}>
+            {s.id}: {s.state} ·{' '}
+            {s.backfillFinishedAt
+              ? 'available source scanned'
+              : 'history incomplete'}{' '}
+            · last success {s.lastSuccessAt?.toISOString() ?? 'none'} ·{' '}
+            {s.warning}
+          </li>
+        ))}
+      </ul>
+      <h2>Rules and rendering</h2>
+      <ul>
+        {p.rulesets.map((r) => (
+          <li key={r.id}>
+            {r.id}: {r.status}
+          </li>
+        ))}
+        {p.renders.map((r) => (
+          <li key={r.status}>
+            {r.status}: {r._count} render events in 24 hours
+          </li>
+        ))}
+      </ul>
+      <h2>Recent jobs</h2>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Run</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {p.runs.map((r) => (
+              <tr key={r.id}>
+                <td>{r.id}</td>
+                <td>{r.source}</td>
+                <td>
+                  {r.status} {r.errorCode}
+                </td>
+                <td>
+                  {r.finishedAt?.toISOString() ?? r.startedAt.toISOString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}

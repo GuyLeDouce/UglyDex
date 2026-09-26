@@ -13,6 +13,10 @@ import { type SearchParams } from '@/components/catalog';
 import { CollectionGrid } from '@/components/collection';
 import { Artwork } from '@/components/artwork';
 import { publicCollectorMetadata } from './metadata';
+import { appearance } from '@/server/cosmetics';
+import { appearanceClass } from '@/domain/cosmetics';
+import { ownedEditions } from '@/server/editions';
+import { EditionGrid } from '@/components/editions';
 export async function generateMetadata({
   params,
 }: {
@@ -37,8 +41,12 @@ export default async function Collector({
       </section>
     );
   const p = r.profile;
+  const [style, editions] = await Promise.all([
+    appearance(r.collectorId),
+    ownedEditions(r.collectorId, true),
+  ]);
   return (
-    <>
+    <div className={appearanceClass(style)}>
       <section className="page-heading profile-heading">
         <Artwork
           src={p.avatar}
@@ -75,6 +83,13 @@ export default async function Collector({
         </section>
       )}
       <TrophyCase id={r.collectorId} slug={p.slug} />
+      {editions.length > 0 && (
+        <section>
+          <p className="eyebrow">A DIFFERENT KIND OF COLLECTIBLE</p>
+          <h2>Editions · {editions.length} owned</h2>
+          <EditionGrid items={editions} />
+        </section>
+      )}
       <GalleryShowcase id={r.collectorId} slug={p.slug} />
       <CollectorActivityPreview id={r.collectorId} slug={p.slug} />
       {r.collectionVisibility === 'FULL' && (
@@ -82,6 +97,6 @@ export default async function Collector({
           Explore the full collection →
         </Link>
       )}
-    </>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ export function DexNav() {
       <Link href="/collection/dex">Dex overview</Link>
       <Link href="/collection/traits">Trait Dex</Link>
       <Link href="/collection/sets">Collection sets</Link>
+      <Link href="/collection/editions">Editions</Link>
       <Link href="/collection/discovered">Discoveries</Link>
     </nav>
   );

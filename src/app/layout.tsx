@@ -3,6 +3,7 @@ import Link from 'next/link';
 import './globals.css';
 import './collections.css';
 import './sharing.css';
+import './appearance.css';
 import { currentSession } from '@/server/auth';
 import { db } from '@/server/db';
 export const metadata: Metadata = {
@@ -49,6 +50,7 @@ export default async function RootLayout({
               </>
             )}
             <Link href="/squigs">Explore</Link>
+            <Link href="/editions">Editions</Link>
             {slug ? (
               <>
                 <Link

@@ -43,7 +43,15 @@
     "collections:seed": "tsx --conditions=react-server scripts/collections.ts seed",
     "collections:rebuild": "tsx --conditions=react-server scripts/collections.ts rebuild",
     "collections:verify": "tsx --conditions=react-server scripts/collections.ts verify",
-    "worker:collections": "tsx --conditions=react-server scripts/collections.ts worker"
+    "worker:collections": "tsx --conditions=react-server scripts/collections.ts worker",
+    "production:preflight": "tsx --conditions=react-server scripts/production.ts preflight",
+    "production:backfill": "tsx --conditions=react-server scripts/production.ts backfill",
+    "production:verify": "tsx --conditions=react-server scripts/production.ts verify",
+    "production:worker": "tsx --conditions=react-server scripts/production.ts worker",
+    "customs:import": "tsx --conditions=react-server scripts/collectibles.ts customs",
+    "editions:import": "tsx --conditions=react-server scripts/collectibles.ts editions",
+    "collectibles:verify": "tsx --conditions=react-server scripts/collectibles.ts verify",
+    "collectibles:export": "tsx --conditions=react-server scripts/collectibles.ts export"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
@@ -55,6 +63,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "server-only": "^0.0.1",
+    "sharp": "^0.35.4",
     "viem": "^2.56.9",
     "zod": "^4.6.5"
   },

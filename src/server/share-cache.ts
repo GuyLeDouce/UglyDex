@@ -2,6 +2,7 @@ import 'server-only';
 import { createHash } from 'node:crypto';
 import { db } from './db';
 import { artworkBatch } from './share-art';
+import { collectibleArtworkData } from './collectible-art';
 import { renderShareSafe } from './share-render';
 import type { ShareCard, ShareSpec } from '@/domain/sharing';
 const cache = new Map<string, { at: number; bytes: Uint8Array }>();
@@ -44,6 +45,18 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
     try {
       await shareLimit('renders', 30);
       const art = await artworkBatch(card.tokens);
+      // Only server-projected, verified assets. Request parameters never supply URLs.
+      for (let i = 0; i < card.tokens.length; i += 4)
+        await Promise.all(
+          card.tokens.slice(i, i + 4).map(async (token) => {
+            const variant = card.variants?.[token];
+            if (variant)
+              art[token] = await collectibleArtworkData(
+                variant.uri,
+                variant.sha256,
+              );
+          }),
+        );
       failed = Object.values(art).filter((v) => !v).length;
       const rendered = await renderShareSafe(card, spec, art),
         bytes = rendered.bytes;

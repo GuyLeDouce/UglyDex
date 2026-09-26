@@ -5,6 +5,7 @@ import { currentSession } from '@/server/auth';
 import { shareMetadata, absoluteUrl } from '@/server/sharing';
 import { ShareControls } from '@/components/share-controls';
 import { GalleryArt } from '@/components/gallery';
+import { appearanceClass } from '@/domain/cosmetics';
 type Props = { params: Promise<{ slug: string; gallerySlug: string }> };
 export async function generateMetadata({ params }: Props) {
   const p = await params;
@@ -16,7 +17,7 @@ export default async function Page({ params }: Props) {
     g = await galleryView(p.slug, p.gallerySlug, s?.collectorId);
   if (!g) notFound();
   return (
-    <>
+    <div className={appearanceClass(g.appearance)}>
       <section className="gallery-heading">
         <p className="eyebrow">A PRIVATE OBSESSION. A PUBLIC EXHIBITION.</p>
         <h1>{g.name}</h1>
@@ -47,6 +48,6 @@ export default async function Page({ params }: Props) {
           determine what can appear here.
         </section>
       )}
-    </>
+    </div>
   );
 }

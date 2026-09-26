@@ -3,6 +3,7 @@ import { db } from './db';
 import { currentSession } from './auth';
 import { squigToken, SQUIGS_CONTRACT } from '@/domain/validation';
 import { publicIdentity } from '@/domain/profile';
+import { displayCustom } from './collectibles';
 import { confident, publicAttribution } from '@/domain/provenance';
 import {
   activeAddresses,
@@ -50,8 +51,23 @@ export async function collectorProfile(slug: string) {
       featured:
         c.collectionVisibility === 'HIDDEN'
           ? []
-          : c.featuredTokenIds.flatMap((id) =>
-              featured.filter((s) => s.tokenId === id).map(cardDTO),
+          : await Promise.all(
+              c.featuredTokenIds
+                .flatMap((id) =>
+                  featured.filter((s) => s.tokenId === id).map(cardDTO),
+                )
+                .map(async (s) => {
+                  const art = await displayCustom(c.id, s.tokenId);
+                  return {
+                    ...s,
+                    ...(art
+                      ? {
+                          image: art.image,
+                          representation: 'Official Custom · ' + art.name,
+                        }
+                      : {}),
+                  };
+                }),
             ),
     } as const;
   } catch {

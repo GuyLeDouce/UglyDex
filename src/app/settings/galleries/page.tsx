@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
 import { GalleryEditor } from '@/components/gallery-editor';
+import { eligibleGalleryTokens } from '@/server/galleries';
 export default async function Galleries({
   searchParams,
 }: {
@@ -15,7 +16,10 @@ export default async function Galleries({
     include: {
       items: {
         orderBy: { sortOrder: 'asc' },
-        include: { squig: { select: { tokenId: true } } },
+        include: {
+          squig: { select: { tokenId: true } },
+          custom: { select: { key: true } },
+        },
       },
     },
   });
@@ -24,6 +28,11 @@ export default async function Galleries({
     select: { slug: true },
   });
   const selected = rows.find((g) => g.id === q.edit);
+  const eligible = await eligibleGalleryTokens(id, 'CURRENT_COLLECTION');
+  const customs = await db().squigCustom.findMany({
+    where: { status: 'VERIFIED', squig: { tokenId: { in: eligible.current } } },
+    select: { key: true, name: true, squig: { select: { tokenId: true } } },
+  });
   return (
     <>
       <section className="page-heading">
@@ -55,6 +64,11 @@ export default async function Galleries({
         </Link>
       )}
       <GalleryEditor
+        customs={customs.map((c) => ({
+          key: c.key,
+          name: c.name,
+          tokenId: c.squig.tokenId,
+        }))}
         key={selected?.id + '-' + selected?.revision}
         initial={
           selected
@@ -73,6 +87,7 @@ export default async function Galleries({
                   tokenId: i.squig.tokenId,
                   caption: i.caption,
                   section: i.section,
+                  customKey: i.custom?.key ?? null,
                 })),
               }
             : undefined

@@ -172,6 +172,17 @@ export async function passport(
   );
   return {
     page,
+    customs: (
+      await db().squigCustom.findMany({
+        where: { squigId, status: 'VERIFIED', verifiedAt: { not: null } },
+        select: { key: true, name: true, verifiedAt: true },
+        orderBy: { verifiedAt: 'desc' },
+      })
+    ).map((c) => ({
+      key: c.key,
+      name: c.name,
+      verifiedAt: c.verifiedAt!.toISOString(),
+    })),
     pages: Math.max(1, Math.ceil(total / take)),
     total,
     filters: f,

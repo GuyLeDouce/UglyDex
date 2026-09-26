@@ -2,7 +2,11 @@
 
 The identity layer for the Ugly ecosystem. UglyDex unifies collector identity, Squig metadata, ownership observations and historical events above UglyBot, The Gauntlet and ImageSubmit. Those systems remain authoritative. UglyDex never migrates or writes to their databases.
 
-Phases 0–6 provide canonical ownership/provenance, tracked ecosystem history, replayable progression, a Trait Dex and collection sets, plus opt-in galleries and downloadable social cards. See the [Phase 6 report](docs/phase6-report.md), [sharing guide](docs/sharing.md), [privacy policy](docs/privacy.md) and [Railway operations](docs/railway.md). Quests, seasons, leaderboards and paid features remain deferred.
+Phases 0–7 provide canonical ownership/provenance, tracked history, progression, a Trait Dex and sets, opt-in galleries/share cards, verified Customs/Editions and free personalization. Phase 7 adds safe worker onboarding, preflight, resumable backfill and verification. Start with the [Phase 7 report](docs/phase7-report.md), [production deployment order](docs/production-readiness.md), [collectibles guide](docs/collectibles.md), [privacy policy](docs/privacy.md) and [Railway operations](docs/railway.md). Quests, seasons, leaderboards and paid features remain deferred.
+
+New routes: `/editions`, `/editions/[slug]`, `/collection/editions`, `/settings/appearance`, `/admin/production`, `/admin/collectibles`, `/admin/customs` and `/admin/editions`. `/api/health` checks connectivity; `/api/ready` also checks migration readiness and is the Railway rollout gate. All workers now start **disabled**, even with configured RPC/source URLs. Enable them explicitly after following the production guide. No official Customs or Editions are seeded without reviewed evidence.
+
+Operational commands: `production:preflight`, `production:backfill` (plan only unless `--execute`), `production:verify`, `production:worker`, `customs:import`, `editions:import`, `collectibles:verify` and `collectibles:export`. See the linked guides for exact flags and ordering.
 
 ## Local development
 
@@ -20,7 +24,7 @@ npm run dev
 
 PowerShell: `Copy-Item .env.example .env`. Generate a secret with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Never reuse external service secrets. No real `.env` is committed. Page data comes only from UglyDex; artwork is delivered from immutable IPFS references. Legacy service outages do not block collection browsing. New collector profiles are private by default.
 
-Public routes include `/`, `/connect`, `/squigs`, `/collector/[slug]`, `/collector/[slug]/collection`, `/collector/[slug]/gallery/[gallerySlug]`, `/squig/[tokenId]` and `/share`. Profile and gallery visibility is enforced on every public request. Private routes include `/me`, `/collection`, `/settings/profile`, `/settings/wallets`, `/settings/galleries` and `/settings/sharing`. `/api/health` checks readiness. Production admin pages, including `/admin/sharing`, require an authenticated configured Discord administrator. Read-only API diagnostics use `Authorization: Bearer <ADMIN_DIAGNOSTICS_TOKEN>`; never put that token in a URL or browser bundle.
+Public routes include `/`, `/connect`, `/squigs`, `/collector/[slug]`, `/collector/[slug]/collection`, `/collector/[slug]/gallery/[gallerySlug]`, `/squig/[tokenId]` and `/share`. Profile and gallery visibility is enforced on every public request. Private routes include `/me`, `/collection`, `/settings/profile`, `/settings/wallets`, `/settings/galleries` and `/settings/sharing`. `/api/health` checks connectivity; `/api/ready` checks migration readiness. Production admin pages, including `/admin/sharing`, require an authenticated configured Discord administrator. Read-only API diagnostics use `Authorization: Bearer <ADMIN_DIAGNOSTICS_TOKEN>`; never put that token in a URL or browser bundle.
 
 ## Architecture and database
 
@@ -85,12 +89,13 @@ Database tests create their own disposable loopback PostgreSQL cluster with rand
 
 ## Railway
 
-1. Create a Railway project with **new PostgreSQL dedicated to UglyDex** and a GitHub web service for this repository. Do not link UglyBot's writable database.
-2. Set the web service `DATABASE_URL` from the new Postgres service reference. Add its canonical HTTPS `PUBLIC_BASE_URL`, `AUTH_SECRET`, and optional Discord credentials/callback. Railway supplies `PORT`.
-3. Use the committed Dockerfile and `railway.toml`: build generates Prisma and runs `next build`; pre-deploy runs `npm run db:migrate`; start runs `npm start`; readiness is `/api/health`.
-4. Run `npm run sync:squigs` once in the service environment. Supply independently provisioned SELECT-only legacy roles and run `integrations:inspect` before importing history.
-5. Add an ownership worker service from the same repo/artifact with `npm run worker:ownership`, the same UglyDex `DATABASE_URL`, `PUBLIC_BASE_URL`, and `ETH_RPC_URL`. Use `railway.worker.toml` as its config path; it has no HTTP health check. Run `npm run sync:ownership` for the initial scan. Schedule `npm run sync:transfers` separately after verifying the contract deployment block. Ownership leases handle competing workers and interruptions; Transfer cursor guards reject competing commits. Pages never initiate chain scans.
-6. Enable database backups and verify a restore before making profiles public. Set `ADMIN_DIAGNOSTICS_TOKEN` only for administrative API access.
+For first deployment, follow the complete [Phase 7 production order](docs/production-readiness.md). Workers remain disabled until explicit enablement; take backups before the first backfill. The notes below describe the underlying service configuration.
+
+1. Create a dedicated UglyDex PostgreSQL service, enable backups and verify an isolated restore. Never link an ecosystem writable datasource.
+2. Configure canonical HTTPS origin, session secret, Discord OAuth/admin allowlist and the UglyDex database. Deploy web first: `railway.toml` migrates before `npm start` and gates readiness on `/api/ready`.
+3. Run production preflight, configure/validate RPC and SELECT-only sources, then take a pre-backfill backup. Run the explicit bounded production backfill and consistency verification commands in the production guide.
+4. Deploy the four CLI workers from the same release. They start disabled, share only UglyDex's writable database and have no HTTP health check. Enable LIVE individually after onboarding, monitor heartbeats and configure a 90-second deployment drain grace.
+5. Complete real-device wallet/OAuth/gallery/share checks before public rollout. `ADMIN_DIAGNOSTICS_TOKEN` remains a separate read-only integration diagnostic credential.
 
 The image includes dev dependencies because migrations and CLI workers share the Phase 0 artifact. A later split can slim the web image. Requests use the configured public origin for CSRF/OAuth; untrusted forwarded headers do not determine identity, redirect targets or auth rate-limit keys. Cookies are Secure in production, HttpOnly and SameSite=Lax. External outages do not fail readiness; loss of UglyDex PostgreSQL returns 503. Startup clearly fails if its DB URL is missing. Builds require no production DB or secrets. No deployment has been made by this phase.
 

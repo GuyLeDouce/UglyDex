@@ -2,12 +2,15 @@
 import 'server-only';
 import { ImageResponse } from 'next/og';
 import type { ShareCard, ShareSpec } from '@/domain/sharing';
+import { accentColors } from '@/domain/cosmetics';
 // ImageResponse bundles its font; no dependency on a desktop font installation.
 export function renderShare(
   card: ShareCard,
   spec: Pick<ShareSpec, 'ratio' | 'template'>,
   art: Record<number, string | null>,
 ) {
+  if (card.appearance && spec.template === 'clean')
+    spec = { ...spec, template: card.appearance.share };
   const text = (value: string) =>
     value
       .normalize('NFKD')
@@ -25,7 +28,11 @@ export function renderShare(
   const square = spec.ratio === 'square',
     width = square ? 1080 : 1200,
     height = square ? 1080 : 630,
-    accent = spec.template === 'ugly' ? '#ecfa72' : '#c6e5b5';
+    accent = card.appearance
+      ? (accentColors[card.appearance.accent] ?? '#c6e5b5')
+      : spec.template === 'ugly'
+        ? '#ecfa72'
+        : '#c6e5b5';
   const count = card.tokens.length,
     cols = count <= 1 ? 1 : count <= 4 ? 2 : count <= 9 ? 3 : 4;
   const artWidth = square ? 970 : 510,

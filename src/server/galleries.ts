@@ -9,6 +9,8 @@ import {
   cardDTO,
 } from './collections';
 import { dexView } from './dex';
+import { collectibleImageUrl } from '@/domain/collectibles';
+import { appearance } from './cosmetics';
 export async function eligibleGalleryTokens(collectorId: string, mode: string) {
   const addresses = await activeAddresses(collectorId);
   const current = await db().squig.findMany({
@@ -39,6 +41,26 @@ export async function saveGallery(collectorId: string, input: unknown) {
     where: { ...catalogScope, tokenId: { in: g.items.map((i) => i.tokenId) } },
     select: { id: true, tokenId: true },
   });
+  const variants = await db().squigCustom.findMany({
+    where: {
+      key: { in: g.items.flatMap((i) => (i.customKey ? [i.customKey] : [])) },
+      status: 'VERIFIED',
+    },
+    select: { id: true, key: true, squigId: true },
+  });
+  if (
+    g.items.some(
+      (i) =>
+        i.customKey &&
+        (!eligible.current.includes(i.tokenId) ||
+          !variants.some(
+            (v) =>
+              v.key === i.customKey &&
+              v.squigId === rows.find((r) => r.tokenId === i.tokenId)?.id,
+          )),
+    )
+  )
+    throw new Error('INELIGIBLE_CUSTOM');
   return db().$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'gallery:' + collectorId},0))`;
     if (g.id) {
@@ -90,6 +112,7 @@ export async function saveGallery(collectorId: string, input: unknown) {
           )?.addedAt,
           caption: i.caption,
           section: i.section,
+          customId: variants.find((v) => v.key === i.customKey)?.id ?? null,
         })),
       });
     return { id: gallery.id, slug: gallery.slug };
@@ -131,7 +154,17 @@ export async function galleryView(
       },
       items: {
         orderBy: { sortOrder: 'asc' },
-        include: { squig: { select: cardSelect } },
+        include: {
+          squig: { select: cardSelect },
+          custom: {
+            select: {
+              squigId: true,
+              status: true,
+              name: true,
+              artwork: { select: { uri: true, sha256: true } },
+            },
+          },
+        },
       },
     },
   });
@@ -147,14 +180,28 @@ export async function galleryView(
   const allowed = await eligibleGalleryTokens(g.collectorId, g.mode);
   const items = g.items
     .filter((i) => allowed.eligible.includes(i.squig.tokenId))
-    .map((i) => ({
-      ...cardDTO(i.squig),
-      caption: i.caption,
-      section: i.section,
-      currentlyOwned: allowed.current.includes(i.squig.tokenId),
-    }));
+    .map((i) => {
+      const custom =
+        i.custom?.status === 'VERIFIED' &&
+        i.custom.squigId === i.squigId &&
+        allowed.current.includes(i.squig.tokenId)
+          ? i.custom
+          : null;
+      return {
+        ...cardDTO(i.squig),
+        ...(custom ? { image: collectibleImageUrl(custom.artwork.uri) } : {}),
+        representation: custom
+          ? 'Official Custom · ' + custom.name
+          : 'Original',
+        variant: custom ? custom.artwork : null,
+        caption: i.caption,
+        section: i.section,
+        currentlyOwned: allowed.current.includes(i.squig.tokenId),
+      };
+    });
   return {
     slug: g.slug,
+    appearance: await appearance(g.collectorId),
     name: g.name,
     description: g.description,
     visibility: g.visibility,

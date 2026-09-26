@@ -72,6 +72,25 @@ try {
   );
   check(migration.status === 0, 'Prisma deploy applies committed migrations');
   const { db } = await import('../src/server/db');
+  const { productionVerify } = await import('../src/server/production-verify');
+  const emptyVerification = await productionVerify();
+  check(
+    emptyVerification.some(
+      (c) => c.name === 'catalog.integrity' && c.status === 'FAIL',
+    ),
+    'production verification detects an empty unbackfilled catalog',
+  );
+  check(
+    emptyVerification.some(
+      (c) => c.name === 'privacy.private_cards' && c.status === 'PASS',
+    ),
+    'production privacy verification runs against a fresh database',
+  );
+  check(
+    (await db().squig.count()) === 0 &&
+      (await db().productionStage.count()) === 0,
+    'production verify is read-only',
+  );
   const { importEvent } = await import('../src/sync/import-event');
   const { activitySchema } = await import('../src/domain/events');
   const event = activitySchema.parse({
@@ -185,6 +204,8 @@ try {
   await phase5DatabaseTests(check);
   const { phase6DatabaseTests } = await import('../tests/db/phase6');
   await phase6DatabaseTests(check);
+  const { phase7DatabaseTests } = await import('../tests/db/phase7');
+  await phase7DatabaseTests(check);
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
@@ -1101,6 +1122,12 @@ try {
   if (process.argv.includes('--web')) {
     const { phase6WebTests } = await import('../tests/db/phase6-web');
     await phase6WebTests(
+      `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
+    const { phase7WebTests } = await import('../tests/db/phase7-web');
+    await phase7WebTests(
       `http://127.0.0.1:${webPort}`,
       check,
       process.argv.includes('--browser'),

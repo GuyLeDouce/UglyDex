@@ -75,6 +75,7 @@ export async function enrich(feed: Feed, rows: ExternalRow[]) {
   }
 }
 export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
+  const started = Date.now();
   const counts = {
     scanned: 0,
     inserted: 0,
@@ -252,7 +253,13 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
         where: { id: run.id },
         data: { counts, cursorEnd: after as string[] },
       });
-      log('activity.page', { source: feed, ...counts });
+      log('activity.page', {
+        runId: run.id,
+        service: 'ecosystem',
+        stage: feed,
+        source: feed,
+        ...counts,
+      });
     }
     const failed = await db().importRejection.count({
       where: { source: feed, resolvedAt: null },
@@ -323,13 +330,24 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
     lock.release();
     await pool.end();
   }
-  log('activity.finished', { source: feed, ...counts });
+  log('activity.finished', {
+    runId: runId ?? null,
+    service: 'ecosystem',
+    stage: feed,
+    source: feed,
+    durationMs: Date.now() - started,
+    success: counts.failed === 0,
+    ...counts,
+  });
   return counts;
 }
-export async function activityCycle(options: ImportOptions = { maxPages: 2 }) {
+export async function activityCycle(
+  options: ImportOptions = { maxPages: 2 },
+  stopped = () => false,
+) {
   await reattributePending();
   for (const feed of feeds)
-    if (process.env[integrationEnv[tables[feed].integration]]) {
+    if (!stopped() && process.env[integrationEnv[tables[feed].integration]]) {
       try {
         await runActivityFeed(feed, options);
         if (mutable.has(feed))

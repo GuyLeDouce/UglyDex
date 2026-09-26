@@ -1,0 +1,70 @@
+.personal-showcase {
+  --personal-accent: #c6e5b5;
+  padding: clamp(12px, 3vw, 32px);
+  border-top: 3px solid var(--personal-accent);
+  border-radius: 4px;
+}
+.accent-bone {
+  --personal-accent: #eee1c3;
+}
+.accent-violet {
+  --personal-accent: #dac6ff;
+}
+.accent-amber {
+  --personal-accent: #f5d28a;
+}
+.personal-showcase .eyebrow,
+.personal-showcase .text-link {
+  color: var(--personal-accent);
+}
+.theme-labs {
+  background-color: #141a18;
+  background-image:
+    linear-gradient(#b7dac609 1px, transparent 1px),
+    linear-gradient(90deg, #b7dac609 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.theme-minimal {
+  background: #101110;
+}
+.frame-og .squig-card,
+.frame-og .exhibition figure {
+  border: 2px solid #c6e5b5;
+}
+.frame-legendary .squig-card,
+.frame-legendary .exhibition figure {
+  border: 2px solid #f5d28a;
+  box-shadow: 0 3px 0 #756040;
+}
+.frame-set .squig-card,
+.frame-set .exhibition figure {
+  border: 2px solid #dac6ff;
+}
+.gallery-style-labs .gallery-room {
+  border-left: 2px solid var(--personal-accent);
+  padding-left: 12px;
+}
+.gallery-style-trophy .exhibition figure {
+  border-bottom: 5px solid var(--personal-accent);
+}
+.catalog-editor textarea {
+  min-height: 300px;
+  font-family: monospace;
+  font-size: 14px;
+}
+.personal-showcase,
+.catalog-editor {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.personal-showcase:focus-within {
+  outline-offset: 4px;
+}
+@media (max-width: 600px) {
+  .personal-showcase {
+    padding: 12px 4px;
+  }
+  .gallery-style-labs .gallery-room {
+    padding-left: 6px;
+  }
+}

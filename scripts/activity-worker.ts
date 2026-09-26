@@ -2,23 +2,22 @@ import 'dotenv/config';
 import { activityCycle } from '../src/sync/activity';
 import { closeExternalPools } from '../src/integrations/read-only';
 import { db } from '../src/server/db';
-import { log } from '../src/server/log';
-let stopping = false;
-process.on('SIGTERM', () => {
-  stopping = true;
-});
-process.on('SIGINT', () => {
-  stopping = true;
-});
+import { runWorker } from '../src/server/worker-runtime';
 try {
-  do {
-    await activityCycle({ maxPages: 2 });
-    if (process.argv.includes('--once')) break;
-    for (let i = 0; i < 60 && !stopping; i++)
-      await new Promise((r) => setTimeout(r, 5000));
-  } while (!stopping);
+  await runWorker(
+    'ecosystem',
+    async (signal) => {
+      await activityCycle({ maxPages: 2 }, () => signal.aborted);
+      return {
+        failed: await db().integrationSource.count({
+          where: { state: 'ERROR' },
+        }),
+      };
+    },
+    { once: process.argv.includes('--once'), intervalMs: 300000 },
+  );
 } catch {
-  log('activity.worker_failed');
+  console.error('ECOSYSTEM_WORKER_FAILED');
   process.exitCode = 1;
 } finally {
   await closeExternalPools();

@@ -10,6 +10,7 @@ const config: NextConfig = {
       },
     ],
     minimumCacheTTL: 86400,
+    maximumRedirects: 0,
   },
   serverExternalPackages: ['pg', '@prisma/client', '@prisma/adapter-pg'],
   async headers() {

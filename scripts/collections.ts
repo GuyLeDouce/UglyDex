@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { z } from 'zod';
-import { setTimeout as delay } from 'node:timers/promises';
+import { runWorker } from '../src/server/worker-runtime';
 import { db } from '../src/server/db';
 import {
   seedCollections,
@@ -60,7 +60,7 @@ try {
     );
     if (errors.length) process.exitCode = 1;
   } else {
-    await seedCollections();
+    if (command !== 'worker') await seedCollections();
     if (command === 'seed')
       console.log(JSON.stringify({ event: 'collections.seeded', ruleset: R }));
     if (command === 'rebuild') {
@@ -84,19 +84,14 @@ try {
       }
     }
     if (command === 'worker') {
-      const stop = new AbortController();
-      process.once('SIGTERM', () => stop.abort());
-      process.once('SIGINT', () => stop.abort());
-      do {
-        console.log(
-          JSON.stringify({
-            event: 'collections.cycle',
-            ...(await processCollections(25, () => stop.signal.aborted)),
-          }),
-        );
-        if (args.includes('--once') || stop.signal.aborted) break;
-        await delay(15000, undefined, { signal: stop.signal }).catch(() => {});
-      } while (!stop.signal.aborted);
+      await runWorker(
+        'collections',
+        async (signal) => {
+          await seedCollections();
+          return processCollections(25, () => signal.aborted);
+        },
+        { once: args.includes('--once') },
+      );
     }
   }
 } catch {
