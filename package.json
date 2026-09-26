@@ -1,0 +1,71 @@
+{
+  "name": "uglydex",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0 <25"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "node scripts/start.mjs",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "prisma generate && next typegen && tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:db": "tsx --conditions=react-server scripts/test-db.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "tsx --conditions=react-server scripts/migrate.ts",
+    "integrations:inspect": "tsx --conditions=react-server scripts/inspect.ts",
+    "sync:identities": "tsx --conditions=react-server scripts/sync.ts identities",
+    "sync:squigs": "tsx --conditions=react-server scripts/sync.ts squigs",
+    "sync:uglybot": "tsx --conditions=react-server scripts/sync.ts uglybot",
+    "sync:gauntlet": "tsx --conditions=react-server scripts/sync.ts gauntlet",
+    "sync:images": "tsx --conditions=react-server scripts/sync.ts images",
+    "sync:ownership": "tsx --conditions=react-server scripts/sync.ts ownership",
+    "worker:ownership": "tsx --conditions=react-server scripts/ownership-worker.ts",
+    "sync:transfers": "tsx --conditions=react-server scripts/sync.ts transfers",
+    "sync:all": "tsx --conditions=react-server scripts/sync.ts all",
+    "chain:status": "tsx --conditions=react-server scripts/provenance.ts status",
+    "chain:verify": "tsx --conditions=react-server scripts/provenance.ts verify",
+    "chain:discover-start": "tsx --conditions=react-server scripts/provenance.ts discover-start",
+    "provenance:verify": "tsx --conditions=react-server scripts/provenance.ts verify",
+    "provenance:rebuild": "tsx --conditions=react-server scripts/provenance.ts rebuild"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "csv-parse": "^7.0.3",
+    "dotenv": "^18.0.4",
+    "next": "^16.3.6",
+    "pg": "^8.23.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "server-only": "^0.0.1",
+    "viem": "^2.56.9",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.6.3",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "embedded-postgres": "^18.4.0-beta.17",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.6",
+    "prettier": "^3.9.9",
+    "prisma": "^7.10.0",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.2"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2",
+    "mysql2": "^3.24.4"
+  }
+}

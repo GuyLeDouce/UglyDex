@@ -1,0 +1,9 @@
+node_modules
+.next
+.inspection
+.data
+src/generated
+data
+package-lock.json
+coverage
+next-env.d.ts

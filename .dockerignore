@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+.inspection
+.env
+.env.*
+coverage
+.data
+*.log

@@ -1,0 +1,530 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum IdentityProvider {
+  DISCORD
+}
+
+enum WalletStatus {
+  ACTIVE
+  REVOKED
+}
+
+enum ReconciliationStatus {
+  PENDING
+  RESOLVED
+  REJECTED
+}
+
+model Collector {
+  id           String                 @id @default(uuid()) @db.Uuid
+  slug         String                 @unique
+  displayName  String?
+  bio          String?
+  avatar       String?
+  isPublic     Boolean                @default(false)
+  showWallets  Boolean                @default(false)
+  showDiscord  Boolean                @default(false)
+  featuredTokenIds Int[]              @default([])
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  identities   ExternalIdentity[]
+  wallets      CollectorWallet[]
+  activities   CollectorActivity[]
+  discoveries  SquigDiscovery[]
+  progress     CollectorProgress?
+  achievements CollectorAchievement[]
+  sets         CollectorSetProgress[]
+  quests       QuestProgress[]
+  sessions     AuthSession[]
+  refreshRequest CollectorRefreshRequest?
+  attributions HistoricalIdentityAttribution[]
+  holdingPeriods CollectorOwnershipPeriod[]
+}
+
+model ExternalIdentity {
+  id              String           @id @default(uuid()) @db.Uuid
+  collectorId     String           @db.Uuid
+  collector       Collector        @relation(fields: [collectorId], references: [id])
+  provider        IdentityProvider
+  externalId      String
+  username        String?
+  displayName     String?
+  metadata        Json?
+  linkedAt        DateTime         @default(now())
+  authenticatedAt DateTime?
+
+  @@unique([provider, externalId])
+  @@index([collectorId])
+}
+
+model CollectorWallet {
+  id              String       @id @default(uuid()) @db.Uuid
+  collectorId     String       @db.Uuid
+  collector       Collector    @relation(fields: [collectorId], references: [id])
+  chainId         Int
+  walletAddress   String       @db.VarChar(42)
+  checksumAddress String?      @db.VarChar(42)
+  source          String
+  verifiedAt      DateTime
+  firstSeenAt     DateTime     @default(now())
+  lastSeenAt      DateTime     @default(now())
+  revokedAt       DateTime?
+  status          WalletStatus @default(ACTIVE)
+  isPrimary       Boolean      @default(false)
+
+  @@unique([chainId, walletAddress])
+  @@index([collectorId, status])
+}
+
+// Legacy evidence is separate from credentials. No ownership or login grants.
+model WalletLinkEvidence {
+  id              String    @id @default(uuid()) @db.Uuid
+  sourceKey       String    @unique
+  discordId       String
+  guildId         String
+  chainId         Int       @default(1)
+  walletAddress   String
+  legacyVerified  Boolean
+  sourceCreatedAt DateTime?
+  sourceUpdatedAt DateTime?
+  observedAt      DateTime  @default(now())
+
+  @@index([walletAddress, discordId])
+}
+
+model IdentityReconciliation {
+  id         String               @id @default(uuid()) @db.Uuid
+  dedupeKey  String               @unique
+  status     ReconciliationStatus @default(PENDING)
+  reason     String
+  evidence   Json
+  resolution Json?
+  createdAt  DateTime             @default(now())
+  resolvedAt DateTime?
+  decisions ReconciliationDecision[]
+  @@index([status, createdAt])
+}
+
+model Squig {
+  id                 String               @id @default(uuid()) @db.Uuid
+  tokenId            Int
+  contractAddress    String
+  chainId            Int                  @default(1)
+  imageUrl           String?
+  name               String?
+  metadata           Json?
+  uglyPoints         Decimal?             @db.Decimal(20, 4)
+  mawRank            Int?
+  rarityTier         String?
+  legendary          Boolean?
+  og                 Boolean?
+  metadataUpdatedAt  DateTime?
+  metadataSourceHash String?
+  traits             SquigTrait[]
+  ownerships         SquigOwnership[]
+  discoveries        SquigDiscovery[]
+  activities         CollectorActivity[]
+  passport           SquigPassportEvent[]
+  progress           SquigProgress?
+  achievements       SquigAchievement[]
+  transfers NftTransfer[]
+  walletPeriods WalletOwnershipPeriod[]
+  collectorPeriods CollectorOwnershipPeriod[]
+  provenance SquigProvenance?
+
+  @@unique([chainId, contractAddress, tokenId])
+  @@index([uglyPoints, tokenId])
+  @@index([mawRank, tokenId])
+  @@index([rarityTier, og, legendary])
+}
+
+model SquigTrait {
+  id        String @id @default(uuid()) @db.Uuid
+  squigId   String @db.Uuid
+  squig     Squig  @relation(fields: [squigId], references: [id])
+  traitType String
+  value     String
+
+  @@unique([squigId, traitType])
+  @@index([traitType, value])
+}
+
+model SquigOwnership {
+  id              String    @id @default(uuid()) @db.Uuid
+  squigId         String    @db.Uuid
+  squig           Squig     @relation(fields: [squigId], references: [id])
+  walletAddress   String
+  fromWallet      String?
+  sourceKey       String    @unique
+  source          String
+  blockNumber     BigInt
+  blockHash       String
+  transactionHash String?
+  logIndex        Int?
+  acquiredAt      DateTime?
+  observedAt      DateTime  @default(now())
+  isCurrent       Boolean   @default(false)
+
+  @@index([squigId, blockNumber])
+  @@index([walletAddress, isCurrent])
+}
+
+model SquigDiscovery {
+  id           String    @id @default(uuid()) @db.Uuid
+  collectorId  String    @db.Uuid
+  collector    Collector @relation(fields: [collectorId], references: [id])
+  squigId      String    @db.Uuid
+  squig        Squig     @relation(fields: [squigId], references: [id])
+  discoveredAt DateTime
+  sourceKey    String
+  everOwned    Boolean   @default(false)
+  attributionStatus String @default("OBSERVED")
+  firstOwnershipPeriod String?
+
+  @@unique([collectorId, squigId])
+  @@index([collectorId, everOwned, discoveredAt])
+}
+
+model CollectorActivity {
+  id             String               @id @default(uuid()) @db.Uuid
+  eventKey       String               @unique
+  collectorId    String               @db.Uuid
+  collector      Collector            @relation(fields: [collectorId], references: [id])
+  squigId        String?              @db.Uuid
+  squig          Squig?               @relation(fields: [squigId], references: [id])
+  sourceSystem   String
+  sourceType     String
+  sourceId       String
+  subjectKey     String
+  eventType      String
+  eventAt        DateTime
+  metadata       Json
+  payloadHash    String
+  importedAt     DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  passportEvents SquigPassportEvent[]
+
+  @@unique([sourceSystem, sourceType, sourceId, subjectKey, eventType])
+  @@index([collectorId, eventAt])
+}
+
+model SquigPassportEvent {
+  id           String             @id @default(uuid()) @db.Uuid
+  eventKey     String             @unique
+  squigId      String             @db.Uuid
+  squig        Squig              @relation(fields: [squigId], references: [id])
+  activityId   String?            @db.Uuid
+  activity     CollectorActivity? @relation(fields: [activityId], references: [id])
+  eventType    String
+  eventAt      DateTime
+  sourceSystem String
+  sourceId     String
+  metadata     Json
+
+  @@index([squigId, eventAt])
+}
+
+model CollectorProgress {
+  collectorId  String    @id @db.Uuid
+  collector    Collector @relation(fields: [collectorId], references: [id])
+  xp           BigInt    @default(0)
+  level        Int       @default(1)
+  rulesVersion String
+  calculatedAt DateTime  @default(now())
+}
+
+model SquigProgress {
+  squigId      String   @id @db.Uuid
+  squig        Squig    @relation(fields: [squigId], references: [id])
+  xp           BigInt   @default(0)
+  level        Int      @default(1)
+  rulesVersion String
+  calculatedAt DateTime @default(now())
+}
+
+model AchievementDefinition {
+  id          String                 @id
+  name        String
+  description String
+  rules       Json
+  version     Int                    @default(1)
+  collectors  CollectorAchievement[]
+  squigs      SquigAchievement[]
+}
+
+model CollectorAchievement {
+  collectorId   String                @db.Uuid
+  collector     Collector             @relation(fields: [collectorId], references: [id])
+  achievementId String
+  achievement   AchievementDefinition @relation(fields: [achievementId], references: [id])
+  awardedAt     DateTime              @default(now())
+  evidence      Json
+
+  @@id([collectorId, achievementId])
+}
+
+model SquigAchievement {
+  squigId       String                @db.Uuid
+  squig         Squig                 @relation(fields: [squigId], references: [id])
+  achievementId String
+  achievement   AchievementDefinition @relation(fields: [achievementId], references: [id])
+  awardedAt     DateTime              @default(now())
+  evidence      Json
+
+  @@id([squigId, achievementId])
+}
+
+model CollectionSetDefinition {
+  id           String                     @id
+  name         String
+  description  String
+  version      Int                        @default(1)
+  requirements CollectionSetRequirement[]
+  collectors   CollectorSetProgress[]
+}
+
+model CollectionSetRequirement {
+  id            String                  @id @default(uuid()) @db.Uuid
+  setId         String
+  set           CollectionSetDefinition @relation(fields: [setId], references: [id])
+  key           String
+  criteria      Json
+  requiredCount Int                     @default(1)
+
+  @@unique([setId, key])
+}
+
+model CollectorSetProgress {
+  collectorId  String                  @db.Uuid
+  collector    Collector               @relation(fields: [collectorId], references: [id])
+  setId        String
+  set          CollectionSetDefinition @relation(fields: [setId], references: [id])
+  progress     Json
+  completedAt  DateTime?
+  calculatedAt DateTime                @default(now())
+
+  @@id([collectorId, setId])
+}
+
+model QuestDefinition {
+  id          String          @id
+  name        String
+  description String
+  criteria    Json
+  version     Int             @default(1)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  progress    QuestProgress[]
+}
+
+model QuestProgress {
+  collectorId  String          @db.Uuid
+  collector    Collector       @relation(fields: [collectorId], references: [id])
+  questId      String
+  quest        QuestDefinition @relation(fields: [questId], references: [id])
+  progress     Json
+  completedAt  DateTime?
+  calculatedAt DateTime        @default(now())
+
+  @@id([collectorId, questId])
+}
+
+model SyncRun {
+  id         String    @id @default(uuid()) @db.Uuid
+  source     String
+  status     String    @default("RUNNING")
+  counts     Json
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+}
+
+model ChainCursor {
+  key         String   @id
+  blockNumber BigInt
+  blockHash   String
+  updatedAt   DateTime @updatedAt
+  startBlock BigInt?
+  finalizedBlock BigInt?
+  lastSuccessAt DateTime?
+  lastError String?
+}
+
+model ChainBlock {
+  chainId Int
+  number BigInt
+  hash String
+  timestamp DateTime
+  @@id([chainId, number])
+}
+
+model NftTransfer {
+  id String @id
+  chainId Int
+  contractAddress String
+  tokenId Int
+  squigId String @db.Uuid
+  squig Squig @relation(fields: [squigId], references: [id])
+  fromAddress String
+  toAddress String
+  transactionHash String
+  logIndex Int
+  transactionIndex Int
+  blockNumber BigInt
+  blockHash String
+  eventAt DateTime
+  indexedAt DateTime @default(now())
+  finalized Boolean @default(true)
+  @@unique([chainId, transactionHash, logIndex])
+  @@index([squigId, blockNumber, logIndex])
+  @@index([squigId, eventAt])
+  @@index([fromAddress, eventAt])
+  @@index([toAddress, eventAt])
+  @@index([blockNumber])
+  @@index([transactionHash])
+}
+
+model WalletOwnershipPeriod {
+  id String @id
+  squigId String @db.Uuid
+  squig Squig @relation(fields: [squigId], references: [id])
+  walletAddress String
+  acquiredAt DateTime
+  lostAt DateTime?
+  acquisitionEvent String
+  lossEvent String?
+  @@index([squigId, acquiredAt])
+  @@index([walletAddress, acquiredAt])
+  @@index([squigId, lostAt])
+}
+
+model HistoricalIdentityAttribution {
+  id String @id @default(uuid()) @db.Uuid
+  sourceKey String @unique
+  collectorId String @db.Uuid
+  collector Collector @relation(fields: [collectorId], references: [id])
+  chainId Int @default(1)
+  walletAddress String
+  source String
+  status String
+  confidence String
+  effectiveFrom DateTime
+  effectiveTo DateTime?
+  evidence Json
+  reviewedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([walletAddress, effectiveFrom, effectiveTo])
+  @@index([collectorId, status])
+}
+
+model CollectorOwnershipPeriod {
+  id String @id
+  squigId String @db.Uuid
+  squig Squig @relation(fields: [squigId], references: [id])
+  collectorId String @db.Uuid
+  collector Collector @relation(fields: [collectorId], references: [id])
+  acquiredAt DateTime
+  lostAt DateTime?
+  evidenceIds String[]
+  walletAddresses String[]
+  acquisitionEvent String
+  lossEvent String?
+  @@index([squigId, acquiredAt])
+  @@index([collectorId, acquiredAt])
+  @@index([collectorId, lostAt])
+}
+
+model SquigProvenance {
+  squigId String @id @db.Uuid
+  squig Squig @relation(fields: [squigId], references: [id])
+  dirty Boolean @default(true)
+  complete Boolean @default(false)
+  issues Json @default("[]")
+  mintAt DateTime?
+  minter String?
+  mintTransaction String?
+  mintBlock BigInt?
+  currentWallet String?
+  currentSince DateTime?
+  transferCount Int @default(0)
+  uniqueWallets Int @default(0)
+  longestHoldSeconds BigInt?
+  derivedThrough BigInt?
+  verifiedAt DateTime?
+  ownerMatches Boolean?
+  updatedAt DateTime @updatedAt
+  @@index([dirty, complete])
+}
+
+model ReconciliationDecision {
+  id String @id @default(uuid()) @db.Uuid
+  caseId String @db.Uuid
+  case IdentityReconciliation @relation(fields: [caseId], references: [id])
+  actor String
+  action String
+  reason String
+  before Json
+  after Json
+  createdAt DateTime @default(now())
+  @@index([caseId, createdAt])
+}
+
+model AuthChallenge {
+  id          String    @id
+  kind        String
+  subject     String
+  message     String?
+  collectorId String?   @db.Uuid
+  expiresAt   DateTime
+  consumedAt  DateTime?
+
+  @@index([expiresAt])
+}
+
+model AuthSession {
+  tokenHash   String    @id
+  collectorId String    @db.Uuid
+  collector   Collector @relation(fields: [collectorId], references: [id])
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+
+  @@index([collectorId])
+  @@index([expiresAt])
+}
+
+model RateLimitBucket {
+  key       String   @id
+  count     Int
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+// One coalesced, resumable finalized ownership scan for the entire contract.
+model OwnershipRefresh {
+  id String @id @default("squigs")
+  status String @default("QUEUED")
+  nextToken Int @default(1)
+  blockNumber BigInt?
+  blockHash String?
+  blockTime DateTime?
+  requestedAt DateTime @default(now())
+  startedAt DateTime?
+  completedAt DateTime?
+  leaseUntil DateTime?
+  leaseToken String?
+  errorCode String?
+  updatedAt DateTime @updatedAt
+}
+
+model CollectorRefreshRequest {
+  collectorId String @id @db.Uuid
+  collector Collector @relation(fields: [collectorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  requestedAt DateTime @default(now())
+}
