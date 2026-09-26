@@ -36,7 +36,10 @@
     "integrations:validate": "tsx --conditions=react-server scripts/validate-integrations.ts",
     "sync:activity": "tsx --conditions=react-server scripts/activity.ts all",
     "activity:reattribute": "tsx --conditions=react-server scripts/activity.ts reattribute",
-    "worker:ecosystem": "tsx --conditions=react-server scripts/activity-worker.ts"
+    "worker:ecosystem": "tsx --conditions=react-server scripts/activity-worker.ts",
+    "progression:seed": "tsx --conditions=react-server scripts/progression.ts seed",
+    "progression:rebuild": "tsx --conditions=react-server scripts/progression.ts rebuild",
+    "worker:progression": "tsx --conditions=react-server scripts/progression.ts worker"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

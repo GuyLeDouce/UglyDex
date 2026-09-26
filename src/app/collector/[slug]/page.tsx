@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Progression } from '@/components/progression';
 import { EcosystemSummary } from '@/components/activity';
 import { notFound } from 'next/navigation';
 import { collectorProfile } from '@/server/profiles';
@@ -60,6 +61,12 @@ export default async function Collector({
         <span className="badge">UGLYDEX COLLECTOR</span>
       </section>
       <Stats summary={r.summary} />
+      <Progression
+        subject="COLLECTOR"
+        id={r.collectorId}
+        path={`/collector/${p.slug}/achievements`}
+        public
+      />
       <EcosystemSummary
         collectorId={r.collectorId}
         public

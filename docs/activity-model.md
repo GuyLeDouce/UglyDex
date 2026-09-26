@@ -76,3 +76,7 @@ npm run worker:ecosystem -- --once
 ```
 
 `integrations:validate` performs only external SELECTs, schema/estimated-row inspection and permission introspection; writes validation status only to UglyDex. A role with write privileges is reported, never tested by attempting a write. Use `/admin/integrations` for coverage, `/admin/activity` for source/record/Collector/Discord/wallet/token/type lookup, runs and rejected records. All require existing admin authorization outside development. A missing optional field remains unavailable. Schema incompatibility: compare inventory, update the adapter with tests, then explicitly replay; never repair external tables from UglyDex. Review rejections and source availability before announcing coverage.
+
+## Phase 4 consumer
+
+Progression consumes this local evidence layer and confirmed provenance projections. Activity insert/update/delete triggers queue both prior and current Collector/Squig subjects. Source correction, slot retraction, token correction and reattribution therefore reverse dependent XP/achievements without external reimport. PUBLIC source content and confirmed Collector attribution are eligibility prerequisites; token-only facts can qualify for Squig progression independently. Payment amounts never scale XP. Progression audit/level milestones remain derived records and are never written back into CollectorActivity as fake source events. See [progression](progression.md).

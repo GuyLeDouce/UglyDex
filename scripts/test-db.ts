@@ -179,6 +179,8 @@ try {
   await phase2DatabaseTests(check);
   const { phase3DatabaseTests } = await import('../tests/db/phase3');
   await phase3DatabaseTests(check, external);
+  const { phase4DatabaseTests } = await import('../tests/db/phase4');
+  await phase4DatabaseTests(check);
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
@@ -225,6 +227,7 @@ try {
       '/admin/provenance',
       '/admin/reconciliation',
       '/admin/activity',
+      '/admin/progression',
     ])
       check(
         (await fetch(`${base}${path}`)).status === 404,
@@ -244,6 +247,33 @@ try {
       'HTTP passport excludes review evidence',
     );
     check((await fetch(`${base}/`)).status === 200, 'landing renders');
+    const achievementResponse = await fetch(
+        `${base}/collector/progression-test/achievements`,
+      ),
+      achievementHTML = await achievementResponse.text();
+    check(
+      achievementResponse.ok && achievementHTML.includes('Step into the Ring'),
+      'public achievement page renders earned history',
+    );
+    check(
+      !achievementHTML.includes('744444444444444444') &&
+        !achievementHTML.includes('p4-0') &&
+        !achievementHTML.includes('test-confirmed-period'),
+      'public achievement HTML excludes operational evidence',
+    );
+    check(
+      (await fetch(`${base}/collector/progression-recipient/achievements`))
+        .status === 404,
+      'private collector achievements hidden',
+    );
+    check(
+      (await fetch(`${base}/squig/4401/achievements`)).ok,
+      'Squig achievements page renders',
+    );
+    check(
+      (await fetch(`${base}/squig/4445/achievements`)).status === 404,
+      'invalid Squig achievement token rejected',
+    );
     check(
       (await fetch(`${base}/squig/12`)).status === 200,
       'indexed passport renders',
@@ -434,6 +464,7 @@ try {
       '/collection/discovered',
       '/settings/profile',
       '/settings/wallets',
+      '/me/achievements',
     ]) {
       const denied = await fetch(`${base}${route}`, { redirect: 'manual' });
       check(
@@ -584,6 +615,7 @@ try {
       '/admin/reconciliation',
       '/admin/activity',
       '/admin/integrations',
+      '/admin/progression',
     ])
       check(
         (await fetch(`${base}${path}`, { headers: { Cookie: activeCookie } }))
@@ -607,6 +639,26 @@ try {
     );
     const { derivePending } = await import('../src/sync/provenance');
     await derivePending();
+    const { gauntletEvents } =
+      await import('../src/integrations/gauntlet/survival');
+    const { importRecord: importProgressionRecord } =
+      await import('../src/sync/import-event');
+    const { rebuildSubject } = await import('../src/server/progression-engine');
+    await importProgressionRecord(
+      'survival',
+      'phase4-browser',
+      gauntletEvents('survival', {
+        id: 'phase4-browser',
+        game_id: '999',
+        user_id: '222222222222222222',
+        started_at: new Date('2026-08-01'),
+        placement: 1,
+        eliminations: 1,
+        deaths: 0,
+        images_used: 1,
+      }),
+    );
+    await rebuildSubject('COLLECTOR', signedCollector.id);
     const review = await db().identityReconciliation.findUniqueOrThrow({
       where: { dedupeKey: 'fixture-review' },
     });
@@ -628,6 +680,13 @@ try {
     );
     await derivePending();
     if (process.argv.includes('--browser')) {
+      await rebuildSubject('COLLECTOR', signedCollector.id);
+      const { progressionView } = await import('../src/server/progression');
+      check(
+        (await progressionView('COLLECTOR', signedCollector.id))?.status ===
+          'ready',
+        'reviewed evidence reevaluated before browser preference editing',
+      );
       const { chromium } = await import('@playwright/test');
       const browser = await chromium.launch({ headless: true });
       try {
@@ -856,6 +915,46 @@ try {
         await page.screenshot({
           path: '.data/uglydex-collection-desktop.png',
           fullPage: true,
+        });
+        await page.goto(`${base}/me/achievements`);
+        await page
+          .getByLabel('Profile title', { exact: true })
+          .selectOption('collector-survivalWins-1');
+        await page
+          .getByRole('checkbox', { name: 'Survivor', exact: true })
+          .check();
+        await page
+          .getByRole('button', { name: 'Save title and badges', exact: true })
+          .click();
+        await page
+          .getByRole('status')
+          .filter({ hasText: 'Your title and badges are saved.' })
+          .waitFor();
+        check(
+          true,
+          'authenticated badge/title preferences save through server action',
+        );
+        await page.reload();
+        check(
+          (await page
+            .getByLabel('Profile title', { exact: true })
+            .inputValue()) === 'collector-survivalWins-1',
+          'selected title survives reload',
+        );
+        await page.screenshot({
+          path: '.data/phase4-achievements-desktop.png',
+          fullPage: false,
+        });
+        await page.setViewportSize({ width: 390, height: 844 });
+        check(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+          ),
+          'mobile achievements fit viewport',
+        );
+        await page.screenshot({
+          path: '.data/phase4-achievements-mobile.png',
+          fullPage: false,
         });
         await page.goto(`${base}/settings/profile`);
         await page

@@ -32,6 +32,8 @@ model Collector {
   showWallets  Boolean                @default(false)
   showDiscord  Boolean                @default(false)
   featuredTokenIds Int[]              @default([])
+  featuredAchievementIds String[] @default([])
+  selectedTitleId String?
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
   identities   ExternalIdentity[]
@@ -227,6 +229,8 @@ model CollectorActivity {
 
   @@unique([sourceSystem, sourceType, sourceId, subjectKey, eventType])
   @@index([collectorId, eventAt])
+  @@index([collectorId, id])
+  @@index([squigId, id])
   @@index([squigId, eventAt, id])
   @@index([collectorId, category, eventAt, id])
   @@index([sourceSystem, sourceType, sourceId])
@@ -285,6 +289,75 @@ model ActivityAttributionJob {
   queuedAt DateTime @default(now())
 }
 
+model ProgressionRuleset {
+  id String @id
+  fingerprint String
+  status String @default("ACTIVE")
+  configuration Json
+  createdAt DateTime @default(now())
+}
+
+// Subject IDs reference Collector/Squig by subjectType. Ledger evidence survives source rebuilds.
+model XpLedgerEntry {
+  id String @id
+  ruleset String
+  subjectType String
+  subjectId String @db.Uuid
+  ruleId String
+  grantKey String
+  sourceActivityId String?
+  xp Int
+  earnedAt DateTime
+  evidence Json
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+  @@index([ruleset, subjectType, subjectId, revokedAt])
+  @@index([sourceActivityId])
+  @@index([ruleId])
+}
+
+model ProgressionAudit {
+  id String @id @default(uuid()) @db.Uuid
+  ruleset String
+  subjectType String
+  subjectId String @db.Uuid
+  kind String
+  reference String
+  before Json?
+  after Json?
+  createdAt DateTime @default(now())
+  @@index([subjectType, subjectId, createdAt])
+  @@index([ruleset, kind])
+}
+
+model ProgressionJob {
+  subjectType String
+  subjectId String @db.Uuid
+  generation Int @default(1)
+  queuedAt DateTime @default(now())
+  attempts Int @default(0)
+  errorCode String?
+  @@id([subjectType, subjectId])
+  @@index([queuedAt])
+}
+
+model ProgressionMilestone {
+  ruleset String
+  subjectType String
+  subjectId String @db.Uuid
+  level Int
+  reachedAt DateTime
+  @@id([ruleset, subjectType, subjectId, level])
+}
+
+model ProgressionReplay {
+  id String @id
+  stage String @default("COLLECTOR")
+  cursor String?
+  completedAt DateTime?
+  updatedAt DateTime @updatedAt
+}
+
 model SquigPassportEvent {
   id           String             @id @default(uuid()) @db.Uuid
   eventKey     String             @unique
@@ -325,8 +398,16 @@ model AchievementDefinition {
   description String
   rules       Json
   version     Int                    @default(1)
+  ruleset String @default("legacy")
+  subjectType String @default("COLLECTOR")
+  category String @default("OTHER")
+  tier String @default("Common")
+  hidden Boolean @default(false)
+  title String?
+  sortOrder Int @default(0)
   collectors  CollectorAchievement[]
   squigs      SquigAchievement[]
+  @@index([ruleset, subjectType])
 }
 
 model CollectorAchievement {
@@ -334,10 +415,15 @@ model CollectorAchievement {
   collector     Collector             @relation(fields: [collectorId], references: [id])
   achievementId String
   achievement   AchievementDefinition @relation(fields: [achievementId], references: [id])
-  awardedAt     DateTime              @default(now())
+  awardedAt     DateTime?
   evidence      Json
+  revokedAt DateTime?
+  evaluatedAt DateTime @default(now())
+  progress Int @default(0)
+  gateSatisfied Boolean @default(false)
 
   @@id([collectorId, achievementId])
+  @@index([achievementId, revokedAt])
 }
 
 model SquigAchievement {
@@ -345,10 +431,15 @@ model SquigAchievement {
   squig         Squig                 @relation(fields: [squigId], references: [id])
   achievementId String
   achievement   AchievementDefinition @relation(fields: [achievementId], references: [id])
-  awardedAt     DateTime              @default(now())
+  awardedAt     DateTime?
   evidence      Json
+  revokedAt DateTime?
+  evaluatedAt DateTime @default(now())
+  progress Int @default(0)
+  gateSatisfied Boolean @default(false)
 
   @@id([squigId, achievementId])
+  @@index([achievementId, revokedAt])
 }
 
 model CollectionSetDefinition {

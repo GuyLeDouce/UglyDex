@@ -1,5 +1,6 @@
 import { ActivityView, EcosystemSummary } from '@/components/activity';
 import Link from 'next/link';
+import { Progression } from '@/components/progression';
 import { notFound } from 'next/navigation';
 import { squigProfile } from '@/server/profiles';
 import { Artwork } from '@/components/artwork';
@@ -145,6 +146,12 @@ export default async function Squig({
         </section>
       </div>
       <Passport data={history} tokenId={s.tokenId} />
+      <Progression
+        subject="SQUIG"
+        id={r.squigId}
+        path={`/squig/${s.tokenId}/achievements`}
+        public
+      />
       <EcosystemSummary
         squigId={r.squigId}
         public

@@ -1,4 +1,5 @@
 import { EcosystemSummary } from '@/components/activity';
+import { Progression } from '@/components/progression';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
@@ -47,6 +48,7 @@ export default async function Me() {
         </Link>
       </section>
       <Stats summary={s} />
+      <Progression subject="COLLECTOR" id={id} path="/me/achievements" />
       <EcosystemSummary collectorId={id} path="/me/activity" />
       <nav className="anchor-nav">
         <Link href="/me/activity">Activity</Link>

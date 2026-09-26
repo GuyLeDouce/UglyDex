@@ -23,6 +23,11 @@ export default async function IntegrationsPage() {
         </p>
       </section>
       <Link href="/admin/activity">Import runs and activity evidence →</Link>
+      <p>
+        <Link href="/admin/progression">
+          Progression rules, grants and explain →
+        </Link>
+      </p>
       <div className="ecosystem-cards">
         {sources.map((s) => (
           <section className="panel" key={s.id}>

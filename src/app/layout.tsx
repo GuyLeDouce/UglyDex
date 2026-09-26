@@ -42,6 +42,7 @@ export default async function RootLayout({
                 <Link href="/me">My UglyDex</Link>
                 <Link href="/collection">Collection</Link>
                 <Link href="/me/activity">Activity</Link>
+                <Link href="/me/achievements">Achievements</Link>
                 <Link href="/collection/discovered">Discovered</Link>
               </>
             )}
