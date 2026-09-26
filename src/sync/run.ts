@@ -3,9 +3,7 @@ import { db } from '@/server/db';
 import { log } from '@/server/log';
 import { readPage } from '@/integrations/table';
 import { tables } from '@/integrations/registry';
-import { readExternal } from '@/integrations/read-only';
-import { normalizeRow, type Feed } from './normalize';
-import { importEvent, resolveDiscord } from './import-event';
+import { resolveDiscord } from './import-event';
 import { linkSchema } from '@/integrations/wallet-links';
 import { hash } from '@/domain/events';
 export type Counts = {
@@ -22,56 +20,7 @@ export const emptyCounts = (): Counts => ({
   skipped: 0,
   failed: 0,
 });
-export async function runFeed(feed: Feed) {
-  const counts = emptyCounts();
-  const run = await db().syncRun.create({ data: { source: feed, counts } });
-  let after: unknown[] | undefined;
-  let status = 'COMPLETED';
-  try {
-    while (true) {
-      const spec = tables[feed];
-      const page = await readPage(spec, after);
-      if (!page.ok) {
-        status = page.reason.toUpperCase();
-        if (page.reason !== 'unconfigured') counts.failed++;
-        break;
-      }
-      if (!page.data.length) break;
-      for (const row of page.data) {
-        counts.scanned++;
-        try {
-          if (feed === 'survival') {
-            const game = await readExternal<{ started_at: Date }>(
-              'survival',
-              'SELECT started_at FROM public.squig_survival_games WHERE id = $1',
-              [row.game_id],
-            );
-            if (!game.ok || !game.data[0]) throw new Error('MISSING_PARENT');
-            row.started_at = game.data[0].started_at;
-          }
-          const events = normalizeRow(feed, row);
-          if (!events.length) counts.skipped++;
-          for (const event of events) counts[await importEvent(event)]++;
-        } catch {
-          counts.failed++;
-        }
-      }
-      after = spec.keys.map((k) => page.data.at(-1)![k]);
-      await db().syncRun.update({ where: { id: run.id }, data: { counts } });
-      log('sync.page', { source: feed, ...counts });
-    }
-  } catch {
-    status = 'FAILED';
-    counts.failed++;
-  }
-  if (counts.failed && status === 'COMPLETED') status = 'PARTIAL';
-  await db().syncRun.update({
-    where: { id: run.id },
-    data: { counts, status, finishedAt: new Date() },
-  });
-  log('sync.finished', { source: feed, status, ...counts });
-  return counts;
-}
+export { runActivityFeed as runFeed } from './activity';
 export async function syncIdentities() {
   const counts = emptyCounts();
   const guild = process.env.ECOSYSTEM_GUILD_ID;

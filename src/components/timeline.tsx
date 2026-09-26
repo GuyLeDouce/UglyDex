@@ -1,3 +1,4 @@
+import { activityLabels } from '@/domain/activity';
 import Link from 'next/link';
 export type TimelineEntry = {
   id: string;
@@ -7,8 +8,11 @@ export type TimelineEntry = {
   description?: string;
   transaction?: string | null;
   details?: { label: string; value: string }[];
+  category?: string;
+  importance?: string;
 };
 const labels: Record<string, string> = {
+  ...activityLabels,
   MINTED: 'Born ugly',
   BURNED: 'End of the chain',
   TRANSFERRED: 'New home',
@@ -26,7 +30,11 @@ export function Timeline({ entries }: { entries: TimelineEntry[] }) {
   return entries.length ? (
     <ol className="history-timeline">
       {entries.map((e) => (
-        <li key={e.id}>
+        <li
+          key={e.id}
+          data-importance={e.importance}
+          data-category={e.category}
+        >
           <time dateTime={e.eventAt}>
             {new Date(e.eventAt).toLocaleString('en-US', {
               timeZone: 'UTC',
@@ -56,7 +64,7 @@ export function Timeline({ entries }: { entries: TimelineEntry[] }) {
             )}
             {e.details && (
               <details className="chain-details">
-                <summary>Chain details</summary>
+                <summary>Event details</summary>
                 <dl>
                   {e.details.map((d) => (
                     <div key={d.label}>

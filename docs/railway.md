@@ -17,3 +17,13 @@ Deploy sequence:
 5. Configure dedicated SELECT-only legacy credentials, run `integrations:inspect`, and pilot identity/history imports separately. Review historical attribution cases before publishing collector associations.
 
 Graceful SIGTERM stops after the current bounded unit of work. A hard restart releases PostgreSQL session locks; committed cursors and dirty projections persist. RPC failures do not invalidate the web service's own health. Deep-reorg errors intentionally require an operator rather than truncating historical facts automatically. External schema validation and OAuth/provider rollout remain environment-specific operational checks.
+
+## Phase 3 ecosystem worker
+
+Apply `202609250005_activity` to **UglyDex only**, then redeploy web and workers from the same revision. It extends activities/import runs and adds native source state, correction audit, rejection and attribution-job tables. Existing blockchain deployment/start-block configuration is unchanged.
+
+Add a third Railway service using `railway.ecosystem.toml` and `npm run worker:ecosystem`. Share the UglyDex database, supply only dedicated read-only legacy connection variables for each configured source, and do not attach a public domain or HTTP healthcheck. No new mandatory secret variables. Keep one ecosystem worker initially; each feed has a session advisory lock, with crash-resumable checkpoints. It runs roughly every five minutes after work, takes up to two forward pages and one rolling audit page per mutable source, and processes dated attribution jobs. Large timestamp-less histories have a rolling reconciliation delay; monitor source coverage rather than promising immediate updates.
+
+Run `integrations:validate` first, inspect missing columns and permission warnings, then pilot `sync:uglybot -- --pages 2`, `sync:gauntlet -- --pages 2`, and `sync:images -- --pages 2`. Repeat bounded imports to finish available backfills; use `sync:activity` for all feeds. Reserve `--replay` for operator audits. Do not call a source complete merely because its current query is exhausted. `/admin/integrations` and `/admin/activity` show state, runs, source IDs, unresolved attribution and rejections. Validate production retention, time zones, delivery/payout states, image moderation corrections and actual read-only grants before announcing history coverage.
+
+Public activity requires profile visibility plus the relevant Discord/wallet visibility. Confirm those settings with a real OAuth/wallet account after Railway setup. The native health endpoint still does not depend on legacy services. Failure of one source is retried without blocking other feeds or the web app; no heavy import runs in a page request.

@@ -1,5 +1,11 @@
 # External schema inventory
 
+## Phase 3 reinspection
+
+GitHub HEAD was rechecked on 2026-09-25 for all three repositories and still matches the revisions below. Re-read Duel persistence/status transitions, SurvivalStore game/player/image-use writes, Bounty schema and payout paths, Maw session/inventory/burn confirmation, both Marketplace purchase paths, Mad Lib publication/operation state machines, ImageSubmit moderation, and Gauntlet online rewards. No external startup code was executed or repository changed.
+
+Phase 3 canonical rules: completed Duel participants carry outcomes, not inferred payouts; Survival placement is a recorded result with game-start time, not invented finish time; Bounty pool `added_by` is an operator, never the entrant; donated NFT IDs are not draw-entry Squig IDs; Bounty donor payout amount is unavailable; Maw `paid` confirms payout, `swallowed` alone does not prove burn; only confirmed Mad Lib operations carry money; image reward points are not CHARM. Mutable tables lacking update timestamps require bounded rolling reconciliation plus operator full audits. Production schemas remain unvalidated without read-only credentials.
+
 Source inspection: 2026-09-25. These are **source-defined schemas**, not assertions about deployed databases. Run `npm run integrations:inspect` using dedicated SELECT-only roles to compare production. No external application code is imported or executed: their startup paths can run DDL.
 
 Pinned source revisions:

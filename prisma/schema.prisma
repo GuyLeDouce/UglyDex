@@ -195,8 +195,8 @@ model SquigDiscovery {
 model CollectorActivity {
   id             String               @id @default(uuid()) @db.Uuid
   eventKey       String               @unique
-  collectorId    String               @db.Uuid
-  collector      Collector            @relation(fields: [collectorId], references: [id])
+  collectorId    String?              @db.Uuid
+  collector      Collector?           @relation(fields: [collectorId], references: [id])
   squigId        String?              @db.Uuid
   squig          Squig?               @relation(fields: [squigId], references: [id])
   sourceSystem   String
@@ -210,9 +210,79 @@ model CollectorActivity {
   importedAt     DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
   passportEvents SquigPassportEvent[]
+  discordId String?
+  walletAddress String?
+  attributionStatus String @default("RESOLVED")
+  category String @default("OTHER")
+  visibility String @default("PRIVATE")
+  importance String @default("STANDARD")
+  recordStatus String @default("ACTIVE")
+  amount Decimal? @db.Decimal(30, 8)
+  currency String?
+  direction String?
+  sourceCreatedAt DateTime?
+  sourceUpdatedAt DateTime?
+  correctedAt DateTime?
+  corrections ActivityCorrection[]
 
   @@unique([sourceSystem, sourceType, sourceId, subjectKey, eventType])
   @@index([collectorId, eventAt])
+  @@index([squigId, eventAt, id])
+  @@index([collectorId, category, eventAt, id])
+  @@index([sourceSystem, sourceType, sourceId])
+  @@index([sourceSystem, eventAt])
+  @@index([eventType, eventAt])
+  @@index([attributionStatus, eventAt])
+  @@index([discordId])
+  @@index([walletAddress])
+}
+
+model ActivityCorrection {
+  id String @id @default(uuid()) @db.Uuid
+  activityId String @db.Uuid
+  activity CollectorActivity @relation(fields: [activityId], references: [id])
+  reason String
+  before Json
+  afterHash String
+  createdAt DateTime @default(now())
+  @@index([activityId, createdAt])
+}
+
+model IntegrationSource {
+  id String @id
+  state String @default("UNVALIDATED")
+  schemaFingerprint String?
+  schemaValid Boolean?
+  cursor Json?
+  reconcileCursor Json?
+  firstAvailableAt DateTime?
+  lastAvailableAt DateTime?
+  importedThrough DateTime?
+  lastAttemptAt DateTime?
+  lastSuccessAt DateTime?
+  backfillFinishedAt DateTime?
+  warning String?
+  updatedAt DateTime @updatedAt
+}
+
+model ImportRejection {
+  id String @id @default(uuid()) @db.Uuid
+  source String
+  sourceRecordId String
+  code String
+  runId String @db.Uuid
+  attempts Int @default(1)
+  resolvedAt DateTime?
+  updatedAt DateTime @updatedAt
+  @@unique([source, sourceRecordId])
+  @@index([source, resolvedAt])
+}
+
+model ActivityAttributionJob {
+  walletAddress String @id
+  cursor String?
+  generation Int @default(1)
+  queuedAt DateTime @default(now())
 }
 
 model SquigPassportEvent {
@@ -343,6 +413,10 @@ model SyncRun {
   counts     Json
   startedAt  DateTime  @default(now())
   finishedAt DateTime?
+  cursorStart Json?
+  cursorEnd Json?
+  errorCode String?
+  @@index([source, startedAt])
 }
 
 model ChainCursor {

@@ -1,3 +1,4 @@
+import { EcosystemSummary } from '@/components/activity';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
@@ -22,6 +23,7 @@ export default async function Me() {
         },
         identities: { where: { authenticatedAt: { not: null } } },
         activities: {
+          where: { recordStatus: 'ACTIVE' },
           orderBy: { eventAt: 'desc' },
           take: 8,
           select: { id: true, eventAt: true, eventType: true },
@@ -45,6 +47,11 @@ export default async function Me() {
         </Link>
       </section>
       <Stats summary={s} />
+      <EcosystemSummary collectorId={id} path="/me/activity" />
+      <nav className="anchor-nav">
+        <Link href="/me/activity">Activity</Link>
+        <Link href="/me/creations">Creations</Link>
+      </nav>
       <Refresh initial={status} />
       <div className="section-heading inline">
         <h2>Your standouts.</h2>

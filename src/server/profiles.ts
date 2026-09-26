@@ -71,11 +71,20 @@ export async function squigProfile(token: string) {
         traits: { orderBy: { traitType: 'asc' } },
         ownerships: { where: { isCurrent: true }, take: 1 },
         provenance: { select: { dirty: true, complete: true } },
+        activities: {
+          where: {
+            sourceType: 'maw',
+            eventType: 'MAW_DIGESTED',
+            recordStatus: 'ACTIVE',
+          },
+          take: 1,
+          select: { id: true },
+        },
       },
     });
     if (!s) return { status: 'empty', tokenId } as const;
     const session = await currentSession(),
-      current = s.ownerships[0];
+      current = s.activities.length ? undefined : s.ownerships[0];
     let owner: {
       slug: string;
       displayName: string | null;
@@ -136,6 +145,7 @@ export async function squigProfile(token: string) {
     return {
       status: 'ready',
       squigId: s.id,
+      digested: s.activities.length > 0,
       squig: cardDTO(s),
       owner,
       relationship: session

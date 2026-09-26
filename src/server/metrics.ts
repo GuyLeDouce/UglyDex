@@ -35,6 +35,21 @@ export async function internalMetrics() {
     >`SELECT count(DISTINCT w."collectorId") AS count FROM "CollectorWallet" w JOIN "SquigOwnership" o ON o."walletAddress"=w."walletAddress" WHERE w.status='ACTIVE' AND w."chainId"=1 AND o."isCurrent"=true AND o."observedAt" < now()-interval '24 hours'`,
   ]);
   return {
+    activity: {
+      sources: await db().integrationSource.findMany(),
+      events: await db().collectorActivity.groupBy({
+        by: ['sourceType', 'attributionStatus', 'recordStatus'],
+        _count: { _all: true },
+      }),
+      rejectedRecords: await db().importRejection.count({
+        where: { resolvedAt: null },
+      }),
+      pendingAttributionJobs: await db().activityAttributionJob.count(),
+      recentRuns: await db().syncRun.findMany({
+        orderBy: { startedAt: 'desc' },
+        take: 20,
+      }),
+    },
     provenance: await chainStatus(),
     collectors,
     wallets,

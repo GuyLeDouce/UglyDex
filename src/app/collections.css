@@ -852,3 +852,48 @@ footer {
     transform: none;
   }
 }
+.ecosystem-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.ecosystem-cards h3 {
+  text-transform: capitalize;
+}
+.ecosystem-cards strong {
+  font-size: 1.65rem;
+}
+.activity-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+}
+.activity-filters a {
+  border: 1px solid #343631;
+  padding: 0.55rem 0.9rem;
+  border-radius: 2rem;
+  text-transform: capitalize;
+}
+.activity-filters a[aria-current] {
+  background: #c9fc64;
+  color: #12140f;
+}
+.history-coverage {
+  margin-top: 2rem;
+  color: #a4aa9c;
+  font-size: 0.85rem;
+}
+.history-coverage summary {
+  cursor: pointer;
+}
+.tracked-charm {
+  color: #c9fc64;
+}
+.history-timeline li[data-importance='MAJOR'] h3 {
+  color: #c9fc64;
+}
+.history-timeline li[data-category='CREATOR'] h3 {
+  color: #deb8ff;
+}

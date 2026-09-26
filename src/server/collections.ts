@@ -65,6 +65,13 @@ export async function activeAddresses(collectorId: string) {
 export function ownedScope(addresses: string[]): Prisma.SquigWhereInput {
   return {
     ownerships: { some: { isCurrent: true, walletAddress: { in: addresses } } },
+    activities: {
+      none: {
+        sourceType: 'maw',
+        eventType: 'MAW_DIGESTED',
+        recordStatus: 'ACTIVE',
+      },
+    },
   };
 }
 export async function collectionPage(
@@ -118,6 +125,15 @@ export async function collectionPage(
       ? db().squigOwnership.findMany({
           where: {
             squigId: { in: rows.map((r) => r.id) },
+            squig: {
+              activities: {
+                none: {
+                  sourceType: 'maw',
+                  eventType: 'MAW_DIGESTED',
+                  recordStatus: 'ACTIVE',
+                },
+              },
+            },
             isCurrent: true,
             walletAddress: { in: addresses },
           },

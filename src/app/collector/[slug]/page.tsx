@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { EcosystemSummary } from '@/components/activity';
 import { notFound } from 'next/navigation';
 import { collectorProfile } from '@/server/profiles';
 import { Stats } from '@/components/stats';
@@ -58,6 +60,15 @@ export default async function Collector({
         <span className="badge">UGLYDEX COLLECTOR</span>
       </section>
       <Stats summary={r.summary} />
+      <EcosystemSummary
+        collectorId={r.collectorId}
+        public
+        path={`/collector/${p.slug}/activity`}
+      />
+      <nav className="anchor-nav">
+        <Link href={`/collector/${p.slug}/activity`}>Activity</Link>
+        <Link href={`/collector/${p.slug}/creations`}>Creations</Link>
+      </nav>
       {history.length > 0 && (
         <section className="passport">
           <h2>Collection history</h2>

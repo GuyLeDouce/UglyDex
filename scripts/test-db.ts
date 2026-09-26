@@ -177,6 +177,8 @@ try {
   await phase1DatabaseTests(check);
   const { phase2DatabaseTests } = await import('../tests/db/phase2');
   await phase2DatabaseTests(check);
+  const { phase3DatabaseTests } = await import('../tests/db/phase3');
+  await phase3DatabaseTests(check, external);
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
@@ -219,7 +221,11 @@ try {
       await new Promise((r) => setTimeout(r, 250));
     }
     check(ready, 'production server healthy');
-    for (const path of ['/admin/provenance', '/admin/reconciliation'])
+    for (const path of [
+      '/admin/provenance',
+      '/admin/reconciliation',
+      '/admin/activity',
+    ])
       check(
         (await fetch(`${base}${path}`)).status === 404,
         `${path} denies public requests`,
@@ -264,6 +270,49 @@ try {
       diagnostics.ok && !diagnosticBody.includes(password),
       'admin diagnostic excludes credentials',
     );
+    for (const route of ['/me/activity', '/me/creations'])
+      check(
+        (await fetch(base + route, { redirect: 'manual' })).status === 307,
+        route + ' requires session',
+      );
+    const activityResponse = await fetch(
+      base + '/collector/activity-collector/activity?category=MARKETPLACE',
+    );
+    const activityHTML = await activityResponse.text();
+    check(
+      activityResponse.ok && activityHTML.includes('Malformed purchase'),
+      'public activity renders imported records',
+    );
+    check(
+      !activityHTML.includes('888888888888888888') &&
+        !activityHTML.includes('phase3-attribution'),
+      'public activity excludes internal identities and evidence',
+    );
+    check(
+      (await fetch(base + '/collector/activity-collector/creations')).ok,
+      'public approved creator gallery',
+    );
+    const activityCollector = await db().collector.findUniqueOrThrow({
+      where: { slug: 'activity-collector' },
+    });
+    await db().collector.update({
+      where: { id: activityCollector.id },
+      data: { isPublic: false },
+    });
+    check(
+      (await fetch(base + '/collector/activity-collector/activity')).status ===
+        404,
+      'private activity route hidden',
+    );
+    check(
+      (await fetch(base + '/collector/activity-collector/creations')).status ===
+        404,
+      'private creator route hidden',
+    );
+    await db().collector.update({
+      where: { id: activityCollector.id },
+      data: { isPublic: true },
+    });
     const account = privateKeyToAccount(`0x${randomBytes(32).toString('hex')}`);
     const origin = process.env.PUBLIC_BASE_URL!;
     const post = (
@@ -533,6 +582,8 @@ try {
     for (const path of [
       '/admin/provenance?token=3157',
       '/admin/reconciliation',
+      '/admin/activity',
+      '/admin/integrations',
     ])
       check(
         (await fetch(`${base}${path}`, { headers: { Cookie: activeCookie } }))
@@ -582,6 +633,50 @@ try {
       try {
         const page = await browser.newPage({
           viewport: { width: 1440, height: 1000 },
+        });
+        await page.goto(
+          base + '/collector/activity-collector/activity?category=MARKETPLACE',
+        );
+        await page
+          .getByRole('heading', { name: 'Ecosystem field notes.' })
+          .waitFor();
+        check(
+          await page.getByRole('link', { name: 'More history →' }).isVisible(),
+          'browser activity has pagination',
+        );
+        await page.getByRole('link', { name: 'More history →' }).click();
+        await page.waitForURL('**after=*');
+        check(
+          (await page.locator('.history-timeline li').count()) > 0,
+          'browser next activity page',
+        );
+        await page
+          .getByRole('navigation', { name: 'Activity categories' })
+          .getByRole('link', { name: 'duels', exact: true })
+          .click();
+        await page.waitForURL('**category=DUELS**');
+        check(
+          await page
+            .getByRole('heading', { name: 'Duel complete', exact: true })
+            .first()
+            .isVisible(),
+          'browser category filtering',
+        );
+        await page.setViewportSize({ width: 390, height: 844 });
+        check(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+          ),
+          'mobile activity has no horizontal overflow',
+        );
+        await page.screenshot({
+          path: '.data/phase3-activity-mobile.png',
+          fullPage: true,
+        });
+        await page.setViewportSize({ width: 1440, height: 1000 });
+        await page.screenshot({
+          path: '.data/phase3-activity-desktop.png',
+          fullPage: true,
         });
         const errors: string[] = [];
         // Loopback test server uses HTTP while production origin policy is HTTPS.
@@ -705,13 +800,15 @@ try {
           (url) => url.searchParams.get('event') === 'mint',
         );
         await page.waitForFunction(
-          () => document.querySelectorAll('.history-timeline li').length === 1,
+          () =>
+            document.querySelectorAll('#passport .history-timeline li')
+              .length === 1,
         );
         await page
           .getByRole('heading', { name: 'Born ugly', exact: true })
           .waitFor();
         check(
-          (await page.locator('.history-timeline li').count()) === 1,
+          (await page.locator('#passport .history-timeline li').count()) === 1,
           'browser mint filter selects one event',
         );
         check(

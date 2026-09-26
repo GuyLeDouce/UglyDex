@@ -1,3 +1,4 @@
+import { ActivityView, EcosystemSummary } from '@/components/activity';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { squigProfile } from '@/server/profiles';
@@ -100,7 +101,13 @@ export default async function Squig({
           </small>
         </section>
         <section id="ownership" className="panel">
-          <h2>Ownership</h2>
+          <h2>{r.digested ? 'Digested · preserved forever' : 'Ownership'}</h2>
+          {r.digested && (
+            <p>
+              The Maw records a verified digestion. This Squig’s artwork and
+              history remain part of UglyDex.
+            </p>
+          )}
           {r.owner ? (
             <>
               <Link className="text-link" href={`/collector/${r.owner.slug}`}>
@@ -138,6 +145,17 @@ export default async function Squig({
         </section>
       </div>
       <Passport data={history} tokenId={s.tokenId} />
+      <EcosystemSummary
+        squigId={r.squigId}
+        public
+        path={`/squig/${s.tokenId}#ecosystem`}
+      />
+      <ActivityView
+        squigId={r.squigId}
+        public
+        path={`/squig/${s.tokenId}`}
+        params={await searchParams}
+      />
     </>
   );
 }

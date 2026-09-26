@@ -19,6 +19,7 @@ export async function readPage(
   after?: unknown[],
   filters: Record<string, unknown> = {},
   limit = 200,
+  since?: { column: string; value: Date },
 ): Promise<IntegrationResult<ExternalRow[]>> {
   if (!Number.isInteger(limit) || limit < 1 || limit > 500)
     throw new Error('INVALID_PAGE_SIZE');
@@ -29,15 +30,30 @@ export async function readPage(
     return { ok: false, reason: 'schema_mismatch' };
   const columns = [...spec.required, ...spec.optional];
   const selection = columns
-    .map((c) => (names.has(c) ? identifier(c) : `NULL AS ${identifier(c)}`))
+    // Preserve PostgreSQL microseconds in timestamp cursors. JS Date truncation
+    // would replay the same boundary rows indefinitely.
+    .map((c) =>
+      names.has(c)
+        ? spec.keys.includes(c) && c.endsWith('_at')
+          ? `${identifier(c)}::text AS ${identifier(c)}`
+          : identifier(c)
+        : `NULL AS ${identifier(c)}`,
+    )
     .join(', ');
   const values: unknown[] = [];
   const predicates: string[] = [];
+  if (since) {
+    if (!columns.includes(since.column) || !names.has(since.column))
+      return { ok: false, reason: 'schema_mismatch' };
+    values.push(since.value);
+    predicates.push(`${identifier(since.column)} >= $${values.length}`);
+  }
   if (after) {
     if (after.length !== spec.keys.length) throw new Error('INVALID_CURSOR');
+    const offset = values.length;
     values.push(...after);
     predicates.push(
-      `(${spec.keys.map(identifier).join(',')}) > (${after.map((_, i) => `$${i + 1}`).join(',')})`,
+      `(${spec.keys.map(identifier).join(',')}) > (${after.map((_, i) => `$${offset + i + 1}`).join(',')})`,
     );
   }
   for (const [key, value] of Object.entries(filters)) {

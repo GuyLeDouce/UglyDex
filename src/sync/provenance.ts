@@ -16,6 +16,15 @@ export async function markWalletDirty(
   tx: Prisma.TransactionClient,
   address: string,
 ) {
+  await tx.activityAttributionJob.upsert({
+    where: { walletAddress: address },
+    create: { walletAddress: address },
+    update: {
+      generation: { increment: 1 },
+      cursor: null,
+      queuedAt: new Date(),
+    },
+  });
   const rows = await tx.walletOwnershipPeriod.findMany({
     where: { walletAddress: address },
     select: { squigId: true },
@@ -282,6 +291,8 @@ export async function deriveToken(squigId: string) {
               collectorId: p.collectorId,
               squigId,
               sourceSystem: 'provenance',
+              category: 'SQUIGS',
+              visibility: 'PUBLIC',
               sourceType: 'ownership',
               sourceId: eventKey,
               subjectKey: p.collectorId,

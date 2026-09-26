@@ -21,9 +21,9 @@
     "integrations:inspect": "tsx --conditions=react-server scripts/inspect.ts",
     "sync:identities": "tsx --conditions=react-server scripts/sync.ts identities",
     "sync:squigs": "tsx --conditions=react-server scripts/sync.ts squigs",
-    "sync:uglybot": "tsx --conditions=react-server scripts/sync.ts uglybot",
-    "sync:gauntlet": "tsx --conditions=react-server scripts/sync.ts gauntlet",
-    "sync:images": "tsx --conditions=react-server scripts/sync.ts images",
+    "sync:uglybot": "tsx --conditions=react-server scripts/activity.ts uglybot",
+    "sync:gauntlet": "tsx --conditions=react-server scripts/activity.ts gauntlet",
+    "sync:images": "tsx --conditions=react-server scripts/activity.ts images",
     "sync:ownership": "tsx --conditions=react-server scripts/sync.ts ownership",
     "worker:ownership": "tsx --conditions=react-server scripts/ownership-worker.ts",
     "sync:transfers": "tsx --conditions=react-server scripts/sync.ts transfers",
@@ -32,7 +32,11 @@
     "chain:verify": "tsx --conditions=react-server scripts/provenance.ts verify",
     "chain:discover-start": "tsx --conditions=react-server scripts/provenance.ts discover-start",
     "provenance:verify": "tsx --conditions=react-server scripts/provenance.ts verify",
-    "provenance:rebuild": "tsx --conditions=react-server scripts/provenance.ts rebuild"
+    "provenance:rebuild": "tsx --conditions=react-server scripts/provenance.ts rebuild",
+    "integrations:validate": "tsx --conditions=react-server scripts/validate-integrations.ts",
+    "sync:activity": "tsx --conditions=react-server scripts/activity.ts all",
+    "activity:reattribute": "tsx --conditions=react-server scripts/activity.ts reattribute",
+    "worker:ecosystem": "tsx --conditions=react-server scripts/activity-worker.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

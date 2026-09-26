@@ -93,3 +93,11 @@ Database tests create their own disposable loopback PostgreSQL cluster with rand
 6. Enable database backups and verify a restore before making profiles public. Set `ADMIN_DIAGNOSTICS_TOKEN` only for administrative API access.
 
 The image includes dev dependencies because migrations and CLI workers share the Phase 0 artifact. A later split can slim the web image. Requests use the configured public origin for CSRF/OAuth; untrusted forwarded headers do not determine identity, redirect targets or auth rate-limit keys. Cookies are Secure in production, HttpOnly and SameSite=Lax. External outages do not fail readiness; loss of UglyDex PostgreSQL returns 503. Startup clearly fails if its DB URL is missing. Builds require no production DB or secrets. No deployment has been made by this phase.
+
+## Phase 3 — ecosystem history
+
+UglyDex now connects the existing collector/Squig views to source-backed historical activity. `/me/activity`, `/collector/[slug]/activity`, private/public creations, ecosystem Passport entries, and protected `/admin/activity` use the same normalized ledger. Coverage is explicitly tracked; totals are not represented as lifetime activity or a CHARM balance.
+
+Apply the new native migration with `npm run db:migrate`. Then configure dedicated read-only legacy variables, run `npm run integrations:validate`, and pilot `npm run sync:activity -- --pages 2`. Existing `sync:uglybot`, `sync:gauntlet`, `sync:images`, and `sync:all` remain available. The resumable ecosystem worker is `npm run worker:ecosystem` using `railway.ecosystem.toml`; it does not replace the blockchain worker. Targeted identity repair uses `npm run activity:reattribute -- --wallet <lowercase-address>` (also `--discord` / `--collector`).
+
+See [activity model](docs/activity-model.md), [Railway](docs/railway.md), and [Phase 3 report](docs/phase3-report.md). Production legacy credentials were unavailable during development; imported test records are disposable fixtures, never deployed statistics.

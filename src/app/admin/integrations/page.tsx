@@ -1,9 +1,15 @@
+import Link from 'next/link';
+import { adminActor } from '@/server/admin';
+import { db } from '@/server/db';
 import { notFound } from 'next/navigation';
 import { inspectIntegrations } from '@/integrations/inspect';
 import { internalMetrics } from '@/server/metrics';
 export const dynamic = 'force-dynamic';
 export default async function IntegrationsPage() {
-  if (process.env.NODE_ENV !== 'development') notFound();
+  if (!(await adminActor())) notFound();
+  const sources = await db().integrationSource.findMany({
+    orderBy: { id: 'asc' },
+  });
   const results = await inspectIntegrations();
   const metrics = await internalMetrics();
   return (
@@ -16,6 +22,26 @@ export default async function IntegrationsPage() {
           credentials.
         </p>
       </section>
+      <Link href="/admin/activity">Import runs and activity evidence →</Link>
+      <div className="ecosystem-cards">
+        {sources.map((s) => (
+          <section className="panel" key={s.id}>
+            <h2>{s.id}</h2>
+            <p>
+              {s.state} · schema {s.schemaValid ? 'valid' : 'unvalidated'}
+            </p>
+            <p>
+              Earliest imported:{' '}
+              {s.firstAvailableAt?.toISOString() ?? 'unknown'}
+            </p>
+            <p>
+              Latest imported: {s.importedThrough?.toISOString() ?? 'unknown'}
+            </p>
+            <p>Last success: {s.lastSuccessAt?.toISOString() ?? 'never'}</p>
+            <p>{s.warning}</p>
+          </section>
+        ))}
+      </div>
       <div className="profile-grid">
         <section className="panel">
           <h2>UglyDex index</h2>
