@@ -1,5 +1,9 @@
 # Roadmap
 
+## Phase 8 delivery / Phase 9 recommendation
+
+Phase 8 code/tooling is implemented for staging/production safety, isolated restore, pilot/backfill gates, Edition indexing and operational status/capacity. External rollout and device/source evidence remain explicitly PENDING, not completed through local fixtures. Phase 9 should close those gates, rehearse recovery, reconcile real evidence and tune measured reliability; add contract-specific support only for reviewed official use cases. No paid mechanics, rewards or new gamification are authorized by this scope.
+
 ## Phase 7 delivered and exact recommended Phase 8
 
 Phase 7 adds safe deployment/backfill operations, worker controls/heartbeats, preflight/verification, an operational dashboard, audited official Custom/Edition catalogs, read-only supported Edition ownership, alternate-art showcases and free earned personalization. No authoritative official collectible records or production history were invented. See [Phase 7 report](phase7-report.md).

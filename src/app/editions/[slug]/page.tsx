@@ -5,6 +5,7 @@ import { currentSession } from '@/server/auth';
 import { absoluteUrl } from '@/server/sharing';
 import { Artwork } from '@/components/artwork';
 import { EditionCheck } from '@/components/edition-check';
+import { editionHistory } from '@/server/edition-history';
 type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props) {
   const e = await editionDetail((await params).slug);
@@ -18,6 +19,7 @@ export async function generateMetadata({ params }: Props) {
 export default async function Page({ params }: Props) {
   const e = await editionDetail((await params).slug);
   if (!e) notFound();
+  const history = await editionHistory(e.slug);
   const session = await currentSession(),
     owned = session
       ? (await ownedEditions(session.collectorId)).find(
@@ -84,6 +86,27 @@ export default async function Page({ params }: Props) {
               </Link>
             ))}
           </div>
+        </section>
+      )}
+      {history && (
+        <section>
+          <h2>Edition history</h2>
+          <p>
+            {history.complete
+              ? 'Indexed through the observed finalized block'
+              : 'Incomplete indexed history'}{' '}
+            · {history.total} transfer records · through block{' '}
+            {history.through ?? 'not started'}. Latest 50 events; wallet
+            identities are not published.
+          </p>
+          <ol>
+            {history.events.map((event) => (
+              <li key={event.id}>
+                {event.kind} · quantity {event.quantity} ·{' '}
+                {event.at.slice(0, 10)} · block {event.block}
+              </li>
+            ))}
+          </ol>
         </section>
       )}
     </>

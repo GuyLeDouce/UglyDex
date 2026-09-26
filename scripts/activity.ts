@@ -1,3 +1,4 @@
+import { assertOperation } from '../src/server/deployment';
 import 'dotenv/config';
 import { db } from '../src/server/db';
 import { feeds } from '../src/sync/normalize';
@@ -12,6 +13,7 @@ const args = process.argv.slice(2),
     return i < 0 ? undefined : args[i + 1];
   };
 try {
+  if (true) await assertOperation('replay');
   if (args[0] === 'reattribute') {
     const collectorId = arg('--collector'),
       discordId = arg('--discord'),

@@ -9,6 +9,7 @@ import {
   services,
   safeOperationalCode,
   type BackfillStage,
+  requirePassingGate,
 } from '@/domain/operations';
 import { chainKey, derivePending, seedAttributions } from '@/sync/provenance';
 import { transferBatch } from '@/sync/transfers';
@@ -28,6 +29,8 @@ import {
   processCollections,
 } from './dex-engine';
 import { migrationChecks } from './production';
+import { assertOperation } from './deployment';
+import { stageGate } from './stage-gates';
 
 type BatchResult = {
   complete: boolean;
@@ -101,6 +104,22 @@ export async function backfillBatch(
           source.warning === 'ROLE_HAS_WRITE_PRIVILEGES'
         )
           throw new Error('SOURCE_VALIDATION_REQUIRED');
+        if (
+          process.env.APP_ENV === 'production' ||
+          process.env.APP_ENV === 'staging'
+        ) {
+          const approval = await db().operationalAudit.findFirst({
+            where: { action: 'PILOT_APPROVED', subject: feed },
+            orderBy: { createdAt: 'desc' },
+          });
+          const detail = approval?.detail as
+            { schemaFingerprint?: string } | undefined;
+          if (
+            !approval ||
+            detail?.schemaFingerprint !== source.schemaFingerprint
+          )
+            throw new Error('PILOT_REVIEW_REQUIRED');
+        }
         if (!source.backfillFinishedAt) {
           const result = await runActivityFeed(feed, { maxPages: 2 });
           if (result.failed) throw new Error('ACTIVITY_ROWS_FAILED');
@@ -111,6 +130,8 @@ export async function backfillBatch(
       const pending = await db().integrationSource.count({
         where: { id: { in: configured }, backfillFinishedAt: null },
       });
+      const { reattributePending } = await import('@/sync/import-event');
+      await reattributePending();
       return {
         complete: pending === 0,
         counts: {
@@ -163,8 +184,10 @@ export async function productionBackfill(
     batches?: number;
     signal?: AbortSignal;
     runner?: typeof backfillBatch;
+    acceptedWarnings?: string[];
   } = {},
 ) {
+  await assertOperation('backfill');
   if ((await migrationChecks()).some((c) => c.status === 'FAIL'))
     throw new Error('MIGRATIONS_NOT_READY');
   const pool = new Pool({
@@ -202,16 +225,34 @@ export async function productionBackfill(
       if (!lock.rows[0].acquired) throw new Error('WORKER_TASK_STILL_RUNNING');
     }
     const from = options.from ? backfillStages.indexOf(options.from) : 0;
-    for (const previous of backfillStages.slice(0, from))
+    for (const previous of backfillStages.slice(0, from)) {
       if (
         !(await db().productionStage.findUnique({ where: { stage: previous } }))
           ?.completedAt
       )
         throw new Error('EARLIER_STAGE_INCOMPLETE');
+      if (!options.runner)
+        requirePassingGate(await stageGate(previous), options.acceptedWarnings);
+    }
     let batches = 0;
     for (const stage of backfillStages.slice(from)) {
       const prior = await db().productionStage.findUnique({ where: { stage } });
-      if (prior?.completedAt) continue;
+      if (prior?.completedAt) {
+        if (!options.runner) {
+          const checks = await stageGate(stage);
+          if (checks.some((c) => c.status === 'FAIL'))
+            throw new Error('COMPLETED_STAGE_NO_LONGER_VALID');
+          if (
+            checks.some(
+              (c) =>
+                c.status === 'WARN' &&
+                !options.acceptedWarnings?.includes(c.name),
+            )
+          )
+            throw new Error('STAGE_WARNING_REVIEW_REQUIRED');
+        }
+        continue;
+      }
       while (
         batches < (options.batches ?? 20) &&
         !options.signal?.aborted &&
@@ -237,6 +278,18 @@ export async function productionBackfill(
         });
         try {
           const result = await (options.runner ?? backfillBatch)(stage);
+          if (result.complete && !options.runner) {
+            const gates = await stageGate(stage);
+            await db().operationalAudit.create({
+              data: {
+                actor: 'backfill',
+                action: 'STAGE_GATE',
+                subject: stage,
+                detail: gates,
+              },
+            });
+            requirePassingGate(gates, options.acceptedWarnings);
+          }
           await db().productionStage.update({
             where: { stage },
             data: {

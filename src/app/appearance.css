@@ -68,3 +68,19 @@
     padding-left: 6px;
   }
 }
+.production-console {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.production-console .table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+.production-console select {
+  max-width: 100%;
+}
+.production-console nav {
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}

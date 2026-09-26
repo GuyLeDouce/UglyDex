@@ -17,3 +17,10 @@ Thumbs.db
 .railway/
 test-results/
 playwright-report/
+*.dump
+*.backup
+*.inventory.json
+*.pem
+*.p12
+*.pfx
+backups/

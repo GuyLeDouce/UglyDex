@@ -1,5 +1,9 @@
 # Railway operations
 
+## Phase 8 staging and release topology
+
+Follow [production-rollout.md](production-rollout.md). Staging has a separate writable PostgreSQL, AUTH_SECRET, public origin and equivalent web/worker services. Set APP_ENV explicitly; migrate through `202609300010_phase8`, register the DB identity, then preflight/pilot/backfill with action-bound intent. Optional `railway.editions.toml` adds reviewed contract indexing; no contract is enabled by default. Keep workers paused through migration and validation. Backup/restore uses operator-installed PostgreSQL client tools; no new web secret or rendering worker is required. Actual platform backup/retention/resource capabilities must be checked in the deployed Railway project.
+
 ## Phase 7 first deployment — follow this before older phase notes
 
 Use the exact [production readiness deployment order](production-readiness.md). The web rollout gate is now `/api/ready` (DB plus migration history/checksums); `/api/health` remains a lightweight DB probe. Apply all nine committed migrations, ending with `202609290009_phase7`, before deploying workers. All four worker services default to DISABLED via database controls; environment configuration alone never enables them. Inspect preflight/admin readiness, validate sources, back up, run bounded explicit backfills and verification, then enable LIVE individually.

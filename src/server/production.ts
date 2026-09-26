@@ -146,6 +146,11 @@ export async function preflight(
     checks.some((c) => c.name.startsWith('migration.') && c.status === 'FAIL')
   )
     return checks;
+  if (process.env.APP_ENV && process.env.APP_ENV !== 'development') {
+    const { deploymentChecks } = await import('./deployment');
+    checks.push(...(await deploymentChecks(process.env.APP_ENV === 'staging')));
+  } else if (process.env.NODE_ENV === 'production' && !process.env.APP_ENV)
+    add('deployment.identity', false, 'APP_ENV required for deployed services');
   const [catalog, progression, collections, controls, heartbeats, sources] =
     await Promise.all([
       db().squig.count({

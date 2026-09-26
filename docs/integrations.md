@@ -1,5 +1,9 @@
 # Integration operating contract
 
+## Phase 8 pilot gate
+
+Run `integrations:pilot -- --feed <feed> --since <date>` only after live schema/SELECT-role validation. At most 200 rows are normalized without advancing full backfill cursors. The printed audit ID must be approved with `integrations:pilot:approve -- --run <id> --reviewed`; full staging/production backfill requires that source schema fingerprint. Review cross-source reward/payment duplicates using existing canonical event rules. No actual production source credentials or rows were available; schema/duplicate findings remain PENDING. No external writes were added.
+
 Phase 7 rechecked upstream revisions and found no authoritative Customs/Edition issuance or contract registry. A marketplace product name or community image approval is insufficient evidence. Reviewed UglyDex-owned catalog imports remain separate from existing read-only adapters; no source schema/database write was introduced. See [collectible source findings](collectibles.md#source-evidence). Workers now require explicit enablement and validated sources; follow [production preflight and backfill](production-readiness.md).
 
 Phase 1 web pages use only the UglyDex projection database. They never fan out to legacy databases. All nine read-only source configurations remain optional and unchanged. No production credentials were available during Phase 1; production schema inspection and pilot imports still need to be run after Railway configuration. The live source verification performed in Phase 1 was public Ethereum tokenURI and IPFS metadata/artwork reading, documented in [the Phase 1 report](phase1-report.md#images).

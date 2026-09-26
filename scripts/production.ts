@@ -24,7 +24,13 @@ process.once('SIGINT', () => stop.abort());
 try {
   const allowed: Record<string, string[]> = {
     preflight: ['--offline'],
-    backfill: ['--status', '--execute', '--from', '--batches'],
+    backfill: [
+      '--status',
+      '--execute',
+      '--from',
+      '--batches',
+      '--accept-warning',
+    ],
     verify: ['--owners'],
     worker: ['--service', '--mode'],
   };
@@ -33,9 +39,14 @@ try {
     if (!allowed[command].includes(args[i]))
       throw new Error('INVALID_ARGUMENT');
     if (
-      ['--from', '--batches', '--owners', '--service', '--mode'].includes(
-        args[i],
-      ) &&
+      [
+        '--from',
+        '--batches',
+        '--owners',
+        '--service',
+        '--mode',
+        '--accept-warning',
+      ].includes(args[i]) &&
       !args[++i]
     )
       throw new Error('MISSING_ARGUMENT');
@@ -106,7 +117,14 @@ try {
         : 20;
       console.log(
         JSON.stringify(
-          await productionBackfill({ from, batches, signal: stop.signal }),
+          await productionBackfill({
+            from,
+            batches,
+            signal: stop.signal,
+            acceptedWarnings: args.includes('--accept-warning')
+              ? value('--accept-warning').split(',')
+              : [],
+          }),
           null,
           2,
         ),

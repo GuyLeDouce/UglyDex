@@ -26,6 +26,10 @@ const common = {
   description: text(1000).default(''),
   artist: text(100).nullable().default(null),
   imageUri: artworkUri,
+  imageSha256: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .optional(),
   issuedAt: z.iso.datetime({ offset: true }).nullable().default(null),
   source: text(80).min(1),
   sourceReference: text(250).min(1),

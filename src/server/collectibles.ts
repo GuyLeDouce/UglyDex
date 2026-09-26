@@ -54,6 +54,9 @@ export async function importCollectibles(
   const assets = new Map<string, Awaited<ReturnType<typeof inspect>>>();
   for (const uri of new Set(manifest.records.map((r) => r.imageUri)))
     assets.set(uri, await inspect(uri));
+  for (const r of manifest.records)
+    if (r.imageSha256 && r.imageSha256 !== assets.get(r.imageUri)!.sha256)
+      throw new Error('MANIFEST_ARTWORK_HASH_MISMATCH');
   return db().$transaction(
     async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended('collectibles:catalog',0))`;
@@ -339,7 +342,7 @@ export async function exportCollectibles(kind: 'CUSTOM' | 'EDITION') {
     const rows = await db().squigCustom.findMany({
       include: {
         squig: { select: { tokenId: true } },
-        artwork: { select: { uri: true } },
+        artwork: { select: { uri: true, sha256: true } },
       },
       orderBy: { key: 'asc' },
     });
@@ -354,6 +357,7 @@ export async function exportCollectibles(kind: 'CUSTOM' | 'EDITION') {
         artist: c.artist,
         issuedAt: c.issuedAt?.toISOString() ?? null,
         imageUri: c.artwork.uri,
+        imageSha256: c.artwork.sha256,
         source: c.source,
         sourceReference: c.sourceReference,
         status: c.status,
@@ -364,7 +368,7 @@ export async function exportCollectibles(kind: 'CUSTOM' | 'EDITION') {
   }
   const rows = await db().squigEdition.findMany({
     include: {
-      artwork: { select: { uri: true } },
+      artwork: { select: { uri: true, sha256: true } },
       relations: { include: { squig: { select: { tokenId: true } } } },
     },
     orderBy: { slug: 'asc' },
@@ -379,6 +383,7 @@ export async function exportCollectibles(kind: 'CUSTOM' | 'EDITION') {
       artist: e.artist,
       issuedAt: e.issuedAt?.toISOString() ?? null,
       imageUri: e.artwork.uri,
+      imageSha256: e.artwork.sha256,
       source: e.source,
       sourceReference: e.sourceReference,
       status: e.status,

@@ -9,3 +9,9 @@ export async function register() {
     log('startup.config_valid');
   }
 }
+export async function onRequestError() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { operationalFailure } = await import('./server/operational-metrics');
+    await operationalFailure('WEB_ERROR');
+  }
+}

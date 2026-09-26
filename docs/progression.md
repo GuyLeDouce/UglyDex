@@ -1,5 +1,9 @@
 # Progression
 
+## Phase 8 replay safety
+
+CLI seed/rebuild/replay commands require environment/database-bound replay intent in staging/production. Backfill gates stop on earlier evidence failures; deterministic verification recomputes existing grants and achievements. production:report exposes actual active/revoked grants and evaluated gates, never fabricated production totals. Completion and XP rules are unchanged.
+
 Phase 7 adds free appearance eligibility from active achievements. Achievement amber requires an awarded, unrevoked achievement and settled Collector progression. No XP rule, level curve, payout or achievement definition changed. Entitlement rows materialize on appearance save; live eligibility governs public display and falls back after corrections. The progression worker now starts disabled until explicitly enabled. See [collectibles](collectibles.md) and [production readiness](production-readiness.md).
 
 UglyDex progression describes recorded collecting and participation. XP is not currency, purchasing power, an NFT valuation or a promise of rewards. It never issues CHARM. Current holdings remain separate from historical discoveries and progression.

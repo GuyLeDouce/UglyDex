@@ -114,5 +114,7 @@ export async function verifyCollectibles(
     detail:
       'Ethereum ERC721/ERC1155 observations require a reviewed verified catalog entry and expire after 15 minutes. Other chains and off-chain catalogs have no ownership claims.',
   });
+  const { verifyEditionIndex } = await import('./edition-verify');
+  checks.push(...(await verifyEditionIndex()));
   return checks;
 }

@@ -1,5 +1,9 @@
 # Galleries and sharing
 
+## Phase 8 capacity and external proof
+
+The controlled local renderer benchmark and two-render concurrency limit are documented in reliability.md. Busy responses are included in admin failure/alert metrics. Physical native sharing and external OG crawler behavior remain PENDING in device-validation.md. Fresh public projections still govern every cached PNG response; third-party cached/downloaded previews cannot be recalled. No external social posting was introduced.
+
 Phase 7 adds `custom` cards, per-item verified gallery artwork and owner-specific featured/share art. URLs carry only canonical token and catalog key. The server projects verified immutable IPFS URI/hash pairs into the renderer, decodes bounded PNG/JPEG bytes, validates the hash and rechecks catalog/privacy state before returning PNG. Retirement revokes future requests, including cache hits. Enumerated accents/share styles preserve dimensions, no-store responses and render budgets. See [collectibles](collectibles.md).
 
 Phase 6 is a presentation layer over indexed UglyDex data. It does not import external databases, change ownership, award XP or issue rewards.

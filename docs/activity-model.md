@@ -1,5 +1,9 @@
 # Ecosystem activity model
 
+## Phase 8 operational import discipline
+
+Bounded pilot runs preserve full cursors and never imply complete history. Schema-bound operator approval is required before full staging/production orchestration. Rejected rows and unresolved attribution remain visible; normalization decisions are changed only for evidenced source issues with regression fixtures. Production cross-source duplicate review is PENDING; no synthetic findings were used to modify canonical payout/payment selection.
+
 UglyDex reads legacy history; it never pays rewards, changes game results, or writes to an ecosystem database. Phase 3 extends `CollectorActivity` and `SquigPassportEvent`. Blockchain provenance remains in its existing raw ledger and rebuildable collector projection.
 
 ## Event identity and correction

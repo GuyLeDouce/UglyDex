@@ -1,3 +1,4 @@
+import { assertOperation } from '../src/server/deployment';
 import 'dotenv/config';
 import { readEnv } from '../src/server/env';
 import { db } from '../src/server/db';
@@ -41,6 +42,7 @@ jobs.all = [
   ...jobs.images,
 ];
 try {
+  if (true) await assertOperation('replay');
   readEnv();
   const selected = jobs[process.argv[2]];
   if (!selected) throw new Error('UNKNOWN_SYNC');

@@ -1,3 +1,4 @@
+import { assertOperation } from '../src/server/deployment';
 import 'dotenv/config';
 import { z } from 'zod';
 import { runWorker } from '../src/server/worker-runtime';
@@ -21,6 +22,8 @@ import {
 } from '../src/domain/dex-catalog';
 const [command, ...args] = process.argv.slice(2);
 try {
+  if (['rebuild', 'seed'].includes(process.argv[2]))
+    await assertOperation('replay');
   if (!['seed', 'rebuild', 'worker', 'verify'].includes(command))
     throw new Error('INVALID_COMMAND');
   for (let i = 0; i < args.length; i++) {

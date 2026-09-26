@@ -37,7 +37,10 @@ export function CollectibleEditor({
     try {
       const r = await fetch('/api/admin/collectibles', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-uglydex-reviewed': 'true',
+        },
         body: JSON.stringify(body),
       });
       const data = await r.json();
@@ -293,6 +296,11 @@ export function CollectibleEditor({
           <label>
             Version 1 manifest
             <textarea name="manifest" required maxLength={100000} />
+          </label>
+          <label>
+            <input type="checkbox" required /> I reviewed every
+            source/reference, token relationship and artwork hash. VERIFIED
+            records will be published.
           </label>
           <button className="button" disabled={busy}>
             Validate and import

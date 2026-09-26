@@ -1,5 +1,9 @@
 # Collector identity and reconciliation
 
+## Phase 8 reconciliation evidence
+
+Production rollout requires reviewed confirm/reject/time-split cases, audit history and targeted downstream replay. Unresolved conflicts block the identity gate and remain visible in production:report. No conflict was auto-resolved during this phase. Edition historical acquisition uses only CONFIRMED attribution whose effective interval contains the event; current wallet linking alone is not historical evidence. Edition public timelines never expose raw identity/wallet evidence.
+
 ## Phase 1 active associations and public privacy
 
 Profile controls are independent: `isPublic`, `showWallets`, `showDiscord` (all false by default). Only authenticated Discord usernames may be published. Public Squig owner links require an active association and public collector; raw addresses additionally require wallet visibility. Public passport entries do not include internal evidence, raw activity metadata, Discord IDs, nonces or sessions. Public collections can still be correlated with public blockchain records; hiding an address is not blockchain anonymity.

@@ -29,6 +29,11 @@ export async function POST(request: Request) {
     const input = await jsonBody(request, 100000);
     if (!Array.isArray(input?.records) || input.records.length > 10)
       throw new Error('WEB_MANIFEST_LIMIT');
+    if (
+      input.records.some((r: { status?: string }) => r.status === 'VERIFIED') &&
+      request.headers.get('x-uglydex-reviewed') !== 'true'
+    )
+      throw new Error('OFFICIAL_REVIEW_REQUIRED');
     return Response.json(await importCollectibles(input, actor), { headers });
   } catch (e) {
     const allowed = [

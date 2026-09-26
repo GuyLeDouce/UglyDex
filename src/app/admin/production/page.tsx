@@ -4,11 +4,15 @@ import { adminActor } from '@/server/admin';
 import { productionOverview } from '@/server/production';
 import { heartbeatState, backfillStages } from '@/domain/operations';
 import { WorkerControls } from '@/components/worker-controls';
+import { reliabilityReport } from '@/server/reliability';
 export default async function Page() {
   if (!(await adminActor())) notFound();
-  const p = await productionOverview();
+  const [p, reliability] = await Promise.all([
+    productionOverview(),
+    reliabilityReport(),
+  ]);
   return (
-    <>
+    <div className="production-console">
       <h1>Production command centre</h1>
       <p>
         Release: <code>{p.version}</code>. External probes and schema drift
@@ -20,6 +24,37 @@ export default async function Page() {
         <Link href="/admin/sharing">Rendering</Link>
         <Link href="/admin/collectibles">Collectibles</Link>
       </nav>
+      <h2>Subsystem status and alerts</h2>
+      <ul>
+        {reliability.systems.map((s) => (
+          <li key={s.name}>
+            <strong>
+              {s.status} · {s.name}
+            </strong>{' '}
+            — {s.detail}
+          </li>
+        ))}
+      </ul>
+      <p>
+        {reliability.alerts.length} degraded/failed subsystems. Data quality:{' '}
+        {reliability.quality.rejected} rejected records,{' '}
+        {reliability.quality.unresolvedIdentity} identity reviews,{' '}
+        {reliability.quality.failedProgression} failed progression jobs,{' '}
+        {reliability.quality.failedCollections} failed collection jobs.
+      </p>
+      <Link href="/admin/reconciliation">Review identity evidence</Link>
+      {' · '}
+      <Link href="/admin/editions">Edition catalog</Link>
+      <details>
+        <summary>Recent operational incidents and gates</summary>
+        <ul>
+          {reliability.incidents.map((i, n) => (
+            <li key={n}>
+              {i.createdAt.toISOString()} · {i.action} · {i.subject}
+            </li>
+          ))}
+        </ul>
+      </details>
       <h2>Readiness</h2>
       <ul>
         {p.checks.map((c) => (
@@ -157,6 +192,6 @@ export default async function Page() {
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 }

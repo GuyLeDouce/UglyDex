@@ -1,3 +1,4 @@
+import { assertOperation } from '../src/server/deployment';
 import 'dotenv/config';
 import { z } from 'zod';
 import { runWorker } from '../src/server/worker-runtime';
@@ -15,6 +16,8 @@ const args = process.argv.slice(2),
 const value = (key: string) =>
   args.includes(key) ? args[args.indexOf(key) + 1] : undefined;
 try {
+  if (['rebuild', 'seed'].includes(process.argv[2]))
+    await assertOperation('replay');
   for (let i = 0; i < args.length; i++) {
     const flag = args[i];
     if (flag === '--collector' || flag === '--squig') {

@@ -1059,3 +1059,81 @@ model CollectorCosmeticPreference {
  updatedAt DateTime @updatedAt
  @@id([collectorId, kind])
 }
+
+model DeploymentIdentity {
+ id String @id
+ environment String
+ databaseFingerprint String
+ createdAt DateTime @default(now())
+}
+
+model EditionContract {
+ id String @id
+ chainId Int
+ address String
+ standard String
+ status String @default("DRAFT")
+ startBlock BigInt
+ tokenIds String[]
+ sourceReference String
+ enabled Boolean @default(false)
+ verifiedAt DateTime?
+ startHash String?
+ cursor BigInt?
+ cursorHash String?
+ finalizedBlock BigInt?
+ lastSuccessAt DateTime?
+ errorCode String?
+ revision Int @default(1)
+ updatedAt DateTime @updatedAt
+ events EditionTransfer[]
+ balances EditionBalance[]
+ checkpoints EditionCheckpoint[]
+ @@unique([chainId, address])
+}
+
+model EditionTransfer {
+ id String @id
+ contractId String
+ contract EditionContract @relation(fields: [contractId], references: [id])
+ tokenId String
+ fromAddress String
+ toAddress String
+ quantity String
+ blockNumber BigInt
+ blockHash String
+ transactionHash String
+ logIndex Int
+ batchIndex Int
+ eventAt DateTime
+ @@index([contractId, blockNumber, logIndex, batchIndex])
+ @@index([contractId, tokenId, eventAt])
+}
+
+model EditionBalance {
+ contractId String
+ contract EditionContract @relation(fields: [contractId], references: [id])
+ tokenId String
+ walletAddress String
+ quantity String
+ maximumQuantity String
+ firstAcquiredAt DateTime
+ lastAcquiredAt DateTime
+ @@id([contractId, tokenId, walletAddress])
+ @@index([walletAddress])
+}
+
+model EditionCheckpoint {
+ contractId String
+ contract EditionContract @relation(fields: [contractId], references: [id])
+ blockNumber BigInt
+ blockHash String
+ @@id([contractId, blockNumber])
+}
+
+model OperationalMetric {
+ bucket DateTime
+ kind String
+ count Int @default(0)
+ @@id([bucket, kind])
+}

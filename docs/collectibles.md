@@ -83,3 +83,15 @@ Profile framing, gallery borders and share styles consume this safe configuratio
 - Missing Custom: check status, canonical token relation and current ownership. Draft/retired records are deliberately absent publicly.
 - Missing Edition holding: check supported chain/standard, verified linked wallets, revision and observation age. Refresh on the detail page; catalog presence alone is not evidence.
 - Cosmetic reverted: inspect actual ownership, pending jobs, revoked achievements/current sets or disabled definition. Do not grant a paid/manual bypass.
+
+## Phase 8 reviewed manifests and historical indexing
+
+Public catalog JSON version 1 now accepts imageSha256; CLI imports require this 64-character lowercase digest. Exports include it. Use --validate-only to check schema and gateway bytes without inserting anything, review references/art in the admin preview, import DRAFT candidates, then explicitly approve VERIFIED publication with --reviewed. Web publication requires an authenticated admin, origin/rate checks and a review acknowledgment header emitted by the reviewed form. Imports still validate all rows before the transaction. No unreviewed social image is canonical. Keep only reviewed public metadata manifests in version control; never ownership evidence or credentials.
+
+Register a contract using editions:register -- --file <public-registry.json> --reviewed. Format: chainId (1), address, standard (ERC721 or ERC1155), startBlock (decimal string), tokenIds (unique decimal-string array, at most 1000) and sourceReference. Archive code at/before the start and ERC165 support are checked; review establishes official status, RPC interface support alone does not. Registration leaves enabled=false. An existing registry is immutable through this command; changing ID strategy needs a reviewed replay plan.
+
+After explicit editions:control -- --id <1:address> --mode enabled, editions:index runs one finalized bounded batch; worker:editions continuously processes enabled contracts. TransferSingle/TransferBatch preserve ERC1155 quantities and array order. ERC721 uses individual ownership, including mint and burn. Checkpoints support bounded reorg rewind and balance replay. Underflow, missing mint, changed start hash, deep reorg or oversized replay halts/alerts rather than inventing ownership. Constructor allocations without events and unusual proxies need contract-specific evidence/adapter work.
+
+Public Edition history shows latest 50 event types/quantities/dates/blocks, never wallet identity. Authenticated collection history uses current verified wallets for indexed balances and effective-time confirmed attribution for historical acquisition. Snapshots are labeled by indexed block and freshness; no extra Reloaded discovery or prestige reward is issued. Full balance/event replay is part of collectibles:verify. No official registry/Custom/Edition records were seeded in Phase 8.
+
+Standards inspected: [ERC721](https://eips.ethereum.org/EIPS/eip-721), [ERC1155](https://eips.ethereum.org/EIPS/eip-1155). Registry support is deliberately limited to reviewed Ethereum contracts and explicit IDs.

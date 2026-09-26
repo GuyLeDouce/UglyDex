@@ -49,7 +49,7 @@ for (const key of [
 process.env.SQUIGS_CONTRACT_ADDRESS =
   '0x8c9a02c0585200c4c65608df6b8def543d33792a';
 process.env.DATABASE_URL = `postgresql://uglydex_test:${password}@127.0.0.1:${port}/uglydex_test`;
-Object.assign(process.env, { NODE_ENV: 'test' });
+Object.assign(process.env, { NODE_ENV: 'test', APP_ENV: 'development' });
 process.env.PUBLIC_BASE_URL = `https://localhost:${webPort}`;
 process.env.AUTH_SECRET = randomBytes(32).toString('hex');
 process.env.ADMIN_DIAGNOSTICS_TOKEN = randomBytes(32).toString('hex');
@@ -206,6 +206,8 @@ try {
   await phase6DatabaseTests(check);
   const { phase7DatabaseTests } = await import('../tests/db/phase7');
   await phase7DatabaseTests(check);
+  const { phase8DatabaseTests } = await import('../tests/db/phase8');
+  await phase8DatabaseTests(check);
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
@@ -1129,6 +1131,14 @@ try {
     const { phase7WebTests } = await import('../tests/db/phase7-web');
     await phase7WebTests(
       `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
+  }
+  if (process.argv.includes('--web')) {
+    const { phase8WebTests } = await import('../tests/db/phase8-web');
+    await phase8WebTests(
+      'http://127.0.0.1:' + webPort,
       check,
       process.argv.includes('--browser'),
     );

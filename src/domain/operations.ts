@@ -30,6 +30,19 @@ export type Check = {
 export function heartbeatState(time: Date, state: string, now = new Date()) {
   return now.getTime() - time.getTime() > 90000 ? 'STALE' : state;
 }
+export function requirePassingGate(
+  checks: Check[],
+  acceptedWarnings: string[] = [],
+) {
+  if (checks.some((c) => c.status === 'FAIL'))
+    throw new Error('STAGE_GATE_FAILED');
+  if (
+    checks.some(
+      (c) => c.status === 'WARN' && !acceptedWarnings.includes(c.name),
+    )
+  )
+    throw new Error('STAGE_WARNING_REVIEW_REQUIRED');
+}
 export function safeOperationalCode(error: unknown) {
   return error instanceof Error && /^[A-Z][A-Z0-9_]{2,70}$/.test(error.message)
     ? error.message

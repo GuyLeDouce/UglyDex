@@ -1,3 +1,4 @@
+import { assertOperation } from '../src/server/deployment';
 import 'dotenv/config';
 import { db } from '../src/server/db';
 import { readEnv } from '../src/server/env';
@@ -9,6 +10,7 @@ import { squigToken } from '../src/domain/validation';
 import { validateContract } from '../src/integrations/blockchain';
 import { retryRpc } from '../src/domain/provenance';
 try {
+  if (process.argv[2] === 'rebuild') await assertOperation('replay');
   readEnv();
   const command = process.argv[2];
   if (command === 'status')

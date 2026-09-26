@@ -5,6 +5,7 @@ import { Pool } from 'pg';
 import { db } from './db';
 import { readEnv } from './env';
 import { log } from './log';
+import { assertOperation, assertDeploymentBinding } from './deployment';
 import {
   safeOperationalCode,
   workerControlSchema,
@@ -14,6 +15,7 @@ import {
 
 export async function setWorkerControl(input: unknown, actor: string) {
   const data = workerControlSchema.parse(input);
+  if (data.mode !== 'DISABLED') await assertOperation('workers');
   await db().$transaction(async (tx) => {
     if (data.mode !== 'DISABLED') {
       const lock = await tx.$queryRaw<
@@ -40,6 +42,7 @@ export async function setWorkerControl(input: unknown, actor: string) {
 // LIVE cannot bootstrap historical cursors. An operator must finish each source backfill first.
 export async function workerReadiness(service: Service, mode: WorkerMode) {
   if (mode === 'DISABLED') return 'DISABLED';
+  await assertDeploymentBinding();
   if (service === 'blockchain') {
     const env = readEnv();
     if (!env.ETH_RPC_URL || env.SQUIGS_START_BLOCK === undefined)
@@ -107,6 +110,7 @@ export async function runWorker(
   let runId: string | null = null,
     errorCode: string | null = null,
     lastSuccessAt: Date | undefined;
+  let consecutiveFailures = 0;
   const heartbeat = () =>
     db().workerHeartbeat.upsert({
       where: { service_instanceId: key },
@@ -166,6 +170,7 @@ export async function runWorker(
             if (typeof counts.failed === 'number' && counts.failed > 0)
               throw new Error('TASK_REPORTED_FAILURE');
             lastSuccessAt = new Date();
+            consecutiveFailures = 0;
             errorCode = null;
             state = 'IDLE';
             log('worker.task', {
@@ -174,11 +179,27 @@ export async function runWorker(
               stage: mode,
               durationMs: Date.now() - started,
               success: true,
+              rssBytes: process.memoryUsage().rss,
               ...counts,
             });
           } else state = 'LOCKED_BY_PEER';
         } catch (error) {
           errorCode = safeOperationalCode(error);
+          consecutiveFailures++;
+          if (consecutiveFailures >= 3) {
+            await setWorkerControl(
+              { service, mode: 'DISABLED' },
+              'automatic:circuit-breaker',
+            );
+            await db().operationalAudit.create({
+              data: {
+                actor: 'worker',
+                action: 'CIRCUIT_OPEN',
+                subject: service,
+                detail: { code: errorCode },
+              },
+            });
+          }
           state = 'ERROR';
           log('worker.task', {
             runId,
@@ -198,9 +219,16 @@ export async function runWorker(
         await heartbeat();
       }
       if (options.once || stop.signal.aborted) break;
-      await delay(options.intervalMs ?? 15000, undefined, {
-        signal: stop.signal,
-      }).catch(() => {});
+      await delay(
+        Math.min(
+          300000,
+          (options.intervalMs ?? 15000) * 2 ** consecutiveFailures,
+        ),
+        undefined,
+        {
+          signal: stop.signal,
+        },
+      ).catch(() => {});
     } while (!stop.signal.aborted);
   } finally {
     clearInterval(timer);

@@ -1,5 +1,9 @@
 # Squig provenance
 
+## Phase 8 production proof
+
+`production:report` reports stored mint/continuous-history/owner-match coverage and every anomalous token ID. Run archive start-boundary validation plus provenance:verify and production:verify --owners full before enabling dependent workers. The start reported by an explorer remains unverified until actual archive code/block evidence is checked. Backfill provenance gates refuse incomplete/dirty records. Edition history has separate cursors and cannot alter Reloaded provenance. Real mainnet verification remains PENDING.
+
 ## Facts, observations and identity
 
 `NftTransfer` is the canonical Ethereum Transfer ledger for the configured Squigs contract. Its primary ID is `1:<transactionHash>:<logIndex>`, with an additional unique `(chainId, transactionHash, logIndex)` constraint. It retains contract, token, both addresses, transaction index, block number/hash/time, ingestion time and finalized flag. Token records must already exist; run `sync:squigs` first. An event key with inconsistent contents stops the scan. Raw records are never edited by profile settings, identity review or a normal rebuild.

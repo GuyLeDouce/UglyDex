@@ -1,5 +1,9 @@
 # Collections and the UglyDex
 
+## Phase 8 verification
+
+Replay commands are operationally guarded. The collections stage drains its queue and final verification recomputes evidence/snapshots. Editions and their indexed discoveries stay outside all Reloaded denominators and v1 set/completion calculations. Real-data second-replay comparison remains PENDING until sources and attribution settle.
+
 Phase 7 preserves `uglydex-collection-v1`, 4,444 Reloaded tokens and all trait/set denominators. Customs represent the same tokens; Editions are a separate catalog/ownership category. Currently complete enabled sets with settled evaluation can unlock free frames/gallery presentation; loss or correction falls back on read. The collection worker now starts disabled. See [collectibles](collectibles.md) and [production readiness](production-readiness.md).
 
 `uglydex-collection-v1` is a permanent collection interpretation layer, separate from `uglydex-progression-v1`. It reads only UglyDex's indexed metadata, ownership, discoveries and provenance. It issues no XP, CHARM, NFT, payment, financial reward or purchase recommendation. The Phase 4 ruleset and achievements are unchanged; future collection achievements require a separately reviewed progression version.

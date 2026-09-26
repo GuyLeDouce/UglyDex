@@ -1,5 +1,9 @@
 # Production readiness and first deployment
 
+## Phase 8 supersedes the initial rollout instructions
+
+Use [production-rollout.md](production-rollout.md) for the current ten-migration deployment sequence, APP_ENV registration, exact-action confirmations, pilots, backup/restore drill and explicit evidence gates. Use [rollback.md](rollback.md), [reliability.md](reliability.md) and [device-validation.md](device-validation.md). The Phase 7 notes below describe the original baseline; Phase 8 adds stricter guards and an optional separate Edition service.
+
 Phase 7 adds operational gates; it does not assert that production credentials, source databases, ownership history or real-device flows have been validated. The database control records are the source of truth for worker enablement. An absent control means **DISABLED**, including when all RPC/source environment variables exist.
 
 ## Exact first-deployment order

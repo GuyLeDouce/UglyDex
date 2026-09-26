@@ -1,5 +1,9 @@
 # UglyDex
 
+## Phase 8 operations
+
+Follow [production rollout](docs/production-rollout.md), [rollback](docs/rollback.md), [reliability](docs/reliability.md) and [device validation](docs/device-validation.md). Phase 7 is checkpointed at `2c6eda2`. Phase 8 adds environment-bound operational intent, staging/smoke/restore tools, pilot/stage gates, Edition history indexing and reliability diagnostics. See [Phase 8 report](docs/phase8-report.md) for measured local results and explicitly pending external gates. Run `npm run release:check` before release; never treat fixtures as production evidence.
+
 The identity layer for the Ugly ecosystem. UglyDex unifies collector identity, Squig metadata, ownership observations and historical events above UglyBot, The Gauntlet and ImageSubmit. Those systems remain authoritative. UglyDex never migrates or writes to their databases.
 
 Phases 0–7 provide canonical ownership/provenance, tracked history, progression, a Trait Dex and sets, opt-in galleries/share cards, verified Customs/Editions and free personalization. Phase 7 adds safe worker onboarding, preflight, resumable backfill and verification. Start with the [Phase 7 report](docs/phase7-report.md), [production deployment order](docs/production-readiness.md), [collectibles guide](docs/collectibles.md), [privacy policy](docs/privacy.md) and [Railway operations](docs/railway.md). Quests, seasons, leaderboards and paid features remain deferred.
