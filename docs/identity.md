@@ -71,3 +71,7 @@ Progression requires confirmed evidence. Pending wallet attribution excludes aff
 ## Phase 5 collection evidence
 
 Collection replay uses confirmed discoveries only when the first CollectorOwnershipPeriod matches the collector/token/date and provenance is complete and clean. Wallet unlinking affects current sets but retains valid historical traits/sets. Reconciliation and dirty provenance queue reevaluation; pending jobs suppress stale public claims. Public set evidence never contains attribution IDs or wallets; qualifying token evidence is also hidden when wallet attribution visibility is disabled. See [collections](collections.md).
+
+## Phase 6 gallery and share privacy
+
+Private profiles hide every public/unlisted gallery and personalized public card. Gallery visibility and full-collection visibility are independent explicit disclosures; private galleries remain owner-only even on public profiles. HIDDEN collection suppresses featured artwork/collages and public set token evidence. Sharing consumes explicit safe DTOs and rechecks state before returning image bytes. Downloaded images cannot be recalled from their recipients. See [sharing privacy](sharing.md#profile-and-public-projections).

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import './globals.css';
 import './collections.css';
+import './sharing.css';
 import { currentSession } from '@/server/auth';
 import { db } from '@/server/db';
 export const metadata: Metadata = {

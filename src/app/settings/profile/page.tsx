@@ -11,6 +11,8 @@ export default async function Settings() {
         <p className="eyebrow">MAKE IT YOURS</p>
         <h1>Your public face.</h1>
         <div className="actions">
+          <Link href="/settings/galleries">Galleries →</Link>
+          <Link href="/settings/sharing">Share studio →</Link>
           <Link href="/settings/wallets">Wallet settings →</Link>
           {c.isPublic && (
             <Link href={`/collector/${c.slug}`}>View public profile ↗</Link>
@@ -23,6 +25,7 @@ export default async function Settings() {
           displayName: c.displayName ?? '',
           bio: c.bio ?? '',
           avatar: c.avatar ?? '',
+          collectionVisibility: c.collectionVisibility,
           isPublic: c.isPublic,
           showWallets: c.showWallets,
           showDiscord: c.showDiscord,

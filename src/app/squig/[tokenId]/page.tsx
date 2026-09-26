@@ -1,3 +1,12 @@
+import { ShareControls } from '@/components/share-controls';
+import { absoluteUrl, shareMetadata } from '@/server/sharing';
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tokenId: string }>;
+}) {
+  return shareMetadata({ kind: 'squig', entity: (await params).tokenId });
+}
 import { ActivityView, EcosystemSummary } from '@/components/activity';
 import Link from 'next/link';
 import { Progression } from '@/components/progression';
@@ -31,6 +40,14 @@ export default async function Squig({
   const history = await passport(r.squigId, await searchParams);
   return (
     <>
+      <ShareControls
+        spec={{ kind: 'squig', entity: String(s.tokenId) }}
+        url={absoluteUrl('/squig/' + s.tokenId)}
+        copy={'Squig #' + s.tokenId + ' has a story.'}
+      />
+      <Link href={'/share?kind=passport&entity=' + s.tokenId}>
+        Share Passport ↗
+      </Link>
       <div className="breadcrumb">
         <Link href="/squigs">Field guide</Link>
         <span>/ Squig #{s.tokenId}</span>

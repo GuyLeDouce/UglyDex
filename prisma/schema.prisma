@@ -35,6 +35,8 @@ model Collector {
   featuredAchievementIds String[] @default([])
   selectedTitleId String?
   featuredSetIds String[] @default([])
+  collectionVisibility CollectionVisibility @default(FULL)
+  galleries CollectorGallery[]
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
   identities   ExternalIdentity[]
@@ -141,11 +143,79 @@ model Squig {
   walletPeriods WalletOwnershipPeriod[]
   collectorPeriods CollectorOwnershipPeriod[]
   provenance SquigProvenance?
+  galleryItems CollectorGalleryItem[]
 
   @@unique([chainId, contractAddress, tokenId])
   @@index([uglyPoints, tokenId])
   @@index([mawRank, tokenId])
   @@index([rarityTier, og, legendary])
+}
+
+enum CollectionVisibility {
+  FULL
+  FEATURED_ONLY
+  HIDDEN
+}
+
+enum GalleryVisibility {
+  PUBLIC
+  UNLISTED
+  PRIVATE
+}
+
+enum GalleryMode {
+  CURRENT_COLLECTION
+  DISCOVERED_HISTORY
+}
+
+enum GalleryLayout {
+  GRID
+  EXHIBITION
+  COMPACT
+}
+
+model CollectorGallery {
+  id String @id @default(uuid()) @db.Uuid
+  collectorId String @db.Uuid
+  collector Collector @relation(fields: [collectorId], references: [id], onDelete: Cascade)
+  slug String
+  name String
+  description String @default("")
+  visibility GalleryVisibility @default(PRIVATE)
+  mode GalleryMode @default(CURRENT_COLLECTION)
+  layout GalleryLayout @default(GRID)
+  coverTokenId Int?
+  featured Boolean @default(false)
+  revision Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items CollectorGalleryItem[]
+  @@unique([collectorId, slug])
+  @@index([collectorId, visibility, featured])
+}
+
+model CollectorGalleryItem {
+  galleryId String @db.Uuid
+  gallery CollectorGallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  squigId String @db.Uuid
+  squig Squig @relation(fields: [squigId], references: [id])
+  sortOrder Int
+  caption String @default("")
+  section String @default("")
+  addedAt DateTime @default(now())
+  @@id([galleryId, squigId])
+  @@index([galleryId, sortOrder])
+}
+
+model ShareRenderMetric {
+  id String @id @default(uuid()) @db.Uuid
+  kind String
+  status String
+  cacheHit Boolean @default(false)
+  artworkFailures Int @default(0)
+  durationMs Int
+  createdAt DateTime @default(now())
+  @@index([createdAt])
 }
 
 model SquigTrait {

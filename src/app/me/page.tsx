@@ -37,6 +37,10 @@ export default async function Me() {
   ]);
   return (
     <>
+      <nav className="anchor-nav">
+        <Link href="/settings/galleries">My galleries</Link>
+        <Link href="/settings/sharing">Share studio</Link>
+      </nav>
       <section className="page-heading profile-heading">
         <Artwork src={c.avatar} alt="Your avatar" avatar />
         <div>

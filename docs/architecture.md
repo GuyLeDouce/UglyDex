@@ -67,3 +67,7 @@ The internal activity ledger and confirmed provenance/discovery projections feed
 ## Phase 5 collection projection
 
 Confirmed discoveries and current indexed ownership feed a separate collection ruleset. Durable UglyDex-only outbox jobs drive atomic trait/set/completion/hint snapshots. Existing CollectionSetDefinition, CollectionSetRequirement and CollectorSetProgress are extended; XP and ecosystem ledgers remain unchanged. CollectionAudit and CollectionMilestone retain derived corrections and time semantics. Public requests read privacy-safe snapshots; 24-card explorer pages use precomputed hints, never external databases or per-card set replay. See [collections](collections.md).
+
+## Phase 6 public presentation
+
+CollectorGallery and CollectorGalleryItem reference canonical Squigs without copying ownership. Reads revalidate current ownership or settled discovery, and gate profile/gallery visibility. A centralized ShareCard projection feeds public metadata, suggested copy, share pages and Next ImageResponse. Bounded canonical-asset fetching, shared rate limits and privacy-checked process caching stay in the web service. ShareRenderMetric stores content-free operational telemetry. Progression, collection rules and source ledgers remain unchanged. See [sharing](sharing.md).

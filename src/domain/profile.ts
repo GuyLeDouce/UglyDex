@@ -41,6 +41,7 @@ export const profileSchema = z.object({
       return u.protocol === 'https:' && !u.username && !u.password;
     }, 'Use a public HTTPS image URL.'),
   ]),
+  collectionVisibility: z.enum(['FULL', 'FEATURED_ONLY', 'HIDDEN']).optional(),
   isPublic: z.boolean(),
   showWallets: z.boolean(),
   showDiscord: z.boolean(),

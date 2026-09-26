@@ -1,6 +1,6 @@
 import { z } from 'zod';
-export async function jsonBody(request: Request) {
-  if (Number(request.headers.get('content-length') ?? 0) > 16384)
+export async function jsonBody(request: Request, limit = 16384) {
+  if (Number(request.headers.get('content-length') ?? 0) > limit)
     throw new Error('BODY_TOO_LARGE');
   const reader = request.body?.getReader();
   if (!reader) throw new Error('INVALID_BODY');
@@ -10,7 +10,7 @@ export async function jsonBody(request: Request) {
     const chunk = await reader.read();
     if (chunk.done) break;
     length += chunk.value.length;
-    if (length > 16384) {
+    if (length > limit) {
       await reader.cancel();
       throw new Error('BODY_TOO_LARGE');
     }

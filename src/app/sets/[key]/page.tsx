@@ -1,3 +1,19 @@
+import { absoluteUrl } from '@/server/sharing';
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ key: string }>;
+}) {
+  const { key } = await params,
+    s = collectionSets.find((s) => s.key === key);
+  if (!s || s.hidden)
+    return { title: 'UglyDex collection set', robots: { index: false } };
+  return {
+    title: s.name + ' | UglyDex',
+    description: s.description,
+    alternates: { canonical: absoluteUrl('/sets/' + s.key) },
+  };
+}
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { collectionSets } from '@/domain/dex-catalog';

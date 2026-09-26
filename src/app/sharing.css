@@ -1,0 +1,259 @@
+.gallery-heading {
+  padding: 3rem 0;
+  border-bottom: 1px solid #384033;
+  margin-bottom: 2rem;
+}
+.gallery-heading h1 {
+  font-size: clamp(2.5rem, 7vw, 5.8rem);
+  line-height: 1.02;
+  max-width: 1000px;
+  overflow-wrap: anywhere;
+}
+.gallery-heading > p {
+  max-width: 65ch;
+  overflow-wrap: anywhere;
+}
+.showcase-highlights {
+  margin: 2rem 0 3rem;
+}
+.showcase-level,
+.showcase-activity-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.showcase-level {
+  color: var(--acid);
+  margin-bottom: 1.5rem;
+}
+.showcase-completion {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  padding: 2rem;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.showcase-completion h2 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  margin: 0.5rem 0;
+  line-height: 1.1;
+}
+.showcase-completion h2 span {
+  font-size: 1rem;
+  margin-left: 0.5rem;
+  color: var(--muted);
+}
+.showcase-completion progress {
+  display: block;
+  width: 100%;
+  margin: 1rem 0;
+}
+.showcase-completion dl {
+  margin: 0;
+  align-self: center;
+}
+.showcase-completion dl > div {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.showcase-completion dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.showcase-activity-stats {
+  margin-bottom: 1rem;
+}
+.gallery-cover,
+.trophy-grid > a,
+.gallery-section,
+.profile-heading {
+  overflow-wrap: anywhere;
+}
+.exhibition {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+}
+.exhibition figure {
+  margin: 0;
+  min-width: 0;
+}
+.exhibition figcaption {
+  padding: 1rem 0;
+}
+.exhibition figcaption p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.exhibition-exhibition {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4rem;
+}
+.exhibition-compact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+.gallery-section {
+  font-size: 1.1rem;
+  min-height: 2rem;
+}
+.gallery-edit-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+.gallery-edit-list li {
+  background: #171c17;
+  padding: 1rem;
+  border: 1px solid #394334;
+}
+.gallery-edit-list button {
+  padding: 0.5rem;
+  min-height: 44px;
+}
+.share-options {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.share-options label {
+  flex: 1;
+  min-width: 0;
+}
+.share-controls {
+  margin: 1rem 0;
+  max-width: 100%;
+}
+.share-panel {
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid #657652;
+  background: #151a14;
+  max-width: 900px;
+  margin-top: 1rem;
+}
+.share-preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 80px;
+  margin: 1rem 0;
+  border: 1px solid #343e2f;
+}
+.share-options select {
+  width: 100%;
+  padding: 0.7rem;
+  background: #181c17;
+  color: #eee;
+  border: 1px solid #4d5844;
+}
+.share-art-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.gallery-cover {
+  display: block;
+  padding: 1rem;
+  border: 1px solid #414b38;
+  background: #181c16;
+}
+.gallery-cover h3 {
+  font-size: 2rem;
+}
+.featured-exhibition,
+.trophy-case {
+  margin: 3rem 0;
+}
+.trophy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.trophy-grid > a {
+  padding: 1.3rem;
+  border: 1px solid #50573e;
+  background: #1a1c15;
+}
+.trophy-grid small {
+  font-size: 0.65rem;
+  letter-spacing: 0.13em;
+  color: #b4c790;
+}
+.trophy-grid h3 {
+  font-size: 1.4rem;
+}
+.table-scroll {
+  overflow: auto;
+}
+.anchor-nav {
+  flex-wrap: wrap;
+}
+.share-panel .actions {
+  flex-wrap: wrap;
+}
+.share-panel button {
+  min-height: 44px;
+}
+.share-panel p {
+  overflow-wrap: anywhere;
+}
+.gallery-edit-list input {
+  max-width: 100%;
+}
+@media (max-width: 680px) {
+  .showcase-completion {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .exhibition,
+  .exhibition-exhibition {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .exhibition-compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.7rem;
+  }
+  .exhibition-compact .inline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .trophy-grid {
+    grid-template-columns: 1fr;
+  }
+  .share-art-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .share-options {
+    flex-direction: column;
+  }
+  .gallery-heading {
+    padding: 1.5rem 0;
+  }
+  .share-panel .actions > * {
+    flex: 1 1 45%;
+  }
+  .gallery-edit-list {
+    margin: 0;
+  }
+  .gallery-cover h3 {
+    font-size: 1.5rem;
+  }
+}
+
+.gallery-room {
+  margin-bottom: 3rem;
+}
+.gallery-section {
+  font-size: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #384033;
+  letter-spacing: 0.06em;
+}

@@ -92,7 +92,12 @@ export async function dexView(id: string, isPublic = false) {
     async (tx) => {
       const collector = await tx.collector.findUnique({
         where: { id },
-        select: { isPublic: true, showWallets: true, featuredSetIds: true },
+        select: {
+          isPublic: true,
+          showWallets: true,
+          featuredSetIds: true,
+          collectionVisibility: true,
+        },
       });
       if (!collector || (isPublic && !collector.isPublic)) return null;
       const pending = await tx.collectionJob.findUnique({
@@ -113,7 +118,9 @@ export async function dexView(id: string, isPublic = false) {
           card = setProjection(
             s,
             row?.progress as Result | undefined,
-            !isPublic || collector.showWallets,
+            !isPublic ||
+              (collector.showWallets &&
+                collector.collectionVisibility === 'FULL'),
           );
         return {
           ...card,

@@ -6,6 +6,7 @@ type Values = {
   displayName: string;
   bio: string;
   avatar: string;
+  collectionVisibility: 'FULL' | 'FEATURED_ONLY' | 'HIDDEN';
   isPublic: boolean;
   showWallets: boolean;
   showDiscord: boolean;
@@ -25,6 +26,7 @@ export function ProfileForm({ initial }: { initial: Values }) {
         displayName: f.get('displayName'),
         bio: f.get('bio'),
         avatar: f.get('avatar'),
+        collectionVisibility: f.get('collectionVisibility'),
         isPublic: f.has('isPublic'),
         showWallets: f.has('showWallets'),
         showDiscord: f.has('showDiscord'),
@@ -102,6 +104,21 @@ export function ProfileForm({ initial }: { initial: Values }) {
       </label>
       <fieldset>
         <legend>Public profile privacy</legend>
+        <label>
+          Collection display
+          <select
+            name="collectionVisibility"
+            defaultValue={initial.collectionVisibility}
+          >
+            <option value="FULL">Full current collection</option>
+            <option value="FEATURED_ONLY">Featured Squigs only</option>
+            <option value="HIDDEN">Hide collection and featured Squigs</option>
+          </select>
+        </label>
+        <p>
+          Individually published galleries are a separate, explicit selection.
+          Private profiles hide every gallery.
+        </p>
         <label className="check">
           <input
             name="isPublic"

@@ -2,7 +2,7 @@
 
 The identity layer for the Ugly ecosystem. UglyDex unifies collector identity, Squig metadata, ownership observations and historical events above UglyBot, The Gauntlet and ImageSubmit. Those systems remain authoritative. UglyDex never migrates or writes to their databases.
 
-Phase 2 adds a canonical Transfer ledger, resumable finalized-chain indexing, reorg recovery, wallet/collector holding periods, audited historical identity review, provenance verification and paginated Squig Passports. It builds on the Phase 1 collection/profile experience. XP, achievements, sets and quests remain foundations only. See the [Phase 2 report](docs/phase2-report.md), [provenance guide](docs/provenance.md) and [Railway operations](docs/railway.md).
+Phases 0–6 provide canonical ownership/provenance, tracked ecosystem history, replayable progression, a Trait Dex and collection sets, plus opt-in galleries and downloadable social cards. See the [Phase 6 report](docs/phase6-report.md), [sharing guide](docs/sharing.md), [privacy policy](docs/privacy.md) and [Railway operations](docs/railway.md). Quests, seasons, leaderboards and paid features remain deferred.
 
 ## Local development
 
@@ -20,7 +20,7 @@ npm run dev
 
 PowerShell: `Copy-Item .env.example .env`. Generate a secret with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Never reuse external service secrets. No real `.env` is committed. Page data comes only from UglyDex; artwork is delivered from immutable IPFS references. Legacy service outages do not block collection browsing. New collector profiles are private by default.
 
-Public routes: `/`, `/connect`, `/squigs`, `/collector/[slug]`, `/squig/[tokenId]`. Private routes: `/me`, `/collection`, `/collection/discovered`, `/settings/profile`, `/settings/wallets`. `/api/health` checks readiness. `/admin/integrations` exists only in development. Production diagnostics use `/api/admin/integrations` with `Authorization: Bearer <ADMIN_DIAGNOSTICS_TOKEN>`; never put that token in a URL or browser bundle.
+Public routes include `/`, `/connect`, `/squigs`, `/collector/[slug]`, `/collector/[slug]/collection`, `/collector/[slug]/gallery/[gallerySlug]`, `/squig/[tokenId]` and `/share`. Profile and gallery visibility is enforced on every public request. Private routes include `/me`, `/collection`, `/settings/profile`, `/settings/wallets`, `/settings/galleries` and `/settings/sharing`. `/api/health` checks readiness. Production admin pages, including `/admin/sharing`, require an authenticated configured Discord administrator. Read-only API diagnostics use `Authorization: Bearer <ADMIN_DIAGNOSTICS_TOKEN>`; never put that token in a URL or browser bundle.
 
 ## Architecture and database
 
@@ -109,3 +109,7 @@ Evidence-backed Collector/Squig XP, levels, 65 achievements, titles, featured ba
 ## Collection Dex (Phase 5)
 
 Versioned trait discovery, 52 curated historical/current sets, explained completion, private/public showcases and personalized explorer hints now build on confirmed local provenance. Start at `/collection/dex`; see [collection operations](docs/collections.md) and [Phase 5 report](docs/phase5-report.md). Deploy the native migration, run `collections:verify`, `collections:seed`, `collections:rebuild`, and start `worker:collections`. No additional secrets or financial rewards.
+
+## Galleries and sharing
+
+Phase 6 adds opt-in galleries, ordered showcases, public collection visibility, earned trophy cards and downloadable social PNGs. Start at `/settings/galleries` or `/settings/sharing`. Public share resources use the same privacy gates as profiles. Apply native migration `202609280008_sharing` with `npm run db:migrate`; no new secrets or worker are needed. See [sharing architecture](docs/sharing.md) and [Phase 6 report](docs/phase6-report.md).

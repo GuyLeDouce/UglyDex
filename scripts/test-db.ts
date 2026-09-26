@@ -183,6 +183,8 @@ try {
   await phase4DatabaseTests(check);
   const { phase5DatabaseTests } = await import('../tests/db/phase5');
   await phase5DatabaseTests(check);
+  const { phase6DatabaseTests } = await import('../tests/db/phase6');
+  await phase6DatabaseTests(check);
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
@@ -1095,6 +1097,14 @@ try {
         await browser.close();
       }
     }
+  }
+  if (process.argv.includes('--web')) {
+    const { phase6WebTests } = await import('../tests/db/phase6-web');
+    await phase6WebTests(
+      `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
   }
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));

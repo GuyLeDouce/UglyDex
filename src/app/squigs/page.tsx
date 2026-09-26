@@ -1,3 +1,12 @@
+import { absoluteUrl } from '@/server/sharing';
+export async function generateMetadata() {
+  return {
+    title: 'Squigs Reloaded field guide | UglyDex',
+    description:
+      'Explore all 4,444 Squigs Reloaded by traits, UglyPoints and Maw Rank.',
+    alternates: { canonical: absoluteUrl('/squigs') },
+  };
+}
 import { Catalog, type SearchParams } from '@/components/catalog';
 import { currentSession } from '@/server/auth';
 export const dynamic = 'force-dynamic';

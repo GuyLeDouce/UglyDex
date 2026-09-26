@@ -1,3 +1,16 @@
+import { shareMetadata, absoluteUrl } from '@/server/sharing';
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const m = await shareMetadata({ entity: slug, kind: 'collector' });
+  return {
+    ...m,
+    alternates: { canonical: absoluteUrl('/collector/' + slug + '/sets') },
+  };
+}
 import { notFound } from 'next/navigation';
 import { publicSetCollector, dexView } from '@/server/dex';
 import { DexScore, SetGrid } from '@/components/dex';

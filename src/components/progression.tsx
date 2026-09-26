@@ -114,6 +114,20 @@ export async function Progression({
                       {c.tier} · {c.unlocked ? 'EARNED' : 'LOCKED'}
                     </p>
                     <h3>{c.name}</h3>
+                    {c.unlocked &&
+                      subject === 'COLLECTOR' &&
+                      path.startsWith('/collector/') && (
+                        <Link
+                          href={
+                            '/share?kind=achievement&entity=' +
+                            path.split('/')[2] +
+                            '&key=' +
+                            c.key
+                          }
+                        >
+                          Share achievement ↗
+                        </Link>
+                      )}
                     <p>{c.description}</p>
                     {c.threshold > 0 && (
                       <>

@@ -1,16 +1,18 @@
-import { DexSummary } from '@/components/dex';
+import { ShareControls } from '@/components/share-controls';
+import { absoluteUrl } from '@/server/sharing';
+import {
+  GalleryShowcase,
+  TrophyCase,
+  CollectorHighlights,
+  CollectorActivityPreview,
+} from '@/components/showcase';
 import Link from 'next/link';
-import { Progression } from '@/components/progression';
-import { EcosystemSummary } from '@/components/activity';
 import { notFound } from 'next/navigation';
 import { collectorProfile } from '@/server/profiles';
-import { Stats } from '@/components/stats';
-import { Catalog, type SearchParams } from '@/components/catalog';
+import { type SearchParams } from '@/components/catalog';
 import { CollectionGrid } from '@/components/collection';
 import { Artwork } from '@/components/artwork';
 import { publicCollectorMetadata } from './metadata';
-import { Timeline } from '@/components/timeline';
-import { collectorHistory } from '@/server/provenance';
 export async function generateMetadata({
   params,
 }: {
@@ -20,7 +22,6 @@ export async function generateMetadata({
 }
 export default async function Collector({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
   searchParams: Promise<SearchParams>;
@@ -36,7 +37,6 @@ export default async function Collector({
       </section>
     );
   const p = r.profile;
-  const history = p.wallets.length ? await collectorHistory(r.collectorId) : [];
   return (
     <>
       <section className="page-heading profile-heading">
@@ -61,51 +61,27 @@ export default async function Collector({
         </div>
         <span className="badge">UGLYDEX COLLECTOR</span>
       </section>
-      <Stats summary={r.summary} />
-      <DexSummary
-        id={r.collectorId}
-        public
-        path={`/collector/${p.slug}/sets`}
+      <ShareControls
+        spec={{ kind: 'collector', entity: p.slug }}
+        url={absoluteUrl('/collector/' + p.slug)}
+        copy={(p.displayName || p.slug) + ' — still ugly. Still hunting.'}
       />
-      <Progression
-        subject="COLLECTOR"
-        id={r.collectorId}
-        path={`/collector/${p.slug}/achievements`}
-        public
-      />
-      <EcosystemSummary
-        collectorId={r.collectorId}
-        public
-        path={`/collector/${p.slug}/activity`}
-      />
-      <nav className="anchor-nav">
-        <Link href={`/collector/${p.slug}/activity`}>Activity</Link>
-        <Link href={`/collector/${p.slug}/creations`}>Creations</Link>
-      </nav>
-      {history.length > 0 && (
-        <section className="passport">
-          <h2>Collection history</h2>
-          <Timeline entries={history} />
+      <CollectorHighlights id={r.collectorId} slug={p.slug} />
+      {r.featured.length > 0 && (
+        <section className="featured-exhibition">
+          <p className="eyebrow">PERSONALLY SELECTED</p>
+          <h2>The favourite freaks.</h2>
+          <CollectionGrid items={r.featured} controls={false} />
         </section>
       )}
-      {r.featured.length > 0 && (
-        <>
-          <div className="section-heading">
-            <p className="eyebrow">PERSONALLY SELECTED</p>
-            <h2>The showcase.</h2>
-          </div>
-          <CollectionGrid items={r.featured} controls={false} />
-        </>
+      <TrophyCase id={r.collectorId} slug={p.slug} />
+      <GalleryShowcase id={r.collectorId} slug={p.slug} />
+      <CollectorActivityPreview id={r.collectorId} slug={p.slug} />
+      {r.collectionVisibility === 'FULL' && (
+        <Link className="button" href={'/collector/' + p.slug + '/collection'}>
+          Explore the full collection →
+        </Link>
       )}
-      <div className="section-heading">
-        <h2>Current collection</h2>
-        <p>{r.summary.discovered} Squigs discovered along the way.</p>
-      </div>
-      <Catalog
-        collectorId={r.collectorId}
-        params={await searchParams}
-        path={`/collector/${p.slug}`}
-      />
     </>
   );
 }

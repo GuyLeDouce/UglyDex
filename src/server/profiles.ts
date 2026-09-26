@@ -35,6 +35,7 @@ export async function collectorProfile(slug: string) {
                 .map((w) => w.walletAddress),
             ),
             { tokenId: { in: c.featuredTokenIds } },
+            { NOT: { provenance: { is: { dirty: true } } } },
           ],
         },
         select: cardSelect,
@@ -44,8 +45,14 @@ export async function collectorProfile(slug: string) {
       status: 'ready',
       collectorId: c.id,
       profile: publicIdentity(c),
+      collectionVisibility: c.collectionVisibility,
       summary,
-      featured: featured.map(cardDTO),
+      featured:
+        c.collectionVisibility === 'HIDDEN'
+          ? []
+          : c.featuredTokenIds.flatMap((id) =>
+              featured.filter((s) => s.tokenId === id).map(cardDTO),
+            ),
     } as const;
   } catch {
     return { status: 'unavailable' } as const;

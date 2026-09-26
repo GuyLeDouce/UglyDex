@@ -1,3 +1,30 @@
+import { absoluteUrl } from '@/server/sharing';
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ traitType: string; traitValue: string }>;
+}) {
+  const p = await params;
+  const t = traitCatalog.find(
+    (t) =>
+      t.type === decodeTraitSlug(p.traitType) &&
+      t.value === decodeTraitSlug(p.traitValue),
+  );
+  if (!t) return { title: 'UglyDex', robots: { index: false } };
+  return {
+    title: t.value + ' · ' + t.type + ' | UglyDex',
+    description:
+      'Explore the ' + t.value + ' ' + t.type + ' trait in Squigs Reloaded.',
+    alternates: {
+      canonical: absoluteUrl(
+        '/traits/' +
+          encodeURIComponent(t.type) +
+          '/' +
+          encodeURIComponent(t.value),
+      ),
+    },
+  };
+}
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { traitCatalog } from '@/domain/dex-catalog';
