@@ -1,3 +1,4 @@
+import { DexSummary } from '@/components/dex';
 import { EcosystemSummary } from '@/components/activity';
 import { Progression } from '@/components/progression';
 import Link from 'next/link';
@@ -48,6 +49,7 @@ export default async function Me() {
         </Link>
       </section>
       <Stats summary={s} />
+      <DexSummary id={id} />
       <Progression subject="COLLECTOR" id={id} path="/me/achievements" />
       <EcosystemSummary collectorId={id} path="/me/activity" />
       <nav className="anchor-nav">

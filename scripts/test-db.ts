@@ -181,6 +181,8 @@ try {
   await phase3DatabaseTests(check, external);
   const { phase4DatabaseTests } = await import('../tests/db/phase4');
   await phase4DatabaseTests(check);
+  const { phase5DatabaseTests } = await import('../tests/db/phase5');
+  await phase5DatabaseTests(check);
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
@@ -679,6 +681,59 @@ try {
       'authorized review API records auditable decision',
     );
     await derivePending();
+    const { rebuildCollection } = await import('../src/server/dex-engine');
+    await rebuildCollection(signedCollector.id);
+    for (const path of [
+      '/collection/dex',
+      '/collection/traits',
+      '/collection/sets',
+    ]) {
+      check(
+        (await fetch(base + path, { redirect: 'manual' })).status === 307,
+        'private Dex route requires authentication: ' + path,
+      );
+      check(
+        (await fetch(base + path, { headers: { Cookie: activeCookie } })).ok,
+        'authenticated Dex route: ' + path,
+      );
+    }
+    check(
+      (await fetch(base + '/collector/dex-private/sets')).status === 404,
+      'private collector set page hidden',
+    );
+    check(
+      (await fetch(base + '/collector/dex-test/sets')).ok,
+      'public collector set page',
+    );
+    check(
+      (await fetch(base + '/sets/no-such-set')).status === 404,
+      'invalid set route',
+    );
+    check(
+      (await fetch(base + '/traits/Bad/Unknown')).status === 404,
+      'invalid trait route',
+    );
+    check(
+      (await fetch(base + '/traits/Body/Diving%20Suit')).ok,
+      'normalized trait route',
+    );
+    const secretBody = await (await fetch(base + '/sets/static-signal')).text();
+    check(
+      !secretBody.includes('Gold Terminator') && !secretBody.includes('Atomic'),
+      'hidden set conditions absent from HTML and RSC',
+    );
+    check(
+      (await fetch(base + '/admin/collections')).status === 404,
+      'collection admin requires authorization',
+    );
+    check(
+      (
+        await fetch(base + '/admin/collections', {
+          headers: { Cookie: activeCookie },
+        })
+      ).ok,
+      'authorized collection admin available',
+    );
     if (process.argv.includes('--browser')) {
       await rebuildSubject('COLLECTOR', signedCollector.id);
       const { progressionView } = await import('../src/server/progression');
@@ -956,7 +1011,61 @@ try {
           path: '.data/phase4-achievements-mobile.png',
           fullPage: false,
         });
-        await page.goto(`${base}/settings/profile`);
+        await page.goto(base + '/collection/dex');
+        check(
+          await page
+            .getByRole('heading', { name: 'Leave no ugly unexplored.' })
+            .isVisible(),
+          'Dex flagship page renders',
+        );
+        await page.setViewportSize({ width: 1440, height: 1000 });
+        await page.screenshot({
+          path: '.data/phase5-dex-desktop.png',
+          fullPage: false,
+        });
+        await page.goto(base + '/collection/traits?category=Eyes');
+        check(
+          await page
+            .getByRole('heading', { name: 'The Trait Dex.' })
+            .isVisible(),
+          'trait Dex renders',
+        );
+        check(
+          (await page.locator('.trait-tile').count()) === 19,
+          'trait category filter returns canonical Eyes values',
+        );
+        await page.setViewportSize({ width: 390, height: 844 });
+        check(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+          ),
+          'mobile Trait Dex fits viewport',
+        );
+        await page.screenshot({
+          path: '.data/phase5-traits-mobile.png',
+          fullPage: false,
+        });
+        await page.goto(base + '/collection/sets?mode=CURRENT_HOLDING');
+        check(
+          (await page.locator('.set-tile').count()) === 13,
+          'current set filter',
+        );
+        await page
+          .getByRole('button', { name: 'Save featured sets', exact: true })
+          .click();
+        await page
+          .getByRole('status')
+          .filter({ hasText: 'Featured sets saved.' })
+          .waitFor();
+        check(true, 'showcase preferences save through authenticated action');
+        await page.goto(base + '/squigs?dex=undiscovered');
+        check(
+          (await page
+            .getByLabel('My field guide', { exact: true })
+            .inputValue()) === 'undiscovered',
+          'personalized explorer filter persists in URL',
+        );
+        await page.goto(base + '/settings/profile');
         await page
           .getByLabel('Display name', { exact: true })
           .fill('Browser Edited Collector');

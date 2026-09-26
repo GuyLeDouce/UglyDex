@@ -67,3 +67,7 @@ Public Discord-derived activity requires showDiscord; wallet-derived activity re
 ## Phase 4 identity and progression
 
 Progression requires confirmed evidence. Pending wallet attribution excludes affected Collector activities; confirmed discovery must reference its valid ownership period. Corrections queue old and new subjects, preserve grant/revocation audit, and filter revoked titles/badges from public output. Generic public levels/achievement summaries do not publish hidden credential associations or source evidence. Private profiles have no public progression route. See [progression privacy](progression.md#presentation-and-privacy).
+
+## Phase 5 collection evidence
+
+Collection replay uses confirmed discoveries only when the first CollectorOwnershipPeriod matches the collector/token/date and provenance is complete and clean. Wallet unlinking affects current sets but retains valid historical traits/sets. Reconciliation and dirty provenance queue reevaluation; pending jobs suppress stale public claims. Public set evidence never contains attribution IDs or wallets; qualifying token evidence is also hidden when wallet attribution visibility is disabled. See [collections](collections.md).

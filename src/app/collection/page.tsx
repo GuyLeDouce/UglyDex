@@ -1,3 +1,4 @@
+import { DexNav } from '@/components/dex';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { collectionSummary } from '@/server/collections';
@@ -18,6 +19,7 @@ export default async function CollectionPage({
   ]);
   return (
     <>
+      <DexNav />
       <section className="page-heading">
         <p className="eyebrow">YOUR LIVING COLLECTION</p>
         <h1>The usual suspects.</h1>

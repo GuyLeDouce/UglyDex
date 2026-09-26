@@ -167,3 +167,7 @@ All achievements are one-time historical thresholds. Display tiers are visual cl
 | SQUIG     | Legendary Specimen             | Canonical Legendary metadata with verified mint provenance.                                   | Common    | —                 |
 | SQUIG     | Well Travelled                 | Record at least 3 distinct attributed collectors with completed holds of at least seven days. | Common    | —                 |
 | SQUIG     | Many Homes                     | Record at least 5 distinct attributed collectors with completed holds of at least seven days. | Uncommon  | —                 |
+
+## Phase 5 integration boundary
+
+`uglydex-collection-v1` is independent of this XP ruleset. Sets, trait discovery and completion milestones do not grant XP or modify the 65 V1 achievements. There is no progression/collection feedback loop. Future set-based achievements require an explicit new progression version and evidence review. Current-holder sets remain reversible while confirmed historical discoveries survive sale. See [collections](collections.md).

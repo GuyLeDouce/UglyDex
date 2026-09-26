@@ -63,3 +63,7 @@ Public projections omit operational fields and require consented identity visibi
 ## Phase 4 progression projection
 
 The internal activity ledger and confirmed provenance/discovery projections feed a code-versioned progression evaluator. UglyDex-owned transaction triggers enqueue coalesced subject jobs when evidence changes; no external database triggers or queries are introduced. A repeatable-read evaluation reconciles the XP ledger, existing achievement tables, cached Collector/Squig progress and historical level milestones in one subject-locked transaction. Correction/revocation audit is retained separately from source facts. Public pages read materialized, explicit DTOs; pending corrections withhold stale earned claims. [Progression](progression.md) specifies eligibility, keys, rules, privacy and replay.
+
+## Phase 5 collection projection
+
+Confirmed discoveries and current indexed ownership feed a separate collection ruleset. Durable UglyDex-only outbox jobs drive atomic trait/set/completion/hint snapshots. Existing CollectionSetDefinition, CollectionSetRequirement and CollectorSetProgress are extended; XP and ecosystem ledgers remain unchanged. CollectionAudit and CollectionMilestone retain derived corrections and time semantics. Public requests read privacy-safe snapshots; 24-card explorer pages use precomputed hints, never external databases or per-card set replay. See [collections](collections.md).

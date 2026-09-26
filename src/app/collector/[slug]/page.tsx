@@ -1,3 +1,4 @@
+import { DexSummary } from '@/components/dex';
 import Link from 'next/link';
 import { Progression } from '@/components/progression';
 import { EcosystemSummary } from '@/components/activity';
@@ -61,6 +62,11 @@ export default async function Collector({
         <span className="badge">UGLYDEX COLLECTOR</span>
       </section>
       <Stats summary={r.summary} />
+      <DexSummary
+        id={r.collectorId}
+        public
+        path={`/collector/${p.slug}/sets`}
+      />
       <Progression
         subject="COLLECTOR"
         id={r.collectorId}

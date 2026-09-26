@@ -105,3 +105,7 @@ See [activity model](docs/activity-model.md), [Railway](docs/railway.md), and [P
 ## Phase 4 progression
 
 Evidence-backed Collector/Squig XP, levels, 65 achievements, titles, featured badges, correction-safe replay and a dedicated progression worker are implemented. See [progression rules and operations](docs/progression.md) and [Phase 4 report](docs/phase4-report.md). Apply migrations, run `npm run progression:seed`, then `npm run progression:rebuild`; keep `npm run worker:progression` running alongside the existing sync workers. No external credentials or financial rewards are involved in progression evaluation.
+
+## Collection Dex (Phase 5)
+
+Versioned trait discovery, 52 curated historical/current sets, explained completion, private/public showcases and personalized explorer hints now build on confirmed local provenance. Start at `/collection/dex`; see [collection operations](docs/collections.md) and [Phase 5 report](docs/phase5-report.md). Deploy the native migration, run `collections:verify`, `collections:seed`, `collections:rebuild`, and start `worker:collections`. No additional secrets or financial rewards.

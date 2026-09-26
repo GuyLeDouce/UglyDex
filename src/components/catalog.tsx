@@ -5,15 +5,17 @@ export type SearchParams = Record<string, string | string[] | undefined>;
 export async function Catalog({
   params = {},
   collectorId,
+  viewerId,
   discovered = false,
   path = '/squigs',
 }: {
   params?: SearchParams;
   collectorId?: string;
+  viewerId?: string;
   discovered?: boolean;
   path?: string;
 }) {
-  const data = await collectionPage(params, collectorId, discovered),
+  const data = await collectionPage(params, collectorId, discovered, viewerId),
     f = data.filters;
   const link = (page: number) => {
     const q = new URLSearchParams();
@@ -26,6 +28,22 @@ export async function Catalog({
     <>
       <form className="filters" action={path}>
         <div className="filter-top">
+          {viewerId && (
+            <label>
+              My field guide
+              <select
+                name="dex"
+                aria-label="My field guide"
+                defaultValue={f.dex}
+              >
+                <option value="">All Squigs</option>
+                <option value="advances">Advances My UglyDex</option>
+                <option value="traits">Traits I Have Not Discovered</option>
+                <option value="undiscovered">Undiscovered Squigs</option>
+              </select>
+            </label>
+          )}
+          {f.set && <input type="hidden" name="set" value={f.set} />}
           <label>
             Token ID
             <input

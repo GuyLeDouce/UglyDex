@@ -16,6 +16,7 @@ export default async function IntegrationsPage() {
     <>
       <section className="page-heading">
         <p className="eyebrow">DEVELOPMENT DIAGNOSTICS</p>
+        <a href="/admin/collections">Collection diagnostics →</a>
         <h1>Integration health</h1>
         <p>
           Source schema and connection status. No personal records or

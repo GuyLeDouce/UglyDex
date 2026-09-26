@@ -1,3 +1,4 @@
+import { DexNav } from '@/components/dex';
 import { requireCollector } from '@/server/session';
 import { collectionSummary } from '@/server/collections';
 import { Catalog, type SearchParams } from '@/components/catalog';
@@ -10,6 +11,7 @@ export default async function Discoveries({
     s = await collectionSummary(id);
   return (
     <>
+      <DexNav />
       <section className="page-heading">
         <p className="eyebrow">ONCE MET. NEVER FORGOTTEN.</p>
         <h1>Your UglyDex.</h1>

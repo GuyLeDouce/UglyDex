@@ -1,6 +1,10 @@
 import { z } from 'zod';
+import { canonicalTokens } from './dex-catalog';
+import { normalizeTrait } from './dex';
 import type { Prisma } from '@/generated/prisma/client';
 export const filterSchema = z.object({
+  dex: z.enum(['', 'undiscovered', 'traits', 'advances']).catch(''),
+  set: z.string().max(100).catch(''),
   page: z.coerce.number().int().min(1).max(186).catch(1),
   sort: z
     .enum([
@@ -52,7 +56,11 @@ export function collectionWhere(f: Filters): Prisma.SquigWhereInput {
           traits: {
             some: {
               ...(f.trait ? { traitType: f.trait } : {}),
-              ...(f.value ? { value: f.value } : {}),
+              ...(f.value
+                ? {
+                    value: traitFilterValues(f.trait, f.value),
+                  }
+                : {}),
             },
           },
         }
@@ -77,3 +85,21 @@ export function collectionOrder(
   return [first, { tokenId: 'asc' }];
 }
 export const PAGE_SIZE = 24;
+
+function traitFilterValues(type: string, value: string) {
+  const values = [
+    ...new Set([
+      value,
+      ...canonicalTokens.flatMap((t) =>
+        Object.entries(t.traits)
+          .filter(
+            ([key, v]) =>
+              (!type || key === type) &&
+              normalizeTrait(v) === normalizeTrait(value),
+          )
+          .map(([, v]) => v),
+      ),
+    ]),
+  ];
+  return values.length === 1 ? value : { in: values };
+}

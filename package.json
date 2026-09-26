@@ -39,7 +39,11 @@
     "worker:ecosystem": "tsx --conditions=react-server scripts/activity-worker.ts",
     "progression:seed": "tsx --conditions=react-server scripts/progression.ts seed",
     "progression:rebuild": "tsx --conditions=react-server scripts/progression.ts rebuild",
-    "worker:progression": "tsx --conditions=react-server scripts/progression.ts worker"
+    "worker:progression": "tsx --conditions=react-server scripts/progression.ts worker",
+    "collections:seed": "tsx --conditions=react-server scripts/collections.ts seed",
+    "collections:rebuild": "tsx --conditions=react-server scripts/collections.ts rebuild",
+    "collections:verify": "tsx --conditions=react-server scripts/collections.ts verify",
+    "worker:collections": "tsx --conditions=react-server scripts/collections.ts worker"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

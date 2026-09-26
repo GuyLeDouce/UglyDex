@@ -34,6 +34,7 @@ model Collector {
   featuredTokenIds Int[]              @default([])
   featuredAchievementIds String[] @default([])
   selectedTitleId String?
+  featuredSetIds String[] @default([])
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
   identities   ExternalIdentity[]
@@ -443,6 +444,13 @@ model SquigAchievement {
 }
 
 model CollectionSetDefinition {
+  ruleset String @default("legacy")
+  mode String @default("HISTORICAL_DISCOVERY")
+  category String @default("OTHER")
+  difficulty String @default("Medium")
+  hidden Boolean @default(false)
+  enabled Boolean @default(true)
+  sortOrder Int @default(0)
   id           String                     @id
   name         String
   description  String
@@ -463,6 +471,10 @@ model CollectionSetRequirement {
 }
 
 model CollectorSetProgress {
+  currentlyComplete Boolean @default(false)
+  firstCompletedAt DateTime?
+  lastCompletedAt DateTime?
+  completionCount Int @default(0)
   collectorId  String                  @db.Uuid
   collector    Collector               @relation(fields: [collectorId], references: [id])
   setId        String
@@ -472,6 +484,7 @@ model CollectorSetProgress {
   calculatedAt DateTime                @default(now())
 
   @@id([collectorId, setId])
+  @@index([setId, currentlyComplete])
 }
 
 model QuestDefinition {
@@ -692,4 +705,83 @@ model CollectorRefreshRequest {
   collectorId String @id @db.Uuid
   collector Collector @relation(fields: [collectorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   requestedAt DateTime @default(now())
+}
+
+model CollectionRuleset {
+ id String @id
+ fingerprint String
+ configuration Json
+ createdAt DateTime @default(now())
+}
+model CanonicalTrait {
+ ruleset String
+ key String
+ traitType String
+ value String
+ tokenCount Int
+ firstToken Int
+ ogCount Int
+ legendaryOnly Boolean
+ @@id([ruleset, key])
+ @@index([ruleset, traitType, value])
+}
+model CollectorTraitDiscovery {
+ ruleset String
+ collectorId String @db.Uuid
+ traitKey String
+ tokenId Int
+ firstDiscoveredAt DateTime
+ evidence String
+ revokedAt DateTime?
+ @@id([ruleset, collectorId, traitKey])
+ @@index([collectorId, revokedAt])
+}
+model CollectionSnapshot {
+ ruleset String
+ collectorId String @db.Uuid
+ discovered Int
+ traits Int
+ historicalSets Int
+ currentSets Int
+ overall Float
+ discoveredTokenIds Int[]
+ currentTokenIds Int[]
+ traitCounts Json @default("{}")
+ candidates Json
+ calculatedAt DateTime @default(now())
+ @@id([ruleset, collectorId])
+}
+model CollectionAudit {
+ id String @id @default(uuid()) @db.Uuid
+ ruleset String
+ collectorId String @db.Uuid
+ kind String
+ reference String
+ before Json?
+ after Json?
+ createdAt DateTime @default(now())
+ @@index([collectorId, createdAt])
+}
+model CollectionMilestone {
+ ruleset String
+ collectorId String @db.Uuid
+ key String
+ reachedAt DateTime
+ timeBasis String
+ revokedAt DateTime?
+ @@id([ruleset, collectorId, key])
+}
+model CollectionJob {
+ collectorId String @id @db.Uuid
+ generation Int @default(1)
+ queuedAt DateTime @default(now())
+ attempts Int @default(0)
+ errorCode String?
+ @@index([queuedAt])
+}
+model CollectionReplay {
+ id String @id
+ cursor String?
+ completedAt DateTime?
+ updatedAt DateTime @updatedAt
 }

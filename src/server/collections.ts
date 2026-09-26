@@ -1,5 +1,6 @@
 import 'server-only';
 import { db } from './db';
+import { personalizedCandidates } from './dex';
 import { SQUIGS_CONTRACT } from '@/domain/validation';
 import {
   collectionWhere,
@@ -41,6 +42,12 @@ export function cardDTO(row: CardRow) {
   };
 }
 export type SquigCardData = ReturnType<typeof cardDTO> & {
+  personalization?: {
+    discovered: boolean;
+    owned: boolean;
+    missingTraits: number;
+    advances: number;
+  };
   currentlyOwned?: boolean;
   discoveredAt?: string;
   history?: {
@@ -78,16 +85,39 @@ export async function collectionPage(
   params: Record<string, string | string[] | undefined>,
   collectorId?: string,
   discovered = false,
+  viewerId?: string,
 ) {
   const filters = filterSchema.parse(params),
     addresses = collectorId ? await activeAddresses(collectorId) : [];
+  const candidates = viewerId ? await personalizedCandidates(viewerId) : null;
+  const personalizedScope: Prisma.SquigWhereInput =
+    filters.dex || filters.set
+      ? {
+          tokenId: {
+            in: candidates
+              ? Object.entries(candidates)
+                  .filter(
+                    ([, c]) =>
+                      (!filters.set || c.sets.includes(filters.set)) &&
+                      (!filters.dex ||
+                        (filters.dex === 'undiscovered'
+                          ? !c.discovered
+                          : filters.dex === 'traits'
+                            ? c.missingTraits > 0
+                            : c.sets.length > 0)),
+                  )
+                  .map(([id]) => Number(id))
+              : [],
+          },
+        }
+      : {};
   const scope: Prisma.SquigWhereInput = collectorId
     ? discovered
       ? { discoveries: { some: { collectorId, everOwned: true } } }
       : ownedScope(addresses)
     : {};
   const where: Prisma.SquigWhereInput = {
-    AND: [catalogScope, scope, collectionWhere(filters)],
+    AND: [catalogScope, scope, collectionWhere(filters), personalizedScope],
   };
   const total = await db().squig.count({ where });
   const page = Math.min(
@@ -204,6 +234,16 @@ export async function collectionPage(
   return {
     items: rows.map((r): SquigCardData => ({
       ...cardDTO(r),
+      ...(candidates?.[r.tokenId]
+        ? {
+            personalization: {
+              discovered: candidates[r.tokenId].discovered,
+              owned: candidates[r.tokenId].owned,
+              missingTraits: candidates[r.tokenId].missingTraits,
+              advances: candidates[r.tokenId].sets.length,
+            },
+          }
+        : {}),
       ...(collectorId
         ? {
             currentlyOwned: ownedIds.has(r.id),

@@ -45,6 +45,23 @@ export function SquigCard({ item }: { item: SquigCardData }) {
               <span key={t.traitType}>{t.value}</span>
             ))}
         </div>
+        {item.personalization && (
+          <p className="ownership-label">
+            {item.personalization.owned
+              ? 'Currently Owned'
+              : item.personalization.discovered
+                ? 'Already Discovered'
+                : 'NEW DISCOVERY'}
+            {item.personalization.missingTraits > 0 && (
+              <small>
+                Adds {item.personalization.missingTraits} missing traits
+              </small>
+            )}
+            {item.personalization.advances > 0 && (
+              <small>Advances {item.personalization.advances} sets</small>
+            )}
+          </p>
+        )}
         {item.currentlyOwned !== undefined && (
           <p className="ownership-label">
             {item.currentlyOwned ? 'Currently Owned' : 'Previously Owned'}
