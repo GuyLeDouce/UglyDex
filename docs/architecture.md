@@ -79,3 +79,7 @@ Confirmed discoveries and current indexed ownership feed a separate collection r
 ## Phase 6 public presentation
 
 CollectorGallery and CollectorGalleryItem reference canonical Squigs without copying ownership. Reads revalidate current ownership or settled discovery, and gate profile/gallery visibility. A centralized ShareCard projection feeds public metadata, suggested copy, share pages and Next ImageResponse. Bounded canonical-asset fetching, shared rate limits and privacy-checked process caching stay in the web service. ShareRenderMetric stores content-free operational telemetry. Progression, collection rules and source ledgers remain unchanged. See [sharing](sharing.md).
+
+## Phase 9
+
+Phase 9 adds private LaunchGate/ReplayProof models, deployment-bound evidence and admin-only projections. See [launch-readiness](launch-readiness.md) and [replay-validation](replay-validation.md). Canonical ownership, rulesets and public DTO boundaries are unchanged.

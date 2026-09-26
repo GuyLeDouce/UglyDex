@@ -1,5 +1,11 @@
 # Railway operations
 
+## Phase 9 launch proof and pool budgets
+
+The additive eleventh migration introduces LaunchGate/ReplayProof. Web remains the only migration runner; workers stay disabled until migration readiness. Supply the exact deployed commit for evidence binding. No extra service or secret is required. Run [launch checks](launch-readiness.md) on the intended environment; local release success does not prove Railway operation.
+
+`DB_POOL_MAX` defaults to the existing 8 and now accepts 1–30 per service. Budget the sum across web replicas and each worker, plus one advisory-lock connection per running worker/import, temporary verifier/restore connections, and operator headroom. External read-only pools retain their separate maximum of 2 per configured source per process. With one web and five workers, six pools of eight alone can reach 48 connections before lock/admin headroom; compare the actual database's max_connections and reserved capacity before enabling all services. Start worker pools lower only after measuring task needs; do not assume a Railway plan's connection limit. `WORKER_INTERVAL_MS` retains 15 seconds by default, configurable 1–300 seconds across core and Edition workers. Failure backoff remains capped at five minutes. RPC concurrency/chunk/retry limits already use existing environment settings. No measured Railway tuning was possible without access.
+
 ## Phase 8 staging and release topology
 
 Follow [production-rollout.md](production-rollout.md). Staging has a separate writable PostgreSQL, AUTH_SECRET, public origin and equivalent web/worker services. Set APP_ENV explicitly; migrate through `202609300010_phase8`, register the DB identity, then preflight/pilot/backfill with action-bound intent. Optional `railway.editions.toml` adds reviewed contract indexing; no contract is enabled by default. Keep workers paused through migration and validation. Backup/restore uses operator-installed PostgreSQL client tools; no new web secret or rendering worker is required. Actual platform backup/retention/resource capabilities must be checked in the deployed Railway project.

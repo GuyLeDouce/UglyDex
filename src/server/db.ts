@@ -8,7 +8,7 @@ export function db() {
     globalDb.uglydexDb = new PrismaClient({
       adapter: new PrismaPg({
         connectionString: readEnv().DATABASE_URL,
-        max: 8,
+        max: readEnv().DB_POOL_MAX,
         connectionTimeoutMillis: 5000,
         statement_timeout: 15000,
       }),

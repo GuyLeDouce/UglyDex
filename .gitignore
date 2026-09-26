@@ -24,3 +24,8 @@ playwright-report/
 *.p12
 *.pfx
 backups/
+operational-evidence/
+production-exports/
+*.launch-evidence.json
+*.source-extract.json
+*.reconciliation.json

@@ -55,3 +55,7 @@ Public share endpoints re-project and recheck visibility before returning bytes;
 Security review includes existing signed/HttpOnly cookies, OAuth state, consumed wallet nonce replay tests, same-origin mutation checks, allowlisted admin identity, parameterized source queries, constrained URLs/redirects, raster signatures/hash validation and request limits. Phase 8 adds exact operational intent/database binding, empty-target restore guards and server-enforced collectible review acknowledgment. Archives remain trusted-operator artifacts, not arbitrary user uploads. No object storage upload feature or blockchain write operation exists.
 
 `npm audit --json` reported **0 vulnerabilities** in the dependency audit performed for this phase. The secret scan reviews current files and reachable local Git blobs without printing matched values; it is heuristic and does not prove absence of every credential form. Real secrets require rotation if discovered. Example/local test URLs are not credentials for external systems. Database dumps/key files are ignored. Railway backup support/retention must be checked in the actual account.
+
+## Phase 9
+
+Phase 9 adds launch gates alongside live subsystem status. Launch evidence is as-of, expires after 24 hours and is bound to deployment/commit. Pool and cadence limits are configurable; real Railway measurements remain PENDING. No Phase 8 local fixture measurement is relabeled as production capacity.

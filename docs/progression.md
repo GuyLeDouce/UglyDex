@@ -177,3 +177,7 @@ All achievements are one-time historical thresholds. Display tiers are visual cl
 ## Phase 5 integration boundary
 
 `uglydex-collection-v1` is independent of this XP ruleset. Sets, trait discovery and completion milestones do not grant XP or modify the 65 V1 achievements. There is no progression/collection feedback loop. Future set-based achievements require an explicit new progression version and evidence review. Current-holder sets remain reversible while confirmed historical discoveries survive sale. See [collections](collections.md).
+
+## Phase 9
+
+Phase 9 launch:replay compares complete A/B semantic fingerprints and input stability using this existing engine. Replay instability blocks launch. No ruleset or award formula change. See [replay-validation](replay-validation.md).

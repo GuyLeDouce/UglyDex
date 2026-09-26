@@ -24,6 +24,23 @@ export async function phase8WebTests(
     },
   });
   const headers = { Cookie: 'uglydex_session=' + token };
+  const anonymous = await fetch(base + '/api/admin/launch');
+  check(anonymous.status === 404, 'launch export denies anonymous enumeration');
+  const exported = await fetch(base + '/api/admin/launch', { headers });
+  const launch = await exported.json();
+  check(
+    exported.ok && launch.gates.length === 31,
+    'admin launch export complete gate registry',
+  );
+  check(
+    exported.headers.get('cache-control')?.includes('no-store'),
+    'launch export cannot be cached',
+  );
+  check(
+    !JSON.stringify(launch).includes('databaseFingerprint') &&
+      !JSON.stringify(launch).includes('notes'),
+    'launch export excludes private binding and notes',
+  );
   const response = await fetch(base + '/admin/production', { headers });
   const html = await response.text();
   check(

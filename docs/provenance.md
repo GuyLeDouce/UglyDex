@@ -75,3 +75,7 @@ npm run provenance:rebuild -- --from-block 25342921
 `chain:verify` and `provenance:verify` are aliases. They check all 4,444 expected token IDs, metadata presence, mint, raw continuity, materialized periods and derived owner against batched `ownerOf` calls pinned to the cursor block. The cursor hash is checked before and after verification. Comparing a lagged ledger to current chain head would produce false anomalies, so verification deliberately uses the same indexed block. Failed calls remain `OWNER_OF_UNAVAILABLE`, including burn reverts; they are not counted as owner matches. The report separately states coverage, missing data, successful comparisons and token-specific anomaly reasons, and exits nonzero on incomplete/anomalous results.
 
 Rebuild commands only flag selected tokens and reconstruct derived data. They preserve raw transfers and unrelated activities. `/admin/provenance` shows sync status, paginated raw records and holding periods, supports token lookup and queues the same safe derivation. There is no arbitrary SQL endpoint. Web pages always read PostgreSQL, never scan the chain.
+
+## Phase 9
+
+Phase 9 launch:rpc persists bounded archive boundary evidence; launch:provenance runs full pinned verification; launch:spot samples low/high/OG/Legendary/transfer-count/attributed/burn categories. Missing categories remain PENDING. No actual RPC/start-block proof has been performed in this workspace.

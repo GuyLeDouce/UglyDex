@@ -20,3 +20,9 @@ Replays should match the fault: raw-source resync for missing/corrected facts, t
 Independent kill switches: `production:worker -- --service <service> --mode DISABLED`; `editions:control -- --id <registry-id> --mode disabled`. Disabling does not need a production enablement override. Confirm no lock-held in-flight task remains before manual repair. Core workers back off exponentially and disable after three consecutive task failures; Edition contracts disable on the first inconsistent batch.
 
 Phase 8 migrations add tables only. Apply migrations before new workers start; pause workers during migration and rollout validation. The preceding release can coexist with added tables, but lacks Phase 8 operational safeguards. Rolling code back does not erase Edition events or registry approvals. Never promise zero downtime during a database recovery.
+
+## Phase 9
+
+After code rollback or source remediation, old launch evidence is invalid for the new revision. Rerun safe verification and affected gates. Interrupted ReplayProof rows are never success; resume engines then run a new A/B pair. Do not restore production solely to erase an unstable derived replay.
+
+Restore an older archive with the matching release's inventory verifier first. Phase 9 inventories include LaunchGate/ReplayProof; a Phase 8 archive does not contain those tables. Validate the old archive at its original schema on an isolated recovery database, then apply forward migrations and run the new checks. Never bypass inventory failures or mark an incompatible archive verified merely because pg_restore completed.

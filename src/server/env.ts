@@ -16,6 +16,13 @@ export const environmentSchema = z
       .enum(['development', 'test', 'production'])
       .default('development'),
     DATABASE_URL: pg,
+    DB_POOL_MAX: z.coerce.number().int().min(1).max(30).default(8),
+    WORKER_INTERVAL_MS: z.coerce
+      .number()
+      .int()
+      .min(1000)
+      .max(300000)
+      .default(15000),
     PUBLIC_BASE_URL: http.default('http://localhost:3000'),
     AUTH_SECRET: optional(z.string().min(32)),
     ADMIN_DIAGNOSTICS_TOKEN: optional(z.string().min(32)),

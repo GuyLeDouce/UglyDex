@@ -70,7 +70,20 @@
     "release:check": "tsx scripts/release.ts",
     "security:secrets": "tsx scripts/secrets-audit.ts",
     "production:report": "tsx --conditions=react-server scripts/ops.ts report",
-    "integrations:pilot:approve": "tsx --conditions=react-server scripts/ops.ts pilot-approve"
+    "integrations:pilot:approve": "tsx --conditions=react-server scripts/ops.ts pilot-approve",
+    "launch:status": "tsx --conditions=react-server scripts/launch.ts status",
+    "launch:report": "tsx --conditions=react-server scripts/launch.ts report",
+    "launch:check": "tsx --conditions=react-server scripts/launch.ts check",
+    "launch:verify": "tsx --conditions=react-server scripts/launch.ts verify",
+    "launch:attest": "tsx --conditions=react-server scripts/launch.ts attest",
+    "launch:rpc": "tsx --conditions=react-server scripts/launch.ts rpc",
+    "launch:sources": "tsx --conditions=react-server scripts/launch.ts sources",
+    "launch:replay": "tsx --conditions=react-server scripts/launch.ts replay",
+    "launch:audit": "tsx --conditions=react-server scripts/launch.ts audit",
+    "launch:provenance": "tsx --conditions=react-server scripts/launch.ts provenance",
+    "launch:handoff": "tsx --conditions=react-server scripts/launch.ts handoff",
+    "launch:explain": "tsx --conditions=react-server scripts/launch.ts explain",
+    "launch:spot": "tsx --conditions=react-server scripts/launch.ts spot"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

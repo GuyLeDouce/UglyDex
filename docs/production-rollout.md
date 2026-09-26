@@ -1,5 +1,9 @@
 # Phase 8 rollout gates
 
+## Phase 9 evidence overlay
+
+Deploy all **eleven** migrations through `202610010011_phase9`. Follow [launch-readiness.md](launch-readiness.md), [replay-validation.md](replay-validation.md) and [data-reconciliation.md](data-reconciliation.md). Use APP_COMMIT/Railway revision for evidence binding. Add `launch:verify`, `launch:rpc`, `launch:provenance`, `launch:spot` and `launch:sources` at the matching steps below. After reviewed imports/reconciliation, run `launch:replay`, then each `launch:handoff` probe. Record manual restore/device/auth/OG evidence only after actual execution. Finish with `launch:check`; a release-check pass alone is insufficient. The Phase 8 sequence below remains the operational base; its ten-migration count is historical.
+
 No real Railway rollout, production archive RPC, legacy database, official manifest or physical device has been validated by the local fixture suite. Record each gate as PENDING, PASS, WARN or FAIL with UTC date, commit, operator, evidence location and issue reference. WARN never becomes PASS through acknowledgment.
 
 ## Isolated staging

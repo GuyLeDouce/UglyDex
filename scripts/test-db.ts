@@ -208,6 +208,8 @@ try {
   await phase7DatabaseTests(check);
   const { phase8DatabaseTests } = await import('../tests/db/phase8');
   await phase8DatabaseTests(check);
+  const { phase9DatabaseTests } = await import('../tests/db/phase9');
+  await phase9DatabaseTests(check);
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
@@ -773,6 +775,28 @@ try {
         const page = await browser.newPage({
           viewport: { width: 1440, height: 1000 },
         });
+        // Browser delivery/fallback is deterministic. Actual gateway/optimizer fetch
+        // availability belongs to the deployed launch checks, not this local suite.
+        const sharp = (await import('sharp')).default;
+        const controlledArtwork = await sharp({
+          create: { width: 32, height: 32, channels: 3, background: '#875f92' },
+        })
+          .png()
+          .toBuffer();
+        let artworkUnavailable = false;
+        await page.route(
+          (url) => url.pathname === '/_next/image',
+          (route) =>
+            route.fulfill(
+              artworkUnavailable
+                ? { status: 502, body: 'Controlled artwork outage' }
+                : {
+                    status: 200,
+                    contentType: 'image/png',
+                    body: controlledArtwork,
+                  },
+            ),
+        );
         await page.goto(
           base + '/collector/activity-collector/activity?category=MARKETPLACE',
         );
@@ -858,9 +882,19 @@ try {
             { timeout: 25000 },
           );
           check(
-            true,
-            'canonical IPFS image renders through optimized delivery',
+            (
+              await page
+                .getByRole('img', { name: 'Squig #1', exact: true })
+                .getAttribute('src')
+            )?.includes('/_next/image?'),
+            'controlled artwork renders at the canonical optimizer URL',
           );
+          artworkUnavailable = true;
+          await page.reload();
+          await page.locator('.artwork .art-fallback').first().waitFor();
+          check(true, 'artwork gateway outage shows accessible fallback');
+          artworkUnavailable = false;
+          await page.reload();
           await page.evaluate(() => window.scrollTo(0, 0));
         }
         await page.screenshot({
@@ -1143,6 +1177,8 @@ try {
       process.argv.includes('--browser'),
     );
   }
+  const { phase9ReplayTests } = await import('../tests/db/phase9-replay');
+  await phase9ReplayTests(check);
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));
 } catch (error) {

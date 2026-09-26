@@ -222,7 +222,8 @@ export async function runWorker(
       await delay(
         Math.min(
           300000,
-          (options.intervalMs ?? 15000) * 2 ** consecutiveFailures,
+          (options.intervalMs ?? readEnv().WORKER_INTERVAL_MS) *
+            2 ** consecutiveFailures,
         ),
         undefined,
         {

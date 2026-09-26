@@ -79,3 +79,7 @@ Collection replay uses confirmed discoveries only when the first CollectorOwners
 ## Phase 6 gallery and share privacy
 
 Private profiles hide every public/unlisted gallery and personalized public card. Gallery visibility and full-collection visibility are independent explicit disclosures; private galleries remain owner-only even on public profiles. HIDDEN collection suppresses featured artwork/collages and public set token evidence. Sharing consumes explicit safe DTOs and rechecks state before returning image bytes. Downloaded images cannot be recalled from their recipients. See [sharing privacy](sharing.md#profile-and-public-projections).
+
+## Phase 9
+
+Phase 9 adds aggregate attribution explanations through launch:explain and an admin-only API. Real reconciliation cases remain PENDING without source evidence; no real identities were merged. See [data-reconciliation](data-reconciliation.md).

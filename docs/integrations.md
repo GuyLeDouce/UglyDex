@@ -49,3 +49,7 @@ Discoveries from blockchain observations require the collector's wallet verifica
 Rechecked upstream HEAD on 2026-09-25; all three match the inventory revisions. Source-specific mappings now cover Duels/round counts, Survival/game and image-use observations, solo runs/confirmed online rewards, Bounty donations/entries/winners, Maw receipt/disposition/verified digestion/delivered prizes, both Marketplace purchases/refunds, ImageSubmit/live image deduplication and safe Mad Lib publication/confirmed operation history. Schema validation, canonical authorities, optional fields and exclusions are detailed in [activity model](activity-model.md).
 
 `integrations:validate` performs SELECT-only schema/permission inspection, reports estimates, and stores status only in UglyDex. Production connections remain absent in this workspace; actual schemas/counts/retention and historical completeness require read-only credentials. Fixture success is not production validation. No ecosystem source repository or external database was altered.
+
+## Phase 9
+
+Phase 9 launch:sources probes read-only schema/privileges and count/date boundaries without external writes. launch:audit compares pilot normalization/linkage counters and duplicate candidates. Empty pilots cannot be approved. See [data-reconciliation](data-reconciliation.md); actual production sources remain PENDING.

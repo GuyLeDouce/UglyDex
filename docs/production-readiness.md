@@ -82,3 +82,7 @@ Record device/OS/browser version, release SHA, date and result for **iOS Safari,
 - Paste public Collector, Squig, Custom, gallery, achievement and set URLs into intended external share targets and inspect their OG images. Test privacy/retirement changes; previously downloaded/third-party cached copies cannot be recalled.
 - Browse collection filters, trait/set pages and Edition detail on slow mobile data; break the gateway connection to verify image fallback and legibility.
 - Verify navigation, scrolling, captions/trophy case and share modal have no horizontal overflow. Record unresolved device-specific limitations before release approval.
+
+## Phase 9
+
+Phase 9 requires all eleven migrations through 202610010011_phase9 and a separate launch:check. Follow [launch-readiness](launch-readiness.md); the older migration counts below are historical. Release checks prove code readiness only.

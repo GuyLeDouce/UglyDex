@@ -24,3 +24,7 @@ Use deployed public URLs in appropriate platform preview tools/manual share draf
 Then make the reviewed test profile/gallery private or retire a Custom. The origin must immediately return generic/denied projections and no-index where applicable; fetch the old image URL directly to confirm authorization is rechecked. Separately record whether the external platform retains its cached preview, and request re-scrape/purge where available. Third-party caches are outside UglyDex control; never claim that prior social copies disappear.
 
 Authenticated real-device checks, known-private URL smoke fixtures and external crawler results remain PENDING until supplied through an approved operator session. No secret URLs, sessions or wallet signatures belong in committed evidence.
+
+## Phase 9
+
+Phase 9 REAL_DEVICE_SHARE and EXTERNAL_OG gates remain PENDING. Actual operator evidence is required; browser automation does not certify a physical phone, mobile wallet, native share sheet or external crawler. All existing manual matrix results remain unchanged.

@@ -5,7 +5,7 @@ import { readEnv } from '@/server/env';
 import { readPage, tableColumns, type ExternalRow } from '@/integrations/table';
 import { tables, integrationEnv } from '@/integrations/registry';
 import { readExternal } from '@/integrations/read-only';
-import { hash } from '@/domain/events';
+import { hash, eventKey } from '@/domain/events';
 import { log } from '@/server/log';
 import { feeds, normalizeRow, type Feed } from './normalize';
 import { importRecord, reattributePending } from './import-event';
@@ -83,6 +83,12 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
     skipped: 0,
     unresolved: 0,
     failed: 0,
+    eligible: 0,
+    normalized: 0,
+    collectorLinked: 0,
+    squigLinked: 0,
+    duplicates: 0,
+    ignoredRows: 0,
   };
   const maxPages = options.maxPages ?? 25;
   if (!Number.isInteger(maxPages) || maxPages < 1 || maxPages > 10000)
@@ -99,7 +105,14 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
       'SELECT pg_try_advisory_lock(hashtextextended($1,0)) AS locked',
       [`activity:${feed}`],
     );
-    if (!locked.rows[0].locked) return counts;
+    if (!locked.rows[0].locked) {
+      log('activity.busy', {
+        service: 'ecosystem',
+        stage: feed,
+        success: false,
+      });
+      return { ...counts, failed: 1 };
+    }
     await db().syncRun.updateMany({
       where: { source: feed, status: 'RUNNING' },
       data: {
@@ -193,6 +206,7 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
         break;
       }
       await enrich(feed, result.data);
+      const pageKeys: string[] = [];
       for (const row of result.data) {
         counts.scanned++;
         const recordId = String(
@@ -201,6 +215,11 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
         try {
           const events = normalizeRow(feed, row),
             c = await importRecord(feed, recordId, events);
+          if (events.length) counts.eligible++;
+          counts.normalized += events.length;
+          counts.duplicates += c.skipped;
+          if (!events.length) counts.ignoredRows++;
+          pageKeys.push(...events.map(eventKey));
           for (const key of [
             'inserted',
             'updated',
@@ -237,6 +256,14 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
             },
           });
         }
+      }
+      if (pageKeys.length) {
+        const linked = await db().collectorActivity.findMany({
+          where: { eventKey: { in: pageKeys } },
+          select: { collectorId: true, squigId: true },
+        });
+        counts.collectorLinked += linked.filter((e) => e.collectorId).length;
+        counts.squigLinked += linked.filter((e) => e.squigId).length;
       }
       after = effective.keys.map((k) => {
         const v = result.data.at(-1)![k];

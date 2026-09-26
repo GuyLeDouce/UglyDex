@@ -55,3 +55,7 @@ Public Collector/Squig/gallery/share resources have canonical URLs and Open Grap
 Deploy migration 202609280008_sharing to UglyDex only. Rendering stays in the web service, with no new worker, package, mandatory secret or external credentials. PUBLIC_BASE_URL must be the canonical HTTPS origin. Allow outbound HTTPS to the canonical artwork gateway. Start with at least 512 MB web memory and measure peak render memory before increasing concurrency; a 1 GB budget provides more headroom. See Railway instructions.
 
 If a card is unavailable: verify public/profile/gallery privacy, canonical token eligibility, an active unlock/completion, and drained progression/collection queues. Retry 429 after the advertised interval. Artwork fallback indicates gateway timeout, malformed response or size/type rejection, not missing ownership. Changing a title/slug/privacy takes effect on the next request. No production backfill or lifetime-history completeness is implied by fixture validation.
+
+## Phase 9
+
+Phase 9 keeps real-device share and external crawler evidence separate from local PNG/HTTP/browser tests. Third-party cached previews remain outside application recall control. No deployment or physical-device PASS was inferred.

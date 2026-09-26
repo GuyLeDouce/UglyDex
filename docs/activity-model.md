@@ -84,3 +84,7 @@ npm run worker:ecosystem -- --once
 ## Phase 4 consumer
 
 Progression consumes this local evidence layer and confirmed provenance projections. Activity insert/update/delete triggers queue both prior and current Collector/Squig subjects. Source correction, slot retraction, token correction and reattribution therefore reverse dependent XP/achievements without external reimport. PUBLIC source content and confirmed Collector attribution are eligibility prerequisites; token-only facts can qualify for Squig progression independently. Payment amounts never scale XP. Progression audit/level milestones remain derived records and are never written back into CollectorActivity as fake source events. See [progression](progression.md).
+
+## Phase 9
+
+Phase 9 adds per-page pilot linkage counts, canonical duplicate review and effective-time attribution explanations. Amount/time candidate matches never automatically merge events. See [data-reconciliation](data-reconciliation.md).

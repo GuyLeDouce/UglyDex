@@ -95,3 +95,7 @@ After explicit editions:control -- --id <1:address> --mode enabled, editions:ind
 Public Edition history shows latest 50 event types/quantities/dates/blocks, never wallet identity. Authenticated collection history uses current verified wallets for indexed balances and effective-time confirmed attribution for historical acquisition. Snapshots are labeled by indexed block and freshness; no extra Reloaded discovery or prestige reward is issued. Full balance/event replay is part of collectibles:verify. No official registry/Custom/Edition records were seeded in Phase 8.
 
 Standards inspected: [ERC721](https://eips.ethereum.org/EIPS/eip-721), [ERC1155](https://eips.ethereum.org/EIPS/eip-1155). Registry support is deliberately limited to reviewed Ethereum contracts and explicit IDs.
+
+## Phase 9
+
+Phase 9 supplies no reviewed official manifest or contract. Catalogs remain unseeded; CUSTOM_MANIFEST, EDITION_MANIFEST and EDITION_CONTRACTS stay PENDING. Keep candidate validation/publication review and bounded registry indexing from Phase 8. No speculative adapter was added.

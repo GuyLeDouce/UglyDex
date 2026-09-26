@@ -74,11 +74,13 @@ try {
     });
     const detail = run.detail as {
       failed?: number;
+      scanned?: number;
       schemaFingerprint?: string;
     };
     if (
       run.action !== 'PILOT_IMPORT' ||
       detail.failed !== 0 ||
+      !detail.scanned ||
       !args.includes('--reviewed')
     )
       throw new Error('PILOT_REVIEW_REQUIRED');

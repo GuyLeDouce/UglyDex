@@ -33,6 +33,8 @@ const tables = [
   'EditionTransfer',
   'EditionBalance',
   'WorkerControl',
+  'LaunchGate',
+  'ReplayProof',
   '_prisma_migrations',
 ] as const;
 export async function restoreInventory(client: PoolClient) {

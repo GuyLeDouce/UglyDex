@@ -58,3 +58,7 @@ Exact Phase 6 scope: first run approved production ownership/provenance and read
 Phase 6 adds opt-in exhibitions, collection privacy modes, profile trophy/showcase presentation, canonical share pages, downloadable Collector/Squig/earned/Dex/gallery/collage cards, privacy-safe OG, and rendering diagnostics. No posting API, reward, quest, season, leaderboard or paid customization was added.
 
 Exact recommended Phase 7: first configure and audit production provenance/legacy pilots, reconcile attribution and replay progression/collections; validate real mobile wallet/gallery/sharing flows and rendering budgets on Railway. Then add non-financial collector customization and indexing for verified Customs/Editions contracts, with explicit ownership/privacy semantics and integration evidence. Treat any currency spending, subscriptions or paid cosmetics as a separately approved design with pricing, authorization, refund and source-of-truth contracts; do not attach automatic rewards to sets or achievements.
+
+## Phase 9
+
+Phase 9 code adds launch evidence gates and deterministic replay proof. External rollout gates remain PENDING without access. Phase 10 should close those gates and address only observed defects/bottlenecks; no new gamification or paid/financial systems.

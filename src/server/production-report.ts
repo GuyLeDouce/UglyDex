@@ -82,6 +82,20 @@ export async function productionEvidenceReport() {
       db().collectorProgress.count(),
       db().squigProgress.count(),
     ]);
+  const [squigUnlocks, burned, observedWallets, attributed, hiddenSets] =
+    await Promise.all([
+      db().squigAchievement.count({
+        where: { awardedAt: { not: null }, revokedAt: null },
+      }),
+      db().nftTransfer.count({ where: { toAddress: '0x' + '0'.repeat(40) } }),
+      db().$queryRaw<
+        { n: bigint }[]
+      >`SELECT count(DISTINCT "walletAddress") AS n FROM "HistoricalIdentityAttribution"`,
+      db().collectorActivity.count({ where: { collectorId: { not: null } } }),
+      db().collectorSetProgress.count({
+        where: { firstCompletedAt: { not: null }, set: { hidden: true } },
+      }),
+    ]);
   return {
     at: new Date().toISOString(),
     provenance: {
@@ -89,6 +103,7 @@ export async function productionEvidenceReport() {
       mints,
       continuous,
       ownerMatched,
+      burnEvents: burned,
       anomalousTokens: anomalies.map((a) => ({
         tokenId: a.squig.tokenId,
         issues: a.issues,
@@ -96,12 +111,22 @@ export async function productionEvidenceReport() {
         ownerMatches: a.ownerMatches,
       })),
     },
-    identity: { discord, wallets, collectors, conflicts, unattributed },
+    identity: {
+      discord,
+      wallets,
+      linkedWallets: wallets,
+      observedHistoricalWallets: Number(observedWallets[0].n),
+      collectors,
+      conflicts,
+      unattributed,
+      attributedActivities: attributed,
+    },
     progression: {
       collectorEvaluations,
       squigEvaluations,
       activeXpGrants: xp,
       collectorUnlocks: unlocks,
+      squigUnlocks,
       revokedGrants: revoked,
       completenessGated: gated,
     },
@@ -110,6 +135,7 @@ export async function productionEvidenceReport() {
       traits,
       sets,
       snapshots,
+      hiddenSetsRevealed: hiddenSets,
       completionDistribution: distribution.map((r) => ({
         bucket: r.bucket,
         count: Number(r.n),

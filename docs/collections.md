@@ -169,3 +169,7 @@ Production legacy credentials are not needed for this engine, but actual histori
 | Purple Wardrobe                | Current    | Weird     | Hard       | 5 different Body values with Skin: Purple                                                                                                                                   |
 | Colour Clash                   | Current    | Variety   | Hard       | 8 different Skin values                                                                                                                                                     |
 | The Quiet Room (hidden)        | Current    | Hidden    | Hard       | 3 Squigs with Mouth: Sewn; 3 Squigs with Mouth: Tape                                                                                                                        |
+
+## Phase 9
+
+Phase 9 includes discovery, set, completion and milestone state in replay fingerprints. The uglydex-collection-v1 formula and denominators remain unchanged. Production replay evidence is separate from local fixtures.

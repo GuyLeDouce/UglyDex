@@ -5,15 +5,50 @@ import { productionOverview } from '@/server/production';
 import { heartbeatState, backfillStages } from '@/domain/operations';
 import { WorkerControls } from '@/components/worker-controls';
 import { reliabilityReport } from '@/server/reliability';
+import { launchReport } from '@/server/launch';
 export default async function Page() {
   if (!(await adminActor())) notFound();
-  const [p, reliability] = await Promise.all([
+  const [p, reliability, launch] = await Promise.all([
     productionOverview(),
     reliabilityReport(),
+    launchReport(),
   ]);
   return (
     <div className="production-console">
       <h1>Production command centre</h1>
+      <section aria-label="Launch Readiness">
+        <h2>Launch Readiness — {launch.overall}</h2>
+        <p>Migration: {launch.migration ?? 'Unavailable'}</p>
+        <ul>
+          {launch.catalogs.map((c) => (
+            <li key={c.kind + c.id}>
+              {c.kind}: {c.id} · <code>{c.fingerprint}</code>
+            </li>
+          ))}
+        </ul>
+        <p>
+          {launch.environment} · {launch.blockingPassed} blocking gates verified
+          · {launch.blockingPending} blocking gates outstanding ·{' '}
+          {launch.warnings} warnings · {launch.failed} failed.
+        </p>
+        <p>
+          Evidence expires after 24 hours and must match this deployment and
+          commit.
+        </p>
+        <a href="/api/admin/launch">Export JSON</a>
+        {' · '}
+        <a href="/api/admin/launch?format=text">Export text</a>
+        <ul>
+          {launch.gates.map((g) => (
+            <li key={g.key}>
+              <strong>
+                {g.status} · {g.key}
+              </strong>
+              {g.blocking ? ' (blocking)' : ''} — {g.summary}
+            </li>
+          ))}
+        </ul>
+      </section>
       <p>
         Release: <code>{p.version}</code>. External probes and schema drift
         checks run through <code>npm run production:preflight</code>.

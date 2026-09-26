@@ -24,6 +24,7 @@ try {
     'format:check',
     'typecheck',
     'collections:verify',
+    'launch:status',
     'build',
   ])
     await run(command);

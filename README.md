@@ -1,5 +1,7 @@
 # UglyDex
 
+Phase 9 adds [launch evidence gates](docs/launch-readiness.md), [replay proof](docs/replay-validation.md) and [reconciliation reporting](docs/data-reconciliation.md). Use `npm run release:check` for code readiness and `npm run launch:check` for the actual deployment. The latter intentionally fails until critical external evidence exists. See [Phase 9 report](docs/phase9-report.md).
+
 ## Phase 8 operations
 
 Follow [production rollout](docs/production-rollout.md), [rollback](docs/rollback.md), [reliability](docs/reliability.md) and [device validation](docs/device-validation.md). Phase 7 is checkpointed at `2c6eda2`. Phase 8 adds environment-bound operational intent, staging/smoke/restore tools, pilot/stage gates, Edition history indexing and reliability diagnostics. See [Phase 8 report](docs/phase8-report.md) for measured local results and explicitly pending external gates. Run `npm run release:check` before release; never treat fixtures as production evidence.
