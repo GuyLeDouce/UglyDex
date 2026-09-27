@@ -1,5 +1,9 @@
 # Physical device and external share validation
 
+## Phase 10 execution status
+
+On 2026-09-26, no deployed public origin, OAuth configuration or approved physical-device/interactive wallet session was available. All manual device and external preview rows below remain PENDING. No wallet provider, physical phone, production Chrome/Edge session or real crawler was newly certified. Local browser regressions are reported separately in [phase10-report.md](phase10-report.md).
+
 All real-device rows are **PENDING**. Local Playwright Chromium viewport assertions are separate evidence and cannot certify Safari, Edge, mobile wallets or native share sheets.
 
 | Device / OS       | Browser / version | Release / date | Result  | Issue / evidence                  |

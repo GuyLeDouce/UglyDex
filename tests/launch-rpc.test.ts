@@ -16,7 +16,11 @@ vi.mock('../src/server/db', () => ({
   db: () => ({ operationalAudit: { create: mock.audit } }),
 }));
 vi.mock('../src/server/env', () => ({
-  readEnv: () => ({ SQUIGS_START_BLOCK: mock.start, TRANSFER_BLOCK_BATCH: 10 }),
+  readEnv: () => ({
+    SQUIGS_START_BLOCK: mock.start,
+    TRANSFER_BLOCK_BATCH: 10,
+    RPC_RETRIES: 1,
+  }),
 }));
 vi.mock('../src/integrations/blockchain', () => ({
   validateContract: mock.validate,
@@ -101,6 +105,23 @@ describe('bounded archive proof with controlled RPC', () => {
       {},
     );
     expect(JSON.stringify(mock.record.mock.calls)).not.toContain('429');
+  });
+  it('recovers bounded transient provider failures without widening the probe', async () => {
+    mock.validate.mockRejectedValueOnce(new Error('429 private RPC URL'));
+    mock.code.mockRejectedValueOnce(new Error('429 private RPC URL'));
+    mock.logs.mockRejectedValueOnce(new Error('429 private RPC URL'));
+    await verifyLaunchRpc();
+    expect(mock.validate).toHaveBeenCalledTimes(2);
+    expect(mock.logs).toHaveBeenCalledTimes(2);
+    for (const [request] of mock.logs.mock.calls)
+      expect(request).toMatchObject({ fromBlock: 100n, toBlock: 109n });
+    expect(mock.record).toHaveBeenCalledWith(
+      'ARCHIVE_RPC',
+      'VERIFIED',
+      expect.any(String),
+      expect.objectContaining({ retryCount: 3 }),
+    );
+    expect(JSON.stringify(mock.audit.mock.calls)).not.toContain('private RPC');
   });
   it('unconfigured RPC remains pending', async () => {
     vi.stubEnv('ETH_RPC_URL', '');

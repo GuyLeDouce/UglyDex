@@ -1,5 +1,9 @@
 # Production evidence reconciliation
 
+## Phase 10 actual evidence
+
+On 2026-09-26, every documented external database URL remained absent. No schema/role probe, pilot, full import, duplicate review or real identity decision ran. Source/import/reconciliation counts are PENDING, not zero; no source was classified VERIFIED_READ_ONLY. No normalization or attribution rule changed without real evidence. See [phase10-report.md](phase10-report.md).
+
 No real source database, wallet-link source or archive RPC was configured during Phase 9 implementation. Real import counts, identities, rejected rows, duplicates and remediation decisions are **PENDING**, not zero.
 
 ## Source proof and pilots

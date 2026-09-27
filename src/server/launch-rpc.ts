@@ -6,6 +6,7 @@ import { SQUIGS_CONTRACT } from '@/domain/validation';
 import { readEnv } from './env';
 import { assertDeploymentBinding } from './deployment';
 import { recordGate } from './launch';
+import { retryRpc } from '@/domain/provenance';
 // Explicit bounded probe. No token-1 deployment inference and no automatic multi-million-block log scan.
 export async function verifyLaunchRpc() {
   await assertDeploymentBinding();
@@ -15,42 +16,47 @@ export async function verifyLaunchRpc() {
   }
   const started = Date.now();
   try {
-    const client = await validateContract();
-    const finalized = await client.getBlock({ blockTag: 'finalized' });
+    const env = readEnv();
+    let retryCount = 0;
+    const call = <T>(fn: () => Promise<T>) =>
+      retryRpc(fn, env.RPC_RETRIES, undefined, () => retryCount++);
+    const client = await call(validateContract);
+    const finalized = await call(() =>
+      client.getBlock({ blockTag: 'finalized' }),
+    );
     let low = 0n,
       high = finalized.number;
     while (low < high) {
       const middle = (low + high) / 2n;
-      const code = await client.getCode({
-        address: SQUIGS_CONTRACT,
-        blockNumber: middle,
-      });
+      const code = await call(() =>
+        client.getCode({ address: SQUIGS_CONTRACT, blockNumber: middle }),
+      );
       if (code && code !== '0x') high = middle;
       else low = middle + 1n;
     }
-    const block = await client.getBlock({ blockNumber: low });
+    const block = await call(() => client.getBlock({ blockNumber: low }));
     const before = low
-      ? await client.getCode({
-          address: SQUIGS_CONTRACT,
-          blockNumber: low - 1n,
-        })
+      ? await call(() =>
+          client.getCode({ address: SQUIGS_CONTRACT, blockNumber: low - 1n }),
+        )
       : undefined;
-    const at = await client.getCode({
-      address: SQUIGS_CONTRACT,
-      blockNumber: low,
-    });
+    const at = await call(() =>
+      client.getCode({ address: SQUIGS_CONTRACT, blockNumber: low }),
+    );
     if (!at || at === '0x' || (before && before !== '0x'))
       throw new Error('ARCHIVE_BOUNDARY_INVALID');
     // Probe a single deployment-adjacent range; absence of mint logs remains PARTIAL.
-    const end = low + BigInt(readEnv().TRANSFER_BLOCK_BATCH) - 1n;
-    const logs = await client.getContractEvents({
-      address: SQUIGS_CONTRACT,
-      abi: squigsAbi,
-      eventName: 'Transfer',
-      fromBlock: low,
-      toBlock: end < finalized.number ? end : finalized.number,
-      strict: true,
-    });
+    const end = low + BigInt(env.TRANSFER_BLOCK_BATCH) - 1n;
+    const logs = await call(() =>
+      client.getContractEvents({
+        address: SQUIGS_CONTRACT,
+        abi: squigsAbi,
+        eventName: 'Transfer',
+        fromBlock: low,
+        toBlock: end < finalized.number ? end : finalized.number,
+        strict: true,
+      }),
+    );
     const first = logs
       .filter((l) => l.args.from === zeroAddress)
       .sort((a, b) =>
@@ -60,7 +66,10 @@ export async function verifyLaunchRpc() {
             ? 1
             : a.logIndex - b.logIndex,
       )[0];
-    if ((await client.getBlock({ blockNumber: low })).hash !== block.hash)
+    if (
+      (await call(() => client.getBlock({ blockNumber: low }))).hash !==
+      block.hash
+    )
       throw new Error('CHAIN_CHANGED_DURING_VERIFY');
     const evidence = {
       deploymentBlock: low.toString(),
@@ -74,7 +83,8 @@ export async function verifyLaunchRpc() {
           }
         : null,
       probeLogs: logs.length,
-      range: readEnv().TRANSFER_BLOCK_BATCH,
+      range: env.TRANSFER_BLOCK_BATCH,
+      retryCount,
       durationMs: Date.now() - started,
       providerFingerprint: createHash('sha256')
         .update(new URL(process.env.ETH_RPC_URL).origin)
@@ -86,7 +96,7 @@ export async function verifyLaunchRpc() {
       'Chain, ERC721, historical bytecode and bounded historical logs verified',
       evidence,
     );
-    const configured = readEnv().SQUIGS_START_BLOCK;
+    const configured = env.SQUIGS_START_BLOCK;
     await recordGate(
       'START_BLOCK',
       configured === low && !!first ? 'VERIFIED' : 'PARTIAL',

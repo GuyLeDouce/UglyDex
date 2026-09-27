@@ -79,3 +79,7 @@ Rebuild commands only flag selected tokens and reconstruct derived data. They pr
 ## Phase 9
 
 Phase 9 launch:rpc persists bounded archive boundary evidence; launch:provenance runs full pinned verification; launch:spot samples low/high/OG/Legendary/transfer-count/attributed/burn categories. Missing categories remain PENDING. No actual RPC/start-block proof has been performed in this workspace.
+
+## Phase 10 execution status
+
+ETH_RPC_URL and the UglyDex destination database remained absent on 2026-09-26. Start block, finalized height, transfer/mint counts, continuity, ownerOf matches, burn states and sampled UI traces are all PENDING. No chain backfill or real provenance verification ran; the previously reported block 25,342,921 is still unverified. See [phase10-report.md](phase10-report.md).

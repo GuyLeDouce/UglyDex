@@ -45,3 +45,7 @@ Checkpoint/release → isolated staging and migrations → database binding → 
 RPC evidence persists deployment number/hash, first mint observed in the bounded probe, finalized reference, duration and a provider-origin hash. It does not store RPC URLs. If the first mint is outside the bounded deployment probe, START_BLOCK stays PARTIAL; inspect further bounded ledger evidence rather than expanding to an automatic giant scan. Archive binary search assumes this immutable contract's bytecode presence is monotonic. Provider throughput, unusual archive behavior and full coverage still need actual credentials.
 
 All external operational gates remain PENDING until executed on the intended deployment. A successful local test does not count as a real restore, wallet session, external preview or Railway measurement.
+
+## Phase 10 execution — 2026-09-26
+
+At revision `811314b`, the unconfigured operator environment still reports NOT_READY: 31 PENDING gates, 20 blocking and 11 optional warnings. No production gate database is configured, so remote records were not inspected or reset. No gate was attested from fixture results. See [the Phase 10 access inventory and actual results](phase10-report.md).
