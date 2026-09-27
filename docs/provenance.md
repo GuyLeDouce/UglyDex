@@ -82,4 +82,4 @@ Phase 9 launch:rpc persists bounded archive boundary evidence; launch:provenance
 
 ## Phase 10 execution status
 
-ETH_RPC_URL and the UglyDex destination database remained absent on 2026-09-26. Start block, finalized height, transfer/mint counts, continuity, ownerOf matches, burn states and sampled UI traces are all PENDING. No chain backfill or real provenance verification ran; the previously reported block 25,342,921 is still unverified. See [phase10-report.md](phase10-report.md).
+On 2026-09-27 UTC, archive RPC evidence independently confirmed Ethereum mainnet, ERC721 behavior and the exact deployment boundary **25,342,921**: bytecode absent at the preceding block and present at/after the boundary. The first observed mint is token 1 at **25,349,689**. The first real staging batch imported **3,405** Transfers through **25,352,920**; continuation is resumable and provider retry exhaustion does not reset the cursor. Full provenance/ownerOf results and subsequent progress are recorded in [phase10-report.md](phase10-report.md). No aggregate alone certifies the raw-event-to-UI audit.

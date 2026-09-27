@@ -2,7 +2,7 @@
 
 ## Phase 10 execution status
 
-On 2026-09-26, no Railway account connection, deployed origin, UglyDex database, trusted archive or recovery target was available to this operator. Backup, restore, staging and production rollout remain PENDING; no worker was enabled. Resume with backup capability and a safe disposable restore drill before proceeding through the staging/evidence sequence. The existing isolation, intent and launch-gate policies still apply. See [phase10-report.md](phase10-report.md).
+On 2026-09-27 UTC, isolated Railway staging is deployed at `https://uglydex-staging-staging.up.railway.app`. Both database backups passed disposable restores with 79 matching table inventories. Application commit `c764e28` passes staging smoke/preflight. The owner separately pushed this commit to the existing production service, then authorized its startup repair: invalid environment formatting, missing migration/readiness settings and the empty canonical catalog were corrected. Production now has eleven migrations and passes ten HTTP/PNG smoke assertions at `https://uglydex-production.up.railway.app`. This is an authorized repair of an existing deployment, **not** a gate-approved production launch. Staging is NOT_READY (13 blockers); production is BLOCKED (15 blockers, including a queued attribution job). All four workers remain disabled. See [actual evidence and remaining gates](phase10-report.md).
 
 ## Phase 9 evidence overlay
 

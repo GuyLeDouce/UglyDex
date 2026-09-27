@@ -2,7 +2,7 @@
 
 ## Phase 10 actual evidence
 
-On 2026-09-26, every documented external database URL remained absent. No schema/role probe, pilot, full import, duplicate review or real identity decision ran. Source/import/reconciliation counts are PENDING, not zero; no source was classified VERIFIED_READ_ONLY. No normalization or attribution rule changed without real evidence. See [phase10-report.md](phase10-report.md).
+On 2026-09-27 UTC, source probes ran from the existing production network in read-only transactions. Wallet links and four UglyBot connection groups connect but their credentials have effective write/admin capabilities. Gauntlet authentication fails; Survival and ImageSubmit hosts do not resolve; the separate image database URL is absent. No credential is classified VERIFIED_READ_ONLY. No source pilot, full import, duplicate review or identity decision was performed, and no upstream database was modified. Import completeness remains PENDING. Safe aggregate schema/count results and the credential follow-up are in [phase10-report.md](phase10-report.md).
 
 No real source database, wallet-link source or archive RPC was configured during Phase 9 implementation. Real import counts, identities, rejected rows, duplicates and remediation decisions are **PENDING**, not zero.
 

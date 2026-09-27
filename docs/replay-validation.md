@@ -2,7 +2,7 @@
 
 ## Phase 10 evidence boundary
 
-Production Replay A and B remain PENDING as of 2026-09-26: no production database, imported evidence or reviewed identity state was available. The Phase 10 release rerun exercises the existing disposable fixture replay and records its outcome in [phase10-report.md](phase10-report.md). Fixture fingerprints must not be copied into a production gate. Both v1 rulesets are unchanged.
+Production Replay A and B remain PENDING as of 2026-09-27 UTC. Both deployed databases now exist, but legacy source imports and reviewed identity inputs are not ready. The complete release check passed at `c764e28`, including local fixture Replay A/B with zero semantic differences; those fingerprints are not production evidence. Both v1 rulesets are unchanged. See [phase10-report.md](phase10-report.md).
 
 Run `npm run launch:replay` after input backfills and reviewed identity attribution settle. In staging/production require `OPS_CONFIRM=<environment>:replay`, matching `OPS_DATABASE_FINGERPRINT`, registered deployment identity and known commit. Disable all four workers and Edition contracts. Pause other UglyDex import/reconciliation writers; upstream services remain read-only and need no freeze.
 

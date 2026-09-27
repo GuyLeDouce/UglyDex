@@ -56,4 +56,4 @@ Phase 9 launch:sources probes read-only schema/privileges and count/date boundar
 
 ## Phase 10 execution status
 
-Presence-only checks on 2026-09-26 found no credentials for wallet links, UglyBot main/prizes/claims/points, Gauntlet/Survival/images or ImageSubmit. No source connection, privilege validation or import was attempted without these prerequisites. All source counts and completeness remain PENDING; fixture rows are not production evidence. No ecosystem repository or external database was modified. See [phase10-report.md](phase10-report.md).
+Read-only connection, schema, privilege and aggregate-count probes ran on 2026-09-27 UTC. Wallet links and UglyBot main/prizes/claims/points connect with overly privileged credentials; Gauntlet rejects authentication, Survival/ImageSubmit hosts do not resolve, and the separate Gauntlet image URL is absent. Schema/count probe results do not authorize importing with these roles. Pilots and full imports remain PENDING; no upstream source was written. See [phase10-report.md](phase10-report.md) for exact available counts and [credential follow-up](phase10-access-followup.md).
