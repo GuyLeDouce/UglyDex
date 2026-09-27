@@ -15,9 +15,62 @@ import {
   type WorkerMode,
 } from '@/domain/operations';
 
+async function chainLiveEvidence() {
+  const { chainKey } = await import('@/sync/provenance');
+  const { launchReport, launchContext } = await import('./launch');
+  const cursor = await db().chainCursor.findUnique({
+    where: { key: chainKey },
+  });
+  const report = await launchReport();
+  const verified = [
+    'MINT_COVERAGE',
+    'OWNERSHIP_CONTINUITY',
+    'OWNER_OF',
+    'START_BLOCK',
+    'ARCHIVE_RPC',
+  ].every((key) =>
+    report.gates.some((gate) => gate.key === key && gate.status === 'VERIFIED'),
+  );
+  return { cursor, verified, chainKey, context: launchContext() };
+}
+
 export async function setWorkerControl(input: unknown, actor: string) {
   const data = workerControlSchema.parse(input);
   if (data.mode !== 'DISABLED') await assertOperation('workers');
+  // Record real bootstrap evidence once, so bounded LIVE batches and process
+  // restarts can continue beyond that boundary without inventing a backfill run.
+  let admission:
+    | {
+        environment: string;
+        commit: string;
+        databaseFingerprint: string;
+        chainKey: string;
+        startBlock: string;
+        blockNumber: string;
+        blockHash: string;
+      }
+    | undefined;
+  if (data.service === 'blockchain' && data.mode === 'LIVE') {
+    const env = readEnv();
+    if (env.ETH_RPC_URL && env.SQUIGS_START_BLOCK !== undefined) {
+      const evidence = await chainLiveEvidence();
+      if (
+        evidence.verified &&
+        evidence.cursor &&
+        !evidence.cursor.lastError &&
+        evidence.cursor.finalizedBlock !== null &&
+        evidence.cursor.blockNumber === evidence.cursor.finalizedBlock
+      ) {
+        admission = {
+          ...evidence.context,
+          chainKey: evidence.chainKey,
+          startBlock: String(env.SQUIGS_START_BLOCK),
+          blockNumber: evidence.cursor.blockNumber.toString(),
+          blockHash: evidence.cursor.blockHash,
+        };
+      }
+    }
+  }
   await db().$transaction(async (tx) => {
     if (data.mode !== 'DISABLED') {
       const lock = await tx.$queryRaw<
@@ -38,6 +91,15 @@ export async function setWorkerControl(input: unknown, actor: string) {
         detail: { mode: data.mode },
       },
     });
+    if (admission)
+      await tx.operationalAudit.create({
+        data: {
+          actor,
+          action: 'BLOCKCHAIN_LIVE_ADMISSION',
+          subject: admission.chainKey,
+          detail: admission,
+        },
+      });
   });
 }
 
@@ -55,30 +117,44 @@ export async function workerReadiness(service: Service, mode: WorkerMode) {
         await db().productionStage.findUnique({ where: { stage: 'transfers' } })
       )?.completedAt
     ) {
-      const { chainKey } = await import('@/sync/provenance');
-      const { launchReport } = await import('./launch');
-      const cursor = await db().chainCursor.findUnique({
-        where: { key: chainKey },
-      });
-      const report = await launchReport();
+      const { cursor, verified, chainKey, context } = await chainLiveEvidence();
       if (
         !cursor ||
         cursor.lastError ||
         cursor.finalizedBlock === null ||
-        cursor.blockNumber !== cursor.finalizedBlock ||
-        ![
-          'MINT_COVERAGE',
-          'OWNERSHIP_CONTINUITY',
-          'OWNER_OF',
-          'START_BLOCK',
-          'ARCHIVE_RPC',
-        ].every((key) =>
-          report.gates.some(
-            (gate) => gate.key === key && gate.status === 'VERIFIED',
-          ),
-        )
+        cursor.blockNumber > cursor.finalizedBlock ||
+        !verified
       )
         return 'WAITING_BACKFILL';
+      if (cursor.blockNumber !== cursor.finalizedBlock) {
+        const audit = await db().operationalAudit.findFirst({
+          where: { action: 'BLOCKCHAIN_LIVE_ADMISSION', subject: chainKey },
+          orderBy: { createdAt: 'desc' },
+        });
+        const admission = audit?.detail as Record<string, unknown> | undefined;
+        if (
+          !admission ||
+          admission.environment !== context.environment ||
+          admission.commit !== context.commit ||
+          admission.databaseFingerprint !== context.databaseFingerprint ||
+          admission.chainKey !== chainKey ||
+          admission.startBlock !== String(env.SQUIGS_START_BLOCK) ||
+          typeof admission.blockNumber !== 'string' ||
+          !/^\d+$/.test(admission.blockNumber) ||
+          BigInt(admission.blockNumber) > cursor.blockNumber
+        )
+          return 'WAITING_BACKFILL';
+        const anchor = await db().chainBlock.findUnique({
+          where: {
+            chainId_number: {
+              chainId: 1,
+              number: BigInt(admission.blockNumber),
+            },
+          },
+        });
+        if (!anchor || anchor.hash !== admission.blockHash)
+          return 'WAITING_BACKFILL';
+      }
     }
   }
   if (service === 'ecosystem') {
