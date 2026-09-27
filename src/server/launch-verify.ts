@@ -106,10 +106,12 @@ export async function verifyLaunch() {
     where: { collectorId: null },
   });
   const jobs = await db().activityAttributionJob.count();
-  if (
-    jobs ||
-    !(await db().launchGate.findUnique({ where: { key: 'REATTRIBUTION' } }))
-  )
+  const attributionGate = await db().launchGate.findUnique({
+    where: { key: 'REATTRIBUTION' },
+  });
+  // Clearing operational backlog does not prove downstream reconciliation, but
+  // must replace the stale degraded observation with a current pending one.
+  if (jobs || !attributionGate || attributionGate.status === 'DEGRADED')
     await recordGate(
       'REATTRIBUTION',
       jobs ? 'DEGRADED' : 'PENDING',
