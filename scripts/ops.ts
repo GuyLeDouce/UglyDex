@@ -45,6 +45,9 @@ try {
     if (!source?.schemaValid || source.warning === 'ROLE_HAS_WRITE_PRIVILEGES')
       throw new Error('SOURCE_VALIDATION_REQUIRED');
     const counts = await runActivityFeed(feed, { since, maxPages: 1 });
+    const checkedSource = await db().integrationSource.findUniqueOrThrow({
+      where: { id: feed },
+    });
     const pilot = await db().operationalAudit.create({
       data: {
         actor: 'cli:operator',
@@ -52,7 +55,7 @@ try {
         subject: feed,
         detail: {
           since: since.toISOString(),
-          schemaFingerprint: source.schemaFingerprint,
+          schemaFingerprint: checkedSource.schemaFingerprint,
           ...counts,
         },
       },

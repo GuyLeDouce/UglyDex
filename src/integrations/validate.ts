@@ -3,7 +3,7 @@ import { inspectIntegrations } from './inspect';
 import { sourcePermissions, safeSourceRole } from './permissions';
 import { tables } from './registry';
 import { db } from '@/server/db';
-import { hash } from '@/domain/events';
+import { sourceSchemaFingerprint } from './source-schema';
 import { feeds } from '@/sync/normalize';
 export async function validateIntegrations() {
   const reports = await inspectIntegrations();
@@ -56,13 +56,19 @@ export async function validateIntegrations() {
           state,
           schemaValid: valid,
           warning,
-          schemaFingerprint: hash(table ?? null),
+          schemaFingerprint: sourceSchemaFingerprint(
+            tables[feed],
+            table?.columns ?? [],
+          ),
         },
         update: {
           state,
           schemaValid: valid,
           warning,
-          schemaFingerprint: hash(table ?? null),
+          schemaFingerprint: sourceSchemaFingerprint(
+            tables[feed],
+            table?.columns ?? [],
+          ),
         },
       });
     }

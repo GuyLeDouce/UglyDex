@@ -46,6 +46,7 @@ for (const key of [
   'SQUIG_IMAGE_BASE_URL',
   'UGLYBOT_BRIDGE_URL',
   'UGLYBOT_BRIDGE_SECRET',
+  'UGLYBOT_BOT_DISCORD_ID',
   'GAUNTLET_BRIDGE_URL',
   'GAUNTLET_BRIDGE_SECRET',
   'IMAGE_BRIDGE_URL',
@@ -345,7 +346,7 @@ try {
     );
     const activityHTML = await activityResponse.text();
     check(
-      activityResponse.ok && activityHTML.includes('Malformed purchase'),
+      activityResponse.ok && activityHTML.includes('Marketplace purchase'),
       'public activity renders imported records',
     );
     check(

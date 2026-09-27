@@ -28,6 +28,7 @@ export const environmentSchema = z
     ADMIN_DIAGNOSTICS_TOKEN: optional(z.string().min(32)),
     WALLET_LINKS_DATABASE_URL: optional(pg),
     UGLYBOT_DATABASE_URL: optional(pg),
+    UGLYBOT_BOT_DISCORD_ID: optional(z.string().regex(/^\d{17,20}$/)),
     UGLYBOT_PRIZES_DATABASE_URL: optional(pg),
     UGLYBOT_CLAIMS_DATABASE_URL: optional(pg),
     UGLYBOT_POINTS_DATABASE_URL: optional(pg),

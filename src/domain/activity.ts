@@ -40,7 +40,7 @@ export const activityLabels: Record<string, string> = {
   MAW_REGURGITATED: 'Regurgitated',
   MAW_SWALLOWED: 'Swallowed',
   MAW_DIGESTED: 'Digested',
-  MARKETPLACE_PURCHASE: 'Malformed purchase',
+  MARKETPLACE_PURCHASE: 'Marketplace purchase',
   MARKETPLACE_REFUND: 'Marketplace refund',
   IMAGE_APPROVED: 'Ugly contribution',
   IMAGE_SUBMISSION: 'Image submission',

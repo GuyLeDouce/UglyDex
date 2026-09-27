@@ -32,6 +32,13 @@ URLs. Half-configured or failed bridges fail closed; there is no fallback to a
 public PostgreSQL connection. Keep direct URLs for operator inspection with normal
 certificate and hostname verification.
 
+Set `UGLYBOT_BOT_DISCORD_ID` on the UglyDex client from the upstream UglyBot
+application's authoritative identity before reviewing/importing Duels. The bot
+opponent is excluded from Collector activity; human outcomes still use the recorded
+winner. Never infer a bot from a username or absence of a Squig. Changing this
+setting requires rerunning the affected bounded pilot so obsolete bot slots are
+retracted through the normal importer, with correction evidence retained.
+
 ## Transport and authentication
 
 Public requests use normally verified HTTPS through Railway web networking. The
@@ -72,6 +79,12 @@ the bridge group. There is no SQL, table or column input. Unknown JSON propertie
 and query parameters are rejected. Existing timestamp cursor precision is retained.
 Updated-time pagination remains a composite key; corrections update the canonical
 source event rather than create a second event.
+
+Date bounds use the feed's declared timestamp (`finished_at` for runs, `used_at`
+for image uses). Survival player rows have no native timestamp: read a bounded
+keyset page, enrich from its parent games, then filter by `started_at`. A pilot
+does not advance either historical or reconciliation cursors. Maw prizes support
+updated-time cursors even though `updated_at` is required, not optional.
 
 `onlineRewards` reports `FEED_UNAVAILABLE` while its source table is absent.
 `gauntlet_runs` remains usable. Never create or backfill a fabricated rewards table.

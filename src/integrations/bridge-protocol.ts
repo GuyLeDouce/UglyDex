@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { tables, type TableSpec } from './registry';
+import { tables, sourceTimestamp, type TableSpec } from './registry';
 export type SourceFeed = keyof typeof tables;
 export const pageInput = z
   .object({
@@ -57,7 +57,10 @@ export function effectivePage(
   input: z.infer<typeof pageInput>,
 ) {
   const base = tables[feed];
-  if (input.order === 'updated' && !base.optional.includes('updated_at'))
+  if (
+    input.order === 'updated' &&
+    ![...base.required, ...base.optional].includes('updated_at')
+  )
     throw new Error('INVALID_CURSOR_ORDER');
   const spec: TableSpec =
     input.order === 'updated'
@@ -77,16 +80,13 @@ export function effectivePage(
     filters[column] = name === 'approved' ? 'approved' : value;
   }
   const column =
-    input.order === 'updated'
-      ? 'updated_at'
-      : base.required.includes('submitted_at')
-        ? 'submitted_at'
-        : base.required.includes('added_at')
-          ? 'added_at'
-          : 'created_at';
+    input.order === 'updated' ? 'updated_at' : sourceTimestamp(base);
   return {
     spec,
     filters,
-    since: input.since ? { column, value: new Date(input.since) } : undefined,
+    since:
+      input.since && column
+        ? { column, value: new Date(input.since) }
+        : undefined,
   };
 }

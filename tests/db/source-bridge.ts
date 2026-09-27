@@ -87,6 +87,10 @@ export async function sourceBridgeDatabaseTests(
       next.ok && next.data[0].id === 'bridge-b',
       'bridge composite cursor does not repeat or skip microsecond boundaries',
     );
+    await validateIntegrations();
+    const pilotBefore = await db().integrationSource.findUniqueOrThrow({
+      where: { id: 'duels' },
+    });
     const imported = await runActivityFeed('duels', {
       since: new Date('2099-01-01'),
       maxPages: 1,
@@ -94,6 +98,26 @@ export async function sourceBridgeDatabaseTests(
     check(
       imported.inserted === 2,
       'bridge adapter uses existing canonical import pipeline',
+    );
+    const pilotAfter = await db().integrationSource.findUniqueOrThrow({
+      where: { id: 'duels' },
+    });
+    check(
+      pilotBefore.schemaFingerprint === pilotAfter.schemaFingerprint,
+      'pilot retains the validated schema fingerprint for approval',
+    );
+    check(
+      JSON.stringify([
+        pilotBefore.cursor,
+        pilotBefore.reconcileCursor,
+        pilotBefore.backfillFinishedAt,
+      ]) ===
+        JSON.stringify([
+          pilotAfter.cursor,
+          pilotAfter.reconcileCursor,
+          pilotAfter.backfillFinishedAt,
+        ]),
+      'bounded pilot cannot advance historical or reconciliation cursors or completion',
     );
     const replay = await runActivityFeed('duels', {
       since: new Date('2099-01-01'),
@@ -123,6 +147,30 @@ export async function sourceBridgeDatabaseTests(
       })) === 2,
       'bridge corrections preserve canonical record identity',
     );
+    // Fixture-only historical bot attribution is corrected by the importer.
+    await external.query(
+      "INSERT INTO squig_duels(id,challenger_id,opponent_id,winner_id,status,created_at,completed_at,updated_at) VALUES ('bridge-bot','888888888888888888','777777777777777777','777777777777777777','completed','2102-01-01','2102-01-01','2102-01-01')",
+    );
+    const botOptions = { since: new Date('2102-01-01'), maxPages: 1 };
+    await runActivityFeed('duels', botOptions);
+    process.env.UGLYBOT_BOT_DISCORD_ID = '777777777777777777';
+    const botCorrection = await runActivityFeed('duels', botOptions);
+    const botRecords = await db().collectorActivity.findMany({
+      where: { sourceType: 'duels', sourceId: 'bridge-bot' },
+    });
+    check(
+      botCorrection.inserted === 0 &&
+        botCorrection.updated === 1 &&
+        botRecords.filter((r) => r.recordStatus === 'ACTIVE').length === 1 &&
+        botRecords.filter((r) => r.recordStatus === 'RETRACTED').length === 1,
+      'bot identity correction retracts obsolete slot without deleting source evidence',
+    );
+    const botReplay = await runActivityFeed('duels', botOptions);
+    check(
+      botReplay.updated === 0 && botReplay.inserted === 0,
+      'bot correction remains idempotent on bounded replay',
+    );
+    process.env.UGLYBOT_BOT_DISCORD_ID = '';
     // Fixture-only schema absence: no upstream Gauntlet table is created here.
     const missing = await bridgeRequest('uglybot', '/v1/feeds/maw/page', {});
     check(!missing.ok, 'absent configured source stays unavailable');
@@ -164,15 +212,65 @@ export async function sourceBridgeDatabaseTests(
       ).state === 'UNAVAILABLE',
       'absent reward feed records UNAVAILABLE',
     );
+    await external.query(
+      'CREATE TABLE squig_survival_games(id bigint PRIMARY KEY,started_at timestamptz)',
+    );
+    await external.query(
+      'CREATE TABLE squig_survival_game_players(game_id bigint,user_id text,eliminations int,deaths int,images_used int,placement int,PRIMARY KEY(game_id,user_id))',
+    );
+    await external.query(
+      'GRANT SELECT ON squig_survival_games,squig_survival_game_players TO uglydex_readonly',
+    );
+    await external.query(
+      "INSERT INTO squig_survival_games VALUES (990001,'2099-01-01T00:00:00Z'),(990002,'2100-01-01T00:00:00Z')",
+    );
+    await external.query(
+      "INSERT INTO squig_survival_game_players VALUES (990001,'888888888888888888',0,1,1,2),(990002,'888888888888888888',1,0,1,1)",
+    );
+    process.env.GAUNTLET_SURVIVAL_DATABASE_URL =
+      process.env.UGLYBOT_DATABASE_URL;
+    const survival = await runActivityFeed('survival', {
+      since: new Date('2099-06-01'),
+      maxPages: 1,
+    });
+    check(
+      survival.scanned === 2 &&
+        survival.inserted === 1 &&
+        survival.skipped === 1 &&
+        survival.failed === 0,
+      'parent-dated Survival pilot bounds reads and filters by game start',
+    );
+    const kept = await db().collectorActivity.findFirstOrThrow({
+      where: { sourceType: 'survival', sourceId: '990002:888888888888888888' },
+    });
+    check(
+      kept.eventAt.toISOString() === '2100-01-01T00:00:00.000Z' &&
+        kept.squigId === null,
+      'Survival pilot retains game-start date and no inferred Squig',
+    );
+    await runActivityFeed('survival', {
+      since: new Date('2101-01-01'),
+      maxPages: 1,
+    });
+    check(
+      (
+        await db().collectorActivity.findUniqueOrThrow({
+          where: { id: kept.id },
+        })
+      ).recordStatus === 'ACTIVE',
+      'out-of-range pilot rows cannot retract earlier activity',
+    );
   } finally {
     globalThis.fetch = originalFetch;
     process.env.UGLYBOT_BRIDGE_URL = '';
     process.env.UGLYBOT_BRIDGE_SECRET = '';
+    process.env.UGLYBOT_BOT_DISCORD_ID = '';
     process.env.GAUNTLET_DATABASE_URL = '';
+    process.env.GAUNTLET_SURVIVAL_DATABASE_URL = '';
     process.env.GAUNTLET_BRIDGE_URL = '';
     process.env.GAUNTLET_BRIDGE_SECRET = '';
     await external.query(
-      "DELETE FROM squig_duels WHERE id IN ('bridge-a','bridge-b')",
+      "DELETE FROM squig_duels WHERE id IN ('bridge-a','bridge-b','bridge-bot')",
     );
   }
 }

@@ -17,6 +17,19 @@ export type TableSpec = {
   required: string[];
   optional: string[];
 };
+// Some feeds have no row timestamp: Survival's event date comes from its game.
+export function sourceTimestamp(spec: TableSpec) {
+  return [
+    'submitted_at',
+    'added_at',
+    'finished_at',
+    'used_at',
+    'received_at',
+    'started_at',
+    'created_at',
+    'updated_at',
+  ].find((column) => spec.required.includes(column));
+}
 const spec = (
   integration: Integration,
   table: string,

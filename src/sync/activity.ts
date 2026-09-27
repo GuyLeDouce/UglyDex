@@ -4,9 +4,10 @@ import { Pool } from 'pg';
 import { db } from '@/server/db';
 import { readEnv } from '@/server/env';
 import { readPage, tableColumns, type ExternalRow } from '@/integrations/table';
-import { tables } from '@/integrations/registry';
+import { tables, sourceTimestamp } from '@/integrations/registry';
+import { sourceSchemaFingerprint } from '@/integrations/source-schema';
 import { readSourceQuery } from '@/integrations/queries';
-import { hash, eventKey } from '@/domain/events';
+import { eventKey } from '@/domain/events';
 import { log } from '@/server/log';
 import { feeds, normalizeRow, type Feed } from './normalize';
 import { importRecord, reattributePending } from './import-event';
@@ -175,13 +176,7 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
     if (rotating && !options.replay && !options.since)
       after = (state.reconcileCursor as unknown[] | null) ?? undefined;
     if (after?.length === 0) after = undefined;
-    const timeColumn =
-      timestamp ??
-      (spec.required.includes('submitted_at')
-        ? 'submitted_at'
-        : spec.required.includes('added_at')
-          ? 'added_at'
-          : 'created_at');
+    const timeColumn = timestamp ?? sourceTimestamp(spec);
     let exhausted = false,
       earliest: Date | undefined,
       latest: Date | undefined;
@@ -191,7 +186,7 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
         after,
         {},
         200,
-        options.since
+        options.since && timeColumn
           ? { column: timeColumn, value: options.since }
           : undefined,
       );
@@ -204,6 +199,18 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
       const pageKeys: string[] = [];
       for (const row of result.data) {
         counts.scanned++;
+        // Parent-dated Survival rows are still bounded by this source page.
+        // Exclude out-of-range rows without retracting previously imported slots.
+        if (
+          options.since &&
+          !timeColumn &&
+          row.started_at &&
+          new Date(String(row.started_at)) < options.since
+        ) {
+          counts.skipped++;
+          counts.ignoredRows++;
+          continue;
+        }
         const recordId = String(
           row.id ?? row.event_id ?? `${row.game_id}:${row.user_id}`,
         );
@@ -291,7 +298,10 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
       data: {
         state: failed ? 'DEGRADED' : 'PARTIAL',
         schemaValid: true,
-        schemaFingerprint: hash(columns.data),
+        schemaFingerprint: sourceSchemaFingerprint(
+          spec,
+          columns.data.map((c) => c.column_name),
+        ),
         lastSuccessAt: new Date(),
         warning: options.since
           ? 'PILOT_RANGE'
