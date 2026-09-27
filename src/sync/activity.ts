@@ -1,4 +1,5 @@
 import { integrationConfigured } from '@/integrations/bridge-config';
+import { unavailableSource } from '@/integrations/availability';
 import 'server-only';
 import { Pool } from 'pg';
 import { db } from '@/server/db';
@@ -381,6 +382,10 @@ export async function activityCycle(
   for (const feed of feeds)
     if (!stopped() && integrationConfigured(tables[feed].integration)) {
       try {
+        const source = await db().integrationSource.findUnique({
+          where: { id: feed },
+        });
+        if (unavailableSource(source)) continue;
         await runActivityFeed(feed, options);
         if (mutable.has(feed))
           await runActivityFeed(feed, { maxPages: 1, reconcile: true });
