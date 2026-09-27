@@ -1,5 +1,14 @@
 # Phase 8 rollout gates
 
+## Phase 11 staging historical checkpoint
+
+See the [full staging import and duplicate review](phase11-full-import-report.md).
+ACTIVITY and DUPLICATE_REVIEW are VERIFIED on staging, but staging still has 11
+blocking gates and production has 15. No production import, bridge rollout,
+worker enablement or launch is authorized by this checkpoint. The next operator
+decision covers identity review and downstream derivation/replay; it must also
+refresh the provenance projections dirtied by canonical identity evidence preload.
+
 ## Phase 11 focused repair
 
 See [source/RPC results](phase11-source-rpc-report.md) and

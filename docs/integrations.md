@@ -1,5 +1,16 @@
 # Integration operating contract
 
+## Phase 11 full staging import follow-up
+
+The [full staging report](phase11-full-import-report.md) supersedes the pilot-only
+operational checkpoint below. All 16 available feeds reached source exhaustion
+and passed full reconciliation repeats, semantic review and populated privacy
+checks. Historical cursors now retain real import coverage; source states remain
+PARTIAL with TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME. The absent onlineRewards
+table remains UNAVAILABLE_SOURCE_TABLE. All nine logical source connections
+continue through verified read-only staging bridges. No upstream writes,
+production imports or worker cycles occurred.
+
 ## Phase 11 bounded pilot follow-up
 
 The [pilot report](phase11-pilot-report.md) records the 16 available staging feed

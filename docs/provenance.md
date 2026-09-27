@@ -1,5 +1,17 @@
 # Squig provenance
 
+## Phase 11 source-import checkpoint
+
+The [full staging import report](phase11-full-import-report.md) revalidated archive
+access, the known deployment boundary and all 4,444 pinned owner matches on
+application revision 2ab0fc3. The 11,052 Transfer ledger and cursor 26,068,941 were
+not reset or advanced. Subsequent canonical identity evidence preload marked
+3,319 projections dirty for normal downstream attribution/derivation. Fresh
+launch checks therefore report MINT_COVERAGE and OWNERSHIP_CONTINUITY as PARTIAL
+with 1,125 clean projections; all 4,444 stored mint/provenance rows remain intact.
+This requires the next identity stage, not a historical chain rescan. No deployed
+derived replay or worker processing was performed in the source-import task.
+
 ## Phase 11 replacement RPC follow-up
 
 The replacement Alchemy archive endpoint completed staging's existing Transfer
