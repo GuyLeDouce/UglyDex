@@ -1,5 +1,13 @@
 # Source reader SQL for review — 2026-09-27 UTC
 
+**Subsequent authorized execution:** the focused source/RPC repair created only
+the Gauntlet-main reader, granting CONNECT, public USAGE and SELECT on
+`public.gauntlet_runs`. All eight physical readers now validate read-only through
+the staging bridges. The seven earlier roles were unchanged. The missing rewards
+table was neither created nor granted. See [current evidence](../../phase11-source-rpc-report.md).
+The inspection and proposals below describe the earlier checkpoint; do not rerun
+any role creation script now that all eight readers exist.
+
 **These newly generated proposals have not been executed. No additional role or grant change was made during this reinspection.** Under the owner's earlier explicit authorization, seven reader roles had already been created; the main Gauntlet role had not. Each new creation script stops if the role already exists, without altering it.
 
 ## Authority and source revisions

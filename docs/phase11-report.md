@@ -1,5 +1,9 @@
 # Phase 11 operational evidence — 2026-09-27 UTC
 
+Later focused source-connectivity/RPC work is recorded in
+[the source/RPC follow-up](phase11-source-rpc-report.md). The checkpoint below is
+retained as historical evidence; it predates that repair.
+
 **No gate-approved production launch occurred.** Staging runs application commit `0687d01cc565c90b9af7068ec88baf06abc42fc4`; production continues serving `c764e2810715be0608e5fadc47d45a6a391ba674`. Work is on `phase11-launch-evidence`, descended from Phase 10 evidence commit `d6684d6` on `phase10-evidence-20260927`. The documentation commit containing this report is the evidence checkpoint; no application change follows `0687d01` in this checkpoint.
 
 ## Checkpoint and launch decision

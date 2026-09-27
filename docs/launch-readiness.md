@@ -1,5 +1,11 @@
 # Launch evidence, not configuration
 
+The latest focused Phase 11 checkpoint is
+[source connectivity and RPC repair](phase11-source-rpc-report.md). Its real
+staging bridge/provenance evidence supersedes earlier unavailable-access results
+only for the validations actually rerun. Imports, replay, handoff, worker and
+device gates remain independent prerequisites. No production launch was approved.
+
 Phase 9 separates code readiness (`release:check`) from deployment evidence (`launch:check`). No production credential or real device was supplied during implementation. The unconfigured workspace reports **NOT_READY**, all 31 gates PENDING, and `launch:check` exits 1. Fixture tests never close production gates.
 
 ## Persistent policy

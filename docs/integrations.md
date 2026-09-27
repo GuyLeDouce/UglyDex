@@ -1,5 +1,16 @@
 # Integration operating contract
 
+## Phase 11 secure transport follow-up
+
+The [source bridges](source-bridges.md) preserve the existing adapters while
+replacing cross-project public PostgreSQL connections that fail certificate and
+hostname validation. Staging uses three authenticated HTTPS bridge services with
+dedicated readers inside the upstream private networks. All nine logical sources
+authenticate and verify read-only privileges; 25/26 registry tables exist with
+every required column. The absent `gauntlet_online_reward_events` makes only
+`onlineRewards` unavailable. Gauntlet runs remain usable. No source pilot or import
+was run during this repair. See [dated results](phase11-source-rpc-report.md).
+
 ## Phase 8 pilot gate
 
 Run `integrations:pilot -- --feed <feed> --since <date>` only after live schema/SELECT-role validation. At most 200 rows are normalized without advancing full backfill cursors. The printed audit ID must be approved with `integrations:pilot:approve -- --run <id> --reviewed`; full staging/production backfill requires that source schema fingerprint. Review cross-source reward/payment duplicates using existing canonical event rules. No actual production source credentials or rows were available; schema/duplicate findings remain PENDING. No external writes were added.
