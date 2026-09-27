@@ -87,3 +87,7 @@ Phase 9 adds aggregate attribution explanations through launch:explain and an ad
 ## Phase 10 execution status
 
 Discord OAuth credentials and the existing admin allowlist are configured on both deployments as of 2026-09-27 UTC. Only the staging Discord authorization redirect and invalid-callback behavior have been tested; real Discord login remains pending. The owner reports successful Brave/MetaMask signature login and session persistence. Production has one Collector and one linked wallet, with one pending attribution job; no Discord identity or reconciliation decision exists in the measured snapshot. Source privilege/connectivity failures prevent reconciliation pilots. No real Collector was merged, confirmed, rejected or split; downstream correction evidence remains PENDING. Auth protections were not weakened. See [phase10-report.md](phase10-report.md).
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.

@@ -33,3 +33,7 @@ Authenticated real-device checks, known-private URL smoke fixtures and external 
 ## Phase 9
 
 Phase 9 REAL_DEVICE_SHARE and EXTERNAL_OG gates remain PENDING. Actual operator evidence is required; browser automation does not certify a physical phone, mobile wallet, native share sheet or external crawler. All existing manual matrix results remain unchanged.
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.

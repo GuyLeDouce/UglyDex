@@ -17,3 +17,7 @@ Only explicit processing clocks (`calculatedAt`, `evaluatedAt`, ledger `createdA
 `DERIVED_REPLAY_STABLE` is critical. It cannot be manually attested. `launch:check` rehashes inputs/results and changes the gate to PENDING when evidence has since changed. Evidence is also bound to commit/environment and expires after 24 hours. A stable empty fixture cannot prove production provenance: independent catalog, mint, continuity, ownerOf, activity and deployment gates remain mandatory.
 
 Local fixture proof and production proof must be reported separately. Test-generated fingerprints live in ignored `.data/phase9-replay.json`; no fixture fingerprint is a production metric. Production Replay A/B remains PENDING without real evidence/access.
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.

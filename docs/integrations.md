@@ -57,3 +57,7 @@ Phase 9 launch:sources probes read-only schema/privileges and count/date boundar
 ## Phase 10 execution status
 
 Read-only connection, schema, privilege and aggregate-count probes ran on 2026-09-27 UTC. Wallet links and UglyBot main/prizes/claims/points connect with overly privileged credentials; Gauntlet rejects authentication, Survival/ImageSubmit hosts do not resolve, and the separate Gauntlet image URL is absent. Schema/count probe results do not authorize importing with these roles. Pilots and full imports remain PENDING; no upstream source was written. See [phase10-report.md](phase10-report.md) for exact available counts and [credential follow-up](phase10-access-followup.md).
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.

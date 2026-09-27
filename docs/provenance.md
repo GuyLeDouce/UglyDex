@@ -83,3 +83,7 @@ Phase 9 launch:rpc persists bounded archive boundary evidence; launch:provenance
 ## Phase 10 execution status
 
 On 2026-09-27 UTC, archive RPC evidence independently confirmed Ethereum mainnet, ERC721 behavior and the exact deployment boundary **25,342,921**: bytecode absent at the preceding block and present at/after the boundary. The first observed mint is token 1 at **25,349,689**. The first real staging batch imported **3,405** Transfers through **25,352,920**; continuation is resumable and provider retry exhaustion does not reset the cursor. Full provenance/ownerOf results and subsequent progress are recorded in [phase10-report.md](phase10-report.md). No aggregate alone certifies the raw-event-to-UI audit.
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.
