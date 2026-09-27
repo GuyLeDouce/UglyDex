@@ -2,16 +2,17 @@
 
 ## Phase 10 execution status
 
-On 2026-09-26, no deployed public origin, OAuth configuration or approved physical-device/interactive wallet session was available. All manual device and external preview rows below remain PENDING. No wallet provider, physical phone, production Chrome/Edge session or real crawler was newly certified. Local browser regressions are reported separately in [phase10-report.md](phase10-report.md).
+On 2026-09-27 UTC, staging and production public origins and Discord credentials are configured. A staging HTTP probe verified the Discord authorization redirect, exact callback, state, S256 PKCE and Secure/HttpOnly cookie; an invalid callback returns 400. No real consent/token exchange or wallet session was completed. A Twitterbot user-agent probe received public Squig metadata and a PNG, but no actual third-party preview or public-to-private transition was certified. Physical iPhone/Android and interactive desktop rows below remain PENDING. The in-app browser tool failed before opening a session. See [phase10-report.md](phase10-report.md).
 
-All real-device rows are **PENDING**. Local Playwright Chromium viewport assertions are separate evidence and cannot certify Safari, Edge, mobile wallets or native share sheets.
+The owner reports Brave + MetaMask message signing and session persistence after reload on the live deployment. OS/device/browser version were not supplied; other wallet flows and native sharing remain PENDING. Local Playwright Chromium viewport assertions are separate evidence and cannot certify Safari, Edge, mobile wallets or native share sheets.
 
-| Device / OS       | Browser / version | Release / date | Result  | Issue / evidence                  |
-| ----------------- | ----------------- | -------------- | ------- | --------------------------------- |
-| iPhone / pending  | Safari / pending  | pending        | PENDING | No physical device session        |
-| Android / pending | Chrome / pending  | pending        | PENDING | No physical device session        |
-| Desktop / pending | Chrome / pending  | pending        | PENDING | No interactive production session |
-| Desktop / pending | Edge / pending    | pending        | PENDING | No interactive production session |
+| Device / OS             | Browser / version           | Release / date           | Result  | Issue / evidence                                                                          |
+| ----------------------- | --------------------------- | ------------------------ | ------- | ----------------------------------------------------------------------------------------- |
+| iPhone / pending        | Safari / pending            | pending                  | PENDING | No physical device session                                                                |
+| Android / pending       | Chrome / pending            | pending                  | PENDING | No physical device session                                                                |
+| Desktop / pending       | Chrome / pending            | pending                  | PENDING | No interactive production session                                                         |
+| Desktop / pending       | Edge / pending              | pending                  | PENDING | No interactive production session                                                         |
+| Device / OS unspecified | Brave / version unspecified | c764e28 / 2026-09-27 UTC | PARTIAL | Owner tested MetaMask signature login and persistence after reload; slow loading reported |
 
 For each row record exact hardware, OS/browser version, SHA, URL, UTC time and issue references. Test homepage, 360px/zoom navigation, collection/explorer filters, Squig Original/Custom selection, Edition history, gallery create/reorder/captions/visibility and keyboard focus. Test private transitions in a separate anonymous browser.
 
@@ -32,3 +33,7 @@ Authenticated real-device checks, known-private URL smoke fixtures and external 
 ## Phase 9
 
 Phase 9 REAL_DEVICE_SHARE and EXTERNAL_OG gates remain PENDING. Actual operator evidence is required; browser automation does not certify a physical phone, mobile wallet, native share sheet or external crawler. All existing manual matrix results remain unchanged.
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.

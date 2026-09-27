@@ -2,7 +2,7 @@
 
 ## Phase 10 actual evidence
 
-On 2026-09-26, every documented external database URL remained absent. No schema/role probe, pilot, full import, duplicate review or real identity decision ran. Source/import/reconciliation counts are PENDING, not zero; no source was classified VERIFIED_READ_ONLY. No normalization or attribution rule changed without real evidence. See [phase10-report.md](phase10-report.md).
+On 2026-09-27 UTC, source probes ran from the existing production network in read-only transactions. Wallet links and four UglyBot connection groups connect but their credentials have effective write/admin capabilities. Gauntlet authentication fails; Survival and ImageSubmit hosts do not resolve; the separate image database URL is absent. No credential is classified VERIFIED_READ_ONLY. No source pilot, full import, duplicate review or identity decision was performed, and no upstream database was modified. Import completeness remains PENDING. Safe aggregate schema/count results and the credential follow-up are in [phase10-report.md](phase10-report.md).
 
 No real source database, wallet-link source or archive RPC was configured during Phase 9 implementation. Real import counts, identities, rejected rows, duplicates and remediation decisions are **PENDING**, not zero.
 
@@ -27,3 +27,7 @@ Use existing `/admin/reconciliation` confirm/reject/time-split actions only with
 After each approved historical feed completes, use `launch:handoff -- --feed <feed>` with ecosystem disabled. It performs a bounded cursor pass, rotating reconciliation pass and second cursor pass, persisting hashed cursors and counts. New records/corrections are measured, not interpreted as replay corruption. The probe remains PARTIAL until operators review all feed boundaries, complete any unfinished sweeps and attest HANDOFF. Enable LIVE ecosystem only after the existing backfill/readiness gates pass. Mutable sources use updated timestamps where supported and rotating reconciliation otherwise; no upstream write freeze is required.
 
 The available UglyBot checkout reads `holder_rules` from its database (`getHolderRules`, min/max token bounds); it contains no verified production branded-tier catalog. HOLDER_TIERS stays PENDING. No thresholds or speculative Edition adapters were added.
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.

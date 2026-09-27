@@ -105,3 +105,9 @@ Both UglyBot and Gauntlet default to Ethereum contract `0x8c9a02c0585200c4c65608
 - Phase 0 exports a provenance-pinned data snapshot by running only this pure ranking module in the inspection snapshot; runtime imports the resulting values. No second scoring implementation. OG means explicit Status `OG`; no inference from token number. Metadata traits remain canonical. Store hashes and source revision with imports. Future updates should re-export from the reviewed upstream implementation.
 
 Production schema, permissions, row counts and historical completeness remain unverified until read-only connection URLs are supplied. Previously committed production credentials in any ecosystem repository must be rotated by its owner; UglyDex does not copy or alter them.
+
+## Phase 11 live reinspection — 2026-09-27 UTC
+
+Fresh origin fetches still match all three pinned source revisions above. Catalog-only read-only queries against all eight mapped source databases checked all 26 registry-required table names. Twenty-five required tables exist in their intended public schemas, with all required columns; only Gauntlet main gauntlet_online_reward_events is missing. The Team database also has noncanonical copies of marketplace_purchases and holder_point_mappings; these are excluded from its reader grants. Images and ImageSubmit share one physical database.
+
+The [database-to-table mapping and eight exact SQL proposals](operator/phase11-reader-review/README.md) distinguish seven previously authorized/provisioned readers from the uncreated Gauntlet reader. The newly generated proposals have not been executed. Network TLS problems remain independent of source-local schema presence. Earlier source-only inventory statements are historical; no source application startup or migration was executed during reinspection.

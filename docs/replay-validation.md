@@ -2,7 +2,7 @@
 
 ## Phase 10 evidence boundary
 
-Production Replay A and B remain PENDING as of 2026-09-26: no production database, imported evidence or reviewed identity state was available. The Phase 10 release rerun exercises the existing disposable fixture replay and records its outcome in [phase10-report.md](phase10-report.md). Fixture fingerprints must not be copied into a production gate. Both v1 rulesets are unchanged.
+Production Replay A and B remain PENDING as of 2026-09-27 UTC. Both deployed databases now exist, but legacy source imports and reviewed identity inputs are not ready. The complete release check passed at `c764e28`, including local fixture Replay A/B with zero semantic differences; those fingerprints are not production evidence. Both v1 rulesets are unchanged. See [phase10-report.md](phase10-report.md).
 
 Run `npm run launch:replay` after input backfills and reviewed identity attribution settle. In staging/production require `OPS_CONFIRM=<environment>:replay`, matching `OPS_DATABASE_FINGERPRINT`, registered deployment identity and known commit. Disable all four workers and Edition contracts. Pause other UglyDex import/reconciliation writers; upstream services remain read-only and need no freeze.
 
@@ -17,3 +17,7 @@ Only explicit processing clocks (`calculatedAt`, `evaluatedAt`, ledger `createdA
 `DERIVED_REPLAY_STABLE` is critical. It cannot be manually attested. `launch:check` rehashes inputs/results and changes the gate to PENDING when evidence has since changed. Evidence is also bound to commit/environment and expires after 24 hours. A stable empty fixture cannot prove production provenance: independent catalog, mint, continuity, ownerOf, activity and deployment gates remain mandatory.
 
 Local fixture proof and production proof must be reported separately. Test-generated fingerprints live in ignored `.data/phase9-replay.json`; no fixture fingerprint is a production metric. Production Replay A/B remains PENDING without real evidence/access.
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.

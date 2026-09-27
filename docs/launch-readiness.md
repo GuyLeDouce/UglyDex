@@ -46,6 +46,10 @@ RPC evidence persists deployment number/hash, first mint observed in the bounded
 
 All external operational gates remain PENDING until executed on the intended deployment. A successful local test does not count as a real restore, wallet session, external preview or Railway measurement.
 
-## Phase 10 execution — 2026-09-26
+## Phase 10 execution — 2026-09-27 UTC
 
-At revision `811314b`, the unconfigured operator environment still reports NOT_READY: 31 PENDING gates, 20 blocking and 11 optional warnings. No production gate database is configured, so remote records were not inspected or reset. No gate was attested from fixture results. See [the Phase 10 access inventory and actual results](phase10-report.md).
+The starting unconfigured projection at `811314b` was NOT_READY: 31 PENDING gates, 20 blocking and 11 optional warnings. Railway access now permits real per-environment evidence at application revision `c764e28`. Staging database/migrations, archive RPC/start block, backup, restore and web deployment have been verified individually. Production was separately repaired with the owner's authorization after their push; it has not passed the launch policy. Gate evidence remains bound to environment, database and deployed application commit and expires after 24 hours. See [current exact gate counts and limitations](phase10-report.md).
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.

@@ -62,4 +62,8 @@ Phase 9 adds launch gates alongside live subsystem status. Launch evidence is as
 
 ## Phase 10 execution status
 
-No Railway service was accessible on 2026-09-26, so worker observation windows, chain/source lag, connection counts, render latency, staging outage recovery and post-launch errors remain PENDING. No pool, batch, concurrency or cadence setting was tuned. Existing local security/recovery regressions were rerun; exact outcomes are in [phase10-report.md](phase10-report.md), separate from deployment proof.
+Actual Railway staging measurements were collected on 2026-09-27 UTC: five samples each for home/explorer/passport, square/landscape PNGs, two concurrent first requests and a bounded cached burst. All sampled requests succeeded. The idle database sample had 1 connection of 100; active worker topology remains unmeasured. The first 10,000-block transfer batch imported 3,405 events in 39,798 ms with repeated RPC retries. Subsequent provider failures required a smaller operator batch and slower pacing; no render or database pool limits were increased. Workers remain disabled, and staging failure injection, recovery alerts and a live-worker observation window remain PENDING. See [measurements and limitations](phase10-report.md).
+
+## Phase 11 checkpoint — 2026-09-27 UTC
+
+See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.
