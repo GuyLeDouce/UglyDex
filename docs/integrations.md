@@ -1,5 +1,14 @@
 # Integration operating contract
 
+## Phase 11 bounded pilot follow-up
+
+The [pilot report](phase11-pilot-report.md) records the 16 available staging feed
+reviews, corrections, source warnings and individual approval decisions. Historical
+cursors and completion flags remain untouched; no full import or worker cycle was
+run. `onlineRewards` remains unavailable. Before subsequent Duel imports, retain
+the authoritative `UGLYBOT_BOT_DISCORD_ID` configuration described in
+[source bridges](source-bridges.md); never identify bot opponents by name.
+
 ## Phase 11 secure transport follow-up
 
 The [source bridges](source-bridges.md) preserve the existing adapters while
