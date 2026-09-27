@@ -1,3 +1,4 @@
+import { integrationConfigured } from '@/integrations/bridge-config';
 import 'server-only';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -56,10 +57,10 @@ export async function workerReadiness(service: Service, mode: WorkerMode) {
       return 'WAITING_BACKFILL';
   }
   if (service === 'ecosystem') {
-    const { integrationEnv, tables } = await import('@/integrations/registry');
+    const { tables } = await import('@/integrations/registry');
     const { feeds } = await import('@/sync/normalize');
-    const configured = feeds.filter(
-      (f) => !!process.env[integrationEnv[tables[f].integration]],
+    const configured = feeds.filter((f) =>
+      integrationConfigured(tables[f].integration),
     );
     if (!configured.length) return 'WAITING_CONFIGURATION';
     const sources = await db().integrationSource.findMany({

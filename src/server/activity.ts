@@ -1,3 +1,4 @@
+import { integrationConfigured } from '@/integrations/bridge-config';
 import 'server-only';
 import { Prisma } from '@/generated/prisma/client';
 import { db } from './db';
@@ -7,7 +8,7 @@ import {
   type ActivityInput,
 } from '@/domain/activity';
 import { feeds } from '@/sync/normalize';
-import { integrationEnv, tables } from '@/integrations/registry';
+import { tables } from '@/integrations/registry';
 type Scope = { collectorId?: string; squigId?: string; public?: boolean };
 async function predicate(scope: Scope) {
   let privacy = Prisma.sql`TRUE`;
@@ -156,7 +157,7 @@ export async function historyFreshness() {
       source: id,
       state:
         row?.state ??
-        (process.env[integrationEnv[tables[id].integration]]
+        (integrationConfigured(tables[id].integration)
           ? 'UNVALIDATED'
           : 'NOT_CONFIGURED'),
       updatedAt: row?.lastSuccessAt?.toISOString() ?? null,

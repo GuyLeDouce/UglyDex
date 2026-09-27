@@ -34,12 +34,11 @@ export async function getLinkedWalletsForDiscordUser(id: string) {
 // Return all matches. Never choose one conflicting Discord identity arbitrarily.
 export async function getDiscordIdentitiesForWallet(address: string) {
   const wallet = normalizeWallet(address);
-  const { readExternal } = await import('../read-only');
+  const { readSourceQuery } = await import('../queries');
   const guild = process.env.ECOSYSTEM_GUILD_ID;
   if (!guild) return { ok: false, reason: 'unconfigured' } as const;
-  return readExternal<{ discord_id: string; guild_id: string }>(
-    'links',
-    'SELECT discord_id, guild_id FROM public.wallet_links WHERE lower(wallet_address) = $1 AND guild_id = $2 AND verified = true ORDER BY discord_id LIMIT 200',
+  return readSourceQuery<{ discord_id: string; guild_id: string }>(
+    'walletIdentity',
     [wallet, discordId.parse(guild)],
   );
 }

@@ -19,6 +19,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "tsx --conditions=react-server scripts/migrate.ts",
     "integrations:inspect": "tsx --conditions=react-server scripts/inspect.ts",
+    "bridge:start": "tsx --conditions=react-server scripts/source-bridge.ts",
     "sync:identities": "tsx --conditions=react-server scripts/sync.ts identities",
     "sync:squigs": "tsx --conditions=react-server scripts/sync.ts squigs",
     "sync:uglybot": "tsx --conditions=react-server scripts/activity.ts uglybot",

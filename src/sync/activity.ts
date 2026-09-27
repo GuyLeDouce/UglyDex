@@ -1,10 +1,11 @@
+import { integrationConfigured } from '@/integrations/bridge-config';
 import 'server-only';
 import { Pool } from 'pg';
 import { db } from '@/server/db';
 import { readEnv } from '@/server/env';
 import { readPage, tableColumns, type ExternalRow } from '@/integrations/table';
-import { tables, integrationEnv } from '@/integrations/registry';
-import { readExternal } from '@/integrations/read-only';
+import { tables } from '@/integrations/registry';
+import { readSourceQuery } from '@/integrations/queries';
 import { hash, eventKey } from '@/domain/events';
 import { log } from '@/server/log';
 import { feeds, normalizeRow, type Feed } from './normalize';
@@ -30,15 +31,11 @@ export async function enrich(feed: Feed, rows: ExternalRow[]) {
       .map((r) => r.bounty_submission_id)
       .filter((v) => v != null);
     if (ids.length) {
-      const prizes = await readExternal<{
+      const prizes = await readSourceQuery<{
         id: string;
         project_name: string;
         token_id: string;
-      }>(
-        'prizes',
-        'SELECT id,project_name,token_id FROM public.bounty_submissions WHERE id=ANY($1::bigint[])',
-        [ids],
-      );
+      }>('bountyParents', [ids]);
       if (prizes.ok)
         for (const row of rows) {
           const prize = prizes.data.find(
@@ -52,9 +49,8 @@ export async function enrich(feed: Feed, rows: ExternalRow[]) {
     }
   }
   if (feed === 'survival') {
-    const games = await readExternal<{ id: string; started_at: Date }>(
-      'survival',
-      'SELECT id,started_at FROM public.squig_survival_games WHERE id = ANY($1::bigint[])',
+    const games = await readSourceQuery<{ id: string; started_at: Date }>(
+      'survivalParents',
       [rows.map((r) => r.game_id)],
     );
     if (!games.ok) throw new Error('PARENT_UNAVAILABLE');
@@ -64,9 +60,8 @@ export async function enrich(feed: Feed, rows: ExternalRow[]) {
       )?.started_at;
   }
   if (feed === 'duels') {
-    const rounds = await readExternal<{ duel_id: string; rounds: number }>(
-      'uglybot',
-      'SELECT duel_id,count(*)::int AS rounds FROM public.squig_duel_rounds WHERE duel_id = ANY($1::text[]) GROUP BY duel_id',
+    const rounds = await readSourceQuery<{ duel_id: string; rounds: number }>(
+      'duelRounds',
       [rows.map((r) => r.id)],
     );
     if (rounds.ok)
@@ -374,7 +369,7 @@ export async function activityCycle(
 ) {
   await reattributePending();
   for (const feed of feeds)
-    if (!stopped() && process.env[integrationEnv[tables[feed].integration]]) {
+    if (!stopped() && integrationConfigured(tables[feed].integration)) {
       try {
         await runActivityFeed(feed, options);
         if (mutable.has(feed))

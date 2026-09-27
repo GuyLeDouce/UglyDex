@@ -35,6 +35,12 @@ export const environmentSchema = z
     GAUNTLET_SURVIVAL_DATABASE_URL: optional(pg),
     GAUNTLET_IMAGE_DATABASE_URL: optional(pg),
     IMAGE_SUBMIT_DATABASE_URL: optional(pg),
+    UGLYBOT_BRIDGE_URL: optional(http),
+    UGLYBOT_BRIDGE_SECRET: optional(z.string().min(32)),
+    GAUNTLET_BRIDGE_URL: optional(http),
+    GAUNTLET_BRIDGE_SECRET: optional(z.string().min(32)),
+    IMAGE_BRIDGE_URL: optional(http),
+    IMAGE_BRIDGE_SECRET: optional(z.string().min(32)),
     ECOSYSTEM_GUILD_ID: optional(z.string().regex(/^\d{17,20}$/)),
     ETH_RPC_URL: optional(http),
     ETH_EXPLORER_URL: optional(z.string().url().startsWith('https://')),
@@ -62,6 +68,32 @@ export const environmentSchema = z
     SQUIG_IMAGE_BASE_URL: optional(http),
   })
   .superRefine((env, ctx) => {
+    for (const prefix of ['UGLYBOT', 'GAUNTLET', 'IMAGE'] as const) {
+      const value = env[`${prefix}_BRIDGE_URL`],
+        secret = env[`${prefix}_BRIDGE_SECRET`];
+      if (!!value !== !!secret)
+        ctx.addIssue({
+          code: 'custom',
+          path: [`${prefix}_BRIDGE_URL`],
+          message: 'Bridge URL and secret must be paired',
+        });
+      if (value) {
+        const url = new URL(value);
+        if (
+          url.protocol !== 'https:' ||
+          url.username ||
+          url.password ||
+          url.pathname !== '/' ||
+          url.search ||
+          url.hash
+        )
+          ctx.addIssue({
+            code: 'custom',
+            path: [`${prefix}_BRIDGE_URL`],
+            message: 'Bridge requires a credential-free HTTPS origin',
+          });
+      }
+    }
     const base = new URL(env.PUBLIC_BASE_URL);
     if (
       base.pathname !== '/' ||

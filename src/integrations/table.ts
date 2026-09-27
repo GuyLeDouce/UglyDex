@@ -1,13 +1,26 @@
 import 'server-only';
 import { readExternal, type IntegrationResult } from './read-only';
 import type { TableSpec } from './registry';
+import { bridgeConfigured } from './bridge-config';
+import { bridgeRequest } from './bridge-client';
+import {
+  feedKey,
+  pageInput,
+  scopeColumns,
+  effectivePage,
+} from './bridge-protocol';
 export type ExternalRow = Record<string, unknown>;
 export function identifier(value: string) {
   if (!/^[a-z_][a-z_0-9]*$/.test(value))
     throw new Error('INVALID_SQL_IDENTIFIER');
   return `"${value}"`;
 }
-export async function tableColumns(spec: TableSpec) {
+export async function tableColumns(spec: TableSpec, direct = false) {
+  if (!direct && bridgeConfigured(spec.integration))
+    return bridgeRequest<{ column_name: string }[]>(
+      spec.integration,
+      `/v1/feeds/${feedKey(spec)}/columns`,
+    );
   return readExternal<{ column_name: string }>(
     spec.integration,
     'SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = $2 ORDER BY ordinal_position',
@@ -21,9 +34,47 @@ export async function readPage(
   limit = 200,
   since?: { column: string; value: Date },
 ): Promise<IntegrationResult<ExternalRow[]>> {
+  if (!bridgeConfigured(spec.integration))
+    return readDirectPage(spec, after, filters, limit, since);
+  const feed = feedKey(spec),
+    scope: Record<string, unknown> = {};
+  for (const [column, value] of Object.entries(filters)) {
+    const name = Object.entries(scopeColumns[feed] ?? {}).find(
+      ([, c]) => c === column,
+    )?.[0];
+    if (!name || (name === 'approved' && value !== 'approved'))
+      throw new Error('INVALID_SCOPE');
+    scope[name] = name === 'approved' ? true : value;
+  }
+  const input = pageInput.parse({
+    order: spec.keys[0] === 'updated_at' ? 'updated' : 'key',
+    after,
+    limit,
+    since: since?.value.toISOString(),
+    scope,
+  });
+  const expected = effectivePage(feed, input);
+  if (
+    JSON.stringify(spec.keys) !== JSON.stringify(expected.spec.keys) ||
+    (since && since.column !== expected.since?.column)
+  )
+    throw new Error('INVALID_CURSOR_ORDER');
+  return bridgeRequest<ExternalRow[]>(
+    spec.integration,
+    `/v1/feeds/${feed}/page`,
+    input,
+  );
+}
+export async function readDirectPage(
+  spec: TableSpec,
+  after?: unknown[],
+  filters: Record<string, unknown> = {},
+  limit = 200,
+  since?: { column: string; value: Date },
+): Promise<IntegrationResult<ExternalRow[]>> {
   if (!Number.isInteger(limit) || limit < 1 || limit > 500)
     throw new Error('INVALID_PAGE_SIZE');
-  const found = await tableColumns(spec);
+  const found = await tableColumns(spec, true);
   if (!found.ok) return found;
   const names = new Set(found.data.map((c) => c.column_name));
   if (spec.required.some((c) => !names.has(c)))

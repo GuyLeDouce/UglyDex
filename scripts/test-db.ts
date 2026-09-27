@@ -44,6 +44,12 @@ for (const key of [
   'ETH_RPC_URL',
   'ECOSYSTEM_GUILD_ID',
   'SQUIG_IMAGE_BASE_URL',
+  'UGLYBOT_BRIDGE_URL',
+  'UGLYBOT_BRIDGE_SECRET',
+  'GAUNTLET_BRIDGE_URL',
+  'GAUNTLET_BRIDGE_SECRET',
+  'IMAGE_BRIDGE_URL',
+  'IMAGE_BRIDGE_SECRET',
 ])
   process.env[key] = '';
 process.env.SQUIGS_CONTRACT_ADDRESS =
@@ -1179,6 +1185,18 @@ try {
   }
   const { phase9ReplayTests } = await import('../tests/db/phase9-replay');
   await phase9ReplayTests(check);
+  const bridgeExternal = postgres.getPgClient(
+    'uglydex_external_test',
+    '127.0.0.1',
+  );
+  await bridgeExternal.connect();
+  try {
+    const { sourceBridgeDatabaseTests } =
+      await import('../tests/db/source-bridge');
+    await sourceBridgeDatabaseTests(check, bridgeExternal);
+  } finally {
+    await bridgeExternal.end();
+  }
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));
 } catch (error) {
