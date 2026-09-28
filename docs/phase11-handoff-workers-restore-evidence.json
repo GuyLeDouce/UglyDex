@@ -1,0 +1,3785 @@
+{
+  "applicationRevision": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f",
+  "stagingDatabaseFingerprint": "f72c0bb40a9e5946a4d07dc63b5559c253bc85b48af83914aec99cd03fb4bc3a",
+  "restore": {
+    "backup": {
+      "createdAt": "2026-09-27T18:32:04Z",
+      "size": 34920589,
+      "archiveSha256": "9e0e77769aff4cdb5cb534ab6fbce6473218d42b86662a75b00dce8c62062ba3",
+      "tables": {
+        "AchievementDefinition": 65,
+        "ActivityAttributionJob": 0,
+        "ActivityCorrection": 132,
+        "AuthChallenge": 48,
+        "AuthSession": 1,
+        "CanonicalTrait": 345,
+        "ChainBlock": 4785,
+        "ChainCursor": 1,
+        "CollectibleArtwork": 0,
+        "CollectibleAudit": 0,
+        "CollectionAudit": 38254,
+        "CollectionJob": 0,
+        "CollectionMilestone": 9958,
+        "CollectionReplay": 1,
+        "CollectionRuleset": 1,
+        "CollectionSetDefinition": 52,
+        "CollectionSetRequirement": 81,
+        "CollectionSnapshot": 377,
+        "Collector": 377,
+        "CollectorAchievement": 16211,
+        "CollectorActivity": 32400,
+        "CollectorCosmeticPreference": 0,
+        "CollectorGallery": 1,
+        "CollectorGalleryItem": 0,
+        "CollectorOwnershipPeriod": 2604,
+        "CollectorProgress": 377,
+        "CollectorRefreshRequest": 2,
+        "CollectorSetProgress": 19604,
+        "CollectorTraitDiscovery": 8692,
+        "CollectorWallet": 2,
+        "CosmeticDefinition": 17,
+        "CosmeticEntitlement": 0,
+        "DeploymentIdentity": 1,
+        "EditionBalance": 0,
+        "EditionCheckpoint": 0,
+        "EditionContract": 0,
+        "EditionOwnership": 0,
+        "EditionTransfer": 0,
+        "ExternalIdentity": 375,
+        "HistoricalIdentityAttribution": 286,
+        "IdentityReconciliation": 285,
+        "ImportRejection": 0,
+        "IntegrationSource": 17,
+        "LaunchGate": 22,
+        "NftTransfer": 11052,
+        "OperationalAudit": 568,
+        "OperationalMetric": 0,
+        "OwnershipRefresh": 1,
+        "ProductionStage": 0,
+        "ProgressionAudit": 20511,
+        "ProgressionJob": 0,
+        "ProgressionMilestone": 551,
+        "ProgressionReplay": 1,
+        "ProgressionRuleset": 1,
+        "QuestDefinition": 0,
+        "QuestProgress": 0,
+        "RateLimitBucket": 91,
+        "ReconciliationDecision": 284,
+        "ReplayProof": 1,
+        "ShareRenderMetric": 58,
+        "Squig": 4444,
+        "SquigAchievement": 97768,
+        "SquigCustom": 0,
+        "SquigDiscovery": 2866,
+        "SquigDisplayPreference": 0,
+        "SquigEdition": 0,
+        "SquigEditionRelation": 0,
+        "SquigOwnership": 7264,
+        "SquigPassportEvent": 391,
+        "SquigProgress": 4444,
+        "SquigProvenance": 4444,
+        "SquigTrait": 44440,
+        "SyncRun": 15726,
+        "WalletLinkEvidence": 377,
+        "WalletOwnershipPeriod": 11003,
+        "WorkerControl": 0,
+        "WorkerHeartbeat": 0,
+        "XpLedgerEntry": 13058,
+        "_prisma_migrations": 11
+      }
+    },
+    "targetFingerprint": "dcceb28bbe1fdd44417fca99426a0c1082c44714bb1cbae2b2263ef11de27bd3",
+    "sourceFingerprint": "f72c0bb40a9e5946a4d07dc63b5559c253bc85b48af83914aec99cd03fb4bc3a",
+    "inventoryTables": 79,
+    "inventoryMatched": 79,
+    "inventoryHash": "71d3ad48297fafcc165aa8f4e9166329f3a1229667e0f214caacc197f80865ff",
+    "singleTransaction": true,
+    "targetEmpty": true,
+    "workersEnabled": 0,
+    "editionsEnabled": 0,
+    "deploymentIdentity": 0,
+    "readOnlyVerification": "PASS",
+    "restoredAt": "2026-09-27T20:18:19Z",
+    "applicationCommit": "2ab0fc39a4ba7d392086d5d66597457ca326a751"
+  },
+  "handoff": {
+    "applicationCommit": "2ab0fc39a4ba7d392086d5d66597457ca326a751",
+    "reviewCommit": "cf4914196e97d80d25f89d6911b3d1be01d84543",
+    "databaseFingerprint": "f72c0bb40a9e5946a4d07dc63b5559c253bc85b48af83914aec99cd03fb4bc3a",
+    "feeds": [
+      {
+        "timestamp": "2026-09-27T20:45:43.789Z",
+        "feed": "duels",
+        "first": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 291,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 291,
+          "normalized": 291,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 187,
+          "collectorLinked": 291
+        },
+        "afterCursorHash": "e5ac883536bae77e23f456ed5f5f0e9c42681a2acd4d31df690c35f6b57a0638",
+        "beforeCursorHash": "e5ac883536bae77e23f456ed5f5f0e9c42681a2acd4d31df690c35f6b57a0638",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:45:44.928Z",
+        "feed": "marketplace",
+        "first": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 45,
+          "skipped": 45,
+          "updated": 0,
+          "eligible": 45,
+          "inserted": 0,
+          "duplicates": 45,
+          "normalized": 45,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 45
+        },
+        "afterCursorHash": "2fb1dc7699d145e9eba632819713ffc1445515349f463ef8b67f0bb242c739cd",
+        "beforeCursorHash": "2fb1dc7699d145e9eba632819713ffc1445515349f463ef8b67f0bb242c739cd",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:45:47.604Z",
+        "feed": "purchases",
+        "first": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 202,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 202,
+          "normalized": 202,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 202
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 123,
+          "skipped": 123,
+          "updated": 0,
+          "eligible": 123,
+          "inserted": 0,
+          "duplicates": 123,
+          "normalized": 123,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 123
+        },
+        "afterCursorHash": "262650562392c4a7ff75cd084980a29814d57134f1d731be70f3f1e28f4e06ea",
+        "beforeCursorHash": "262650562392c4a7ff75cd084980a29814d57134f1d731be70f3f1e28f4e06ea",
+        "reconciliationSweepComplete": true
+      },
+      {
+        "timestamp": "2026-09-27T20:45:48.699Z",
+        "feed": "bounty",
+        "first": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 12,
+          "skipped": 12,
+          "updated": 0,
+          "eligible": 12,
+          "inserted": 0,
+          "duplicates": 12,
+          "normalized": 12,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 12
+        },
+        "afterCursorHash": "d35f5efc8c294d675f5d83a93608b8447a3581a401f6de08a86f5b6dbefa6b3d",
+        "beforeCursorHash": "d35f5efc8c294d675f5d83a93608b8447a3581a401f6de08a86f5b6dbefa6b3d",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:45:49.936Z",
+        "feed": "bountyEntries",
+        "first": {
+          "failed": 0,
+          "scanned": 43,
+          "skipped": 43,
+          "updated": 0,
+          "eligible": 43,
+          "inserted": 0,
+          "duplicates": 43,
+          "normalized": 43,
+          "unresolved": 43,
+          "ignoredRows": 0,
+          "squigLinked": 43,
+          "collectorLinked": 0
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 43,
+          "skipped": 43,
+          "updated": 0,
+          "eligible": 43,
+          "inserted": 0,
+          "duplicates": 43,
+          "normalized": 43,
+          "unresolved": 43,
+          "ignoredRows": 0,
+          "squigLinked": 43,
+          "collectorLinked": 0
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "afterCursorHash": "d35d93509ae15a9af9dec0853e9a99d578cf226b980236cf7560e88ad2a6e57b",
+        "beforeCursorHash": "d35d93509ae15a9af9dec0853e9a99d578cf226b980236cf7560e88ad2a6e57b",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:45:50.922Z",
+        "feed": "bountyResults",
+        "first": {
+          "failed": 0,
+          "scanned": 6,
+          "skipped": 6,
+          "updated": 0,
+          "eligible": 6,
+          "inserted": 0,
+          "duplicates": 6,
+          "normalized": 6,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 6,
+          "collectorLinked": 6
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 6,
+          "skipped": 6,
+          "updated": 0,
+          "eligible": 6,
+          "inserted": 0,
+          "duplicates": 6,
+          "normalized": 6,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 6,
+          "collectorLinked": 6
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "afterCursorHash": "0e71c9d61a801b86235274dfab92b15dfb859514f351bf1627e1bc07bca5b60c",
+        "beforeCursorHash": "0e71c9d61a801b86235274dfab92b15dfb859514f351bf1627e1bc07bca5b60c",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:45:52.287Z",
+        "feed": "maw",
+        "first": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 81,
+          "skipped": 102,
+          "updated": 0,
+          "eligible": 66,
+          "inserted": 0,
+          "duplicates": 87,
+          "normalized": 87,
+          "unresolved": 0,
+          "ignoredRows": 15,
+          "squigLinked": 87,
+          "collectorLinked": 87
+        },
+        "afterCursorHash": "e20d0633953b9c13edb44beafc7771c52a13901d6ea25538473eb7422a58a568",
+        "beforeCursorHash": "e20d0633953b9c13edb44beafc7771c52a13901d6ea25538473eb7422a58a568",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:45:53.394Z",
+        "feed": "mawPrizes",
+        "first": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 66,
+          "skipped": 66,
+          "updated": 0,
+          "eligible": 1,
+          "inserted": 0,
+          "duplicates": 1,
+          "normalized": 1,
+          "unresolved": 0,
+          "ignoredRows": 65,
+          "squigLinked": 1,
+          "collectorLinked": 1
+        },
+        "afterCursorHash": "50dd8129b121298e352c73efd9ac2e5cb826b1dcb28532fed75f5873581c379a",
+        "beforeCursorHash": "50dd8129b121298e352c73efd9ac2e5cb826b1dcb28532fed75f5873581c379a",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:45:57.695Z",
+        "feed": "claimEvents",
+        "first": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "afterCursorHash": "489a9565650ccffdc7e600d7dcf8d06e05f57a11ae00cd45df3f7bd4c92399ab",
+        "beforeCursorHash": "489a9565650ccffdc7e600d7dcf8d06e05f57a11ae00cd45df3f7bd4c92399ab",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:46:01.455Z",
+        "feed": "runs",
+        "first": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 142,
+          "skipped": 142,
+          "updated": 0,
+          "eligible": 142,
+          "inserted": 0,
+          "duplicates": 142,
+          "normalized": 142,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 142
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "afterCursorHash": "ca6c4d4ce33b1e21147fda6083afdaa99e6150491cc8f709f267e47b683ff226",
+        "beforeCursorHash": "ca6c4d4ce33b1e21147fda6083afdaa99e6150491cc8f709f267e47b683ff226",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:46:05.432Z",
+        "feed": "survival",
+        "first": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "afterCursorHash": "acd6e90631be752dc9aa84ebc110c6b6407d00978a728602fea3d7de3b5442c2",
+        "beforeCursorHash": "acd6e90631be752dc9aa84ebc110c6b6407d00978a728602fea3d7de3b5442c2",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:46:09.283Z",
+        "feed": "imageUses",
+        "first": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "afterCursorHash": "bb257b6a873f18050a84f13ebf3a679babece0a9d4e7595450d8909a84bae00c",
+        "beforeCursorHash": "bb257b6a873f18050a84f13ebf3a679babece0a9d4e7595450d8909a84bae00c",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:46:13.303Z",
+        "feed": "submissions",
+        "first": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "afterCursorHash": "776641c2545360fb5ab2b5bcb9335ee6dfc495e236338ff38551e0dd6faf6be5",
+        "beforeCursorHash": "776641c2545360fb5ab2b5bcb9335ee6dfc495e236338ff38551e0dd6faf6be5",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:46:17.169Z",
+        "feed": "liveImages",
+        "first": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 200,
+          "skipped": 200,
+          "updated": 0,
+          "eligible": 200,
+          "inserted": 0,
+          "duplicates": 200,
+          "normalized": 200,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 200
+        },
+        "afterCursorHash": "2021bfcf916adca8c3c724e44ef0de9873a3b8b8f9d00974868d55254e755982",
+        "beforeCursorHash": "2021bfcf916adca8c3c724e44ef0de9873a3b8b8f9d00974868d55254e755982",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:46:18.310Z",
+        "feed": "madlibPublications",
+        "first": {
+          "failed": 0,
+          "scanned": 13,
+          "skipped": 0,
+          "updated": 13,
+          "eligible": 13,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 13,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 13
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 13,
+          "skipped": 13,
+          "updated": 0,
+          "eligible": 13,
+          "inserted": 0,
+          "duplicates": 13,
+          "normalized": 13,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 13
+        },
+        "afterCursorHash": "fe5bda594d7ea6d534856ec9720837379c9f1a3aeb8a90e117450b89533cc4fd",
+        "beforeCursorHash": "3ba3235011e7d9b292af760a1ca8f99f8c6daeef9d4f3fefed12bbf4983c760b",
+        "reconciliationSweepComplete": false
+      },
+      {
+        "timestamp": "2026-09-27T20:46:19.320Z",
+        "feed": "madlibOperations",
+        "first": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "second": {
+          "failed": 0,
+          "scanned": 0,
+          "skipped": 0,
+          "updated": 0,
+          "eligible": 0,
+          "inserted": 0,
+          "duplicates": 0,
+          "normalized": 0,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 0
+        },
+        "rejected": 0,
+        "reconcile": {
+          "failed": 0,
+          "scanned": 23,
+          "skipped": 23,
+          "updated": 0,
+          "eligible": 23,
+          "inserted": 0,
+          "duplicates": 23,
+          "normalized": 23,
+          "unresolved": 0,
+          "ignoredRows": 0,
+          "squigLinked": 0,
+          "collectorLinked": 23
+        },
+        "afterCursorHash": "0a112f4b57eda64a9cb0c5b3ae25936443ab86daa8f5884d028e889b0344ae16",
+        "beforeCursorHash": "0a112f4b57eda64a9cb0c5b3ae25936443ab86daa8f5884d028e889b0344ae16",
+        "reconciliationSweepComplete": false
+      }
+    ],
+    "corrections": {
+      "total": 13,
+      "financialOrIdentityOrMetadataChanges": 0,
+      "retracted": 0,
+      "reason": "UPSTREAM_SOURCE_UPDATED_AT_CHANGED"
+    },
+    "forwardCursorsMonotonic": true,
+    "normalIncrementalJobsProcessed": 9,
+    "unavailable": "onlineRewards",
+    "inputHash": "e9dab8cdb3ddfe239feff1fc500892cee8d8b510c39b64157323f38b7f4a9e15"
+  },
+  "preWorkerReplay": {
+    "id": "6488a39d-df15-4b9d-be55-e0f86b0146fa",
+    "status": "VERIFIED",
+    "inputHash": "e9dab8cdb3ddfe239feff1fc500892cee8d8b510c39b64157323f38b7f4a9e15",
+    "replayA": {
+      "CollectorProgress": {
+        "count": 377,
+        "sha256": "94491a6fbf1d15d97ffed3dbdd2e08a129ce3ce78c0e53257fc48f9d543b1c7c"
+      },
+      "SquigProgress": {
+        "count": 4444,
+        "sha256": "659eea58f070645310ed6d07313c4df416146961288ad62197107957f02f3848"
+      },
+      "XpLedgerEntry": {
+        "count": 13058,
+        "sha256": "b46010ccd5d96afe9220190c1de88792c7f93cf3c97e5fac2c1daedf097cee98"
+      },
+      "CollectorAchievement": {
+        "count": 16211,
+        "sha256": "fc3f157ad4c31f02a5dedfb9d064482adb1492b490401f0e4ce43c47b46a25b5"
+      },
+      "SquigAchievement": {
+        "count": 97768,
+        "sha256": "1ef48cc13c97f31887654855275bdca699cd62992c3acbc4a4e91d0bc9e988f5"
+      },
+      "ProgressionMilestone": {
+        "count": 551,
+        "sha256": "98606b3c43a59ded78140f90c2cef2ddc21256656d8d4c27252e6d8d7d1df512"
+      },
+      "SquigDiscovery": {
+        "count": 2866,
+        "sha256": "a6951da94b6cb0959725355f88779460ead13bdfb18b8b7e2a0cad39da5518ae"
+      },
+      "CollectorTraitDiscovery": {
+        "count": 8692,
+        "sha256": "46b1692adfa142ac1cc5aaa038f36b021b13490fe9ff98ff77ff17329a538196"
+      },
+      "CollectorSetProgress": {
+        "count": 19604,
+        "sha256": "2c63ef7666e47ac1ebc58e51bca597232d498660cec3a9f99de4281b4c0a5ec6"
+      },
+      "CollectionSnapshot": {
+        "count": 377,
+        "sha256": "fd3cbaee67b33ce017049032f943327668ef6fd53e3037d7317998da68c5af72"
+      },
+      "CollectionMilestone": {
+        "count": 9958,
+        "sha256": "35bb9210d164545cd23812ab5e6c899b9552bb254e177d1f8795acee1cccaafa"
+      }
+    },
+    "replayB": {
+      "CollectorProgress": {
+        "count": 377,
+        "sha256": "94491a6fbf1d15d97ffed3dbdd2e08a129ce3ce78c0e53257fc48f9d543b1c7c"
+      },
+      "SquigProgress": {
+        "count": 4444,
+        "sha256": "659eea58f070645310ed6d07313c4df416146961288ad62197107957f02f3848"
+      },
+      "XpLedgerEntry": {
+        "count": 13058,
+        "sha256": "b46010ccd5d96afe9220190c1de88792c7f93cf3c97e5fac2c1daedf097cee98"
+      },
+      "CollectorAchievement": {
+        "count": 16211,
+        "sha256": "fc3f157ad4c31f02a5dedfb9d064482adb1492b490401f0e4ce43c47b46a25b5"
+      },
+      "SquigAchievement": {
+        "count": 97768,
+        "sha256": "1ef48cc13c97f31887654855275bdca699cd62992c3acbc4a4e91d0bc9e988f5"
+      },
+      "ProgressionMilestone": {
+        "count": 551,
+        "sha256": "98606b3c43a59ded78140f90c2cef2ddc21256656d8d4c27252e6d8d7d1df512"
+      },
+      "SquigDiscovery": {
+        "count": 2866,
+        "sha256": "a6951da94b6cb0959725355f88779460ead13bdfb18b8b7e2a0cad39da5518ae"
+      },
+      "CollectorTraitDiscovery": {
+        "count": 8692,
+        "sha256": "46b1692adfa142ac1cc5aaa038f36b021b13490fe9ff98ff77ff17329a538196"
+      },
+      "CollectorSetProgress": {
+        "count": 19604,
+        "sha256": "2c63ef7666e47ac1ebc58e51bca597232d498660cec3a9f99de4281b4c0a5ec6"
+      },
+      "CollectionSnapshot": {
+        "count": 377,
+        "sha256": "fd3cbaee67b33ce017049032f943327668ef6fd53e3037d7317998da68c5af72"
+      },
+      "CollectionMilestone": {
+        "count": 9958,
+        "sha256": "35bb9210d164545cd23812ab5e6c899b9552bb254e177d1f8795acee1cccaafa"
+      }
+    },
+    "differences": []
+  },
+  "workerObservationBeforeFinalReplay": [
+    {
+      "service": "blockchain",
+      "cycles": 399,
+      "successes": 399,
+      "failures": 0,
+      "firstSuccess": "2026-09-27T23:27:00.501Z",
+      "lastSuccess": "2026-09-28T00:08:18.869Z",
+      "processed": 0,
+      "failedJobs": 0,
+      "activityPages": 0,
+      "feeds": [],
+      "scanned": 0,
+      "inserted": 0,
+      "updated": 0,
+      "retracted": 0
+    },
+    {
+      "service": "ecosystem",
+      "cycles": 8,
+      "successes": 8,
+      "failures": 0,
+      "firstSuccess": "2026-09-27T23:35:08.281Z",
+      "lastSuccess": "2026-09-28T00:07:59.187Z",
+      "processed": 0,
+      "failedJobs": 0,
+      "activityPages": 141,
+      "feeds": [
+        "bounty",
+        "bountyEntries",
+        "bountyResults",
+        "claimEvents",
+        "duels",
+        "imageUses",
+        "liveImages",
+        "madlibOperations",
+        "madlibPublications",
+        "marketplace",
+        "maw",
+        "mawPrizes",
+        "purchases",
+        "runs",
+        "submissions",
+        "survival"
+      ],
+      "scanned": 27213,
+      "inserted": 1,
+      "updated": 101,
+      "retracted": 0
+    },
+    {
+      "service": "progression",
+      "cycles": 101,
+      "successes": 101,
+      "failures": 0,
+      "firstSuccess": "2026-09-27T23:40:08.712Z",
+      "lastSuccess": "2026-09-28T00:08:06.540Z",
+      "processed": 4593,
+      "failedJobs": 0,
+      "activityPages": 0,
+      "feeds": [],
+      "scanned": 0,
+      "inserted": 0,
+      "updated": 0,
+      "retracted": 0
+    },
+    {
+      "service": "collections",
+      "cycles": 47,
+      "successes": 47,
+      "failures": 0,
+      "firstSuccess": "2026-09-27T23:55:31.750Z",
+      "lastSuccess": "2026-09-28T00:08:14.367Z",
+      "processed": 189,
+      "failedJobs": 0,
+      "activityPages": 0,
+      "feeds": [],
+      "scanned": 0,
+      "inserted": 0,
+      "updated": 0,
+      "retracted": 0
+    }
+  ],
+  "revisionReview": {
+    "commit": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f",
+    "restoreCodeUnchangedFromVerifiedDrill": true,
+    "restoreTargetCleaned": true,
+    "readinessOnlyFixes": true,
+    "release": "5837400fbb58b90de20853255046de18c4739c37eff835178aea7efc710dcba3",
+    "smoke": "73755f4911b41ffcef933489e210348ed155de03f5449fdaf47e3323956200ae",
+    "reviewedAt": "2026-09-28T00:00:03.773Z"
+  },
+  "finalFrozenReplay": {
+    "input": {
+      "Collector": {
+        "count": 377,
+        "sha256": "fda98883c347a683de4c4456465232c547d91db6eb7d5fdb79a73013ee7571b7"
+      },
+      "ExternalIdentity": {
+        "count": 375,
+        "sha256": "dfe1b13eefdbb8aab28662c8457cf44ea522e1ff1c00cd4f775b06c86eb3707f"
+      },
+      "CollectorWallet": {
+        "count": 2,
+        "sha256": "7758f5d3ecc78db6677d34fa4fd8c2c7ae9816e1e16780b7efbab927f89c50a4"
+      },
+      "HistoricalIdentityAttribution": {
+        "count": 286,
+        "sha256": "f5a1ba6be4e3233da878d25276ae34694bd84aabe2eb48dba069f2c3269c2652"
+      },
+      "CollectorOwnershipPeriod": {
+        "count": 2605,
+        "sha256": "f5d9f13287689d2c3ab28c0219c1f7c2988535779e67bebfbf54460fb68e35b0"
+      },
+      "NftTransfer": {
+        "count": 11053,
+        "sha256": "24e9dbf0392644be695a9171cc1a62a8ee17354aff3360c22a850fa9e7a96354"
+      },
+      "SquigProvenance": {
+        "count": 4444,
+        "sha256": "9f34e76c60657b3e715db024b6854f795aedce719f751983ea95f5a5c1233f7d"
+      },
+      "SquigOwnership": {
+        "count": 11709,
+        "sha256": "a6c1c3a020e995f2894c8bd623217a902a8cd4656d5b73e9a0da5a1aef41fb22"
+      },
+      "Squig": {
+        "count": 4444,
+        "sha256": "8b345e5dfdf49cf83c30a918d5967803dd0ecf1ca87f67bab3eea5ffdc9019bf"
+      },
+      "SquigTrait": {
+        "count": 44440,
+        "sha256": "4afb9741d9bbdbd932ed71ed64d4843d2a4c5d167896740b6c2f23b926591b77"
+      },
+      "CollectorActivity": {
+        "count": 32402,
+        "sha256": "5ba80f8fc245996abc085ede3145ea8a3c5267d90280bd48311cf3eed0509c59"
+      },
+      "IntegrationSource": {
+        "count": 17,
+        "sha256": "f7869e0fcee6e71dd67c0c9f73d6a8096f805c1465ec3934ab589f54f6c08909"
+      },
+      "ProgressionRuleset": {
+        "count": 1,
+        "sha256": "04eb87c3edd95874ec224949aabfd5d1a12231491e9f0cfa6d84425d56e8742f"
+      },
+      "CollectionRuleset": {
+        "count": 1,
+        "sha256": "8e4ddedf18fc7bb66ad37d0f76d8060e3a45ebacd403626849d353e60553d817"
+      },
+      "AchievementDefinition": {
+        "count": 65,
+        "sha256": "312fdb054f7d05f06642359c4f517b49ed118e2a559dcb934874670ad3c298af"
+      },
+      "CollectionSetDefinition": {
+        "count": 52,
+        "sha256": "a8960623ae7790457bce47270fe93cb405f072525d1635c73f145f09598732dd"
+      },
+      "CollectionSetRequirement": {
+        "count": 81,
+        "sha256": "312ac4a83d79b9dd7349b74888df2c70682db2e59b54e2a0e083a6ee591f3365"
+      },
+      "CosmeticDefinition": {
+        "count": 17,
+        "sha256": "37e415220c540864414a2399562c1b0c5784958e394f743e3b21e0ee47323a3c"
+      },
+      "CollectorCosmeticPreference": {
+        "count": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "result": {
+      "id": "b6a1d45d-d9fc-454a-9771-37da3cb450c1",
+      "status": "VERIFIED",
+      "inputHash": "83b5ec1c293e1452ee560ddd3afd35da72a6c2d61494b3273184d7419f7162f1",
+      "replayA": {
+        "CollectorProgress": {
+          "count": 377,
+          "sha256": "7c96050b0a69d8cd8bdd614edbf45572217a94c03173a0fa6febeedb64251c87"
+        },
+        "SquigProgress": {
+          "count": 4444,
+          "sha256": "659eea58f070645310ed6d07313c4df416146961288ad62197107957f02f3848"
+        },
+        "XpLedgerEntry": {
+          "count": 13059,
+          "sha256": "fbe80022346aac353161f2c9e099f0ce4fbf9a3304f4f4366e83e1e4e17c7d57"
+        },
+        "CollectorAchievement": {
+          "count": 16211,
+          "sha256": "b0ec8f444eecb88a9c3eab8a79d449f8efcb708dbab35b1b1994aef347f89b24"
+        },
+        "SquigAchievement": {
+          "count": 97768,
+          "sha256": "1ef48cc13c97f31887654855275bdca699cd62992c3acbc4a4e91d0bc9e988f5"
+        },
+        "ProgressionMilestone": {
+          "count": 551,
+          "sha256": "98606b3c43a59ded78140f90c2cef2ddc21256656d8d4c27252e6d8d7d1df512"
+        },
+        "SquigDiscovery": {
+          "count": 2867,
+          "sha256": "8c00aa95e162b6a80bdf25effccdb8b84e017588596793225852c8ae10046db8"
+        },
+        "CollectorTraitDiscovery": {
+          "count": 8696,
+          "sha256": "1267cfe170ceaeef0930aeb49a26cb00c99e7663bc85c0deec8169a6c6dcdd08"
+        },
+        "CollectorSetProgress": {
+          "count": 19604,
+          "sha256": "08d42e0db0f27a8f7a3028c8daea8329df5c0db2d36b7cd76fc779998ca025af"
+        },
+        "CollectionSnapshot": {
+          "count": 377,
+          "sha256": "b645a080f215f2b6f17260f94cb6ed9f097613e3dbfc95b7102fd807b4687b56"
+        },
+        "CollectionMilestone": {
+          "count": 9962,
+          "sha256": "bd9b57027d8a5ad155310e9a948ba17ec143bfc1b949654daef4e11d2bf29e10"
+        }
+      },
+      "replayB": {
+        "CollectorProgress": {
+          "count": 377,
+          "sha256": "7c96050b0a69d8cd8bdd614edbf45572217a94c03173a0fa6febeedb64251c87"
+        },
+        "SquigProgress": {
+          "count": 4444,
+          "sha256": "659eea58f070645310ed6d07313c4df416146961288ad62197107957f02f3848"
+        },
+        "XpLedgerEntry": {
+          "count": 13059,
+          "sha256": "fbe80022346aac353161f2c9e099f0ce4fbf9a3304f4f4366e83e1e4e17c7d57"
+        },
+        "CollectorAchievement": {
+          "count": 16211,
+          "sha256": "b0ec8f444eecb88a9c3eab8a79d449f8efcb708dbab35b1b1994aef347f89b24"
+        },
+        "SquigAchievement": {
+          "count": 97768,
+          "sha256": "1ef48cc13c97f31887654855275bdca699cd62992c3acbc4a4e91d0bc9e988f5"
+        },
+        "ProgressionMilestone": {
+          "count": 551,
+          "sha256": "98606b3c43a59ded78140f90c2cef2ddc21256656d8d4c27252e6d8d7d1df512"
+        },
+        "SquigDiscovery": {
+          "count": 2867,
+          "sha256": "8c00aa95e162b6a80bdf25effccdb8b84e017588596793225852c8ae10046db8"
+        },
+        "CollectorTraitDiscovery": {
+          "count": 8696,
+          "sha256": "1267cfe170ceaeef0930aeb49a26cb00c99e7663bc85c0deec8169a6c6dcdd08"
+        },
+        "CollectorSetProgress": {
+          "count": 19604,
+          "sha256": "08d42e0db0f27a8f7a3028c8daea8329df5c0db2d36b7cd76fc779998ca025af"
+        },
+        "CollectionSnapshot": {
+          "count": 377,
+          "sha256": "b645a080f215f2b6f17260f94cb6ed9f097613e3dbfc95b7102fd807b4687b56"
+        },
+        "CollectionMilestone": {
+          "count": 9962,
+          "sha256": "bd9b57027d8a5ad155310e9a948ba17ec143bfc1b949654daef4e11d2bf29e10"
+        }
+      },
+      "differences": []
+    },
+    "inputFingerprintA": "83b5ec1c293e1452ee560ddd3afd35da72a6c2d61494b3273184d7419f7162f1",
+    "inputFingerprintB": "83b5ec1c293e1452ee560ddd3afd35da72a6c2d61494b3273184d7419f7162f1",
+    "inputDifferences": [],
+    "supplemental": {
+      "identity": "644e7c88374603bab6d0b71305b2dace48e603ac89a0e43be45eda4db83ab33e",
+      "cases": "eb013bcf259d14a12248ab645f6d4c46158b4558e65662b9e329275382dd33a0",
+      "entitlements": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "supplementalEnd": {
+      "identity": "644e7c88374603bab6d0b71305b2dace48e603ac89a0e43be45eda4db83ab33e",
+      "cases": "eb013bcf259d14a12248ab645f6d4c46158b4558e65662b9e329275382dd33a0",
+      "entitlements": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "workerHeartbeatReview": [
+    {
+      "service": "blockchain",
+      "firstObservedHeartbeat": "2026-09-27T23:26:53.417Z",
+      "observedSuccessfulProcessInstances": 2,
+      "restartRecovered": true
+    },
+    {
+      "service": "ecosystem",
+      "firstObservedHeartbeat": "2026-09-27T23:30:06.543Z",
+      "observedSuccessfulProcessInstances": 2,
+      "restartRecovered": true
+    },
+    {
+      "service": "progression",
+      "firstObservedHeartbeat": "2026-09-27T23:39:51.483Z",
+      "observedSuccessfulProcessInstances": 2,
+      "restartRecovered": true
+    },
+    {
+      "service": "collections",
+      "firstObservedHeartbeat": "2026-09-27T23:55:05.701Z",
+      "observedSuccessfulProcessInstances": 2,
+      "restartRecovered": true
+    }
+  ],
+  "securityReview": [
+    {
+      "service": "web",
+      "passed": true,
+      "sameStagingDatabase": true,
+      "noOperatorIntent": true,
+      "noUnneededSecrets": true,
+      "revision": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f"
+    },
+    {
+      "service": "progression",
+      "passed": true,
+      "sameStagingDatabase": true,
+      "noOperatorIntent": true,
+      "noUnneededSecrets": true,
+      "revision": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f"
+    },
+    {
+      "service": "blockchain",
+      "passed": true,
+      "sameStagingDatabase": true,
+      "noOperatorIntent": true,
+      "noUnneededSecrets": true,
+      "revision": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f"
+    },
+    {
+      "service": "ecosystem",
+      "passed": true,
+      "sameStagingDatabase": true,
+      "noOperatorIntent": true,
+      "noUnneededSecrets": true,
+      "revision": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f"
+    },
+    {
+      "service": "collections",
+      "passed": true,
+      "sameStagingDatabase": true,
+      "noOperatorIntent": true,
+      "noUnneededSecrets": true,
+      "revision": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f"
+    }
+  ],
+  "preFreezeQueueState": [
+    {
+      "beforeFreeze": {
+        "progression": 0,
+        "collections": 0,
+        "attribution": 0
+      }
+    },
+    {
+      "priorReplayValid": false
+    },
+    {
+      "settledAt": "2026-09-28T00:08:19.694Z",
+      "attribution": 0,
+      "progression": 0,
+      "collections": 0,
+      "dirty": 0
+    }
+  ],
+  "liveMetricsBeforeFreeze": [
+    {
+      "at": "2026-09-28T00:06:33.296Z",
+      "revision": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f",
+      "inputHash": "5e58a2a3dd8b8371689c521aefd7a6b195b0912520b33ee45b2dfddbdb486c2c",
+      "input": {
+        "Collector": {
+          "count": 377,
+          "sha256": "fda98883c347a683de4c4456465232c547d91db6eb7d5fdb79a73013ee7571b7"
+        },
+        "ExternalIdentity": {
+          "count": 375,
+          "sha256": "dfe1b13eefdbb8aab28662c8457cf44ea522e1ff1c00cd4f775b06c86eb3707f"
+        },
+        "CollectorWallet": {
+          "count": 2,
+          "sha256": "7758f5d3ecc78db6677d34fa4fd8c2c7ae9816e1e16780b7efbab927f89c50a4"
+        },
+        "HistoricalIdentityAttribution": {
+          "count": 286,
+          "sha256": "f5a1ba6be4e3233da878d25276ae34694bd84aabe2eb48dba069f2c3269c2652"
+        },
+        "CollectorOwnershipPeriod": {
+          "count": 2605,
+          "sha256": "f5d9f13287689d2c3ab28c0219c1f7c2988535779e67bebfbf54460fb68e35b0"
+        },
+        "NftTransfer": {
+          "count": 11053,
+          "sha256": "24e9dbf0392644be695a9171cc1a62a8ee17354aff3360c22a850fa9e7a96354"
+        },
+        "SquigProvenance": {
+          "count": 4444,
+          "sha256": "9f34e76c60657b3e715db024b6854f795aedce719f751983ea95f5a5c1233f7d"
+        },
+        "SquigOwnership": {
+          "count": 11709,
+          "sha256": "a6c1c3a020e995f2894c8bd623217a902a8cd4656d5b73e9a0da5a1aef41fb22"
+        },
+        "Squig": {
+          "count": 4444,
+          "sha256": "8b345e5dfdf49cf83c30a918d5967803dd0ecf1ca87f67bab3eea5ffdc9019bf"
+        },
+        "SquigTrait": {
+          "count": 44440,
+          "sha256": "4afb9741d9bbdbd932ed71ed64d4843d2a4c5d167896740b6c2f23b926591b77"
+        },
+        "CollectorActivity": {
+          "count": 32402,
+          "sha256": "d61a2b2817e22f7ee82aa14c425ecd8762e6b1dd14c1ffed1b98cde2540b89cb"
+        },
+        "IntegrationSource": {
+          "count": 17,
+          "sha256": "4604e2a14ad8ad604528d4d050a488b51be5f5a26a4dea7d734f32061f2c3a0f"
+        },
+        "ProgressionRuleset": {
+          "count": 1,
+          "sha256": "04eb87c3edd95874ec224949aabfd5d1a12231491e9f0cfa6d84425d56e8742f"
+        },
+        "CollectionRuleset": {
+          "count": 1,
+          "sha256": "8e4ddedf18fc7bb66ad37d0f76d8060e3a45ebacd403626849d353e60553d817"
+        },
+        "AchievementDefinition": {
+          "count": 65,
+          "sha256": "312fdb054f7d05f06642359c4f517b49ed118e2a559dcb934874670ad3c298af"
+        },
+        "CollectionSetDefinition": {
+          "count": 52,
+          "sha256": "a8960623ae7790457bce47270fe93cb405f072525d1635c73f145f09598732dd"
+        },
+        "CollectionSetRequirement": {
+          "count": 81,
+          "sha256": "312ac4a83d79b9dd7349b74888df2c70682db2e59b54e2a0e083a6ee591f3365"
+        },
+        "CosmeticDefinition": {
+          "count": 17,
+          "sha256": "37e415220c540864414a2399562c1b0c5784958e394f743e3b21e0ee47323a3c"
+        },
+        "CollectorCosmeticPreference": {
+          "count": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "derived": {
+        "CollectorProgress": {
+          "count": 377,
+          "sha256": "7c96050b0a69d8cd8bdd614edbf45572217a94c03173a0fa6febeedb64251c87"
+        },
+        "SquigProgress": {
+          "count": 4444,
+          "sha256": "659eea58f070645310ed6d07313c4df416146961288ad62197107957f02f3848"
+        },
+        "XpLedgerEntry": {
+          "count": 13059,
+          "sha256": "fbe80022346aac353161f2c9e099f0ce4fbf9a3304f4f4366e83e1e4e17c7d57"
+        },
+        "CollectorAchievement": {
+          "count": 16211,
+          "sha256": "b0ec8f444eecb88a9c3eab8a79d449f8efcb708dbab35b1b1994aef347f89b24"
+        },
+        "SquigAchievement": {
+          "count": 97768,
+          "sha256": "1ef48cc13c97f31887654855275bdca699cd62992c3acbc4a4e91d0bc9e988f5"
+        },
+        "ProgressionMilestone": {
+          "count": 551,
+          "sha256": "98606b3c43a59ded78140f90c2cef2ddc21256656d8d4c27252e6d8d7d1df512"
+        },
+        "SquigDiscovery": {
+          "count": 2867,
+          "sha256": "8c00aa95e162b6a80bdf25effccdb8b84e017588596793225852c8ae10046db8"
+        },
+        "CollectorTraitDiscovery": {
+          "count": 8696,
+          "sha256": "1267cfe170ceaeef0930aeb49a26cb00c99e7663bc85c0deec8169a6c6dcdd08"
+        },
+        "CollectorSetProgress": {
+          "count": 19604,
+          "sha256": "08d42e0db0f27a8f7a3028c8daea8329df5c0db2d36b7cd76fc779998ca025af"
+        },
+        "CollectionSnapshot": {
+          "count": 377,
+          "sha256": "b645a080f215f2b6f17260f94cb6ed9f097613e3dbfc95b7102fd807b4687b56"
+        },
+        "CollectionMilestone": {
+          "count": 9962,
+          "sha256": "bd9b57027d8a5ad155310e9a948ba17ec143bfc1b949654daef4e11d2bf29e10"
+        }
+      },
+      "proof": {
+        "id": "6488a39d-df15-4b9d-be55-e0f86b0146fa",
+        "status": "VERIFIED",
+        "inputHash": "e9dab8cdb3ddfe239feff1fc500892cee8d8b510c39b64157323f38b7f4a9e15",
+        "commit": "cf4914196e97d80d25f89d6911b3d1be01d84543",
+        "derivedDifferences": [
+          "CollectionMilestone",
+          "CollectionSnapshot",
+          "CollectorAchievement",
+          "CollectorProgress",
+          "CollectorSetProgress",
+          "CollectorTraitDiscovery",
+          "SquigDiscovery",
+          "XpLedgerEntry"
+        ],
+        "inputMatches": false
+      },
+      "activity": [
+        {
+          "active": 32342,
+          "collectorLinked": 32299,
+          "squigLinked": 3272,
+          "unattributed": 43,
+          "conflicting": 0,
+          "retracted": 60
+        }
+      ],
+      "xp": [
+        {
+          "_count": 4910,
+          "_sum": {
+            "xp": 94805
+          },
+          "subjectType": "SQUIG"
+        },
+        {
+          "_count": 8149,
+          "_sum": {
+            "xp": 210340
+          },
+          "subjectType": "COLLECTOR"
+        }
+      ],
+      "xpRevoked": 0,
+      "collectorAwards": 1349,
+      "squigAwards": 6104,
+      "historicalCompleted": 917,
+      "currentCompleted": 13,
+      "traits": 8696,
+      "milestones": 9962,
+      "entitlements": 0,
+      "identityCases": [
+        {
+          "_count": 283,
+          "status": "RESOLVED"
+        },
+        {
+          "_count": 2,
+          "status": "PENDING"
+        }
+      ],
+      "decisions": 284,
+      "duplicateXp": [
+        {
+          "groups": 0
+        }
+      ],
+      "duplicateMilestones": [
+        {
+          "groups": 0
+        }
+      ]
+    },
+    {
+      "liveCorrectionGroups": [
+        {
+          "feed": "madlibPublications",
+          "reason": "SOURCE_CORRECTION",
+          "fields": [
+            "correctedAt",
+            "payloadHash",
+            "sourceUpdatedAt",
+            "updatedAt"
+          ],
+          "count": 88
+        }
+      ],
+      "newActivityGroups": [
+        {
+          "_count": 1,
+          "sourceType": "claimEvents",
+          "eventType": "CHARM_CLAIM_RECORDED",
+          "recordStatus": "ACTIVE",
+          "attributionStatus": "DISCORD"
+        }
+      ]
+    }
+  ],
+  "liveResume": {
+    "at": "2026-09-28T00:53:27.966Z",
+    "replayValidAfter": false,
+    "report": {
+      "overall": "NOT_READY",
+      "blockingPassed": 17,
+      "blockingPending": 3,
+      "warnings": 11,
+      "failed": 0,
+      "environment": "staging",
+      "commit": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f",
+      "storage": "VERIFIED",
+      "migration": "202610010011_phase9",
+      "catalogs": [
+        {
+          "kind": "progression",
+          "id": "uglydex-progression-v1",
+          "fingerprint": "31587ed34d35f222e42a55e6870af23a6c73770816af2674c59597d57d2040f2"
+        },
+        {
+          "kind": "collections",
+          "id": "uglydex-collection-v1",
+          "fingerprint": "25fbb6d64d961f8b1ca38f4e3b3f90038626cffc23858ae00f63e7001501b573"
+        }
+      ],
+      "gates": [
+        {
+          "key": "DATABASE",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:53:26.656Z",
+          "summary": "Safe local database/migration checks",
+          "evidenceHash": "247f4b7bd7deb12b8ca743a112f005279a1544ea7cb84ed52b6c93992ee4eac8"
+        },
+        {
+          "key": "MIGRATIONS",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:53:26.665Z",
+          "summary": "Safe local database/migration checks",
+          "evidenceHash": "e02445bd19b0c3fd181b3bdd38ea355266cd1bf408d56b10a7ff8390b7c17d2c"
+        },
+        {
+          "key": "WEB_DEPLOYMENT",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:22:49.758Z",
+          "summary": "Reviewed operator evidence; details retained privately",
+          "evidenceHash": "7667897ceb2b6ed211d8bfc769fcc0a97866a8b8727687ea6624fae9d37552c0"
+        },
+        {
+          "key": "WORKERS",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:53:26.675Z",
+          "summary": "All four LIVE workers require fresh successful heartbeats",
+          "evidenceHash": "1614f4537e47f04504e9c9a436c609d1e2abc1b71ce0c9e84829b865763698f0"
+        },
+        {
+          "key": "BACKUP",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:22:49.770Z",
+          "summary": "Reviewed operator evidence; details retained privately",
+          "evidenceHash": "1f2b1d9d56dcdf393d5207731fd6cba475ce5d62719b7b8aeaee8eb3665906fd"
+        },
+        {
+          "key": "RESTORE_DRILL",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:22:49.724Z",
+          "summary": "Reviewed operator evidence; details retained privately",
+          "evidenceHash": "42305d600db43f7f7699dbbcaa70999d83214a048e8b6ec081e16204fd3dd018"
+        },
+        {
+          "key": "ARCHIVE_RPC",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-27T23:26:07.963Z",
+          "summary": "Current revision verified chain/ERC721/archive bytecode/block/log access",
+          "evidenceHash": "0b8b33634030f7555264a812dae0bf59731c4d92c2af45e526700ab02903aaa0"
+        },
+        {
+          "key": "START_BLOCK",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-27T23:26:07.993Z",
+          "summary": "Known deployment boundary and first mint revalidated with bounded archive reads",
+          "evidenceHash": "0b8b33634030f7555264a812dae0bf59731c4d92c2af45e526700ab02903aaa0"
+        },
+        {
+          "key": "MINT_COVERAGE",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:53:26.689Z",
+          "summary": "4444/4444; stored finalized boundary only",
+          "evidenceHash": "7bcee78e2c2709a7c5a5cf1e8427acb21239436c9584091a297fda4535900ef7"
+        },
+        {
+          "key": "OWNERSHIP_CONTINUITY",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:53:26.695Z",
+          "summary": "4444/4444; stored finalized boundary only",
+          "evidenceHash": "7bcee78e2c2709a7c5a5cf1e8427acb21239436c9584091a297fda4535900ef7"
+        },
+        {
+          "key": "OWNER_OF",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:36:03.702Z",
+          "summary": "4444/4444 ownerOf matched; 0 anomalous tokens at indexed block 26072176",
+          "evidenceHash": "9bc24b30f2d6a883694dafe8a793d7dd86a2b8be6671bb43797e09444493aadb"
+        },
+        {
+          "key": "WALLET_LINKS",
+          "blocking": false,
+          "status": "PARTIAL",
+          "checkedAt": "2026-09-27T23:38:29.863Z",
+          "summary": "Schema/role inspection; history completeness remains separately reviewed",
+          "evidenceHash": "c2782d2b4a79846d21574dee5a5c8846f845d1e4a0945679428b87d6be42bea6"
+        },
+        {
+          "key": "UGLYBOT",
+          "blocking": false,
+          "status": "PARTIAL",
+          "checkedAt": "2026-09-27T23:38:28.891Z",
+          "summary": "Schema/role inspection; history completeness remains separately reviewed",
+          "evidenceHash": "4c9d6d2ea2cd2b05161a56d66119bd589f4c39afaac00576706626cd2b3708de"
+        },
+        {
+          "key": "GAUNTLET",
+          "blocking": false,
+          "status": "PARTIAL",
+          "checkedAt": "2026-09-27T23:38:29.514Z",
+          "summary": "Schema/role inspection; history completeness remains separately reviewed",
+          "evidenceHash": "5780e35664faedcb4a5b8c6b2accbec13235ecafb367aa7b02639b9b2b7cb743"
+        },
+        {
+          "key": "SURVIVAL",
+          "blocking": false,
+          "status": "PARTIAL",
+          "checkedAt": "2026-09-27T23:38:29.674Z",
+          "summary": "Schema/role inspection; history completeness remains separately reviewed",
+          "evidenceHash": "94e12549f79be7ccee083cf49fb77e79cc6f045fce9c48db4309f70190d2f747"
+        },
+        {
+          "key": "IMAGE_SUBMIT",
+          "blocking": false,
+          "status": "PARTIAL",
+          "checkedAt": "2026-09-27T23:38:29.789Z",
+          "summary": "Schema/role inspection; history completeness remains separately reviewed",
+          "evidenceHash": "fb8e2e2b4b472cbdd2cdfb2c45da00bb5f697cb0c25a01123d1a13fd7ba7abaf"
+        },
+        {
+          "key": "IDENTITY_REVIEW",
+          "blocking": false,
+          "status": "PENDING",
+          "checkedAt": null,
+          "summary": "Current deployment evidence required (absent, expired or changed context)",
+          "evidenceHash": null
+        },
+        {
+          "key": "REATTRIBUTION",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:35:07.830Z",
+          "summary": "Completed Replay A/B; tracked evidence only",
+          "evidenceHash": "d9bc7e13f2808ee906e61256e3733b5b9c296f4b95df19d9bc0d75e45080985e"
+        },
+        {
+          "key": "ACTIVITY",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:22:49.778Z",
+          "summary": "Reviewed operator evidence; details retained privately",
+          "evidenceHash": "7a44a15f65cdbb11f3329f2a058f917d777613d457a8ac37dbab1dc066fa60cc"
+        },
+        {
+          "key": "DUPLICATE_REVIEW",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:22:49.785Z",
+          "summary": "Reviewed operator evidence; details retained privately",
+          "evidenceHash": "47e6c624ffa72a75a695ea64b445f9abbe50fe7ce02f41ee15c526cc0804dbf6"
+        },
+        {
+          "key": "PROGRESSION",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:35:07.821Z",
+          "summary": "Completed Replay A/B; tracked evidence only",
+          "evidenceHash": "d9bc7e13f2808ee906e61256e3733b5b9c296f4b95df19d9bc0d75e45080985e"
+        },
+        {
+          "key": "COLLECTIONS",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:35:07.825Z",
+          "summary": "Completed Replay A/B; tracked evidence only",
+          "evidenceHash": "d9bc7e13f2808ee906e61256e3733b5b9c296f4b95df19d9bc0d75e45080985e"
+        },
+        {
+          "key": "DERIVED_REPLAY_STABLE",
+          "blocking": true,
+          "status": "PENDING",
+          "checkedAt": "2026-09-28T00:53:27.956Z",
+          "summary": "Current deployment evidence required (absent, expired or changed context)",
+          "evidenceHash": "7fe5c63d1e7df49afa1db7fe6ff78dbfa386cbad28b6b48d898742da2a1f9b82"
+        },
+        {
+          "key": "HANDOFF",
+          "blocking": true,
+          "status": "VERIFIED",
+          "checkedAt": "2026-09-28T00:22:49.749Z",
+          "summary": "Reviewed operator evidence; details retained privately",
+          "evidenceHash": "c0c2b6a075a8a5d90dfd0dc764cc4715910dc46d0980df9f26edc36c3795fa12"
+        },
+        {
+          "key": "PRIVACY_AUTH",
+          "blocking": true,
+          "status": "PENDING",
+          "checkedAt": null,
+          "summary": "Current deployment evidence required (absent, expired or changed context)",
+          "evidenceHash": null
+        },
+        {
+          "key": "EXTERNAL_OG",
+          "blocking": false,
+          "status": "PENDING",
+          "checkedAt": null,
+          "summary": "Current deployment evidence required (absent, expired or changed context)",
+          "evidenceHash": null
+        },
+        {
+          "key": "REAL_DEVICE_SHARE",
+          "blocking": true,
+          "status": "PENDING",
+          "checkedAt": null,
+          "summary": "Current deployment evidence required (absent, expired or changed context)",
+          "evidenceHash": null
+        },
+        {
+          "key": "CUSTOM_MANIFEST",
+          "blocking": false,
+          "status": "PENDING",
+          "checkedAt": null,
+          "summary": "Current deployment evidence required (absent, expired or changed context)",
+          "evidenceHash": null
+        },
+        {
+          "key": "EDITION_MANIFEST",
+          "blocking": false,
+          "status": "PENDING",
+          "checkedAt": null,
+          "summary": "Current deployment evidence required (absent, expired or changed context)",
+          "evidenceHash": null
+        },
+        {
+          "key": "EDITION_CONTRACTS",
+          "blocking": false,
+          "status": "PENDING",
+          "checkedAt": null,
+          "summary": "Current deployment evidence required (absent, expired or changed context)",
+          "evidenceHash": null
+        },
+        {
+          "key": "HOLDER_TIERS",
+          "blocking": false,
+          "status": "PENDING",
+          "checkedAt": null,
+          "summary": "Current deployment evidence required (absent, expired or changed context)",
+          "evidenceHash": null
+        }
+      ]
+    }
+  },
+  "finalWorkerSnapshot": {
+    "at": "2026-09-28T01:00:22.505Z",
+    "revision": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f",
+    "controls": [
+      {
+        "service": "blockchain",
+        "mode": "LIVE"
+      },
+      {
+        "service": "ecosystem",
+        "mode": "LIVE"
+      },
+      {
+        "service": "progression",
+        "mode": "LIVE"
+      },
+      {
+        "service": "collections",
+        "mode": "LIVE"
+      }
+    ],
+    "heartbeats": [
+      {
+        "service": "ecosystem",
+        "instanceId": "99b8ecb1-c495-442c-a4aa-ab020bd4f371",
+        "mode": "LIVE",
+        "state": "IDLE",
+        "lockHeld": false,
+        "lastHeartbeat": "2026-09-28T01:00:13.543Z",
+        "lastSuccessAt": "2026-09-28T00:58:27.209Z",
+        "errorCode": null,
+        "runId": "1dcf5a4a-cd6e-4ea1-9345-c77fc9034403"
+      },
+      {
+        "service": "progression",
+        "instanceId": "354b8ba9-b637-4921-b10b-f528aaec4439",
+        "mode": "LIVE",
+        "state": "IDLE",
+        "lockHeld": false,
+        "lastHeartbeat": "2026-09-28T01:00:13.886Z",
+        "lastSuccessAt": "2026-09-28T01:00:13.886Z",
+        "errorCode": null,
+        "runId": "83f74ad3-e041-4ea0-9a0d-6a3c579146fd"
+      },
+      {
+        "service": "blockchain",
+        "instanceId": "e9a54449-7893-4a5a-8cef-cb51e94696f2",
+        "mode": "LIVE",
+        "state": "IDLE",
+        "lockHeld": false,
+        "lastHeartbeat": "2026-09-28T01:00:17.771Z",
+        "lastSuccessAt": "2026-09-28T01:00:17.770Z",
+        "errorCode": null,
+        "runId": "68488bb1-810d-48ca-9cc3-051d17f44c3f"
+      },
+      {
+        "service": "collections",
+        "instanceId": "35840ea6-b13d-419c-8f1b-1615c29c6762",
+        "mode": "LIVE",
+        "state": "IDLE",
+        "lockHeld": false,
+        "lastHeartbeat": "2026-09-28T01:00:20.317Z",
+        "lastSuccessAt": "2026-09-28T01:00:13.436Z",
+        "errorCode": null,
+        "runId": "850a003c-708c-47b1-a10d-b34aeaad25a3"
+      }
+    ],
+    "cursor": {
+      "block": "26072429",
+      "finalized": "26072429",
+      "error": null
+    },
+    "transfers": 11053,
+    "mints": 4444,
+    "clean": 4444,
+    "dirty": 0,
+    "ownerMatches": 4444,
+    "activities": 32342,
+    "retracted": 60,
+    "unattributed": 43,
+    "conflicting": 0,
+    "queue": {
+      "attribution": 0,
+      "progression": 0,
+      "collections": 0
+    },
+    "failures": {
+      "progression": 0,
+      "collections": 0
+    },
+    "rejections": 0,
+    "xp": 13059,
+    "discoveries": 2601,
+    "collectionMilestones": 9962,
+    "sources": [
+      {
+        "feed": "mawPrizes",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "50dd8129b121298e352c73efd9ac2e5cb826b1dcb28532fed75f5873581c379a",
+        "reconcileHash": "d9f93b3f7455fed473c640d4a0317ec2609dcaa8d3b5439fbdd98fefc40821fc"
+      },
+      {
+        "feed": "marketplace",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "2fb1dc7699d145e9eba632819713ffc1445515349f463ef8b67f0bb242c739cd",
+        "reconcileHash": "1a2835647e32523006fe3837f7406b304396a2057e6a5d6f8fbe8bbc86e08fd6"
+      },
+      {
+        "feed": "imageUses",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "bb257b6a873f18050a84f13ebf3a679babece0a9d4e7595450d8909a84bae00c",
+        "reconcileHash": "9ac63f72dda01b160038c6e41d747183f21a2b7b857eb0be970f9a4404da0345"
+      },
+      {
+        "feed": "claimEvents",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "489a9565650ccffdc7e600d7dcf8d06e05f57a11ae00cd45df3f7bd4c92399ab",
+        "reconcileHash": "0816e7524944c74b4394cef012fd14b8495d4ae44cb16d08647a8f03cc314c51"
+      },
+      {
+        "feed": "purchases",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "262650562392c4a7ff75cd084980a29814d57134f1d731be70f3f1e28f4e06ea",
+        "reconcileHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "feed": "bountyResults",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "0e71c9d61a801b86235274dfab92b15dfb859514f351bf1627e1bc07bca5b60c",
+        "reconcileHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "feed": "madlibPublications",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "50be9582ae56cb3e84de21e55b237bb5153b0ff232a09d2c58bf03329bc42f7b",
+        "reconcileHash": "3c9cd0c928f9ed0acc1ee298a1afa5bc36cea25d93e1b61a9eabe43a396a12f8"
+      },
+      {
+        "feed": "submissions",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "776641c2545360fb5ab2b5bcb9335ee6dfc495e236338ff38551e0dd6faf6be5",
+        "reconcileHash": "95a87717d6f6a36c86382fa56102856e1f993eaa1c576ae13c4d868e3cf80594"
+      },
+      {
+        "feed": "duels",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "e5ac883536bae77e23f456ed5f5f0e9c42681a2acd4d31df690c35f6b57a0638",
+        "reconcileHash": "bd66e73855f62bc385a4a66ba76ac12dd346e40903fb9a33610b821588ce6b0b"
+      },
+      {
+        "feed": "runs",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "ca6c4d4ce33b1e21147fda6083afdaa99e6150491cc8f709f267e47b683ff226",
+        "reconcileHash": "0816e7524944c74b4394cef012fd14b8495d4ae44cb16d08647a8f03cc314c51"
+      },
+      {
+        "feed": "madlibOperations",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "0a112f4b57eda64a9cb0c5b3ae25936443ab86daa8f5884d028e889b0344ae16",
+        "reconcileHash": "d16f4676a646812639b04cf17d2186c024a551c6293ba885818220cf58714370"
+      },
+      {
+        "feed": "bounty",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "d35f5efc8c294d675f5d83a93608b8447a3581a401f6de08a86f5b6dbefa6b3d",
+        "reconcileHash": "115175dafa22e3159003105401f27980690a156ea5190aa769e33a7e1394b09e"
+      },
+      {
+        "feed": "maw",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "e20d0633953b9c13edb44beafc7771c52a13901d6ea25538473eb7422a58a568",
+        "reconcileHash": "85626d36d1b1ef8169be39610873fd0b7e950986889931a6a60c31aaa40f906b"
+      },
+      {
+        "feed": "liveImages",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "2021bfcf916adca8c3c724e44ef0de9873a3b8b8f9d00974868d55254e755982",
+        "reconcileHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "feed": "survival",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "acd6e90631be752dc9aa84ebc110c6b6407d00978a728602fea3d7de3b5442c2",
+        "reconcileHash": "b850e783583bb80f2f8672edd79f98ea27967088ca2b5cbee044ef9ac75ff097"
+      },
+      {
+        "feed": "bountyEntries",
+        "state": "PARTIAL",
+        "warning": "TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME",
+        "schemaValid": true,
+        "cursorHash": "d35d93509ae15a9af9dec0853e9a99d578cf226b980236cf7560e88ad2a6e57b",
+        "reconcileHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      {
+        "feed": "onlineRewards",
+        "state": "UNAVAILABLE",
+        "warning": "FEED_UNAVAILABLE",
+        "schemaValid": false,
+        "cursorHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "reconcileHash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+      }
+    ],
+    "circuitEvents": 0
+  },
+  "finalMetrics": [
+    {
+      "at": "2026-09-28T01:01:00.076Z",
+      "revision": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f",
+      "inputHash": "fbc1e59c2be11a5f16495142d460da13cbc13053b203386f2f2e0fb49f4054e3",
+      "input": {
+        "Collector": {
+          "count": 377,
+          "sha256": "fda98883c347a683de4c4456465232c547d91db6eb7d5fdb79a73013ee7571b7"
+        },
+        "ExternalIdentity": {
+          "count": 375,
+          "sha256": "dfe1b13eefdbb8aab28662c8457cf44ea522e1ff1c00cd4f775b06c86eb3707f"
+        },
+        "CollectorWallet": {
+          "count": 2,
+          "sha256": "7758f5d3ecc78db6677d34fa4fd8c2c7ae9816e1e16780b7efbab927f89c50a4"
+        },
+        "HistoricalIdentityAttribution": {
+          "count": 286,
+          "sha256": "f5a1ba6be4e3233da878d25276ae34694bd84aabe2eb48dba069f2c3269c2652"
+        },
+        "CollectorOwnershipPeriod": {
+          "count": 2605,
+          "sha256": "f5d9f13287689d2c3ab28c0219c1f7c2988535779e67bebfbf54460fb68e35b0"
+        },
+        "NftTransfer": {
+          "count": 11053,
+          "sha256": "24e9dbf0392644be695a9171cc1a62a8ee17354aff3360c22a850fa9e7a96354"
+        },
+        "SquigProvenance": {
+          "count": 4444,
+          "sha256": "9f34e76c60657b3e715db024b6854f795aedce719f751983ea95f5a5c1233f7d"
+        },
+        "SquigOwnership": {
+          "count": 11709,
+          "sha256": "a6c1c3a020e995f2894c8bd623217a902a8cd4656d5b73e9a0da5a1aef41fb22"
+        },
+        "Squig": {
+          "count": 4444,
+          "sha256": "8b345e5dfdf49cf83c30a918d5967803dd0ecf1ca87f67bab3eea5ffdc9019bf"
+        },
+        "SquigTrait": {
+          "count": 44440,
+          "sha256": "4afb9741d9bbdbd932ed71ed64d4843d2a4c5d167896740b6c2f23b926591b77"
+        },
+        "CollectorActivity": {
+          "count": 32402,
+          "sha256": "db4fad80e56514d978e20de78cb628bb514d99e96293f1954e99193e5207333d"
+        },
+        "IntegrationSource": {
+          "count": 17,
+          "sha256": "507e1f9a5ca65fef4901e7be36181464ddc2f65423ab6b6d3267beaec1a65cc8"
+        },
+        "ProgressionRuleset": {
+          "count": 1,
+          "sha256": "04eb87c3edd95874ec224949aabfd5d1a12231491e9f0cfa6d84425d56e8742f"
+        },
+        "CollectionRuleset": {
+          "count": 1,
+          "sha256": "8e4ddedf18fc7bb66ad37d0f76d8060e3a45ebacd403626849d353e60553d817"
+        },
+        "AchievementDefinition": {
+          "count": 65,
+          "sha256": "312fdb054f7d05f06642359c4f517b49ed118e2a559dcb934874670ad3c298af"
+        },
+        "CollectionSetDefinition": {
+          "count": 52,
+          "sha256": "a8960623ae7790457bce47270fe93cb405f072525d1635c73f145f09598732dd"
+        },
+        "CollectionSetRequirement": {
+          "count": 81,
+          "sha256": "312ac4a83d79b9dd7349b74888df2c70682db2e59b54e2a0e083a6ee591f3365"
+        },
+        "CosmeticDefinition": {
+          "count": 17,
+          "sha256": "37e415220c540864414a2399562c1b0c5784958e394f743e3b21e0ee47323a3c"
+        },
+        "CollectorCosmeticPreference": {
+          "count": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "derived": {
+        "CollectorProgress": {
+          "count": 377,
+          "sha256": "7c96050b0a69d8cd8bdd614edbf45572217a94c03173a0fa6febeedb64251c87"
+        },
+        "SquigProgress": {
+          "count": 4444,
+          "sha256": "659eea58f070645310ed6d07313c4df416146961288ad62197107957f02f3848"
+        },
+        "XpLedgerEntry": {
+          "count": 13059,
+          "sha256": "fbe80022346aac353161f2c9e099f0ce4fbf9a3304f4f4366e83e1e4e17c7d57"
+        },
+        "CollectorAchievement": {
+          "count": 16211,
+          "sha256": "b0ec8f444eecb88a9c3eab8a79d449f8efcb708dbab35b1b1994aef347f89b24"
+        },
+        "SquigAchievement": {
+          "count": 97768,
+          "sha256": "1ef48cc13c97f31887654855275bdca699cd62992c3acbc4a4e91d0bc9e988f5"
+        },
+        "ProgressionMilestone": {
+          "count": 551,
+          "sha256": "98606b3c43a59ded78140f90c2cef2ddc21256656d8d4c27252e6d8d7d1df512"
+        },
+        "SquigDiscovery": {
+          "count": 2867,
+          "sha256": "8c00aa95e162b6a80bdf25effccdb8b84e017588596793225852c8ae10046db8"
+        },
+        "CollectorTraitDiscovery": {
+          "count": 8696,
+          "sha256": "1267cfe170ceaeef0930aeb49a26cb00c99e7663bc85c0deec8169a6c6dcdd08"
+        },
+        "CollectorSetProgress": {
+          "count": 19604,
+          "sha256": "08d42e0db0f27a8f7a3028c8daea8329df5c0db2d36b7cd76fc779998ca025af"
+        },
+        "CollectionSnapshot": {
+          "count": 377,
+          "sha256": "b645a080f215f2b6f17260f94cb6ed9f097613e3dbfc95b7102fd807b4687b56"
+        },
+        "CollectionMilestone": {
+          "count": 9962,
+          "sha256": "bd9b57027d8a5ad155310e9a948ba17ec143bfc1b949654daef4e11d2bf29e10"
+        }
+      },
+      "proof": {
+        "id": "b6a1d45d-d9fc-454a-9771-37da3cb450c1",
+        "status": "VERIFIED",
+        "inputHash": "83b5ec1c293e1452ee560ddd3afd35da72a6c2d61494b3273184d7419f7162f1",
+        "commit": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f",
+        "derivedDifferences": [],
+        "inputMatches": false
+      },
+      "activity": [
+        {
+          "active": 32342,
+          "collectorLinked": 32299,
+          "squigLinked": 3272,
+          "unattributed": 43,
+          "conflicting": 0,
+          "retracted": 60
+        }
+      ],
+      "xp": [
+        {
+          "_count": 4910,
+          "_sum": {
+            "xp": 94805
+          },
+          "subjectType": "SQUIG"
+        },
+        {
+          "_count": 8149,
+          "_sum": {
+            "xp": 210340
+          },
+          "subjectType": "COLLECTOR"
+        }
+      ],
+      "xpRevoked": 0,
+      "collectorAwards": 1349,
+      "squigAwards": 6104,
+      "historicalCompleted": 917,
+      "currentCompleted": 13,
+      "traits": 8696,
+      "milestones": 9962,
+      "entitlements": 0,
+      "identityCases": [
+        {
+          "_count": 283,
+          "status": "RESOLVED"
+        },
+        {
+          "_count": 2,
+          "status": "PENDING"
+        }
+      ],
+      "decisions": 284,
+      "duplicateXp": [
+        {
+          "groups": 0
+        }
+      ],
+      "duplicateMilestones": [
+        {
+          "groups": 0
+        }
+      ]
+    },
+    {
+      "liveCorrectionGroups": [
+        {
+          "feed": "madlibPublications",
+          "reason": "SOURCE_CORRECTION",
+          "fields": [
+            "correctedAt",
+            "payloadHash",
+            "sourceUpdatedAt",
+            "updatedAt"
+          ],
+          "count": 127
+        }
+      ],
+      "newActivityGroups": [
+        {
+          "_count": 1,
+          "sourceType": "claimEvents",
+          "eventType": "CHARM_CLAIM_RECORDED",
+          "recordStatus": "ACTIVE",
+          "attributionStatus": "DISCORD"
+        }
+      ]
+    }
+  ],
+  "liveInputFieldChanges": [
+    {
+      "feed": "bounty",
+      "changedFields": ["backfillFinishedAt"]
+    },
+    {
+      "feed": "bountyEntries",
+      "changedFields": ["backfillFinishedAt"]
+    },
+    {
+      "feed": "bountyResults",
+      "changedFields": ["backfillFinishedAt"]
+    },
+    {
+      "feed": "claimEvents",
+      "changedFields": ["reconcileCursor", "backfillFinishedAt"]
+    },
+    {
+      "feed": "duels",
+      "changedFields": ["reconcileCursor", "backfillFinishedAt"]
+    },
+    {
+      "feed": "imageUses",
+      "changedFields": ["reconcileCursor"]
+    },
+    {
+      "feed": "liveImages",
+      "changedFields": ["reconcileCursor", "backfillFinishedAt"]
+    },
+    {
+      "feed": "madlibOperations",
+      "changedFields": ["backfillFinishedAt"]
+    },
+    {
+      "feed": "madlibPublications",
+      "changedFields": ["cursor", "backfillFinishedAt"]
+    },
+    {
+      "feed": "marketplace",
+      "changedFields": ["backfillFinishedAt"]
+    },
+    {
+      "feed": "maw",
+      "changedFields": ["backfillFinishedAt"]
+    },
+    {
+      "feed": "mawPrizes",
+      "changedFields": ["backfillFinishedAt"]
+    },
+    {
+      "feed": "purchases",
+      "changedFields": ["backfillFinishedAt"]
+    },
+    {
+      "feed": "runs",
+      "changedFields": ["backfillFinishedAt"]
+    },
+    {
+      "feed": "submissions",
+      "changedFields": ["reconcileCursor"]
+    },
+    {
+      "feed": "survival",
+      "changedFields": ["reconcileCursor"]
+    }
+  ],
+  "finalInputTableChanges": ["CollectorActivity", "IntegrationSource"],
+  "production": {
+    "overall": "NOT_READY",
+    "blockingPassed": 5,
+    "blockingPending": 15,
+    "warnings": 11,
+    "failed": 3,
+    "environment": "production",
+    "commit": "c764e2810715be0608e5fadc47d45a6a391ba674",
+    "storage": "VERIFIED",
+    "migration": "202610010011_phase9",
+    "catalogs": [
+      {
+        "kind": "progression",
+        "id": "uglydex-progression-v1",
+        "fingerprint": "31587ed34d35f222e42a55e6870af23a6c73770816af2674c59597d57d2040f2"
+      },
+      {
+        "kind": "collections",
+        "id": "uglydex-collection-v1",
+        "fingerprint": "25fbb6d64d961f8b1ca38f4e3b3f90038626cffc23858ae00f63e7001501b573"
+      }
+    ],
+    "gates": [
+      {
+        "key": "DATABASE",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-27T02:51:51.306Z",
+        "summary": "Safe local database/migration checks",
+        "evidenceHash": "247f4b7bd7deb12b8ca743a112f005279a1544ea7cb84ed52b6c93992ee4eac8"
+      },
+      {
+        "key": "MIGRATIONS",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-27T02:51:51.324Z",
+        "summary": "Safe local database/migration checks",
+        "evidenceHash": "e02445bd19b0c3fd181b3bdd38ea355266cd1bf408d56b10a7ff8390b7c17d2c"
+      },
+      {
+        "key": "WEB_DEPLOYMENT",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-27T01:02:13.174Z",
+        "summary": "Reviewed operator evidence; details retained privately",
+        "evidenceHash": "1da37e5b9132c0505bd941f87b60f145c772d4deadd4d5ab6a07229af76b85c5"
+      },
+      {
+        "key": "WORKERS",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": "2026-09-27T02:51:51.334Z",
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": "7153b95367956a526cb66fad18a495fba25707ada9ee9313e3576233443077e1"
+      },
+      {
+        "key": "BACKUP",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-27T01:02:13.141Z",
+        "summary": "Reviewed operator evidence; details retained privately",
+        "evidenceHash": "b793670fe6060cd4e836b01b8f5a766e02ad9fd2078226d83bdef3299c5f335d"
+      },
+      {
+        "key": "RESTORE_DRILL",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-27T01:02:13.166Z",
+        "summary": "Reviewed operator evidence; details retained privately",
+        "evidenceHash": "b26be5d7178e770a7f6f61780ee83577d64da44252c2acc24ed42d6003308b2f"
+      },
+      {
+        "key": "ARCHIVE_RPC",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "START_BLOCK",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "MINT_COVERAGE",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": "2026-09-27T02:51:51.351Z",
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": "9b5f84d867d3da5a4f1665950572ef452af77fd117545e838ec98d8c83e2ddcd"
+      },
+      {
+        "key": "OWNERSHIP_CONTINUITY",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": "2026-09-27T02:51:51.357Z",
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": "9b5f84d867d3da5a4f1665950572ef452af77fd117545e838ec98d8c83e2ddcd"
+      },
+      {
+        "key": "OWNER_OF",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "WALLET_LINKS",
+        "blocking": false,
+        "status": "PARTIAL",
+        "checkedAt": "2026-09-27T02:33:47.253Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "9246e0912057e3a7377372811463d273fb6d2f257685b8f7c96c2f963384d13c"
+      },
+      {
+        "key": "UGLYBOT",
+        "blocking": false,
+        "status": "PARTIAL",
+        "checkedAt": "2026-09-27T02:33:46.905Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "30dbed3627f776cfed6b0ccee091ccc8e9b6c6c8e30da0ef49684ec6acc34068"
+      },
+      {
+        "key": "GAUNTLET",
+        "blocking": false,
+        "status": "FAILED",
+        "checkedAt": "2026-09-27T02:33:47.011Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "6983bf3e5da1bd0a7b38300b998d7800c3b6aa813903b600bd5ff4bb1939661c"
+      },
+      {
+        "key": "SURVIVAL",
+        "blocking": false,
+        "status": "FAILED",
+        "checkedAt": "2026-09-27T02:33:47.090Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "ebf94e1ca048924da598cae5d44b4ad0ff81457db1aeea8e576b4656001fa969"
+      },
+      {
+        "key": "IMAGE_SUBMIT",
+        "blocking": false,
+        "status": "FAILED",
+        "checkedAt": "2026-09-27T02:33:47.225Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "82e5d348f42800bfdc77a009588782b5261a55876ebce9ffd62f80ef8aa687b2"
+      },
+      {
+        "key": "IDENTITY_REVIEW",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "REATTRIBUTION",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": "2026-09-27T02:51:50.426Z",
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": "52f5762234d469ffdba40abf509bb5e0cc21a3d84cecd16d8b709113a4fca830"
+      },
+      {
+        "key": "ACTIVITY",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": "2026-09-27T00:48:20.842Z",
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": "0b2374461514a87ef00620b0807d468a12bdc99800ff4f676168970dca75fed1"
+      },
+      {
+        "key": "DUPLICATE_REVIEW",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "PROGRESSION",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": "2026-09-27T00:48:20.856Z",
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": "0b2374461514a87ef00620b0807d468a12bdc99800ff4f676168970dca75fed1"
+      },
+      {
+        "key": "COLLECTIONS",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": "2026-09-27T00:48:20.867Z",
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": "0b2374461514a87ef00620b0807d468a12bdc99800ff4f676168970dca75fed1"
+      },
+      {
+        "key": "DERIVED_REPLAY_STABLE",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": "2026-09-27T13:06:34.745Z",
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      },
+      {
+        "key": "HANDOFF",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "PRIVACY_AUTH",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "EXTERNAL_OG",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "REAL_DEVICE_SHARE",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "CUSTOM_MANIFEST",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "EDITION_MANIFEST",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "EDITION_CONTRACTS",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "HOLDER_TIERS",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      }
+    ],
+    "serviceInventoryUnchanged": true,
+    "serviceCount": 14
+  },
+  "finalWorkerCycleSummary": [
+    {
+      "service": "blockchain",
+      "cycles": 489,
+      "successes": 489,
+      "failures": 0,
+      "firstSuccess": "2026-09-27T23:27:00.501Z",
+      "lastSuccess": "2026-09-28T01:01:31.340Z",
+      "processed": 0,
+      "failedJobs": 0,
+      "activityPages": 0,
+      "feeds": [],
+      "scanned": 0,
+      "inserted": 0,
+      "updated": 0,
+      "retracted": 0
+    },
+    {
+      "service": "ecosystem",
+      "cycles": 10,
+      "successes": 10,
+      "failures": 0,
+      "firstSuccess": "2026-09-27T23:35:08.281Z",
+      "lastSuccess": "2026-09-28T00:58:27.209Z",
+      "processed": 0,
+      "failedJobs": 0,
+      "activityPages": 177,
+      "feeds": [
+        "bounty",
+        "bountyEntries",
+        "bountyResults",
+        "claimEvents",
+        "duels",
+        "imageUses",
+        "liveImages",
+        "madlibOperations",
+        "madlibPublications",
+        "marketplace",
+        "maw",
+        "mawPrizes",
+        "purchases",
+        "runs",
+        "submissions",
+        "survival"
+      ],
+      "scanned": 33940,
+      "inserted": 1,
+      "updated": 127,
+      "retracted": 0
+    },
+    {
+      "service": "progression",
+      "cycles": 137,
+      "successes": 137,
+      "failures": 0,
+      "firstSuccess": "2026-09-27T23:40:08.712Z",
+      "lastSuccess": "2026-09-28T01:01:29.348Z",
+      "processed": 4611,
+      "failedJobs": 0,
+      "activityPages": 0,
+      "feeds": [],
+      "scanned": 0,
+      "inserted": 0,
+      "updated": 0,
+      "retracted": 0
+    },
+    {
+      "service": "collections",
+      "cycles": 83,
+      "successes": 83,
+      "failures": 0,
+      "firstSuccess": "2026-09-27T23:55:31.750Z",
+      "lastSuccess": "2026-09-28T01:01:29.741Z",
+      "processed": 189,
+      "failedJobs": 0,
+      "activityPages": 0,
+      "feeds": [],
+      "scanned": 0,
+      "inserted": 0,
+      "updated": 0,
+      "retracted": 0
+    }
+  ],
+  "verificationGeneratedQueueWork": [
+    {
+      "beforeFreeze": {
+        "progression": 4633,
+        "collections": 189,
+        "attribution": 0
+      }
+    },
+    {
+      "priorReplayValid": true
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 50,
+        "failed": 0
+      }
+    },
+    {
+      "progression": {
+        "processed": 33,
+        "failed": 0
+      }
+    },
+    {
+      "collections": {
+        "processed": 25,
+        "failed": 0
+      }
+    },
+    {
+      "collections": {
+        "processed": 25,
+        "failed": 0
+      }
+    },
+    {
+      "collections": {
+        "processed": 25,
+        "failed": 0
+      }
+    },
+    {
+      "collections": {
+        "processed": 25,
+        "failed": 0
+      }
+    },
+    {
+      "collections": {
+        "processed": 25,
+        "failed": 0
+      }
+    },
+    {
+      "collections": {
+        "processed": 25,
+        "failed": 0
+      }
+    },
+    {
+      "collections": {
+        "processed": 25,
+        "failed": 0
+      }
+    },
+    {
+      "collections": {
+        "processed": 14,
+        "failed": 0
+      }
+    },
+    {
+      "settledAt": "2026-09-28T00:51:07.001Z",
+      "attribution": 0,
+      "progression": 0,
+      "collections": 0,
+      "dirty": 0
+    }
+  ],
+  "readOnlyIntegrityVerification": {
+    "checks": [
+      {
+        "name": "migration.pending",
+        "status": "PASS",
+        "detail": "11 applied migrations"
+      },
+      {
+        "name": "migration.failed",
+        "status": "PASS",
+        "detail": "No unfinished migrations"
+      },
+      {
+        "name": "migration.checksums",
+        "status": "PASS",
+        "detail": "Applied SQL matches this release"
+      },
+      {
+        "name": "catalog.integrity",
+        "status": "PASS",
+        "detail": "0 discrepancies; Canonical 4444 token and trait catalog"
+      },
+      {
+        "name": "ownership.unique",
+        "status": "PASS",
+        "detail": "0 discrepancies; At most one current owner per Squig"
+      },
+      {
+        "name": "provenance.dirty",
+        "status": "PASS",
+        "detail": "0 discrepancies; Derivation queue drained"
+      },
+      {
+        "name": "provenance.continuity",
+        "status": "PASS",
+        "detail": "0 discrepancies; No overlapping wallet periods"
+      },
+      {
+        "name": "identity.attribution",
+        "status": "PASS",
+        "detail": "0 discrepancies; Confirmed discoveries reference the same Collector and Squig"
+      },
+      {
+        "name": "activity.idempotency",
+        "status": "PASS",
+        "detail": "0 discrepancies; Unique normalized event keys"
+      },
+      {
+        "name": "derived.queues",
+        "status": "FAIL",
+        "detail": "4788 discrepancies; All evaluation and attribution queues drained"
+      },
+      {
+        "name": "progression.replay",
+        "status": "PASS",
+        "detail": "0 discrepancies; 4821 subjects recomputed without writes"
+      },
+      {
+        "name": "collections.replay",
+        "status": "PASS",
+        "detail": "0 discrepancies; Completion and deterministic set evidence recomputed without writes"
+      },
+      {
+        "name": "privacy.private_cards",
+        "status": "PASS",
+        "detail": "0 discrepancies; Private Collectors have no personalized anonymous share projection"
+      },
+      {
+        "name": "history.coverage",
+        "status": "PASS",
+        "detail": "4444/4444 complete provenance; tracked counts are not lifetime totals"
+      },
+      {
+        "name": "chain.ownerOf",
+        "status": "WARN",
+        "detail": "Use --owners spot or --owners full for RPC verification"
+      },
+      {
+        "name": "collectibles.custom",
+        "status": "PASS",
+        "detail": "0 official records; 0 invalid metadata or chain references"
+      },
+      {
+        "name": "collectibles.edition",
+        "status": "PASS",
+        "detail": "0 official records; 0 invalid metadata or chain references"
+      },
+      {
+        "name": "collectibles.relations_audit",
+        "status": "PASS",
+        "detail": "0 inconsistent representation references, missing verification dates or audit histories"
+      },
+      {
+        "name": "collectibles.artwork",
+        "status": "WARN",
+        "detail": "0 assets; 0 failures; use collectibles:verify to revalidate gateway bytes"
+      },
+      {
+        "name": "editions.ownership",
+        "status": "WARN",
+        "detail": "Ethereum ERC721/ERC1155 observations require a reviewed verified catalog entry and expire after 15 minutes. Other chains and off-chain catalogs have no ownership claims."
+      },
+      {
+        "name": "editions.registry",
+        "status": "WARN",
+        "detail": "No reviewed official contracts; historical ownership unavailable"
+      }
+    ]
+  },
+  "finalLaunchReport": {
+    "overall": "NOT_READY",
+    "blockingPassed": 17,
+    "blockingPending": 3,
+    "warnings": 11,
+    "failed": 0,
+    "environment": "staging",
+    "commit": "cd15cd36c835be38b316ea7bd6fc9c45bab0f77f",
+    "storage": "VERIFIED",
+    "migration": "202610010011_phase9",
+    "catalogs": [
+      {
+        "kind": "progression",
+        "id": "uglydex-progression-v1",
+        "fingerprint": "31587ed34d35f222e42a55e6870af23a6c73770816af2674c59597d57d2040f2"
+      },
+      {
+        "kind": "collections",
+        "id": "uglydex-collection-v1",
+        "fingerprint": "25fbb6d64d961f8b1ca38f4e3b3f90038626cffc23858ae00f63e7001501b573"
+      }
+    ],
+    "gates": [
+      {
+        "key": "DATABASE",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T01:00:23.999Z",
+        "summary": "Safe local database/migration checks",
+        "evidenceHash": "247f4b7bd7deb12b8ca743a112f005279a1544ea7cb84ed52b6c93992ee4eac8"
+      },
+      {
+        "key": "MIGRATIONS",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T01:00:24.022Z",
+        "summary": "Safe local database/migration checks",
+        "evidenceHash": "e02445bd19b0c3fd181b3bdd38ea355266cd1bf408d56b10a7ff8390b7c17d2c"
+      },
+      {
+        "key": "WEB_DEPLOYMENT",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:22:49.758Z",
+        "summary": "Reviewed operator evidence; details retained privately",
+        "evidenceHash": "7667897ceb2b6ed211d8bfc769fcc0a97866a8b8727687ea6624fae9d37552c0"
+      },
+      {
+        "key": "WORKERS",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T01:00:24.051Z",
+        "summary": "All four LIVE workers require fresh successful heartbeats",
+        "evidenceHash": "8a9e5dd5319f566ad2a6e9a9ece75d812dafeb0bb11957d9025c7e1bb826e59c"
+      },
+      {
+        "key": "BACKUP",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:22:49.770Z",
+        "summary": "Reviewed operator evidence; details retained privately",
+        "evidenceHash": "1f2b1d9d56dcdf393d5207731fd6cba475ce5d62719b7b8aeaee8eb3665906fd"
+      },
+      {
+        "key": "RESTORE_DRILL",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:22:49.724Z",
+        "summary": "Reviewed operator evidence; details retained privately",
+        "evidenceHash": "42305d600db43f7f7699dbbcaa70999d83214a048e8b6ec081e16204fd3dd018"
+      },
+      {
+        "key": "ARCHIVE_RPC",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-27T23:26:07.963Z",
+        "summary": "Current revision verified chain/ERC721/archive bytecode/block/log access",
+        "evidenceHash": "0b8b33634030f7555264a812dae0bf59731c4d92c2af45e526700ab02903aaa0"
+      },
+      {
+        "key": "START_BLOCK",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-27T23:26:07.993Z",
+        "summary": "Known deployment boundary and first mint revalidated with bounded archive reads",
+        "evidenceHash": "0b8b33634030f7555264a812dae0bf59731c4d92c2af45e526700ab02903aaa0"
+      },
+      {
+        "key": "MINT_COVERAGE",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T01:00:24.064Z",
+        "summary": "4444/4444; stored finalized boundary only",
+        "evidenceHash": "23434cfc2bf22cb323883a4713247ae8019e998b3398417934515807231eb13e"
+      },
+      {
+        "key": "OWNERSHIP_CONTINUITY",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T01:00:24.073Z",
+        "summary": "4444/4444; stored finalized boundary only",
+        "evidenceHash": "23434cfc2bf22cb323883a4713247ae8019e998b3398417934515807231eb13e"
+      },
+      {
+        "key": "OWNER_OF",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:36:03.702Z",
+        "summary": "4444/4444 ownerOf matched; 0 anomalous tokens at indexed block 26072176",
+        "evidenceHash": "9bc24b30f2d6a883694dafe8a793d7dd86a2b8be6671bb43797e09444493aadb"
+      },
+      {
+        "key": "WALLET_LINKS",
+        "blocking": false,
+        "status": "PARTIAL",
+        "checkedAt": "2026-09-27T23:38:29.863Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "c2782d2b4a79846d21574dee5a5c8846f845d1e4a0945679428b87d6be42bea6"
+      },
+      {
+        "key": "UGLYBOT",
+        "blocking": false,
+        "status": "PARTIAL",
+        "checkedAt": "2026-09-27T23:38:28.891Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "4c9d6d2ea2cd2b05161a56d66119bd589f4c39afaac00576706626cd2b3708de"
+      },
+      {
+        "key": "GAUNTLET",
+        "blocking": false,
+        "status": "PARTIAL",
+        "checkedAt": "2026-09-27T23:38:29.514Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "5780e35664faedcb4a5b8c6b2accbec13235ecafb367aa7b02639b9b2b7cb743"
+      },
+      {
+        "key": "SURVIVAL",
+        "blocking": false,
+        "status": "PARTIAL",
+        "checkedAt": "2026-09-27T23:38:29.674Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "94e12549f79be7ccee083cf49fb77e79cc6f045fce9c48db4309f70190d2f747"
+      },
+      {
+        "key": "IMAGE_SUBMIT",
+        "blocking": false,
+        "status": "PARTIAL",
+        "checkedAt": "2026-09-27T23:38:29.789Z",
+        "summary": "Schema/role inspection; history completeness remains separately reviewed",
+        "evidenceHash": "fb8e2e2b4b472cbdd2cdfb2c45da00bb5f697cb0c25a01123d1a13fd7ba7abaf"
+      },
+      {
+        "key": "IDENTITY_REVIEW",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "REATTRIBUTION",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:35:07.830Z",
+        "summary": "Completed Replay A/B; tracked evidence only",
+        "evidenceHash": "d9bc7e13f2808ee906e61256e3733b5b9c296f4b95df19d9bc0d75e45080985e"
+      },
+      {
+        "key": "ACTIVITY",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:22:49.778Z",
+        "summary": "Reviewed operator evidence; details retained privately",
+        "evidenceHash": "7a44a15f65cdbb11f3329f2a058f917d777613d457a8ac37dbab1dc066fa60cc"
+      },
+      {
+        "key": "DUPLICATE_REVIEW",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:22:49.785Z",
+        "summary": "Reviewed operator evidence; details retained privately",
+        "evidenceHash": "47e6c624ffa72a75a695ea64b445f9abbe50fe7ce02f41ee15c526cc0804dbf6"
+      },
+      {
+        "key": "PROGRESSION",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:35:07.821Z",
+        "summary": "Completed Replay A/B; tracked evidence only",
+        "evidenceHash": "d9bc7e13f2808ee906e61256e3733b5b9c296f4b95df19d9bc0d75e45080985e"
+      },
+      {
+        "key": "COLLECTIONS",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:35:07.825Z",
+        "summary": "Completed Replay A/B; tracked evidence only",
+        "evidenceHash": "d9bc7e13f2808ee906e61256e3733b5b9c296f4b95df19d9bc0d75e45080985e"
+      },
+      {
+        "key": "DERIVED_REPLAY_STABLE",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": "2026-09-28T00:53:27.956Z",
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": "7fe5c63d1e7df49afa1db7fe6ff78dbfa386cbad28b6b48d898742da2a1f9b82"
+      },
+      {
+        "key": "HANDOFF",
+        "blocking": true,
+        "status": "VERIFIED",
+        "checkedAt": "2026-09-28T00:22:49.749Z",
+        "summary": "Reviewed operator evidence; details retained privately",
+        "evidenceHash": "c0c2b6a075a8a5d90dfd0dc764cc4715910dc46d0980df9f26edc36c3795fa12"
+      },
+      {
+        "key": "PRIVACY_AUTH",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "EXTERNAL_OG",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "REAL_DEVICE_SHARE",
+        "blocking": true,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "CUSTOM_MANIFEST",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "EDITION_MANIFEST",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "EDITION_CONTRACTS",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      },
+      {
+        "key": "HOLDER_TIERS",
+        "blocking": false,
+        "status": "PENDING",
+        "checkedAt": null,
+        "summary": "Current deployment evidence required (absent, expired or changed context)",
+        "evidenceHash": null
+      }
+    ]
+  },
+  "validation": {
+    "unitTests": 584,
+    "databaseHttpBrowserAssertions": 837,
+    "stagingSmokeChecks": 10,
+    "releaseCheck": "PASS",
+    "launchCheck": "EXPECTED_NOT_READY"
+  }
+}
