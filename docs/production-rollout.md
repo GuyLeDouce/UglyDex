@@ -1,5 +1,24 @@
 # Phase 8 rollout gates
 
+## Phase 11 staging historical checkpoint
+
+See the [full staging import and duplicate review](phase11-full-import-report.md).
+ACTIVITY and DUPLICATE_REVIEW are VERIFIED on staging, but staging still has 11
+blocking gates and production has 15. No production import, bridge rollout,
+worker enablement or launch is authorized by this checkpoint. The next operator
+decision covers identity review and downstream derivation/replay; it must also
+refresh the provenance projections dirtied by canonical identity evidence preload.
+
+## Phase 11 focused repair
+
+See [source/RPC results](phase11-source-rpc-report.md) and
+[bridge deployment instructions](source-bridges.md). The new transport is deployed
+to staging and its upstream source bridges. Production web remains on `c764e28`;
+no production chain backfill, source import or worker enablement occurred. Before
+production consumes bridges, provision distinct production bridge secrets and
+instances and validate the intended application revision. Do not reuse staging
+bridge secrets or bypass public PostgreSQL TLS verification.
+
 ## Phase 10 execution status
 
 On 2026-09-27 UTC, isolated Railway staging is deployed at `https://uglydex-staging-staging.up.railway.app`. Both database backups passed disposable restores with 79 matching table inventories. Application commit `c764e28` passes staging smoke/preflight. The owner separately pushed this commit to the existing production service, then authorized its startup repair: invalid environment formatting, missing migration/readiness settings and the empty canonical catalog were corrected. Production now has eleven migrations and passes ten HTTP/PNG smoke assertions at `https://uglydex-production.up.railway.app`. This is an authorized repair of an existing deployment, **not** a gate-approved production launch. Staging is NOT_READY (13 blockers); production is BLOCKED (15 blockers, including a queued attribution job). All four workers remain disabled. See [actual evidence and remaining gates](phase10-report.md).

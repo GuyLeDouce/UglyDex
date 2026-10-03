@@ -1,5 +1,17 @@
 # Production evidence reconciliation
 
+## Phase 11 staging historical review
+
+The [full import report](phase11-full-import-report.md) records 29,395 source rows,
+29,460 active imported events, zero rejected rows, and zero inserts or semantic
+differences on full repeats. The historical duplicate audit canonicalized 760
+submission/live-image approval pairs through existing rules, found no matching
+cross-source financial candidates, and retained all source evidence. Claims and
+creator reward metadata remain observation-only. Forty-three Bounty entries
+remain unattributed; 284 dated wallet cases await the next authorized identity
+stage. Source exhaustion remains PARTIAL tracked coverage, not lifetime history.
+No production import or broad reconciliation was performed.
+
 ## Phase 10 actual evidence
 
 On 2026-09-27 UTC, source probes ran from the existing production network in read-only transactions. Wallet links and four UglyBot connection groups connect but their credentials have effective write/admin capabilities. Gauntlet authentication fails; Survival and ImageSubmit hosts do not resolve; the separate image database URL is absent. No credential is classified VERIFIED_READ_ONLY. No source pilot, full import, duplicate review or identity decision was performed, and no upstream database was modified. Import completeness remains PENDING. Safe aggregate schema/count results and the credential follow-up are in [phase10-report.md](phase10-report.md).

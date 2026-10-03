@@ -1,5 +1,36 @@
 # Integration operating contract
 
+## Phase 11 full staging import follow-up
+
+The [full staging report](phase11-full-import-report.md) supersedes the pilot-only
+operational checkpoint below. All 16 available feeds reached source exhaustion
+and passed full reconciliation repeats, semantic review and populated privacy
+checks. Historical cursors now retain real import coverage; source states remain
+PARTIAL with TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME. The absent onlineRewards
+table remains UNAVAILABLE_SOURCE_TABLE. All nine logical source connections
+continue through verified read-only staging bridges. No upstream writes,
+production imports or worker cycles occurred.
+
+## Phase 11 bounded pilot follow-up
+
+The [pilot report](phase11-pilot-report.md) records the 16 available staging feed
+reviews, corrections, source warnings and individual approval decisions. Historical
+cursors and completion flags remain untouched; no full import or worker cycle was
+run. `onlineRewards` remains unavailable. Before subsequent Duel imports, retain
+the authoritative `UGLYBOT_BOT_DISCORD_ID` configuration described in
+[source bridges](source-bridges.md); never identify bot opponents by name.
+
+## Phase 11 secure transport follow-up
+
+The [source bridges](source-bridges.md) preserve the existing adapters while
+replacing cross-project public PostgreSQL connections that fail certificate and
+hostname validation. Staging uses three authenticated HTTPS bridge services with
+dedicated readers inside the upstream private networks. All nine logical sources
+authenticate and verify read-only privileges; 25/26 registry tables exist with
+every required column. The absent `gauntlet_online_reward_events` makes only
+`onlineRewards` unavailable. Gauntlet runs remain usable. No source pilot or import
+was run during this repair. See [dated results](phase11-source-rpc-report.md).
+
 ## Phase 8 pilot gate
 
 Run `integrations:pilot -- --feed <feed> --since <date>` only after live schema/SELECT-role validation. At most 200 rows are normalized without advancing full backfill cursors. The printed audit ID must be approved with `integrations:pilot:approve -- --run <id> --reviewed`; full staging/production backfill requires that source schema fingerprint. Review cross-source reward/payment duplicates using existing canonical event rules. No actual production source credentials or rows were available; schema/duplicate findings remain PENDING. No external writes were added.

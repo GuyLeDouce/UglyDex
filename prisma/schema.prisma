@@ -31,6 +31,7 @@ model Collector {
   isPublic     Boolean                @default(false)
   showWallets  Boolean                @default(false)
   showDiscord  Boolean                @default(false)
+  showCharmBalance Boolean             @default(false)
   featuredTokenIds Int[]              @default([])
   featuredAchievementIds String[] @default([])
   selectedTitleId String?
@@ -54,6 +55,8 @@ model Collector {
   refreshRequest CollectorRefreshRequest?
   attributions HistoricalIdentityAttribution[]
   holdingPeriods CollectorOwnershipPeriod[]
+  dripIdentities DripIdentity[]
+  charmBalances CharmBalance[]
 }
 
 model ExternalIdentity {
@@ -1162,4 +1165,97 @@ model ReplayProof {
  replayB Json?
  differences Json?
  errorCode String?
+ databaseFingerprint String?
+ configurationHash String?
+ liveProofs LiveDerivationProof[]
+}
+
+model LiveDerivationProof {
+ id String @id @default(uuid()) @db.Uuid
+ frozenProofId String @db.Uuid
+ frozenProof ReplayProof @relation(fields:[frozenProofId], references:[id])
+ environment String
+ databaseFingerprint String
+ commit String
+ capturedAt DateTime
+ finishedAt DateTime @default(now())
+ status String
+ inputHash String
+ inputs Json
+ derived Json
+ configurationHash String
+ configuration Json
+ queues Json
+ checks Json
+ @@index([capturedAt])
+}
+
+model DripIdentity {
+ id String @id @default(uuid()) @db.Uuid
+ collectorId String @db.Uuid
+ collector Collector @relation(fields:[collectorId],references:[id])
+ realmId String
+ dripMemberId String?
+ realmMemberId String?
+ status String
+ source String @default("EXACT_DISCORD_CREDENTIAL")
+ firstObservedAt DateTime @default(now())
+ lastResolvedAt DateTime?
+ balances CharmBalance[]
+ @@unique([realmId,collectorId])
+ @@unique([realmId,dripMemberId])
+}
+
+model CharmBalance {
+ collectorId String @db.Uuid
+ collector Collector @relation(fields:[collectorId],references:[id])
+ realmId String
+ currencyId String
+ dripIdentityId String @db.Uuid
+ dripIdentity DripIdentity @relation(fields:[dripIdentityId],references:[id])
+ balance Decimal? @db.Decimal(65,18)
+ observedAt DateTime?
+ lastApiSuccessAt DateTime?
+ status String @default("UNKNOWN")
+ @@id([collectorId,realmId,currencyId])
+}
+
+model DripSyncState {
+ realmId String @id
+ currencyId String
+ alignment Json?
+ alignmentHash String?
+ alignmentAt DateTime?
+ alignmentCommit String?
+ lastFullSweep DateTime?
+ nextSweepAt DateTime @default(now())
+ sweepStartedAt DateTime?
+ memberCursor String?
+ lastSuccessAt DateTime?
+ last429At DateTime?
+ nextRequestAt DateTime @default(now())
+ month String
+ monthRequests Int @default(0)
+ totalRequests Int @default(0)
+ total429 Int @default(0)
+ minimumRemaining Int?
+ lastRateLimit Json?
+ errorCode String?
+}
+
+model CharmRefreshRequest {
+ collectorId String @db.Uuid
+ realmId String
+ requestedAt DateTime @default(now())
+ nextUserRequestAt DateTime @default(now())
+ pending Boolean @default(true)
+ generation Int @default(1)
+ @@id([realmId,collectorId])
+ @@index([realmId,pending,requestedAt])
+}
+
+model CharmDirtyNonce {
+ id String @id
+ expiresAt DateTime
+ @@index([expiresAt])
 }

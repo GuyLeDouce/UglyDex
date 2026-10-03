@@ -5,8 +5,8 @@ import type { Prisma } from '@/generated/prisma/client';
 import {
   deriveWalletPeriods,
   deriveCollectorPeriods,
-  holdingEventTypes,
 } from '@/domain/provenance';
+import { provenanceActivities } from '@/server/provenance-semantics';
 import { SQUIGS_CONTRACT } from '@/domain/validation';
 const key = (parts: unknown[]) =>
   createHash('sha256').update(JSON.stringify(parts)).digest('hex');
@@ -253,57 +253,8 @@ export async function deriveToken(squigId: string) {
       await tx.collectorActivity.deleteMany({
         where: { squigId, sourceSystem: 'provenance' },
       });
-      for (const p of periods) {
-        const types = holdingEventTypes(
-          p === periods.find((v) => v.collectorId === p.collectorId),
-          p.acquiredAt,
-          p.lostAt,
-          facts.find((f) => f.id === p.acquisitionEvent)?.eventAt,
-          facts.find((f) => f.id === p.lossEvent)?.eventAt,
-        );
-        const events = [
-          {
-            type: types.acquired,
-            at: p.acquiredAt,
-          },
-          ...(p.lostAt ? [{ type: types.lost, at: p.lostAt }] : []),
-        ];
-        const firstIndex = facts.findIndex((f) => f.id === p.acquisitionEvent),
-          lastIndex = p.lossEvent
-            ? facts.findIndex((f) => f.id === p.lossEvent)
-            : -1;
-        for (const [index, f] of facts.entries())
-          if (
-            f.fromAddress !== f.toAddress &&
-            index > firstIndex &&
-            (lastIndex < 0 || index < lastIndex) &&
-            f.eventAt >= p.acquiredAt &&
-            (!p.lostAt || f.eventAt <= p.lostAt) &&
-            p.walletAddresses.includes(f.fromAddress) &&
-            p.walletAddresses.includes(f.toAddress)
-          )
-            events.push({ type: 'WALLET_MOVE', at: f.eventAt });
-        for (const [i, e] of events.entries()) {
-          const eventKey = key([p.id, e.type, e.at, i]);
-          await tx.collectorActivity.create({
-            data: {
-              eventKey,
-              collectorId: p.collectorId,
-              squigId,
-              sourceSystem: 'provenance',
-              category: 'SQUIGS',
-              visibility: 'PUBLIC',
-              sourceType: 'ownership',
-              sourceId: eventKey,
-              subjectKey: p.collectorId,
-              eventType: e.type,
-              eventAt: e.at,
-              metadata: { tokenId: facts[0]?.tokenId },
-              payloadHash: eventKey,
-            },
-          });
-        }
-      }
+      for (const activity of provenanceActivities(squigId, periods, facts))
+        await tx.collectorActivity.create({ data: activity });
       const last = facts.at(-1);
       const longest =
         trusted && result.periods.length

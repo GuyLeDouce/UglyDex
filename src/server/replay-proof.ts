@@ -59,9 +59,11 @@ export type Fingerprints = Record<string, { count: number; sha256: string }>;
 export async function semanticFingerprints(
   client: PoolClient,
   mode: 'input' | 'derived',
+  ownTransaction = true,
 ): Promise<Fingerprints> {
   const results: Fingerprints = {};
-  await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+  if (ownTransaction)
+    await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
   try {
     for (const [table, omit] of Object.entries(
       mode === 'input' ? inputs : derived,
@@ -86,12 +88,26 @@ export async function semanticFingerprints(
       await client.query('CLOSE semantic_rows');
       results[table] = { count, sha256: digest.digest('hex') };
     }
-    await client.query('COMMIT');
+    if (ownTransaction) await client.query('COMMIT');
     return results;
   } catch (e) {
-    await client.query('ROLLBACK');
+    if (ownTransaction) await client.query('ROLLBACK');
     throw e;
   }
+}
+export function replayConfiguration(input: Fingerprints) {
+  return Object.fromEntries(
+    [
+      'ProgressionRuleset',
+      'CollectionRuleset',
+      'AchievementDefinition',
+      'CollectionSetDefinition',
+      'CollectionSetRequirement',
+      'CosmeticDefinition',
+      'SquigTrait',
+      'Squig',
+    ].map((key) => [key, input[key]]),
+  );
 }
 export function fingerprintDiff(a: Fingerprints, b: Fingerprints) {
   return [...new Set([...Object.keys(a), ...Object.keys(b)])]
@@ -101,55 +117,8 @@ export function fingerprintDiff(a: Fingerprints, b: Fingerprints) {
     );
 }
 export async function verifyReplayProof() {
-  const proof = await db().replayProof.findFirst({
-    orderBy: { startedAt: 'desc' },
-  });
-  if (!proof) {
-    await recordGate(
-      'DERIVED_REPLAY_STABLE',
-      'PENDING',
-      'No completed replay proof exists',
-      {},
-    );
-    return false;
-  }
-  if (proof.status !== 'VERIFIED') {
-    await recordGate(
-      'DERIVED_REPLAY_STABLE',
-      proof.status === 'FAILED' ? 'FAILED' : 'PENDING',
-      'Latest replay has not produced a stable proof',
-      { id: proof.id, status: proof.status },
-    );
-    return false;
-  }
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 1,
-    connectionTimeoutMillis: 5000,
-  });
-  const client = await pool.connect();
-  try {
-    const context = launchContext();
-    const valid =
-      proof.environment === context.environment &&
-      proof.commit === context.commit &&
-      hash(await semanticFingerprints(client, 'input')) === proof.inputHash &&
-      fingerprintDiff(
-        proof.replayB as Fingerprints,
-        await semanticFingerprints(client, 'derived'),
-      ).length === 0;
-    if (!valid)
-      await recordGate(
-        'DERIVED_REPLAY_STABLE',
-        'PENDING',
-        'Evidence changed since Replay A/B; rerun against stable inputs',
-        { id: proof.id },
-      );
-    return valid;
-  } finally {
-    client.release();
-    await pool.end();
-  }
+  const { verifyCurrentReplay } = await import('./live-convergence');
+  return verifyCurrentReplay();
 }
 async function replay(label: 'A' | 'B') {
   const started = Date.now();
@@ -239,7 +208,11 @@ export async function replayProof() {
       },
     });
     const run = await db().replayProof.create({
-      data: { environment: context.environment, commit: context.commit },
+      data: {
+        environment: context.environment,
+        commit: context.commit,
+        databaseFingerprint: context.databaseFingerprint,
+      },
     });
     id = run.id;
     await recordGate(
@@ -253,7 +226,11 @@ export async function replayProof() {
     const a = await semanticFingerprints(client, 'derived');
     await db().replayProof.update({
       where: { id },
-      data: { inputHash: hash(input), replayA: a },
+      data: {
+        inputHash: hash(input),
+        replayA: a,
+        configurationHash: hash(replayConfiguration(input)),
+      },
     });
     const middle = await semanticFingerprints(client, 'input');
     await replay('B');

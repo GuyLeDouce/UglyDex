@@ -17,6 +17,7 @@ import { appearance } from '@/server/cosmetics';
 import { appearanceClass } from '@/domain/cosmetics';
 import { ownedEditions } from '@/server/editions';
 import { EditionGrid } from '@/components/editions';
+import { formatAmount } from '@/domain/activity';
 export async function generateMetadata({
   params,
 }: {
@@ -58,6 +59,13 @@ export default async function Collector({
           <h1>{p.displayName || p.slug}</h1>
           <p>@{p.slug}</p>
           <p className="bio">{p.bio}</p>
+          {r.charm?.balance !== null && r.charm?.balance !== undefined && (
+            <p>
+              {formatAmount(r.charm.balance)} $CHARM · updated{' '}
+              {r.charm.updatedAt?.slice(0, 10)}
+              {r.charm.stale ? ' · last known balance' : ''}
+            </p>
+          )}
           {p.wallets.map((w) => (
             <p className="wallet-line" key={w}>
               {w}

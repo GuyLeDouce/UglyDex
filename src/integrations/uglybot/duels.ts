@@ -7,6 +7,10 @@ export function duelEvents(row: ExternalRow) {
     const who = row[`${role}_id`],
       other = role === 'challenger' ? 'opponent' : 'challenger';
     const tid = row[`${role}_squig_token_id`];
+    // The upstream bot is an opponent, never a Collector. Match only its
+    // explicitly configured application identity, never names or token absence.
+    const botId = process.env.UGLYBOT_BOT_DISCORD_ID;
+    if (botId && /^\d{17,20}$/.test(botId) && String(who) === botId) return [];
     if (!who && !tid) return [];
     const completed = row.status === 'completed' && !!row.completed_at;
     const outcome =

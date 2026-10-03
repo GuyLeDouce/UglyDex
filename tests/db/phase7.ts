@@ -60,6 +60,16 @@ export async function phase7DatabaseTests(
     ],
     { env: process.env, encoding: 'utf8', windowsHide: true, timeout: 90000 },
   );
+  if (!preflightCLI.stdout.includes('PASS migration.drift'))
+    console.error(
+      (
+        preflightCLI.stdout +
+        preflightCLI.stderr +
+        String(preflightCLI.error ?? '')
+      )
+        .replaceAll(process.env.DATABASE_URL!, '[fixture database]')
+        .replaceAll(process.env.AUTH_SECRET!, '[fixture secret]'),
+    );
   check(
     preflightCLI.stdout.includes('PASS migration.drift'),
     'preflight CLI verifies live schema drift',

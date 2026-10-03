@@ -1,9 +1,11 @@
 // No dotenv, no TEST_DATABASE_URL and no caller-selected database. Every run owns a
-// new loopback PostgreSQL cluster with random credentials in .data/test-<UUID>.
-import EmbeddedPostgres from 'embedded-postgres';
+// new loopback PostgreSQL cluster with random credentials and a generated UUID.
+import { fixturePostgres } from './test-postgres';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { createServer } from 'node:net';
 import { resolve, relative } from 'node:path';
+import { tmpdir } from 'node:os';
+import { rm } from 'node:fs/promises';
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -15,19 +17,28 @@ async function unusedPort() {
   await new Promise<void>((r) => server.close(() => r()));
   return port;
 }
-const root = resolve('.data'),
+// Removable Windows worktrees can take longer than the application connection
+// deadline to open PostgreSQL's backend files. Keep disposable cluster I/O on
+// the local temporary disk; screenshots and test evidence remain in .data.
+const root =
+    process.platform === 'win32'
+      ? resolve(tmpdir(), 'uglydex-db-fixtures')
+      : resolve('.data'),
   directory = resolve(root, `test-${randomUUID()}`);
 if (relative(root, directory).startsWith('..') || directory === root)
   throw new Error('UNSAFE_TEST_DIRECTORY');
 const port = await unusedPort(),
   webPort = await unusedPort(),
   password = randomBytes(24).toString('hex');
+console.log(JSON.stringify({ event: 'test.prepare_postgres_runtime' }));
+const EmbeddedPostgres = await fixturePostgres(directory);
 const postgres = new EmbeddedPostgres({
-  databaseDir: directory,
+  databaseDir: resolve(directory, 'cluster'),
   user: 'uglydex_test',
   password,
   port,
-  persistent: false,
+  // Own cleanup below adds bounded Windows handle-release retries.
+  persistent: true,
   // PG18 async I/O workers can outlive taskkill on Windows and retain pipes.
   // Synchronous I/O keeps this disposable fixture's shutdown deterministic.
   postgresFlags: ['-h', '127.0.0.1', '-c', 'io_method=sync'],
@@ -44,12 +55,41 @@ for (const key of [
   'ETH_RPC_URL',
   'ECOSYSTEM_GUILD_ID',
   'SQUIG_IMAGE_BASE_URL',
+  'UGLYBOT_BRIDGE_URL',
+  'UGLYBOT_BRIDGE_SECRET',
+  'UGLYBOT_BOT_DISCORD_ID',
+  'GAUNTLET_BRIDGE_URL',
+  'GAUNTLET_BRIDGE_SECRET',
+  'IMAGE_BRIDGE_URL',
+  'IMAGE_BRIDGE_SECRET',
+  'DRIP_READ_API_KEY',
+  'DRIP_REALM_ID',
+  'DRIP_REALM_POINT_ID',
+  'DRIP_MAX_RPM',
+  'DRIP_SYNC_INTERVAL_MS',
+  'DRIP_STALE_AFTER_MS',
+  'CHARM_DIRTY_UGLYBOT_SECRET',
+  'CHARM_DIRTY_GAUNTLET_SECRET',
 ])
   process.env[key] = '';
 process.env.SQUIGS_CONTRACT_ADDRESS =
   '0x8c9a02c0585200c4c65608df6b8def543d33792a';
 process.env.DATABASE_URL = `postgresql://uglydex_test:${password}@127.0.0.1:${port}/uglydex_test`;
 Object.assign(process.env, { NODE_ENV: 'test', APP_ENV: 'development' });
+if (process.argv.includes('--web')) {
+  // These are synthetic loopback-fixture values. Web pages read cached database
+  // snapshots and enqueue hints; no DRIP worker or upstream request is started.
+  Object.assign(process.env, {
+    DRIP_READ_API_KEY: 'fixture-key-never-public',
+    DRIP_REALM_ID: 'a'.repeat(24),
+    DRIP_REALM_POINT_ID: 'b'.repeat(24),
+  });
+}
+Object.assign(process.env, {
+  DRIP_MAX_RPM: '6',
+  DRIP_SYNC_INTERVAL_MS: '1800000',
+  DRIP_STALE_AFTER_MS: '300000',
+});
 process.env.PUBLIC_BASE_URL = `https://localhost:${webPort}`;
 process.env.AUTH_SECRET = randomBytes(32).toString('hex');
 process.env.ADMIN_DIAGNOSTICS_TOKEN = randomBytes(32).toString('hex');
@@ -61,16 +101,27 @@ const check = (condition: unknown, message: string) => {
   assertions++;
 };
 try {
+  console.log(JSON.stringify({ event: 'test.initialise_postgres' }));
   await postgres.initialise();
+  console.log(JSON.stringify({ event: 'test.start_postgres' }));
   await postgres.start();
+  console.log(JSON.stringify({ event: 'test.create_databases' }));
   await postgres.createDatabase('uglydex_test');
   await postgres.createDatabase('uglydex_external_test');
+  console.log(JSON.stringify({ event: 'test.deploy_migrations' }));
   const migration = spawnSync(
     process.execPath,
     ['node_modules/prisma/build/index.js', 'migrate', 'deploy'],
     { env: process.env, encoding: 'utf8', windowsHide: true },
   );
+  if (migration.status !== 0)
+    console.error(
+      String(
+        migration.stderr || migration.error || 'MIGRATION_SUBPROCESS_FAILED',
+      ).replaceAll(process.env.DATABASE_URL!, '[isolated fixture database]'),
+    );
   check(migration.status === 0, 'Prisma deploy applies committed migrations');
+  console.log(JSON.stringify({ event: 'test.migrations_ready' }));
   const { db } = await import('../src/server/db');
   const { productionVerify } = await import('../src/server/production-verify');
   const emptyVerification = await productionVerify();
@@ -192,22 +243,31 @@ try {
     );
   }
   console.log(JSON.stringify({ event: 'test.close_fixture' }));
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 1 }));
   const { phase1DatabaseTests } = await import('../tests/db/phase1');
   await phase1DatabaseTests(check);
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 2 }));
   const { phase2DatabaseTests } = await import('../tests/db/phase2');
   await phase2DatabaseTests(check);
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 3 }));
   const { phase3DatabaseTests } = await import('../tests/db/phase3');
   await phase3DatabaseTests(check, external);
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 4 }));
   const { phase4DatabaseTests } = await import('../tests/db/phase4');
   await phase4DatabaseTests(check);
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 5 }));
   const { phase5DatabaseTests } = await import('../tests/db/phase5');
   await phase5DatabaseTests(check);
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 6 }));
   const { phase6DatabaseTests } = await import('../tests/db/phase6');
   await phase6DatabaseTests(check);
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 7 }));
   const { phase7DatabaseTests } = await import('../tests/db/phase7');
   await phase7DatabaseTests(check);
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 8 }));
   const { phase8DatabaseTests } = await import('../tests/db/phase8');
   await phase8DatabaseTests(check);
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 9 }));
   const { phase9DatabaseTests } = await import('../tests/db/phase9');
   await phase9DatabaseTests(check);
   await external.end();
@@ -339,7 +399,7 @@ try {
     );
     const activityHTML = await activityResponse.text();
     check(
-      activityResponse.ok && activityHTML.includes('Malformed purchase'),
+      activityResponse.ok && activityHTML.includes('Marketplace purchase'),
       'public activity renders imported records',
     );
     check(
@@ -1179,6 +1239,29 @@ try {
   }
   const { phase9ReplayTests } = await import('../tests/db/phase9-replay');
   await phase9ReplayTests(check);
+  console.log(JSON.stringify({ event: 'test.phase.start', phase: 12 }));
+  const { phase12DatabaseTests } = await import('../tests/db/phase12');
+  await phase12DatabaseTests(check);
+  if (process.argv.includes('--web')) {
+    const { phase12WebTests } = await import('../tests/db/phase12-web');
+    await phase12WebTests(
+      `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
+  }
+  const bridgeExternal = postgres.getPgClient(
+    'uglydex_external_test',
+    '127.0.0.1',
+  );
+  await bridgeExternal.connect();
+  try {
+    const { sourceBridgeDatabaseTests } =
+      await import('../tests/db/source-bridge');
+    await sourceBridgeDatabaseTests(check, bridgeExternal);
+  } finally {
+    await bridgeExternal.end();
+  }
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));
 } catch (error) {
@@ -1201,7 +1284,16 @@ try {
   const { closeExternalPools } = await import('../src/integrations/read-only');
   await closeExternalPools();
   console.log(JSON.stringify({ event: 'test.cleanup_postgres' }));
-  // Directory was verified under this workspace before enabling disposable cleanup.
+  // Only this invocation's generated UUID directory under the verified fixture
+  // root is eligible for deletion. Copied .data fixtures are never touched.
   await postgres.stop();
+  if (relative(root, directory).startsWith('..') || directory === root)
+    throw new Error('UNSAFE_TEST_DIRECTORY');
+  await rm(directory, {
+    recursive: true,
+    force: true,
+    maxRetries: 8,
+    retryDelay: 250,
+  });
   console.log(JSON.stringify({ event: 'test.cleanup_complete' }));
 }

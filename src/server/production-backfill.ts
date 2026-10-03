@@ -1,3 +1,4 @@
+import { integrationConfigured } from '@/integrations/bridge-config';
 import 'server-only';
 import { randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
@@ -17,7 +18,7 @@ import { syncSquigs } from '@/sync/squigs';
 import { syncIdentities } from '@/sync/run';
 import { runActivityFeed } from '@/sync/activity';
 import { feeds } from '@/sync/normalize';
-import { integrationEnv, tables } from '@/integrations/registry';
+import { tables } from '@/integrations/registry';
 import {
   seedProgression,
   queueReplay,
@@ -91,8 +92,8 @@ export async function backfillBatch(
       };
     }
     case 'activity': {
-      const configured = feeds.filter(
-        (f) => process.env[integrationEnv[tables[f].integration]],
+      const configured = feeds.filter((f) =>
+        integrationConfigured(tables[f].integration),
       );
       let processed = 0;
       for (const feed of configured) {

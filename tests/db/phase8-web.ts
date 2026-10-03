@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
 import { db } from '../../src/server/db';
 import { authHash } from '../../src/server/auth';
+import { launchGates } from '../../src/domain/launch';
 export async function phase8WebTests(
   base: string,
   check: (v: unknown, m: string) => void,
@@ -29,7 +30,7 @@ export async function phase8WebTests(
   const exported = await fetch(base + '/api/admin/launch', { headers });
   const launch = await exported.json();
   check(
-    exported.ok && launch.gates.length === 31,
+    exported.ok && launch.gates.length === launchGates.length,
     'admin launch export complete gate registry',
   );
   check(

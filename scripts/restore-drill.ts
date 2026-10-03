@@ -35,6 +35,12 @@ const tables = [
   'WorkerControl',
   'LaunchGate',
   'ReplayProof',
+  'LiveDerivationProof',
+  'DripIdentity',
+  'CharmBalance',
+  'DripSyncState',
+  'CharmRefreshRequest',
+  'CharmDirtyNonce',
   '_prisma_migrations',
 ] as const;
 export async function restoreInventory(client: PoolClient) {

@@ -1,5 +1,28 @@
 # Squig provenance
 
+## Phase 11 source-import checkpoint
+
+The [full staging import report](phase11-full-import-report.md) revalidated archive
+access, the known deployment boundary and all 4,444 pinned owner matches on
+application revision 2ab0fc3. The 11,052 Transfer ledger and cursor 26,068,941 were
+not reset or advanced. Subsequent canonical identity evidence preload marked
+3,319 projections dirty for normal downstream attribution/derivation. Fresh
+launch checks therefore report MINT_COVERAGE and OWNERSHIP_CONTINUITY as PARTIAL
+with 1,125 clean projections; all 4,444 stored mint/provenance rows remain intact.
+This requires the next identity stage, not a historical chain rescan. No deployed
+derived replay or worker processing was performed in the source-import task.
+
+## Phase 11 replacement RPC follow-up
+
+The replacement Alchemy archive endpoint completed staging's existing Transfer
+cursor without a reset. All 4,444 mints and token IDs are present, with 4,444 pinned
+ownerOf matches and no verifier anomalies. The independently verified deployment
+boundary remains 25,342,921; token 1's first observed mint is at 25,349,689.
+[The dated report](phase11-source-rpc-report.md) records exact block heights,
+request counts and durations. Production provenance has not been backfilled by
+this task. Workers remain disabled; this is manual staging evidence, not live
+handoff or production replay proof.
+
 ## Phase 8 production proof
 
 `production:report` reports stored mint/continuous-history/owner-match coverage and every anomalous token ID. Run archive start-boundary validation plus provenance:verify and production:verify --owners full before enabling dependent workers. The start reported by an explorer remains unverified until actual archive code/block evidence is checked. Backfill provenance gates refuse incomplete/dirty records. Edition history has separate cursors and cannot alter Reloaded provenance. Real mainnet verification remains PENDING.

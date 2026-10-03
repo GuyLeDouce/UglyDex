@@ -1,0 +1,10 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.bridge"
+[deploy]
+startCommand = "node --conditions=react-server --import tsx scripts/source-bridge.ts"
+healthcheckPath = "/healthz"
+healthcheckTimeout = 60
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+numReplicas = 1

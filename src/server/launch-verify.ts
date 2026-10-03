@@ -124,7 +124,12 @@ export async function verifyLaunch() {
 export async function validateSources() {
   await assertDeploymentBinding();
   const { inspectIntegrations } = await import('@/integrations/inspect');
-  const { readExternal } = await import('@/integrations/read-only');
+  const { sourcePermissions, safeSourceRole } =
+    await import('@/integrations/permissions');
+  const { sourceSchema } = await import('@/integrations/source-schema');
+  const { sourceStats } = await import('@/integrations/source-stats');
+  const { tables } = await import('@/integrations/registry');
+  const { feedKey } = await import('@/integrations/bridge-protocol');
   const mapping: Record<string, GateKey> = {
     links: 'WALLET_LINKS',
     uglybot: 'UGLYBOT',
@@ -135,26 +140,25 @@ export async function validateSources() {
   const results = [];
   for (const report of await inspectIntegrations()) {
     const role = report.configured
-      ? await readExternal<{ unsafe: boolean }>(
-          report.integration,
-          "SELECT (SELECT rolsuper OR rolcreatedb OR rolcreaterole FROM pg_roles WHERE rolname=current_user) OR has_database_privilege(current_database(),'CREATE') OR EXISTS(SELECT 1 FROM information_schema.schemata WHERE schema_name NOT LIKE 'pg_%' AND schema_name<>'information_schema' AND has_schema_privilege(schema_name,'CREATE')) OR EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog','information_schema') AND has_table_privilege(quote_ident(table_schema)||'.'||quote_ident(table_name),'INSERT,UPDATE,DELETE,TRUNCATE,TRIGGER')) AS unsafe",
-        )
+      ? await sourcePermissions(report.integration)
       : null;
-    const schema =
-      report.status === 'connected' &&
-      report.tables.every((t) => t.present && !t.missingRequired.length);
+    const schema = sourceSchema(report).compatible;
     const status = !report.configured
       ? 'PENDING'
-      : !schema || (role?.ok && role.data[0]?.unsafe)
+      : !schema || !role?.ok || !safeSourceRole(role.data[0])
         ? 'FAILED'
         : 'PARTIAL';
     const result = {
       integration: report.integration,
       status,
       schemaCompatible: schema,
+      transport: report.transport,
+      reachable: report.reachable,
+      authenticated: report.authenticated,
+      unavailableFeeds: sourceSchema(report).unavailable,
       readOnly:
-        role?.ok && !role.data[0]?.unsafe
-          ? 'LIKELY_READ_ONLY'
+        role?.ok && safeSourceRole(role.data[0])
+          ? 'VERIFIED_READ_ONLY'
           : 'UNABLE_TO_VERIFY',
       limitation:
         'Catalog inspection cannot prove absence of every writable SECURITY DEFINER routine or inherited privilege; operator review required',
@@ -168,25 +172,10 @@ export async function validateSources() {
     };
     for (const table of report.tables) {
       if (!table.present || table.missingRequired.length) continue;
-      const date = [
-        'created_at',
-        'submitted_at',
-        'added_at',
-        'started_at',
-      ].find((c) => table.columns.includes(c));
-      if (
-        !/^[a-z_][a-z0-9_]*$/.test(table.table) ||
-        (date && !/^[a-z_]+$/.test(date))
-      )
-        throw new Error('INVALID_REGISTRY_IDENTIFIER');
-      const count = await readExternal<{
-        rows: string;
-        earliest: string | null;
-        latest: string | null;
-      }>(
-        report.integration,
-        `SELECT count(*)::text AS rows, ${date ? `min("${date}")::text` : 'NULL::text'} AS earliest, ${date ? `max("${date}")::text` : 'NULL::text'} AS latest FROM public."${table.table}"`,
-      );
+      const spec = Object.values(tables).find(
+        (s) => s.integration === report.integration && s.table === table.table,
+      )!;
+      const count = await sourceStats(feedKey(spec));
       result.tables.push({
         table: table.table,
         rows: count.ok ? count.data[0].rows : null,

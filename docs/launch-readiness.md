@@ -1,5 +1,16 @@
 # Launch evidence, not configuration
 
+The latest focused Phase 11 checkpoint is the
+[full staging import and duplicate review](phase11-full-import-report.md).
+Sixteen available histories passed full import, idempotent repeat and populated
+privacy review. ACTIVITY and DUPLICATE_REVIEW are VERIFIED for staging;
+onlineRewards remains unavailable. Staging is BLOCKED with 11 blockers and
+production remains NOT_READY with 15. Canonical identity preload queued 284
+attribution jobs and dirtied 3,319 provenance projections; those need the next
+authorized identity/derivation stage. The Transfer ledger and cursor are intact.
+Reconciliation, replay, handoff, workers and production imports require separate
+authorization. No production launch was approved.
+
 Phase 9 separates code readiness (`release:check`) from deployment evidence (`launch:check`). No production credential or real device was supplied during implementation. The unconfigured workspace reports **NOT_READY**, all 31 gates PENDING, and `launch:check` exits 1. Fixture tests never close production gates.
 
 ## Persistent policy

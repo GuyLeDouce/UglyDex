@@ -10,6 +10,7 @@ type Values = {
   isPublic: boolean;
   showWallets: boolean;
   showDiscord: boolean;
+  showCharmBalance: boolean;
   featuredTokenIds: number[];
 };
 export function ProfileForm({ initial }: { initial: Values }) {
@@ -30,6 +31,7 @@ export function ProfileForm({ initial }: { initial: Values }) {
         isPublic: f.has('isPublic'),
         showWallets: f.has('showWallets'),
         showDiscord: f.has('showDiscord'),
+        showCharmBalance: f.has('showCharmBalance'),
         featuredTokenIds: String(f.get('featured') || '')
           .split(',')
           .map((s) => s.trim())
@@ -52,6 +54,14 @@ export function ProfileForm({ initial }: { initial: Values }) {
   }
   return (
     <form className="settings-form" onSubmit={submit}>
+      <label>
+        <input
+          type="checkbox"
+          name="showCharmBalance"
+          defaultChecked={initial.showCharmBalance}
+        />{' '}
+        Show my current $CHARM balance on my public profile
+      </label>
       <label>
         Username
         <input

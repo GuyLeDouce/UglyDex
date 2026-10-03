@@ -1,22 +1,15 @@
 import 'server-only';
 import { inspectIntegrations } from './inspect';
-import { readExternal } from './read-only';
+import { sourcePermissions, safeSourceRole } from './permissions';
 import { tables } from './registry';
 import { db } from '@/server/db';
-import { hash } from '@/domain/events';
+import { sourceSchemaFingerprint } from './source-schema';
 import { feeds } from '@/sync/normalize';
 export async function validateIntegrations() {
   const reports = await inspectIntegrations();
   const validations = [];
   for (const report of reports) {
-    const permissions = await readExternal<{
-      read_only: string;
-      superuser: boolean;
-      can_write: boolean;
-    }>(
-      report.integration,
-      `SELECT current_setting('transaction_read_only') AS read_only, (SELECT rolsuper FROM pg_roles WHERE rolname=current_user) AS superuser, EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE' AND (has_table_privilege(quote_ident(table_schema)||'.'||quote_ident(table_name),'INSERT,UPDATE,DELETE,TRUNCATE'))) AS can_write`,
-    );
+    const permissions = await sourcePermissions(report.integration);
     validations.push({
       ...report,
       permissions: permissions.ok
@@ -39,7 +32,9 @@ export async function validateIntegrations() {
         : report.status !== 'connected'
           ? 'ERROR'
           : !valid
-            ? 'UNVALIDATED'
+            ? feed === 'onlineRewards' && !table?.present
+              ? 'UNAVAILABLE'
+              : 'UNVALIDATED'
             : rejected
               ? 'DEGRADED'
               : old?.backfillFinishedAt
@@ -47,10 +42,12 @@ export async function validateIntegrations() {
                 : 'READY';
       const warning = !permissions.ok
         ? 'PERMISSIONS_UNAVAILABLE'
-        : permissions.data[0]?.superuser || permissions.data[0]?.can_write
+        : !safeSourceRole(permissions.data[0])
           ? 'ROLE_HAS_WRITE_PRIVILEGES'
           : !valid
-            ? 'SCHEMA_MISMATCH'
+            ? feed === 'onlineRewards' && !table?.present
+              ? 'FEED_UNAVAILABLE'
+              : 'SCHEMA_MISMATCH'
             : null;
       await db().integrationSource.upsert({
         where: { id: feed },
@@ -59,13 +56,19 @@ export async function validateIntegrations() {
           state,
           schemaValid: valid,
           warning,
-          schemaFingerprint: hash(table ?? null),
+          schemaFingerprint: sourceSchemaFingerprint(
+            tables[feed],
+            table?.columns ?? [],
+          ),
         },
         update: {
           state,
           schemaValid: valid,
           warning,
-          schemaFingerprint: hash(table ?? null),
+          schemaFingerprint: sourceSchemaFingerprint(
+            tables[feed],
+            table?.columns ?? [],
+          ),
         },
       });
     }

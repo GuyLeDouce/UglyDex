@@ -1,5 +1,16 @@
 # Collector identity and reconciliation
 
+## Phase 11 staging evidence preload
+
+The [full source import report](phase11-full-import-report.md) records 377 imported
+wallet-link evidence rows and 284 new UNCONFIRMED historical attributions. Final
+staging population: 377 Collectors, 375 Discord identities, 286 historical
+attribution records, 284 review cases and 284 queued attribution jobs. No manual
+decisions or username matching occurred. Forty-three Bounty entries remain
+unattributed because added_by is not ownership evidence. Normal evidence seeding
+marked 3,319 provenance projections dirty; review and downstream derivation are
+the next separately authorized stage, not work completed by the source importer.
+
 ## Phase 8 reconciliation evidence
 
 Production rollout requires reviewed confirm/reject/time-split cases, audit history and targeted downstream replay. Unresolved conflicts block the identity gate and remain visible in production:report. No conflict was auto-resolved during this phase. Edition historical acquisition uses only CONFIRMED attribution whose effective interval contains the event; current wallet linking alone is not historical evidence. Edition public timelines never expose raw identity/wallet evidence.

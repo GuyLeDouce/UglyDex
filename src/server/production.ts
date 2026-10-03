@@ -248,7 +248,9 @@ export async function preflight(
   }
   if (options.external) {
     const { inspectIntegrations } = await import('@/integrations/inspect');
-    const { readExternal } = await import('@/integrations/read-only');
+    const { sourcePermissions, safeSourceRole } =
+      await import('@/integrations/permissions');
+    const { sourceSchema } = await import('@/integrations/source-schema');
     for (const report of await inspectIntegrations()) {
       if (!report.configured) {
         add(
@@ -261,17 +263,20 @@ export async function preflight(
       }
       add(
         `source.${report.integration}`,
-        report.status === 'connected' &&
-          report.tables.every((t) => t.present && !t.missingRequired.length),
+        sourceSchema(report).compatible,
         'Read-only connectivity and expected source schema',
       );
-      const permission = await readExternal<{ unsafe: boolean }>(
-        report.integration,
-        "SELECT (SELECT rolsuper FROM pg_roles WHERE rolname=current_user) OR EXISTS(SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE' AND has_table_privilege(quote_ident(table_schema)||'.'||quote_ident(table_name),'INSERT,UPDATE,DELETE,TRUNCATE')) AS unsafe",
-      );
+      const permission = await sourcePermissions(report.integration);
+      if (sourceSchema(report).partial)
+        add(
+          `source.${report.integration}.optional`,
+          false,
+          'onlineRewards feed unavailable; runs remains independently usable',
+          'WARN',
+        );
       add(
         `source.${report.integration}.role`,
-        permission.ok && permission.data[0]?.unsafe === false,
+        permission.ok && safeSourceRole(permission.data[0]),
         'External role must not have write or superuser privileges',
       );
     }

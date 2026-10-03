@@ -1,11 +1,14 @@
+import { integrationConfigured } from '@/integrations/bridge-config';
+import { unavailableSource } from '@/integrations/availability';
 import 'server-only';
 import { Pool } from 'pg';
 import { db } from '@/server/db';
 import { readEnv } from '@/server/env';
 import { readPage, tableColumns, type ExternalRow } from '@/integrations/table';
-import { tables, integrationEnv } from '@/integrations/registry';
-import { readExternal } from '@/integrations/read-only';
-import { hash, eventKey } from '@/domain/events';
+import { tables, sourceTimestamp } from '@/integrations/registry';
+import { sourceSchemaFingerprint } from '@/integrations/source-schema';
+import { readSourceQuery } from '@/integrations/queries';
+import { eventKey } from '@/domain/events';
 import { log } from '@/server/log';
 import { feeds, normalizeRow, type Feed } from './normalize';
 import { importRecord, reattributePending } from './import-event';
@@ -30,15 +33,11 @@ export async function enrich(feed: Feed, rows: ExternalRow[]) {
       .map((r) => r.bounty_submission_id)
       .filter((v) => v != null);
     if (ids.length) {
-      const prizes = await readExternal<{
+      const prizes = await readSourceQuery<{
         id: string;
         project_name: string;
         token_id: string;
-      }>(
-        'prizes',
-        'SELECT id,project_name,token_id FROM public.bounty_submissions WHERE id=ANY($1::bigint[])',
-        [ids],
-      );
+      }>('bountyParents', [ids]);
       if (prizes.ok)
         for (const row of rows) {
           const prize = prizes.data.find(
@@ -52,9 +51,8 @@ export async function enrich(feed: Feed, rows: ExternalRow[]) {
     }
   }
   if (feed === 'survival') {
-    const games = await readExternal<{ id: string; started_at: Date }>(
-      'survival',
-      'SELECT id,started_at FROM public.squig_survival_games WHERE id = ANY($1::bigint[])',
+    const games = await readSourceQuery<{ id: string; started_at: Date }>(
+      'survivalParents',
       [rows.map((r) => r.game_id)],
     );
     if (!games.ok) throw new Error('PARENT_UNAVAILABLE');
@@ -64,9 +62,8 @@ export async function enrich(feed: Feed, rows: ExternalRow[]) {
       )?.started_at;
   }
   if (feed === 'duels') {
-    const rounds = await readExternal<{ duel_id: string; rounds: number }>(
-      'uglybot',
-      'SELECT duel_id,count(*)::int AS rounds FROM public.squig_duel_rounds WHERE duel_id = ANY($1::text[]) GROUP BY duel_id',
+    const rounds = await readSourceQuery<{ duel_id: string; rounds: number }>(
+      'duelRounds',
       [rows.map((r) => r.id)],
     );
     if (rounds.ok)
@@ -180,13 +177,7 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
     if (rotating && !options.replay && !options.since)
       after = (state.reconcileCursor as unknown[] | null) ?? undefined;
     if (after?.length === 0) after = undefined;
-    const timeColumn =
-      timestamp ??
-      (spec.required.includes('submitted_at')
-        ? 'submitted_at'
-        : spec.required.includes('added_at')
-          ? 'added_at'
-          : 'created_at');
+    const timeColumn = timestamp ?? sourceTimestamp(spec);
     let exhausted = false,
       earliest: Date | undefined,
       latest: Date | undefined;
@@ -196,7 +187,7 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
         after,
         {},
         200,
-        options.since
+        options.since && timeColumn
           ? { column: timeColumn, value: options.since }
           : undefined,
       );
@@ -209,6 +200,18 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
       const pageKeys: string[] = [];
       for (const row of result.data) {
         counts.scanned++;
+        // Parent-dated Survival rows are still bounded by this source page.
+        // Exclude out-of-range rows without retracting previously imported slots.
+        if (
+          options.since &&
+          !timeColumn &&
+          row.started_at &&
+          new Date(String(row.started_at)) < options.since
+        ) {
+          counts.skipped++;
+          counts.ignoredRows++;
+          continue;
+        }
         const recordId = String(
           row.id ?? row.event_id ?? `${row.game_id}:${row.user_id}`,
         );
@@ -296,7 +299,10 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
       data: {
         state: failed ? 'DEGRADED' : 'PARTIAL',
         schemaValid: true,
-        schemaFingerprint: hash(columns.data),
+        schemaFingerprint: sourceSchemaFingerprint(
+          spec,
+          columns.data.map((c) => c.column_name),
+        ),
         lastSuccessAt: new Date(),
         warning: options.since
           ? 'PILOT_RANGE'
@@ -374,8 +380,12 @@ export async function activityCycle(
 ) {
   await reattributePending();
   for (const feed of feeds)
-    if (!stopped() && process.env[integrationEnv[tables[feed].integration]]) {
+    if (!stopped() && integrationConfigured(tables[feed].integration)) {
       try {
+        const source = await db().integrationSource.findUnique({
+          where: { id: feed },
+        });
+        if (unavailableSource(source)) continue;
         await runActivityFeed(feed, options);
         if (mutable.has(feed))
           await runActivityFeed(feed, { maxPages: 1, reconcile: true });

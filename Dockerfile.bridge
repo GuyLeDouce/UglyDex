@@ -1,0 +1,12 @@
+FROM node:24-bookworm-slim
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY tsconfig.json ./
+COPY src/integrations ./src/integrations
+COPY src/server/log.ts ./src/server/log.ts
+COPY scripts/source-bridge.ts ./scripts/source-bridge.ts
+ENV NODE_ENV=production
+USER node
+EXPOSE 3000
+CMD ["node", "--conditions=react-server", "--import", "tsx", "scripts/source-bridge.ts"]

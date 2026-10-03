@@ -18,6 +18,7 @@ export function marketplaceEvents(feed: string, row: ExternalRow) {
         status: classic ? 'purchased' : row.status,
         item: row.item_name ?? row.item_key ?? String(row.item_id),
         quantity: row.quantity ?? 1,
+        purchaseType: classic ? (row.purchase_type ?? null) : null,
         itemIdentity: `${feed}:${String(classic ? row.item_id : row.item_key)}`,
         confirmed,
       },

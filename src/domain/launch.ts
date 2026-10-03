@@ -32,6 +32,7 @@ export const launchGates = [
   ['PROGRESSION', true],
   ['COLLECTIONS', true],
   ['DERIVED_REPLAY_STABLE', true],
+  ['CHARM_DRIP', true],
   ['HANDOFF', true],
   ['PRIVACY_AUTH', true],
   ['EXTERNAL_OG', false],

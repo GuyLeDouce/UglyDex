@@ -60,7 +60,11 @@ export function normalizeRow(feed: Feed, row: ExternalRow) {
           'CHARM_CLAIM_RECORDED',
           row.created_at,
           row.discord_id,
-          { amountRecorded: row.amount, payoutType: row.payout_type ?? null },
+          {
+            amountRecorded: row.amount,
+            payoutType: row.payout_type ?? null,
+            nftCount: row.nft_count ?? null,
+          },
           { visibility: 'PRIVATE' },
         ),
       ];
