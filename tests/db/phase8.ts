@@ -43,7 +43,7 @@ export async function phase8DatabaseTests(
     );
     check(first.Squig.count === 4444, 'restore inventory proves full catalog');
     check(
-      first._prisma_migrations.count === 11,
+      first._prisma_migrations.count === 12,
       'restore inventory includes full migration history',
     );
     await inventoryClient.query('COMMIT');

@@ -2,13 +2,29 @@ import { migrationChecks } from '@/server/production';
 export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
-    if ((await migrationChecks()).some((c) => c.status === 'FAIL'))
-      throw new Error('NOT_READY');
+    const failed = (await migrationChecks())
+      .filter((c) => c.status === 'FAIL')
+      .map((c) => c.name);
+    if (failed.length) {
+      console.error(
+        JSON.stringify({ event: 'readiness.blocked', checks: failed }),
+      );
+      return Response.json(
+        { status: 'not_ready' },
+        { status: 503, headers: { 'Cache-Control': 'no-store' } },
+      );
+    }
     return Response.json(
       { status: 'ready' },
       { headers: { 'Cache-Control': 'no-store' } },
     );
-  } catch {
+  } catch (error) {
+    console.error(
+      JSON.stringify({
+        event: 'readiness.check_error',
+        errorType: error instanceof Error ? error.name : 'UnknownError',
+      }),
+    );
     return Response.json(
       { status: 'not_ready' },
       { status: 503, headers: { 'Cache-Control': 'no-store' } },

@@ -18,8 +18,8 @@ async function run(name: string, args: string[] = []) {
   if (exit !== 0) throw new Error('RELEASE_CHECK_FAILED');
 }
 try {
+  await run('test', ['--maxWorkers=2']);
   for (const command of [
-    'test',
     'lint',
     'format:check',
     'typecheck',

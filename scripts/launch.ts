@@ -16,6 +16,8 @@ try {
   } else if (command === 'verify') {
     const { verifyLaunch } = await import('../src/server/launch-verify');
     await verifyLaunch();
+    const { verifyCharmGate } = await import('../src/server/charm-gate');
+    await verifyCharmGate();
   } else if (command === 'rpc') {
     const { verifyLaunchRpc } = await import('../src/server/launch-rpc');
     await verifyLaunchRpc();
@@ -89,6 +91,8 @@ try {
   if (command === 'check' && process.env.DATABASE_URL) {
     const { verifyReplayProof } = await import('../src/server/replay-proof');
     await verifyReplayProof();
+    const { verifyCharmGate } = await import('../src/server/charm-gate');
+    await verifyCharmGate();
   }
   const report = await launchReport();
   console.log(

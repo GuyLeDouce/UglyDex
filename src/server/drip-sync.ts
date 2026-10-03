@@ -1,0 +1,498 @@
+import 'server-only';
+import { setTimeout as delay } from 'node:timers/promises';
+import { z } from 'zod';
+import { db } from './db';
+import {
+  DripReader,
+  DripReadError,
+  exactMembers,
+  validateCurrency,
+  type DripResponse,
+} from '@/integrations/drip';
+import { dripBudget, balanceView, dripHeaderSpacing } from '@/domain/charm';
+import { hash } from '@/domain/events';
+import { launchContext, recordGate } from './launch';
+import { assertOperation } from './deployment';
+import { Prisma } from '@/generated/prisma/client';
+
+const configSchema = z.object({
+  DRIP_READ_API_KEY: z.string().min(1),
+  DRIP_REALM_ID: z.string().regex(/^[a-f0-9]{24}$/i),
+  DRIP_REALM_POINT_ID: z.string().regex(/^[a-f0-9]{24}$/i),
+  DRIP_MAX_RPM: z.coerce.number().int().min(1).max(6).default(6),
+  DRIP_SYNC_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .min(1800000)
+    .max(86400000)
+    .default(1800000),
+  DRIP_STALE_AFTER_MS: z.coerce
+    .number()
+    .int()
+    .min(60000)
+    .max(3600000)
+    .default(300000),
+});
+export function dripConfig() {
+  return configSchema.parse(process.env);
+}
+async function state() {
+  const c = dripConfig();
+  const row = await db().dripSyncState.upsert({
+    where: { realmId: c.DRIP_REALM_ID },
+    create: {
+      realmId: c.DRIP_REALM_ID,
+      currencyId: c.DRIP_REALM_POINT_ID,
+      month: new Date().toISOString().slice(0, 7),
+    },
+    update: {},
+  });
+  if (row.currencyId !== c.DRIP_REALM_POINT_ID)
+    throw Error('CHARM_ECONOMY_MISMATCH');
+  return row;
+}
+export async function dripRead(
+  run: (client: DripReader) => Promise<DripResponse>,
+) {
+  const c = dripConfig();
+  await state();
+  const allowed = await db().$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'drip-budget:' + c.DRIP_REALM_ID},0))`;
+    const row = await tx.dripSyncState.findUniqueOrThrow({
+      where: { realmId: c.DRIP_REALM_ID },
+    });
+    const budget = dripBudget(row, new Date(), c.DRIP_MAX_RPM);
+    if (!budget.allowed) return false;
+    await tx.dripSyncState.update({
+      where: { realmId: row.realmId },
+      data: {
+        month: budget.month,
+        monthRequests: budget.monthRequests,
+        nextRequestAt: budget.nextRequestAt,
+        totalRequests: { increment: 1 },
+      },
+    });
+    return true;
+  });
+  if (!allowed) throw Error('DRIP_BUDGET_WAIT');
+  let result: DripResponse | undefined, error: unknown;
+  try {
+    result = await run(
+      new DripReader({ key: c.DRIP_READ_API_KEY, realm: c.DRIP_REALM_ID }),
+    );
+  } catch (e) {
+    error = e;
+  }
+  const rate =
+    result?.rate ?? (error instanceof DripReadError ? error.rate : null);
+  await db().$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'drip-budget:' + c.DRIP_REALM_ID},0))`;
+    const row = await tx.dripSyncState.findUniqueOrThrow({
+      where: { realmId: c.DRIP_REALM_ID },
+    });
+    const is429 = error instanceof Error && error.message === 'DRIP_HTTP_429';
+    const backoff = Math.max(
+      +row.nextRequestAt,
+      rate?.retryAt ?? 0,
+      rate?.remaining !== null &&
+        rate?.remaining !== undefined &&
+        rate.remaining < 6
+        ? (rate.resetAt ?? Date.now() + 60000)
+        : 0,
+      is429 ? Date.now() + 60000 : 0,
+      error && !is429 ? Date.now() + 60000 : 0,
+      rate ? Date.now() + dripHeaderSpacing(rate, c.DRIP_MAX_RPM) : 0,
+    );
+    await tx.dripSyncState.update({
+      where: { realmId: row.realmId },
+      data: {
+        nextRequestAt: new Date(backoff),
+        ...(rate
+          ? {
+              lastRateLimit: rate,
+              minimumRemaining:
+                rate.remaining === null
+                  ? row.minimumRemaining
+                  : Math.min(
+                      row.minimumRemaining ?? rate.remaining,
+                      rate.remaining,
+                    ),
+            }
+          : {}),
+        ...(is429 ? { last429At: new Date(), total429: { increment: 1 } } : {}),
+        ...(result
+          ? { lastSuccessAt: new Date(), errorCode: null }
+          : {
+              errorCode:
+                error instanceof DripReadError
+                  ? error.message
+                  : 'DRIP_READ_FAILED',
+            }),
+      },
+    });
+  });
+  if (error) throw error;
+  return result!;
+}
+export async function verifyDripAlignment(bots: {
+  uglyBotRealm: string;
+  uglyBotCurrency: string;
+  gauntletRealm: string;
+  gauntletCurrency: string;
+}) {
+  await assertOperation('launch');
+  try {
+    return await checkDripAlignment(bots);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'CHARM_ECONOMY_MISMATCH') {
+      const c = dripConfig();
+      await db().dripSyncState.updateMany({
+        where: { realmId: c.DRIP_REALM_ID },
+        data: {
+          alignmentHash: null,
+          alignmentCommit: null,
+          errorCode: 'CHARM_ECONOMY_MISMATCH',
+        },
+      });
+      await recordGate('CHARM_DRIP', 'FAILED', 'CHARM_ECONOMY_MISMATCH', {});
+    }
+    throw error;
+  }
+}
+async function checkDripAlignment(bots: {
+  uglyBotRealm: string;
+  uglyBotCurrency: string;
+  gauntletRealm: string;
+  gauntletCurrency: string;
+}) {
+  const c = dripConfig();
+  const matches = {
+    uglyBotRealm: bots.uglyBotRealm === c.DRIP_REALM_ID,
+    uglyBotCurrency: bots.uglyBotCurrency === c.DRIP_REALM_POINT_ID,
+    gauntletRealm: bots.gauntletRealm === c.DRIP_REALM_ID,
+    gauntletCurrency: bots.gauntletCurrency === c.DRIP_REALM_POINT_ID,
+  };
+  if (Object.values(matches).some((v) => !v))
+    throw Error('CHARM_ECONOMY_MISMATCH');
+  const realm = z
+    .object({ id: z.string() })
+    .parse((await dripRead((r) => r.getRealm())).body);
+  if (realm.id !== c.DRIP_REALM_ID) throw Error('CHARM_ECONOMY_MISMATCH');
+  await delay(Math.ceil(60000 / c.DRIP_MAX_RPM) + 50);
+  const currencies = z
+    .object({ data: z.array(z.unknown()) })
+    .parse((await dripRead((r) => r.getCurrencies())).body);
+  const currency = currencies.data.find(
+    (v) =>
+      typeof v === 'object' &&
+      v !== null &&
+      'id' in v &&
+      v.id === c.DRIP_REALM_POINT_ID,
+  );
+  if (!validateCurrency(currency, c.DRIP_REALM_ID, c.DRIP_REALM_POINT_ID))
+    throw Error('CHARM_ECONOMY_MISMATCH');
+  const evidence = {
+    ...matches,
+    realmHash: hash(c.DRIP_REALM_ID),
+    currencyHash: hash(c.DRIP_REALM_POINT_ID),
+    currencyActive: true,
+    readOnly: true,
+  };
+  await db().dripSyncState.update({
+    where: { realmId: c.DRIP_REALM_ID },
+    data: {
+      alignment: evidence,
+      alignmentHash: hash(evidence),
+      alignmentAt: new Date(),
+      alignmentCommit: launchContext().commit,
+    },
+  });
+  return evidence;
+}
+export async function queueCharmRefresh(collectorId: string, user = false) {
+  const c = dripConfig();
+  return db().$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'charm-refresh:' + collectorId},0))`;
+    const where = {
+      realmId_collectorId: { realmId: c.DRIP_REALM_ID, collectorId },
+    };
+    const prior = await tx.charmRefreshRequest.findUnique({ where });
+    const now = new Date();
+    if (user && prior && prior.nextUserRequestAt > now) return false;
+    await tx.charmRefreshRequest.upsert({
+      where,
+      create: {
+        realmId: c.DRIP_REALM_ID,
+        collectorId,
+        nextUserRequestAt: new Date(+now + 120000),
+      },
+      update: {
+        pending: true,
+        ...(user ? { nextUserRequestAt: new Date(+now + 120000) } : {}),
+        generation: { increment: 1 },
+      },
+    });
+    return true;
+  });
+}
+export async function charmBalance(collectorId: string, enqueue = true) {
+  const parsed = configSchema.safeParse(process.env);
+  if (!parsed.success) return balanceView(null);
+  const c = parsed.data;
+  const row = await db().charmBalance.findUnique({
+    where: {
+      collectorId_realmId_currencyId: {
+        collectorId,
+        realmId: c.DRIP_REALM_ID,
+        currencyId: c.DRIP_REALM_POINT_ID,
+      },
+    },
+  });
+  const view = balanceView(row, new Date(), c.DRIP_STALE_AFTER_MS);
+  if (view.stale && enqueue)
+    await queueCharmRefresh(collectorId).catch(() => {});
+  return view;
+}
+
+export async function syncDripDue() {
+  try {
+    return await syncDripBatch();
+  } catch (e) {
+    const code =
+      e instanceof Error && /^DRIP_[A-Z0-9_]+$/.test(e.message)
+        ? e.message
+        : 'DRIP_SYNC_FAILED';
+    if (code !== 'DRIP_BUDGET_WAIT') {
+      const parsed = configSchema.safeParse(process.env);
+      if (parsed.success) {
+        await db().dripSyncState.updateMany({
+          where: { realmId: parsed.data.DRIP_REALM_ID },
+          data: { errorCode: code },
+        });
+        await db().dripSyncState.updateMany({
+          where: {
+            realmId: parsed.data.DRIP_REALM_ID,
+            nextRequestAt: { lt: new Date(Date.now() + 60000) },
+          },
+          data: { nextRequestAt: new Date(Date.now() + 60000) },
+        });
+      }
+    }
+    return { status: code };
+  }
+}
+async function syncDripBatch() {
+  if (!configSchema.safeParse(process.env).success)
+    return { status: 'UNCONFIGURED' };
+  const c = dripConfig(),
+    s = await state();
+  if (!s.alignmentHash || s.alignmentCommit !== launchContext().commit)
+    return { status: 'ALIGNMENT_REQUIRED' };
+  if (s.nextRequestAt > new Date()) return { status: 'NOT_DUE' };
+  const requests = await db().charmRefreshRequest.findMany({
+    where: { realmId: s.realmId, pending: true },
+    orderBy: { requestedAt: 'asc' },
+    take: 25,
+  });
+  const sweep = requests.length === 0;
+  if (sweep && !s.sweepStartedAt && s.nextSweepAt > new Date())
+    return { status: 'NOT_DUE' };
+  if (sweep && !s.sweepStartedAt)
+    await db().dripSyncState.update({
+      where: { realmId: s.realmId },
+      data: { sweepStartedAt: new Date(), memberCursor: null },
+    });
+  const identities = await db().externalIdentity.findMany({
+    where: {
+      provider: 'DISCORD',
+      ...(sweep
+        ? s.memberCursor
+          ? { id: { gt: s.memberCursor } }
+          : {}
+        : { collectorId: { in: requests.map((r) => r.collectorId) } }),
+    },
+    orderBy: { id: 'asc' },
+    take: 25,
+  });
+  if (!identities.length) {
+    if (sweep)
+      await db().dripSyncState.update({
+        where: { realmId: s.realmId },
+        data: {
+          lastFullSweep: new Date(),
+          nextSweepAt: new Date(Date.now() + c.DRIP_SYNC_INTERVAL_MS),
+          sweepStartedAt: null,
+          memberCursor: null,
+        },
+      });
+    else
+      await db().charmRefreshRequest.updateMany({
+        where: {
+          realmId: s.realmId,
+          collectorId: { in: requests.map((r) => r.collectorId) },
+        },
+        data: { pending: false },
+      });
+    return { status: 'COMPLETE', queried: 0 };
+  }
+  const response = await dripRead((r) =>
+    r.searchMembers(identities.map((i) => i.externalId)),
+  );
+  const body = z
+    .object({
+      data: z.array(z.unknown()),
+      meta: z
+        .object({
+          totalPages: z.number().optional(),
+          credentials: z.object({ access: z.boolean().optional() }).optional(),
+        })
+        .optional(),
+    })
+    .parse(response.body);
+  if ((body.meta?.totalPages ?? 1) > 1)
+    throw Error('DRIP_SEARCH_REQUIRES_PAGINATION');
+  if (body.meta?.credentials?.access === false) {
+    await db().dripSyncState.update({
+      where: { realmId: s.realmId },
+      data: {
+        errorCode: 'DRIP_CREDENTIAL_READ_REQUIRED',
+        nextRequestAt: new Date(Date.now() + c.DRIP_SYNC_INTERVAL_MS),
+      },
+    });
+    return { status: 'CREDENTIAL_READ_REQUIRED', queried: identities.length };
+  }
+  const resolved = exactMembers(
+    body.data,
+    identities.map((i) => i.externalId),
+    c.DRIP_REALM_POINT_ID,
+  );
+  const counts = {
+    queried: identities.length,
+    resolved: 0,
+    unresolved: 0,
+    conflicts: 0,
+    balances: 0,
+  };
+  await db().$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'drip-identity:' + s.realmId},0))`;
+    for (const r of resolved) {
+      const identity = identities.find((i) => i.externalId === r.discordId)!;
+      const collectorId = identity.collectorId;
+      const currentIdentity = await tx.externalIdentity.findUnique({
+        where: { id: identity.id },
+      });
+      if (
+        !currentIdentity ||
+        currentIdentity.collectorId !== collectorId ||
+        currentIdentity.externalId !== r.discordId ||
+        currentIdentity.provider !== 'DISCORD'
+      )
+        throw Error('DRIP_IDENTITY_CHANGED_DURING_READ');
+      const where = {
+        realmId_collectorId: { realmId: s.realmId, collectorId },
+      };
+      const prior = await tx.dripIdentity.findUnique({ where });
+      const duplicate = r.dripMemberId
+        ? await tx.dripIdentity.findUnique({
+            where: {
+              realmId_dripMemberId: {
+                realmId: s.realmId,
+                dripMemberId: r.dripMemberId,
+              },
+            },
+          })
+        : null;
+      const conflict =
+        prior?.status === 'CONFLICT' ||
+        r.status === 'CONFLICT' ||
+        (duplicate && duplicate.collectorId !== collectorId) ||
+        (prior?.dripMemberId &&
+          r.dripMemberId &&
+          prior.dripMemberId !== r.dripMemberId);
+      const status = conflict ? 'CONFLICT' : r.status;
+      if (status !== 'RESOLVED') {
+        counts[status === 'CONFLICT' ? 'conflicts' : 'unresolved']++;
+        await tx.dripIdentity.upsert({
+          where,
+          create: { realmId: s.realmId, collectorId, status },
+          update: { status },
+        });
+        await tx.charmBalance.updateMany({
+          where: { realmId: s.realmId, collectorId },
+          data: { status },
+        });
+        if (duplicate && duplicate.collectorId !== collectorId) {
+          await tx.dripIdentity.update({
+            where: { id: duplicate.id },
+            data: { status: 'CONFLICT' },
+          });
+          await tx.charmBalance.updateMany({
+            where: { dripIdentityId: duplicate.id },
+            data: { status: 'CONFLICT' },
+          });
+        }
+        continue;
+      }
+      const mapping = await tx.dripIdentity.upsert({
+        where,
+        create: {
+          realmId: s.realmId,
+          collectorId,
+          dripMemberId: r.dripMemberId,
+          realmMemberId: r.realmMemberId,
+          status,
+          lastResolvedAt: new Date(),
+        },
+        update: {
+          dripMemberId: r.dripMemberId,
+          realmMemberId: r.realmMemberId,
+          status,
+          lastResolvedAt: new Date(),
+        },
+      });
+      counts.resolved++;
+      const value = r.balance === null ? null : new Prisma.Decimal(r.balance);
+      await tx.charmBalance.upsert({
+        where: {
+          collectorId_realmId_currencyId: {
+            collectorId,
+            realmId: s.realmId,
+            currencyId: s.currencyId,
+          },
+        },
+        create: {
+          collectorId,
+          realmId: s.realmId,
+          currencyId: s.currencyId,
+          dripIdentityId: mapping.id,
+          balance: value,
+          observedAt: value === null ? null : new Date(),
+          lastApiSuccessAt: new Date(),
+          status: value === null ? 'UNKNOWN' : 'CURRENT',
+        },
+        update: {
+          ...(value === null ? {} : { balance: value, observedAt: new Date() }),
+          lastApiSuccessAt: new Date(),
+          status: value === null ? 'UNKNOWN' : 'CURRENT',
+        },
+      });
+      if (value !== null) counts.balances++;
+    }
+    if (sweep)
+      await tx.dripSyncState.update({
+        where: { realmId: s.realmId },
+        data: { memberCursor: identities.at(-1)!.id },
+      });
+    else
+      for (const r of requests)
+        await tx.charmRefreshRequest.updateMany({
+          where: {
+            realmId: r.realmId,
+            collectorId: r.collectorId,
+            generation: r.generation,
+          },
+          data: { pending: false },
+        });
+  });
+  return { status: 'SYNCED', ...counts };
+}

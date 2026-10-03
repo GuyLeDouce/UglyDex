@@ -3,7 +3,9 @@ import { db } from './db';
 import { currentSession } from './auth';
 import { squigToken, SQUIGS_CONTRACT } from '@/domain/validation';
 import { publicIdentity } from '@/domain/profile';
+import { publicCharm } from '@/domain/charm';
 import { displayCustom } from './collectibles';
+import { charmBalance } from './drip-sync';
 import { confident, publicAttribution } from '@/domain/provenance';
 import {
   activeAddresses,
@@ -42,10 +44,14 @@ export async function collectorProfile(slug: string) {
         select: cardSelect,
       }),
     ]);
+    const charm = c.showCharmBalance
+      ? publicCharm(true, await charmBalance(c.id, false))
+      : null;
     return {
       status: 'ready',
       collectorId: c.id,
       profile: publicIdentity(c),
+      ...(charm ? { charm } : {}),
       collectionVisibility: c.collectionVisibility,
       summary,
       featured:

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   binding: vi.fn(),
@@ -61,6 +61,12 @@ const required = [
   'START_BLOCK',
   'ARCHIVE_RPC',
 ];
+// Load the real feed registry outside the per-assertion timeout. On the copied
+// USB tree its first transform is slow; worker behavior still has the normal limit.
+beforeAll(async () => {
+  await import('../src/integrations/registry');
+  await import('../src/sync/normalize');
+}, 60000);
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.stage.mockResolvedValue(null);

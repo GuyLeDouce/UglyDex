@@ -29,6 +29,7 @@ export default async function Settings() {
           isPublic: c.isPublic,
           showWallets: c.showWallets,
           showDiscord: c.showDiscord,
+          showCharmBalance: c.showCharmBalance,
           featuredTokenIds: c.featuredTokenIds,
         }}
       />
