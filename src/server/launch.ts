@@ -15,7 +15,7 @@ import {
 import { assertOperation } from './deployment';
 export function launchContext() {
   const value =
-    process.env.RAILWAY_GIT_COMMIT_SHA ?? process.env.APP_COMMIT ?? '';
+    process.env.APP_COMMIT ?? process.env.RAILWAY_GIT_COMMIT_SHA ?? '';
   return {
     environment: appEnvironment(),
     databaseFingerprint: process.env.DATABASE_URL
