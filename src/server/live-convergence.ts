@@ -15,13 +15,35 @@ import { hash } from '@/domain/events';
 import { services, heartbeatState } from '@/domain/operations';
 import { unavailableSource } from '@/integrations/availability';
 
-// This frozen A/B predates the Phase 12 evidence code. Its derivation engines and
-// semantic catalogs are unchanged; the only provenance edit extracted the same
-// deterministic activity projection into a shared pure function. Keep this
-// explicit compatibility entry narrow and review it whenever derivation code
-// changes. Future proofs bind directly to the running revision.
-const compatibleFrozenCommits = new Set([
-  'cd15cd36c835be38b316ea7bd6fc9c45bab0f77f',
+// The frozen Phase 11 A/B predates configurationHash storage. This reviewed
+// manifest binds its exact proof, input hash, ruleset hashes and semantic catalog
+// hashes to the values captured in docs/phase11-reconciliation-replay-report.md.
+// Advanced live input is accepted only while every ruleset/catalog fingerprint
+// still matches this manifest. Future frozen proofs bind configurationHash
+// directly and do not need a compatibility entry.
+const reviewedLegacyProofs = new Map([
+  [
+    'b6a1d45d-d9fc-454a-9771-37da3cb450c1',
+    {
+      commit: 'cd15cd36c835be38b316ea7bd6fc9c45bab0f77f',
+      inputHash:
+        '83b5ec1c293e1452ee560ddd3afd35da72a6c2d61494b3273184d7419f7162f1',
+      configuration: {
+        ProgressionRuleset:
+          '04eb87c3edd95874ec224949aabfd5d1a12231491e9f0cfa6d84425d56e8742f',
+        CollectionRuleset:
+          '8e4ddedf18fc7bb66ad37d0f76d8060e3a45ebacd403626849d353e60553d817',
+        AchievementDefinition:
+          '312fdb054f7d05f06642359c4f517b49ed118e2a559dcb934874670ad3c298af',
+        CollectionSetDefinition:
+          'a8960623ae7790457bce47270fe93cb405f072525d1635c73f145f09598732dd',
+        CollectionSetRequirement:
+          '312ac4a83d79b9dd7349b74888df2c70682db2e59b54e2a0e083a6ee591f3365',
+        CosmeticDefinition:
+          '37e415220c540864414a2399562c1b0c5784958e394f743e3b21e0ee47323a3c',
+      },
+    },
+  ],
 ]);
 
 /** Every read imports the same PostgreSQL MVCC snapshot. Engines issue no writes.
@@ -125,16 +147,24 @@ export async function verifyCurrentReplay() {
                   s.state,
                 )),
           );
+        const legacy = proof ? reviewedLegacyProofs.get(proof.id) : undefined;
+        const legacyConfigurationCompatible =
+          !!legacy &&
+          proof?.commit === legacy.commit &&
+          proof.inputHash === legacy.inputHash &&
+          Object.entries(legacy.configuration).every(
+            ([name, fingerprint]) => inputs[name]?.sha256 === fingerprint,
+          );
         const compatible =
           !!proof &&
           context.commit !== 'unknown' &&
           proof.environment === context.environment &&
-          (proof.commit === context.commit ||
-            compatibleFrozenCommits.has(proof.commit)) &&
+          (proof.commit === context.commit || legacyConfigurationCompatible) &&
           (!proof.databaseFingerprint ||
             proof.databaseFingerprint === context.databaseFingerprint) &&
-          (!proof.configurationHash ||
-            proof.configurationHash === configurationHash);
+          (proof.configurationHash
+            ? proof.configurationHash === configurationHash
+            : legacyConfigurationCompatible);
         const frozenValid =
           !!proof?.finishedAt &&
           !!proof.inputHash &&
@@ -169,7 +199,7 @@ export async function verifyCurrentReplay() {
           compatible &&
           frozenValid &&
           proof?.status === 'VERIFIED' &&
-          proof.configurationHash &&
+          (proof.configurationHash || legacyConfigurationCompatible) &&
           !Object.values(queues).some(Boolean) &&
           ingestionHealthy &&
           !(exactInput && exactDerived)
