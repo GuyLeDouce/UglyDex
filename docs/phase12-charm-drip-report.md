@@ -5,7 +5,8 @@ Date: 2026-10-03. Branch: `phase11-launch-evidence`.
 ## Current checkpoint
 
 - Starting evidence head: `047aef3387f15f6eb5af2477fb57da30738693cf`.
-- Current application/evidence head: `f3386acef5f8ea9aa4f9b911869eb89962fce6a7`.
+- Current staging application revision: `f3386acef5f8ea9aa4f9b911869eb89962fce6a7`.
+- The evidence report is committed separately; that documentation-only commit was not deployed.
 - Current staging web deployment: `2a27f487-f138-47e7-ade2-dc18effbeeaa`, SUCCESS.
 - Production application revision: `c764e2810715be0608e5fadc47d45a6a391ba674`; production was not changed.
 - The prior staging app was `0c8e5f8fc0d5db8c587c749479922accde723ae3`, rather than the expected frozen replay revision `cd15cd3`. Work continued from the checked-out safe branch head and preserved its history.
