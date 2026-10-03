@@ -179,6 +179,37 @@ describe('confirmed semantics', () => {
     expect(
       normalizeRow('claimEvents', fixtures.claimEvents)[0].amount,
     ).toBeUndefined());
+  it('online reward payout requires an exact paid source record', () => {
+    const event = normalizeRow('onlineRewards', fixtures.onlineRewards)[0];
+    expect(event.discordId).toBe(discord);
+    expect(event.sourceId).toBe('phase3-reward');
+    expect(event.visibility).toBe('PRIVATE');
+    expect(event.amount).toBe('100');
+    expect(event.currency).toBe('CHARM');
+    expect(event.direction).toBe('PAYOUT');
+  });
+  it.each(['pending', 'failed'])(
+    'online reward %s status is not financial activity',
+    (status) => {
+      const event = normalizeRow('onlineRewards', {
+        ...fixtures.onlineRewards,
+        status,
+      })[0];
+      expect(event.visibility).toBe('PRIVATE');
+      expect(event.amount).toBeUndefined();
+      expect(event.currency).toBeUndefined();
+      expect(event.direction).toBeUndefined();
+    },
+  );
+  it('online reward corrections preserve the source event key', () => {
+    const original = normalizeRow('onlineRewards', fixtures.onlineRewards)[0];
+    const corrected = normalizeRow('onlineRewards', {
+      ...fixtures.onlineRewards,
+      amount: 125,
+      status: 'paid',
+    })[0];
+    expect(eventKey(corrected)).toBe(eventKey(original));
+  });
   it('unknown category safely defaults', () =>
     expect(activityFilters.parse({ category: 'SQL' }).category).toBe('ALL'));
   it('invalid Squig token is rejected', () =>
