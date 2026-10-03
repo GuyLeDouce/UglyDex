@@ -46,8 +46,8 @@ Date: 2026-10-03. Branch: `phase11-launch-evidence`.
 - Current documented limit: 24 requests/minute and 100,000/month per Realm. UglyDex defaults are 6 requests/minute, 30,000 monthly soft budget, 25 exact Discord IDs per request, and a 30-minute full sweep. The 25-member batch is an UglyDex safety default, not a claimed DRIP maximum.
 - The adapter has only fixed GET operations for Realm, currencies, and exact `discord-id` member search. It has no generic method or write operation. **UglyDex DRIP write requests: 0.** Tests assert that the adapter uses GET only.
 - Realm and currency validation succeeded using staging reads. The configured currency ID resolved to the existing active $CHARM Realm Point.
-- The API accepted the existing key but returned `credentials.access=false` / insufficient permission for member credentials. After the user authorized read access with the same key, a fresh exact-ID probe still returned `credentials.access=false`. No balance value was used or stored.
-- Last recorded counters: 44 requests, 0 HTTP 429s, lowest remaining quota observed 22. No completed full sweep or stored balances. Current balance status is **unknown**, not zero. Retry-After handling and quota-header tracking are implemented; there was no 429 to exercise live.
+- The operator was asked to replace the key after enabling member/point-balance read permission. The configured key could not be independently fingerprinted as new, so this is recorded as the currently configured key, not a confirmed rotation. Its one exact `discord-id` member-search validation returned `credentials.access=false`, `credentials.approved` absent, and sanitized reason `INSUFFICIENT_PERMISSION`. Per the stop rule, member/balance sync was stopped. One additional documented exact-ID credentials GET returned 404 (`CREDENTIAL_SCOPE`); no username lookup or retry was made.
+- Latest observed counters after that test: 48 total/month requests, 0 HTTP 429s, minimum remaining quota 59. No completed full sweep or stored balances. Current balance status is **unknown**, not zero. Retry-After handling and quota-header tracking are implemented; there was no 429 to exercise live.
 
 ## $CHARM alignment
 
@@ -62,7 +62,7 @@ Configuration comparisons used fingerprints; raw Realm, currency, and member IDs
 | Configured existing $CHARM point is active  | Yes                                                                |
 | Exact member balance read works             | No — the latest exact-ID probe returned `credentials.access=false` |
 
-The exact bot/staging fingerprints were compared during the earlier read-only alignment check. Neither bot production deployment changed afterward. The persisted staging alignment record is still bound to application revision `632e7f7`, so the current-revision `CHARM_DRIP` gate remains pending even though the previously compared configurations matched.
+The exact bot/staging fingerprints were compared during the earlier read-only alignment check. Neither bot production deployment changed afterward. The persisted staging alignment record is still bound to application revision `632e7f7`, so the current-revision `CHARM_DRIP` gate remains pending even though the previously compared configurations matched. Exact member access and a current balance read remain unproven; record `DRIP_MEMBER_CREDENTIAL_ACCESS_DENIED` and require DRIP account/Realm permission review.
 
 UglyBot’s production revision was `1460da2185f338a373dcd556c2c37bd91b66c2b2`; The Gauntlet’s production revision was `59506e284cfb3296bd0ab8781e0b89cebcf6ad01`. Both were inspected read-only and neither was changed or deployed.
 
@@ -70,9 +70,9 @@ The Gauntlet helper retains compatibility payout paths without an explicit curre
 
 ## Gauntlet online rewards
 
-The current Gauntlet source defines `gauntlet_online_reward_events`; its startup initialization calls `CREATE TABLE IF NOT EXISTS`. A read-only query against the current Gauntlet main database found the table with zero rows, while the authenticated current UglyDex Gauntlet bridge reports that table unavailable. This identifies a database/schema routing discrepancy between the Gauntlet main database and the source bridge; the bridge’s database identity was not conclusively matched to the main database. The Gauntlet live deployment revision was `59506e284cfb3296bd0ab8781e0b89cebcf6ad01`.
+The live Gauntlet app and its source bridge were checked read-only. Both run against the same database fingerprint (`154994f4c151df504008114feca2120c80dd94a6aa333e9d3b584146dff705f9`); the app revision is `59506e284cfb3296bd0ab8781e0b89cebcf6ad01` and the bridge revision is `2ab0fc39a4ba7d392086d5d66597457ca326a751`. The table exists and its schema matches the reviewed registry. The app DB role can query it and sees zero rows; the bridge role receives PostgreSQL `42501` permission denied on SELECT. The cause is bridge-role table permission, not wrong database routing or stale schema observation. App startup initializes the table with `CREATE TABLE IF NOT EXISTS`; no Gauntlet schema fix is indicated. No role grant or production Gauntlet change was made.
 
-No upstream schema defect was confirmed, and no Gauntlet fix was prepared. UglyDex did not create or alter this table. Historical `onlineRewards` remains `UNAVAILABLE_SOURCE_TABLE / FEED_UNAVAILABLE`; there is no claim of an empty or complete feed.
+The source bridge still cannot expose `onlineRewards`, so UglyDex keeps it `UNAVAILABLE_SOURCE_TABLE / FEED_UNAVAILABLE`. Zero rows are known only from the app’s read-only connection and do not establish an accessible, exhausted historical feed. No pilot/import was performed.
 
 ## Identity and balances
 
@@ -109,7 +109,7 @@ The UI label is “Tracked available ecosystem history.” The current DRIP bala
 
 - Current balance preference defaults to private. Public Collector output, public profile/OG/share surfaces omit it unless the owner explicitly opts in. Automated privacy assertions found no public balance or DRIP ID leaks; the API key is server-only and absent from client bundles.
 - `/charm` requires authenticated owner access. No real Discord OAuth, wallet transition, or physical-device validation was performed in this phase.
-- UglyDex secret/history scan: 402 files and 659 historical blobs; no findings. DRIP-specific history scans found no DRIP credential assignments in UglyBot’s tracked `.env` history or The Gauntlet’s scanned history. No `DRIP_SECRET_ROTATION_REQUIRED` finding.
+- UglyDex secret/history scan at the preceding checkpoint: 402 files and 659 historical blobs; no findings. DRIP-specific history scans found no DRIP credential assignments in UglyBot’s tracked `.env` history or The Gauntlet’s scanned history. No `DRIP_SECRET_ROTATION_REQUIRED` finding. A repeat of the general scanner in this follow-up could not start because the local Node runtime returned `uv_os_get_passwd` / `ENOMEM`; no credential contents were printed.
 - No API key or private DRIP identifiers are included in this report.
 
 ## Workers
@@ -118,11 +118,11 @@ Exactly four mandatory staging workers are configured: blockchain, ecosystem, pr
 
 ## Validation
 
-- Automated unit suite: 686 tests across 25 files passed; lint and typecheck passed.
-- Railway Linux build completed successfully, including TypeScript and static route generation.
+- Automated unit suite: 696 tests across 26 files passed; lint and typecheck passed.
+- Full `npm run release:check` completed successfully in an isolated NTFS temp clone after the repository’s source-drive build hit Windows junction handling. It reached the end of the release script: unit tests (696), ESLint, Prettier, Prisma generation, type checks, catalog verification, Next.js production build, and DB/browser/catalog checks (895 assertions) passed. A C: temp clone was used; the workspace check on E: alone could not build due filesystem junction handling.
 - Staging HTTP smoke passed all 10 probes, including readiness, representative pages/API paths, expected 404s, and a valid PNG share response.
 - Staging migrations were applied and migration verification passed before this report.
-- `release:check` did not complete: the repository-wide Prettier check reports 312 existing files needing formatting. Local Windows Next build also fails on filesystem junction handling (`EISDIR`); the Railway Linux build succeeds.
+- Repository-wide Prettier check now passes; platform line-ending behavior is normalized with `endOfLine: auto`. The formatting changes are committed separately from implementation. The full release check passed in the isolated NTFS clone noted above.
 - Current-revision convergence, launch verification, bounded RPC, owner verification, source verification, and final launch report were run over Railway SSH. Source bridges were reachable, authenticated, and verified read-only; source coverage remains tracked history rather than lifetime completeness. The current Gauntlet bridge still reports `gauntlet_online_reward_events` unavailable.
 - Current staging deployment and all 10 HTTPS smoke probes passed again. `WEB_DEPLOYMENT` was attested against the current deployment and smoke artifact.
 
@@ -142,3 +142,16 @@ Exactly four mandatory staging workers are configured: blockchain, ecosystem, pr
 The final current-revision launch report had 9 critical gates verified, 12 pending, and 0 failed. `ARCHIVE_RPC`, `MINT_COVERAGE`, `OWNERSHIP_CONTINUITY`, and `OWNER_OF` are verified. `START_BLOCK` is PARTIAL because the bounded RPC check has not established the first mint boundary. Current staging launch decision: **NOT READY**. Critical pending gates are `BACKUP`, `RESTORE_DRILL`, `START_BLOCK`, `REATTRIBUTION`, `ACTIVITY`, `DUPLICATE_REVIEW`, `PROGRESSION`, `COLLECTIONS`, `CHARM_DRIP`, `HANDOFF`, `PRIVACY_AUTH`, and `REAL_DEVICE_SHARE`. `PRIVACY_AUTH` and `REAL_DEVICE_SHARE` remain reserved for the later manual stage. Production remains at `c764e28` and was not mutated.
 
 **NOT_READY_FOR_CHARM_HOOK_DEPLOYMENT_AND_FINAL_PRIVACY_DEVICE_VALIDATION**
+
+## Follow-up evidence after the formatting and START_BLOCK commits
+
+- Branch was fetched and is clean at `6f91dc9faad3cafde0def21fcc34847b81d24496`, equal to `origin/phase11-launch-evidence`. Commits after `47615bf` are `450310d` (verified mint-ledger START_BLOCK fallback), `9207e7a` (formatting), and `6f91dc9` (platform-safe Prettier line endings). No history was reset.
+- Actual staging runtime remains `f3386acef5f8ea9aa4f9b911869eb89962fce6a7` (deployment `257f846b-208c-4241-a98b-08e78fc078fe`). Production runtime remains `c764e2810715be0608e5fadc47d45a6a391ba674`. Production received no mutation. The START_BLOCK fix is committed but not deployed, so staging still runs the prior bounded-only verifier.
+- START_BLOCK supporting ledger evidence from the current staging database: 4,444 unique token mints covering IDs 1–4,444; earliest canonical mint is block `25,349,689`; deployment/start block is `25,342,921`; no invalid provenance was observed. `450310d` adds a bounded-RPC fallback using only complete verified stored mint/provenance evidence and includes regressions. Targeted tests passed 18/18 and the full suite passed 696/696. Since the staging app is intentionally still `f338`, its runtime gate remains `PARTIAL` until the new application revision is deployed and revalidated.
+- The latest staging `launch:report` returned `BLOCKED`, 8 critical gates passed, 13 pending and 1 failed. `START_BLOCK` is `PARTIAL`; `CHARM_DRIP` is `PENDING`; `DERIVED_REPLAY_STABLE` is currently `FAILED` with “Current replay boundary requires review.” The frozen ReplayProof and retained LiveDerivationProof `8af4c0f8-69ed-4dcf-b4df-8c6678614047` were not modified. The failed current evaluation followed legitimate live advancement/backlog; it is not a failure of frozen Replay A/B. A fresh convergence proof is required once queues and all other boundary conditions are clear.
+- At the most recent queue observation before this follow-up, attribution, collection, dirty provenance, and failed jobs were zero; progression jobs were still draining under normal LIVE worker operation. No worker was disabled, no replay was repeated, and no cursor or ledger was repaired manually. All four worker intents remain LIVE.
+- Historical HANDOFF and semantic reviews were not re-attested on `f338` during this follow-up. They remain revision-bound and pending. No new backup, populated restore, or current-revision handoff proof was created; `BACKUP`, `RESTORE_DRILL`, and `HANDOFF` remain pending.
+- The locally re-run `security:secrets` command could not initialize `tsx` because Node’s OS user lookup returned `ENOMEM`. The earlier recorded cross-repository DRIP-specific history scans remain clean; no secret was printed and no key was rotated.
+- No DRIP balance sync was run after member access denial. The required next action is operator/DRIP support review of member/point-balance read permission; do not retry until permission is changed and a new key is supplied through Railway variables.
+
+The current blocking gate set therefore still includes `BACKUP`, `RESTORE_DRILL`, `START_BLOCK`, `REATTRIBUTION`, `ACTIVITY`, `DUPLICATE_REVIEW`, `PROGRESSION`, `COLLECTIONS`, `DERIVED_REPLAY_STABLE`, `CHARM_DRIP`, `HANDOFF`, `PRIVACY_AUTH`, and `REAL_DEVICE_SHARE`. The current staging decision remains **NOT READY**. Production remains unchanged.
