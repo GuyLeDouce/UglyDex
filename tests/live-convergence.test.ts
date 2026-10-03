@@ -126,7 +126,10 @@ describe('coherent current-live replay verification', () => {
     expect(mocks.save).not.toHaveBeenCalled();
   });
   it('accepts the reviewed Phase 11 frozen revision when configuration still matches', async () => {
-    mocks.proof.mockResolvedValue({ ...frozen(), commit: 'cd15cd3' });
+    mocks.proof.mockResolvedValue({
+      ...frozen(),
+      commit: 'cd15cd36c835be38b316ea7bd6fc9c45bab0f77f',
+    });
     expect(await verifyCurrentReplay()).toBe(true);
     expect(mocks.derived).not.toHaveBeenCalled();
   });
@@ -136,7 +139,10 @@ describe('coherent current-live replay verification', () => {
     expect(mocks.derived).not.toHaveBeenCalled();
   });
   it('verifies advanced inputs with independent read-only recomputation and saves the captured boundary', async () => {
-    mocks.proof.mockResolvedValue({ ...frozen(), commit: 'cd15cd3' });
+    mocks.proof.mockResolvedValue({
+      ...frozen(),
+      commit: 'cd15cd36c835be38b316ea7bd6fc9c45bab0f77f',
+    });
     advance();
     expect(await verifyCurrentReplay()).toBe(true);
     expect(mocks.execute).toHaveBeenCalledWith('SET TRANSACTION READ ONLY');

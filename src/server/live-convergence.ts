@@ -20,7 +20,9 @@ import { unavailableSource } from '@/integrations/availability';
 // deterministic activity projection into a shared pure function. Keep this
 // explicit compatibility entry narrow and review it whenever derivation code
 // changes. Future proofs bind directly to the running revision.
-const compatibleFrozenCommits = new Set(['cd15cd3']);
+const compatibleFrozenCommits = new Set([
+  'cd15cd36c835be38b316ea7bd6fc9c45bab0f77f',
+]);
 
 /** Every read imports the same PostgreSQL MVCC snapshot. Engines issue no writes.
  * Workers may keep ingesting; this evidence describes capturedAt, never a later input.
