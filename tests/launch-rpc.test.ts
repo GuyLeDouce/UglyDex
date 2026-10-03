@@ -7,13 +7,29 @@ const mock = vi.hoisted(() => ({
   block: vi.fn(),
   logs: vi.fn(),
   start: 100n,
+  query: vi.fn(),
+  gates: vi.fn(),
 }));
-vi.mock('../src/server/launch', () => ({ recordGate: mock.record }));
+vi.mock('../src/server/launch', () => ({
+  recordGate: mock.record,
+  launchContext: () => ({
+    environment: 'staging',
+    databaseFingerprint: 'fingerprint',
+    commit: 'a'.repeat(40),
+  }),
+}));
 vi.mock('../src/server/deployment', () => ({
   assertDeploymentBinding: vi.fn(),
 }));
 vi.mock('../src/server/db', () => ({
-  db: () => ({ operationalAudit: { create: mock.audit } }),
+  db: () => ({
+    operationalAudit: { create: mock.audit },
+    $transaction: (run: (tx: unknown) => unknown) =>
+      run({
+        $queryRaw: mock.query,
+        launchGate: { findMany: mock.gates },
+      }),
+  }),
 }));
 vi.mock('../src/server/env', () => ({
   readEnv: () => ({
@@ -30,6 +46,26 @@ import { verifyLaunchRpc } from '../src/server/launch-rpc';
 describe('bounded archive proof with controlled RPC', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mock.query.mockResolvedValue([
+      {
+        tokenCount: 4444n,
+        distinctTokens: 4444n,
+        minTokenId: 1,
+        maxTokenId: 4444,
+        earliestMintBlock: 101n,
+        invalidProvenance: 0n,
+      },
+    ]);
+    mock.gates.mockResolvedValue(
+      ['MINT_COVERAGE', 'OWNERSHIP_CONTINUITY', 'OWNER_OF'].map((key) => ({
+        key,
+        environment: 'staging',
+        databaseFingerprint: 'fingerprint',
+        commit: 'a'.repeat(40),
+        status: 'VERIFIED',
+        checkedAt: new Date(),
+      })),
+    );
     vi.stubEnv('ETH_RPC_URL', 'https://rpc.invalid/private-key');
     mock.start = 100n;
     mock.code.mockImplementation(
@@ -88,8 +124,26 @@ describe('bounded archive proof with controlled RPC', () => {
       mock.record.mock.calls.find((c) => c[0] === 'START_BLOCK')?.[1],
     ).toBe('PARTIAL');
   });
-  it('does not invent a missing mint boundary', async () => {
+  it('uses a complete stored canonical ledger when the bounded probe finds no mint', async () => {
     mock.logs.mockResolvedValue([]);
+    await verifyLaunchRpc();
+    expect(
+      mock.record.mock.calls.find((c) => c[0] === 'START_BLOCK')?.[1],
+    ).toBe('VERIFIED');
+    expect(mock.query).toHaveBeenCalledTimes(1);
+  });
+  it('keeps START_BLOCK partial when stored mint coverage is incomplete', async () => {
+    mock.logs.mockResolvedValue([]);
+    mock.query.mockResolvedValueOnce([
+      {
+        tokenCount: 4443n,
+        distinctTokens: 4443n,
+        minTokenId: 1,
+        maxTokenId: 4444,
+        earliestMintBlock: 101n,
+        invalidProvenance: 1n,
+      },
+    ]);
     await verifyLaunchRpc();
     expect(
       mock.record.mock.calls.find((c) => c[0] === 'START_BLOCK')?.[1],
