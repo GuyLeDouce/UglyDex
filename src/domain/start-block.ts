@@ -19,16 +19,32 @@ export function decideStartBlock(input: {
   if (!input.archiveBoundaryValid)
     return { status: 'FAILED' as const, evidence: 'archive boundary mismatch' };
   if (input.configuredStartBlock !== input.deploymentBlock)
-    return { status: 'PARTIAL' as const, evidence: 'configured start differs from deployment' };
+    return {
+      status: 'PARTIAL' as const,
+      evidence: 'configured start differs from deployment',
+    };
   if (input.boundedMintBlock !== null) {
     if (input.boundedMintBlock < input.deploymentBlock)
-      return { status: 'FAILED' as const, evidence: 'bounded mint predates deployment' };
-    return { status: 'VERIFIED' as const, evidence: 'mint observed in bounded RPC probe' };
+      return {
+        status: 'FAILED' as const,
+        evidence: 'bounded mint predates deployment',
+      };
+    return {
+      status: 'VERIFIED' as const,
+      evidence: 'mint observed in bounded RPC probe',
+    };
   }
 
   const ledger = input.ledger;
-  if (ledger?.earliestMintBlock !== null && ledger?.earliestMintBlock !== undefined && ledger.earliestMintBlock < input.deploymentBlock)
-    return { status: 'FAILED' as const, evidence: 'canonical mint predates deployment' };
+  if (
+    ledger?.earliestMintBlock !== null &&
+    ledger?.earliestMintBlock !== undefined &&
+    ledger.earliestMintBlock < input.deploymentBlock
+  )
+    return {
+      status: 'FAILED' as const,
+      evidence: 'canonical mint predates deployment',
+    };
   const validLedger =
     !!ledger &&
     ledger.complete &&
@@ -41,6 +57,12 @@ export function decideStartBlock(input: {
     ledger.invalidProvenance === 0 &&
     ledger.currentProvenanceGates;
   return validLedger
-    ? { status: 'VERIFIED' as const, evidence: 'complete verified canonical mint ledger' }
-    : { status: 'PARTIAL' as const, evidence: 'complete verified mint ledger required' };
+    ? {
+        status: 'VERIFIED' as const,
+        evidence: 'complete verified canonical mint ledger',
+      }
+    : {
+        status: 'PARTIAL' as const,
+        evidence: 'complete verified mint ledger required',
+      };
 }

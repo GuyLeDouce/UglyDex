@@ -131,7 +131,8 @@ export async function verifyLaunchRpc() {
             gate.environment === context.environment &&
             gate.databaseFingerprint === context.databaseFingerprint &&
             gate.commit === context.commit &&
-            effectiveGateStatus(gate.status, true, gate.checkedAt) === 'VERIFIED'
+            effectiveGateStatus(gate.status, true, gate.checkedAt) ===
+              'VERIFIED'
           );
         });
         const row = rows[0];

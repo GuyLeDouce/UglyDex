@@ -54,7 +54,10 @@ describe('START_BLOCK evidence policy', () => {
     ['incomplete ledger', { ...validLedger, complete: false }],
     ['missing token mint', { ...validLedger, distinctTokens: 4443 }],
     ['dirty provenance', { ...validLedger, invalidProvenance: 1 }],
-    ['invalid owner verification', { ...validLedger, currentProvenanceGates: false }],
+    [
+      'invalid owner verification',
+      { ...validLedger, currentProvenanceGates: false },
+    ],
   ])('does not verify from %s', (_label, ledger) => {
     expect(
       decideStartBlock({
