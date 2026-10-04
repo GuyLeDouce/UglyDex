@@ -29,10 +29,41 @@ describe('GET /api/ready', () => {
       JSON.stringify({
         event: 'readiness.blocked',
         checks: ['migration.checksums'],
+        migrationDetails: [
+          { name: 'migration.checksums', detail: 'REVIEW_REQUIRED' },
+        ],
       }),
     );
     expect(log.mock.calls.flat().join(' ')).not.toContain(
       'private migration detail',
+    );
+  });
+
+  it('logs migration names but never exposes them in readiness responses', async () => {
+    migrationChecks.mockResolvedValue([
+      {
+        name: 'migration.checksums',
+        status: 'FAIL',
+        detail: '202610020012_live_convergence',
+      },
+    ]);
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const response = await GET();
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ status: 'not_ready' });
+    expect(log).toHaveBeenCalledWith(
+      JSON.stringify({
+        event: 'readiness.blocked',
+        checks: ['migration.checksums'],
+        migrationDetails: [
+          {
+            name: 'migration.checksums',
+            detail: '202610020012_live_convergence',
+          },
+        ],
+      }),
     );
   });
 

@@ -10,6 +10,7 @@ import { POST as dirty } from '../../src/app/api/internal/charm/dirty/route';
 import { dirtySignature } from '../../src/domain/charm-dirty';
 import { randomUUID } from 'node:crypto';
 import { launchContext } from '../../src/server/launch';
+import { verifyAndLinkDripMember } from '../../src/server/charm-link';
 export async function phase12DatabaseTests(
   check: (value: unknown, message: string) => void,
 ) {
@@ -99,6 +100,204 @@ export async function phase12DatabaseTests(
     );
     await syncDripDue();
     check(requests === 1, 'durable request checkpoint prevents restart storm');
+    const linkDiscord = '699999999999999997';
+    const linkMember = 'f'.repeat(24);
+    const linkCollector = await db().collector.create({
+      data: {
+        slug: 'charm-drip-id-link',
+        identities: {
+          create: {
+            provider: 'DISCORD',
+            externalId: linkDiscord,
+            authenticatedAt: new Date(),
+          },
+        },
+      },
+    });
+    await db().dripSyncState.update({
+      where: { realmId: realm },
+      data: { nextRequestAt: new Date(0) },
+    });
+    let linkRequests = 0;
+    globalThis.fetch = async (input, options) => {
+      linkRequests++;
+      const url = new URL(String(input));
+      check(
+        options?.method === 'GET' &&
+          url.searchParams.get('type') === 'drip-id' &&
+          url.searchParams.get('values') === linkMember,
+        'user-provided DRIP ID is verified by one exact GET request',
+      );
+      return new Response(
+        JSON.stringify({
+          data: [
+            {
+              id: linkMember,
+              realmMemberId: 'private-link-realm-fixture',
+              credentials: [
+                { oauthProvider: 'discord', oauthAccountId: linkDiscord },
+              ],
+              balances: [
+                { currencyId: currency, balance: '9007199254740993.125' },
+              ],
+            },
+          ],
+          meta: { totalPages: 1, credentials: { access: true } },
+        }),
+      );
+    };
+    const linkResult = await verifyAndLinkDripMember(
+      linkCollector.id,
+      linkMember,
+    );
+    const linkedIdentity = await db().dripIdentity.findUniqueOrThrow({
+      where: {
+        realmId_collectorId: {
+          realmId: realm,
+          collectorId: linkCollector.id,
+        },
+      },
+    });
+    const linkedBalance = await db().charmBalance.findUniqueOrThrow({
+      where: {
+        collectorId_realmId_currencyId: {
+          collectorId: linkCollector.id,
+          realmId: realm,
+          currencyId: currency,
+        },
+      },
+    });
+    check(
+      linkResult.balanceAvailable &&
+        linkRequests === 1 &&
+        linkedIdentity.status === 'RESOLVED' &&
+        linkedIdentity.source === 'EXACT_DRIP_CREDENTIAL' &&
+        linkedBalance.status === 'CURRENT' &&
+        linkedBalance.balance?.toString() === '9007199254740993.125',
+      'exact DRIP ID ownership and decimal balance persist safely in PostgreSQL',
+    );
+    const mappedMember = 'e'.repeat(24);
+    const mappedDiscord = '688888888888888888';
+    const mappedWallet = `0x${'1'.repeat(40)}`;
+    const mappedCollector = await db().collector.create({
+      data: {
+        slug: 'charm-wallet-link-map',
+        identities: {
+          create: { provider: 'DISCORD', externalId: mappedDiscord },
+        },
+        wallets: {
+          create: {
+            chainId: 1,
+            walletAddress: mappedWallet,
+            source: 'AUTHENTICATED_WALLET',
+            verifiedAt: new Date(),
+          },
+        },
+      },
+    });
+    Object.assign(process.env, {
+      UGLYBOT_BRIDGE_URL: 'https://bridge.example/',
+      UGLYBOT_BRIDGE_SECRET: 'fixture-bridge-secret-'.repeat(2),
+    });
+    globalThis.fetch = async (input, options) => {
+      check(
+        options?.method === 'POST' || options?.method === 'GET',
+        'mapped lookup uses bridge POST and DRIP GET only',
+      );
+      const url = new URL(String(input));
+      if (url.pathname === '/v1/lookups/dripIdentity')
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            data: [
+              {
+                discord_id: mappedDiscord,
+                wallet_address: mappedWallet,
+                drip_member_id: mappedMember,
+              },
+            ],
+          }),
+          { headers: { 'content-type': 'application/json' } },
+        );
+      check(
+        url.searchParams.get('type') === 'drip-id' &&
+          url.searchParams.get('values') === mappedMember,
+        'DRIP member resolution uses the exact mapped drip_member_id',
+      );
+      return new Response(
+        JSON.stringify({
+          data: [
+            {
+              id: mappedMember,
+              balances: [{ currencyId: currency, balance: '88.75' }],
+            },
+          ],
+          meta: { totalPages: 1 },
+        }),
+      );
+    };
+    await queueCharmRefresh(mappedCollector.id);
+    await db().dripSyncState.update({
+      where: { realmId: realm },
+      data: { nextRequestAt: new Date(0) },
+    });
+    const mappedResult = await syncDripDue();
+    check(
+      mappedResult.status === 'SYNCED' &&
+        (await charmBalance(mappedCollector.id, false)).balance === '88.75',
+      'wallet_links drip_member_id resolves and stores the exact $CHARM balance',
+    );
+    check(
+      (
+        await db().dripIdentity.findUniqueOrThrow({
+          where: {
+            realmId_collectorId: {
+              realmId: realm,
+              collectorId: mappedCollector.id,
+            },
+          },
+        })
+      ).source === 'VERIFIED_WALLET_LINK',
+      'mapped DRIP identity records its verified wallet_links source',
+    );
+
+    const deniedDiscord = '688888888888888889';
+    const deniedCollector = await db().collector.create({
+      data: {
+        slug: 'charm-denied-credential-read',
+        identities: {
+          create: { provider: 'DISCORD', externalId: deniedDiscord },
+        },
+      },
+    });
+    globalThis.fetch = async (_input, options) => {
+      check(
+        options?.method === 'GET',
+        'denied credential read remains GET-only',
+      );
+      return new Response('denied', { status: 403 });
+    };
+    await queueCharmRefresh(deniedCollector.id);
+    await db().dripSyncState.update({
+      where: { realmId: realm },
+      data: { nextRequestAt: new Date(0) },
+    });
+    const deniedResult = await syncDripDue();
+    check(
+      deniedResult.status === 'SYNCED' &&
+        (
+          await db().dripIdentity.findUniqueOrThrow({
+            where: {
+              realmId_collectorId: {
+                realmId: realm,
+                collectorId: deniedCollector.id,
+              },
+            },
+          })
+        ).status === 'UNRESOLVED' &&
+        (await charmBalance(deniedCollector.id, false)).balance === null,
+      'credential-read denial remains unknown and does not block later mapped identities',
+    );
     const profile = await collectorProfile(c.slug);
     check(
       profile.status === 'ready' && !('charm' in profile),

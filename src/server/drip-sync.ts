@@ -6,9 +6,11 @@ import {
   DripReader,
   DripReadError,
   exactMembers,
+  exactDripMembers,
   validateCurrency,
   type DripResponse,
 } from '@/integrations/drip';
+import { getDripMemberMappings } from '@/integrations/wallet-links';
 import { dripBudget, balanceView, dripHeaderSpacing } from '@/domain/charm';
 import { hash } from '@/domain/events';
 import { launchContext, recordGate } from './launch';
@@ -254,6 +256,21 @@ export async function charmBalance(collectorId: string, enqueue = true) {
   return view;
 }
 
+export async function shouldPromptDripLink(collectorId: string) {
+  const parsed = configSchema.safeParse(process.env);
+  if (!parsed.success) return true;
+  const identity = await db().dripIdentity.findUnique({
+    where: {
+      realmId_collectorId: {
+        collectorId,
+        realmId: parsed.data.DRIP_REALM_ID,
+      },
+    },
+    select: { status: true },
+  });
+  return !identity || !['RESOLVED', 'CONFLICT'].includes(identity.status);
+}
+
 export async function syncDripDue() {
   try {
     return await syncDripBatch();
@@ -335,36 +352,228 @@ async function syncDripBatch() {
       });
     return { status: 'COMPLETE', queried: 0 };
   }
-  const response = await dripRead((r) =>
-    r.searchMembers(identities.map((i) => i.externalId)),
+  const wallets = await db().collectorWallet.findMany({
+    where: {
+      collectorId: { in: identities.map((identity) => identity.collectorId) },
+      chainId: 1,
+      status: 'ACTIVE',
+      revokedAt: null,
+    },
+    select: { collectorId: true, walletAddress: true },
+  });
+  const identityByDiscord = new Map(
+    identities.map((identity) => [identity.externalId, identity]),
   );
-  const body = z
-    .object({
-      data: z.array(z.unknown()),
-      meta: z
-        .object({
-          totalPages: z.number().optional(),
-          credentials: z.object({ access: z.boolean().optional() }).optional(),
-        })
-        .optional(),
-    })
-    .parse(response.body);
-  if ((body.meta?.totalPages ?? 1) > 1)
-    throw Error('DRIP_SEARCH_REQUIRES_PAGINATION');
-  if (body.meta?.credentials?.access === false) {
+  const pairs = identities.flatMap((identity) =>
+    wallets
+      .filter((wallet) => wallet.collectorId === identity.collectorId)
+      .map((wallet) => ({
+        discordId: identity.externalId,
+        walletAddress: wallet.walletAddress,
+      })),
+  );
+  const mappings = await getDripMemberMappings(pairs);
+  if (!mappings.ok) {
     await db().dripSyncState.update({
       where: { realmId: s.realmId },
       data: {
-        errorCode: 'DRIP_CREDENTIAL_READ_REQUIRED',
+        errorCode: `WALLET_LINKS_${mappings.reason.toUpperCase()}`,
         nextRequestAt: new Date(Date.now() + c.DRIP_SYNC_INTERVAL_MS),
       },
     });
-    return { status: 'CREDENTIAL_READ_REQUIRED', queried: identities.length };
+    return {
+      status: `WALLET_LINKS_${mappings.reason.toUpperCase()}`,
+      queried: 0,
+    };
   }
-  const resolved = exactMembers(
-    body.data,
-    identities.map((i) => i.externalId),
-    c.DRIP_REALM_POINT_ID,
+
+  const mappedIds = new Map<string, Set<string>>();
+  for (const mapping of mappings.data) {
+    const ids = mappedIds.get(mapping.discordId) ?? new Set<string>();
+    ids.add(mapping.dripMemberId);
+    mappedIds.set(mapping.discordId, ids);
+  }
+  const resolvedByDiscord = new Map<
+    string,
+    ReturnType<typeof exactMembers>[number]
+  >();
+  const ambiguousDiscords = new Set<string>();
+  for (const [discordId, memberIds] of mappedIds)
+    if (memberIds.size > 1) {
+      ambiguousDiscords.add(discordId);
+      resolvedByDiscord.set(discordId, {
+        discordId,
+        status: 'CONFLICT',
+        dripMemberId: null,
+        realmMemberId: null,
+        balance: null,
+      });
+    }
+
+  const candidates = identities.flatMap((identity) => {
+    const memberIds = mappedIds.get(identity.externalId);
+    if (!memberIds?.size || ambiguousDiscords.has(identity.externalId))
+      return [];
+    return [
+      { discordId: identity.externalId, dripMemberId: [...memberIds][0] },
+    ];
+  });
+  const collectorsByDripId = new Map<string, Set<string>>();
+  for (const candidate of candidates) {
+    const collectorIds =
+      collectorsByDripId.get(candidate.dripMemberId) ?? new Set<string>();
+    collectorIds.add(identityByDiscord.get(candidate.discordId)!.collectorId);
+    collectorsByDripId.set(candidate.dripMemberId, collectorIds);
+  }
+  const conflictedDripIds = new Set(
+    [...collectorsByDripId]
+      .filter(([, collectorIds]) => collectorIds.size > 1)
+      .map(([id]) => id),
+  );
+  for (const candidate of candidates)
+    if (conflictedDripIds.has(candidate.dripMemberId)) {
+      ambiguousDiscords.add(candidate.discordId);
+      resolvedByDiscord.set(candidate.discordId, {
+        discordId: candidate.discordId,
+        status: 'CONFLICT',
+        dripMemberId: candidate.dripMemberId,
+        realmMemberId: null,
+        balance: null,
+      });
+    }
+
+  const mappedCandidates = candidates.filter(
+    (candidate) => !conflictedDripIds.has(candidate.dripMemberId),
+  );
+  const mappedMemberIds = [
+    ...new Set(mappedCandidates.map((candidate) => candidate.dripMemberId)),
+  ];
+  if (mappedMemberIds.length) {
+    try {
+      const response = await dripRead((reader) =>
+        reader.searchMembersByDripId(mappedMemberIds),
+      );
+      const body = z
+        .object({
+          data: z.array(z.unknown()),
+          meta: z.object({ totalPages: z.number().optional() }).optional(),
+        })
+        .parse(response.body);
+      if ((body.meta?.totalPages ?? 1) > 1)
+        throw Error('DRIP_ID_SEARCH_REQUIRES_PAGINATION');
+      for (const member of exactDripMembers(
+        body.data,
+        mappedMemberIds,
+        c.DRIP_REALM_POINT_ID,
+      )) {
+        const candidate = mappedCandidates.find(
+          (entry) => entry.dripMemberId === member.dripMemberId,
+        );
+        if (!candidate) continue;
+        resolvedByDiscord.set(candidate.discordId, {
+          discordId: candidate.discordId,
+          ...member,
+        });
+      }
+    } catch (error) {
+      if (
+        !(error instanceof DripReadError) ||
+        error.message !== 'DRIP_HTTP_403'
+      )
+        throw error;
+      // A forbidden lookup is unresolved evidence, not a reason to pin the
+      // durable sweep cursor. This lets later exact wallet_links mappings be
+      // tried with drip-id while keeping these balances unknown.
+      for (const candidate of mappedCandidates)
+        resolvedByDiscord.set(candidate.discordId, {
+          discordId: candidate.discordId,
+          status: 'UNRESOLVED',
+          dripMemberId: null,
+          realmMemberId: null,
+          balance: null,
+        });
+    }
+  }
+
+  // One DRIP request per worker batch keeps the shared Realm budget predictable.
+  // Use exact Discord-ID lookup only for a batch with no verified source mapping.
+  // Never fall back to username, nickname, or fuzzy search.
+  const directIdentities = mappedMemberIds.length
+    ? []
+    : identities.filter(
+        (identity) => !ambiguousDiscords.has(identity.externalId),
+      );
+  if (directIdentities.length) {
+    try {
+      const response = await dripRead((reader) =>
+        reader.searchMembers(
+          directIdentities.map((identity) => identity.externalId),
+        ),
+      );
+      const body = z
+        .object({
+          data: z.array(z.unknown()),
+          meta: z
+            .object({
+              totalPages: z.number().optional(),
+              credentials: z
+                .object({ access: z.boolean().optional() })
+                .optional(),
+            })
+            .optional(),
+        })
+        .parse(response.body);
+      if ((body.meta?.totalPages ?? 1) > 1)
+        throw Error('DRIP_SEARCH_REQUIRES_PAGINATION');
+      if (body.meta?.credentials?.access === false) {
+        for (const identity of directIdentities)
+          resolvedByDiscord.set(identity.externalId, {
+            discordId: identity.externalId,
+            status: 'UNRESOLVED',
+            dripMemberId: null,
+            realmMemberId: null,
+            balance: null,
+          });
+        await db().dripSyncState.update({
+          where: { realmId: s.realmId },
+          data: { errorCode: 'DRIP_CREDENTIAL_READ_REQUIRED' },
+        });
+      } else {
+        for (const member of exactMembers(
+          body.data,
+          directIdentities.map((identity) => identity.externalId),
+          c.DRIP_REALM_POINT_ID,
+        ))
+          resolvedByDiscord.set(member.discordId, member);
+      }
+    } catch (error) {
+      if (
+        !(error instanceof DripReadError) ||
+        error.message !== 'DRIP_HTTP_403'
+      )
+        throw error;
+      // DRIP can deny Discord-credential reads while allowing exact drip-id
+      // reads. Record this batch as unresolved and advance; a later batch with
+      // a verified wallet_links mapping will use only the mapped drip-id.
+      for (const identity of directIdentities)
+        resolvedByDiscord.set(identity.externalId, {
+          discordId: identity.externalId,
+          status: 'UNRESOLVED',
+          dripMemberId: null,
+          realmMemberId: null,
+          balance: null,
+        });
+    }
+  }
+  const resolved = identities.map(
+    (identity) =>
+      resolvedByDiscord.get(identity.externalId) ?? {
+        discordId: identity.externalId,
+        status: 'UNRESOLVED' as const,
+        dripMemberId: null,
+        realmMemberId: null,
+        balance: null,
+      },
   );
   const counts = {
     queried: identities.length,
@@ -414,8 +623,20 @@ async function syncDripBatch() {
         counts[status === 'CONFLICT' ? 'conflicts' : 'unresolved']++;
         await tx.dripIdentity.upsert({
           where,
-          create: { realmId: s.realmId, collectorId, status },
-          update: { status },
+          create: {
+            realmId: s.realmId,
+            collectorId,
+            status,
+            source: mappedIds.has(r.discordId)
+              ? 'VERIFIED_WALLET_LINK'
+              : 'EXACT_DISCORD_CREDENTIAL',
+          },
+          update: {
+            status,
+            source: mappedIds.has(r.discordId)
+              ? 'VERIFIED_WALLET_LINK'
+              : 'EXACT_DISCORD_CREDENTIAL',
+          },
         });
         await tx.charmBalance.updateMany({
           where: { realmId: s.realmId, collectorId },
@@ -441,12 +662,18 @@ async function syncDripBatch() {
           dripMemberId: r.dripMemberId,
           realmMemberId: r.realmMemberId,
           status,
+          source: mappedIds.has(r.discordId)
+            ? 'VERIFIED_WALLET_LINK'
+            : 'EXACT_DISCORD_CREDENTIAL',
           lastResolvedAt: new Date(),
         },
         update: {
           dripMemberId: r.dripMemberId,
           realmMemberId: r.realmMemberId,
           status,
+          source: mappedIds.has(r.discordId)
+            ? 'VERIFIED_WALLET_LINK'
+            : 'EXACT_DISCORD_CREDENTIAL',
           lastResolvedAt: new Date(),
         },
       });

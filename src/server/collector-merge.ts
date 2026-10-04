@@ -1,5 +1,6 @@
 import 'server-only';
 import { db } from './db';
+import { markWalletDirty } from '@/sync/provenance';
 
 export async function confirmCollectorMerge(
   requestId: string,
@@ -62,6 +63,11 @@ export async function confirmCollectorMerge(
       await tx.collectorActivity.updateMany({
         where: { collectorId: absorbed.id },
         data: { collectorId: survivor.id, correctedAt: new Date() },
+      });
+
+      const absorbedWallets = await tx.collectorWallet.findMany({
+        where: { collectorId: absorbed.id, chainId: 1 },
+        select: { walletAddress: true },
       });
 
       const discoveries = await tx.squigDiscovery.findMany({
@@ -144,6 +150,13 @@ export async function confirmCollectorMerge(
         where: { collectorId: absorbed.id },
         data: { collectorId: survivor.id },
       });
+      // Moving signed identity evidence changes who owns the wallet's historical
+      // periods. Recompute immutable chain projections under the survivor before
+      // its collection and progression queues are evaluated.
+      for (const walletAddress of new Set(
+        absorbedWallets.map((wallet) => wallet.walletAddress),
+      ))
+        await markWalletDirty(tx, walletAddress);
       await tx.xpLedgerEntry.updateMany({
         where: { subjectType: 'COLLECTOR', subjectId: absorbed.id },
         data: { subjectId: survivor.id },

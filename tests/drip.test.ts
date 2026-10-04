@@ -68,7 +68,13 @@ describe('DRIP read-only authoritative integration', () => {
       redirect: 'error',
     });
     expect(Object.getOwnPropertyNames(DripReader.prototype).sort()).toEqual(
-      ['constructor', 'getCurrencies', 'getRealm', 'searchMembers'].sort(),
+      [
+        'constructor',
+        'getCurrencies',
+        'getRealm',
+        'searchMembers',
+        'searchMembersByDripId',
+      ].sort(),
     );
   });
   it('requires exact IDs, rejects usernames and batches above the code-owned ceiling', async () => {
@@ -89,6 +95,17 @@ describe('DRIP read-only authoritative integration', () => {
     expect(url.pathname).toBe(`/api/v1/realms/${realm}/members/search`);
     expect(url.searchParams.get('type')).toBe('discord-id');
     expect(url.searchParams.get('values')).toBe(discord);
+  });
+  it('constructs exact mapped drip-id search', async () => {
+    const f = vi.fn().mockResolvedValue(new Response('{}'));
+    const dripId = 'd'.repeat(24);
+    await new DripReader({ key: 'test', realm }, f).searchMembersByDripId([
+      dripId,
+    ]);
+    const url = new URL(f.mock.calls[0][0]);
+    expect(url.pathname).toBe(`/api/v1/realms/${realm}/members/search`);
+    expect(url.searchParams.get('type')).toBe('drip-id');
+    expect(url.searchParams.get('values')).toBe(dripId);
   });
   it('accepts an owned currency at the exact realm endpoint', () =>
     expect(

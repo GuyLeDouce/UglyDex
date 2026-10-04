@@ -16,6 +16,11 @@ export const sourceQueries = {
     input: z.tuple([z.string().regex(/^0x[a-f0-9]{40}$/), id]),
     sql: 'SELECT discord_id, guild_id FROM public.wallet_links WHERE lower(wallet_address) = $1 AND guild_id = $2 AND verified = true ORDER BY discord_id LIMIT 200',
   },
+  dripIdentity: {
+    integration: 'links',
+    input: z.tuple([z.string().min(2).max(50000)]),
+    sql: 'SELECT DISTINCT wl.discord_id, lower(wl.wallet_address) AS wallet_address, wl.drip_member_id FROM public.wallet_links wl JOIN jsonb_to_recordset($1::jsonb) AS requested(discord_id text, wallet_address text) ON wl.discord_id = requested.discord_id AND lower(wl.wallet_address) = requested.wallet_address WHERE wl.verified = true AND wl.drip_member_id IS NOT NULL ORDER BY wl.discord_id, wallet_address, wl.drip_member_id LIMIT 500',
+  },
   collectorDuels: {
     integration: 'uglybot',
     input: z.tuple([id]),

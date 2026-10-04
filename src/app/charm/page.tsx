@@ -4,6 +4,7 @@ import { charmBalance } from '@/server/drip-sync';
 import { charmHistory } from '@/server/charm-history';
 import { CharmBalanceCard } from '@/components/charm-balance';
 import { CharmRefresh } from '@/components/charm-refresh';
+import { CharmDripLink } from '@/components/charm-drip-link';
 import { charmDirections } from '@/domain/charm';
 import { formatAmount } from '@/domain/activity';
 export const metadata = {
@@ -36,6 +37,7 @@ export default async function Charm({
       </section>
       <CharmBalanceCard value={balance} />
       <CharmRefresh />
+      <CharmDripLink />
       <section className="panel">
         <h2>Tracked activity</h2>
         <p>
