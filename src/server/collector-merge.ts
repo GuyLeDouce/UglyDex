@@ -88,11 +88,12 @@ export async function confirmCollectorMerge(
             data: { collectorId: survivor.id },
           });
         } else {
-          const earliest = [discovery, existing]
-            .filter((row) => row.firstOwnershipPeriod)
-            .sort(
-              (a, b) => a.discoveredAt.getTime() - b.discoveredAt.getTime(),
-            )[0] ??
+          const earliest =
+            [discovery, existing]
+              .filter((row) => row.firstOwnershipPeriod)
+              .sort(
+                (a, b) => a.discoveredAt.getTime() - b.discoveredAt.getTime(),
+              )[0] ??
             (discovery.discoveredAt < existing.discoveredAt
               ? discovery
               : existing);
@@ -429,17 +430,55 @@ export async function confirmCollectorMerge(
         },
       });
 
-      await tx.identityReconciliation.updateMany({
-        where: { dedupeKey: request.reviewKey, status: 'PENDING' },
+      const reviewCase = await tx.identityReconciliation.findUnique({
+        where: { dedupeKey: request.reviewKey },
+      });
+      if (!reviewCase || reviewCase.status !== 'PENDING')
+        throw new Error('MERGE_REQUEST_EXPIRED');
+      const confirmedAt = new Date();
+      await tx.identityReconciliation.update({
+        where: { id: reviewCase.id },
         data: {
           status: 'RESOLVED',
           resolution: {
             action: 'MERGE_COLLECTORS',
             survivorCollectorId: survivor.id,
             absorbedCollectorId: absorbed.id,
-            confirmedAt: new Date().toISOString(),
+            confirmedAt: confirmedAt.toISOString(),
           },
-          resolvedAt: new Date(),
+          resolvedAt: confirmedAt,
+        },
+      });
+      await tx.reconciliationDecision.create({
+        data: {
+          caseId: reviewCase.id,
+          actor: `collector:${survivor.id}`,
+          action: 'MERGE_COLLECTORS',
+          reason: 'DUAL_CREDENTIAL_PROOF_AND_EXPLICIT_CONFIRMATION',
+          before: {
+            survivorCollectorId: survivor.id,
+            absorbedCollectorId: absorbed.id,
+            status: 'PENDING',
+          },
+          after: {
+            survivorCollectorId: survivor.id,
+            absorbedCollectorId: absorbed.id,
+            status: 'MERGED',
+            proofs: [
+              {
+                type: request.survivorCredentialType,
+                fingerprint: request.survivorCredentialFingerprint,
+              },
+              {
+                type: request.credentialType,
+                fingerprint: request.credentialFingerprint,
+              },
+            ],
+            activityRowsMoved: activityCount,
+            discoveriesMerged: movedDiscoveries,
+            galleriesMoved: galleries.length,
+            confirmedAt: confirmedAt.toISOString(),
+          },
         },
       });
       await tx.operationalAudit.create({
