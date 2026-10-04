@@ -15,6 +15,60 @@ import {
   type WorkerMode,
 } from '@/domain/operations';
 
+// A committed Phase 11 staging admission remains valid across the Phase 12A
+// derivation-evidence upgrade. It is bound to the same staging database,
+// contract, start block and immutable anchor; this allows the existing LIVE
+// indexer to finish ordinary forward work that may have made projections dirty.
+const reviewedAdmission = {
+  environment: 'staging',
+  commit: '0c8e5f8fc0d5db8c587c749479922accde723ae3',
+  databaseFingerprint:
+    'f72c0bb40a9e5946a4d07dc63b5559c253bc85b48af83914aec99cd03fb4bc3a',
+  chainKey: 'transfers:1:0x8c9a02c0585200c4c65608df6b8def543d33792a',
+  startBlock: '25342921',
+};
+
+async function durableAdmissionValid(
+  admission: Record<string, unknown> | undefined,
+  input: {
+    environment: string;
+    commit: string;
+    databaseFingerprint: string;
+    chainKey: string;
+    startBlock: string;
+    blockNumber: bigint;
+  },
+) {
+  if (
+    !admission ||
+    admission.environment !== input.environment ||
+    admission.databaseFingerprint !== input.databaseFingerprint ||
+    admission.chainKey !== input.chainKey ||
+    admission.startBlock !== input.startBlock ||
+    typeof admission.blockNumber !== 'string' ||
+    !/^\d+$/.test(admission.blockNumber) ||
+    BigInt(admission.blockNumber) > input.blockNumber
+  )
+    return false;
+  const currentRevision = admission.commit === input.commit,
+    reviewedRevision =
+      input.environment === reviewedAdmission.environment &&
+      admission.commit === reviewedAdmission.commit &&
+      input.databaseFingerprint === reviewedAdmission.databaseFingerprint &&
+      input.chainKey === reviewedAdmission.chainKey &&
+      input.startBlock === reviewedAdmission.startBlock;
+  if (!currentRevision && !reviewedRevision) return false;
+  const anchor = await db().chainBlock.findUnique({
+    where: {
+      chainId_number: {
+        chainId: 1,
+        number: BigInt(admission.blockNumber),
+      },
+    },
+  });
+  return !!anchor && anchor.hash === admission.blockHash;
+}
+
 async function chainLiveEvidence() {
   const { chainKey } = await import('@/sync/provenance');
   const { launchReport, launchContext } = await import('./launch');
@@ -122,38 +176,23 @@ export async function workerReadiness(service: Service, mode: WorkerMode) {
         !cursor ||
         cursor.lastError ||
         cursor.finalizedBlock === null ||
-        cursor.blockNumber > cursor.finalizedBlock ||
-        !verified
+        cursor.blockNumber > cursor.finalizedBlock
       )
         return 'WAITING_BACKFILL';
+      const audit = await db().operationalAudit.findFirst({
+        where: { action: 'BLOCKCHAIN_LIVE_ADMISSION', subject: chainKey },
+        orderBy: { createdAt: 'desc' },
+      });
+      const admission = audit?.detail as Record<string, unknown> | undefined;
+      const admissionValid = await durableAdmissionValid(admission, {
+        ...context,
+        chainKey,
+        startBlock: String(env.SQUIGS_START_BLOCK),
+        blockNumber: cursor.blockNumber,
+      });
+      if (!verified && !admissionValid) return 'WAITING_BACKFILL';
       if (cursor.blockNumber !== cursor.finalizedBlock) {
-        const audit = await db().operationalAudit.findFirst({
-          where: { action: 'BLOCKCHAIN_LIVE_ADMISSION', subject: chainKey },
-          orderBy: { createdAt: 'desc' },
-        });
-        const admission = audit?.detail as Record<string, unknown> | undefined;
-        if (
-          !admission ||
-          admission.environment !== context.environment ||
-          admission.commit !== context.commit ||
-          admission.databaseFingerprint !== context.databaseFingerprint ||
-          admission.chainKey !== chainKey ||
-          admission.startBlock !== String(env.SQUIGS_START_BLOCK) ||
-          typeof admission.blockNumber !== 'string' ||
-          !/^\d+$/.test(admission.blockNumber) ||
-          BigInt(admission.blockNumber) > cursor.blockNumber
-        )
-          return 'WAITING_BACKFILL';
-        const anchor = await db().chainBlock.findUnique({
-          where: {
-            chainId_number: {
-              chainId: 1,
-              number: BigInt(admission.blockNumber),
-            },
-          },
-        });
-        if (!anchor || anchor.hash !== admission.blockHash)
-          return 'WAITING_BACKFILL';
+        if (!admissionValid) return 'WAITING_BACKFILL';
       }
     }
   }

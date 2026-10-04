@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { z } from 'zod';
 import {
   authenticateDiscord,
+  MergeConfirmationRequired,
   authHash,
   currentSession,
   oauthCookie,
@@ -77,9 +78,23 @@ export async function GET(request: Request) {
     const user = z
       .object({ id: discordId, username: z.string().max(100) })
       .parse(await userResponse.json());
-    await authenticateDiscord(user.id, user.username, challenge.collectorId);
+    try {
+      await authenticateDiscord(user.id, user.username, challenge.collectorId);
+    } catch (error) {
+      if (error instanceof MergeConfirmationRequired)
+        return Response.redirect(
+          `${env.PUBLIC_BASE_URL}/settings/identity/merge?request=${encodeURIComponent(error.mergeRequestId)}`,
+          303,
+        );
+      throw error;
+    }
     return Response.redirect(`${env.PUBLIC_BASE_URL}/me`, 303);
   } catch (error) {
+    if (error instanceof Error && error.message === 'IDENTITY_REVIEW_REQUIRED')
+      return Response.redirect(
+        `${readEnv().PUBLIC_BASE_URL}/connect?error=IDENTITY_REVIEW_REQUIRED`,
+        303,
+      );
     return authError(error);
   }
 }

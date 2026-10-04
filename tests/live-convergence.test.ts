@@ -67,7 +67,39 @@ vi.mock('../src/server/provenance-convergence', () => ({
 }));
 import { hash } from '../src/domain/events';
 import { verifyCurrentReplay } from '../src/server/live-convergence';
-const inputs = { CollectorActivity: { count: 1, sha256: 'input' } },
+const inputs = {
+    CollectorActivity: { count: 1, sha256: 'input' },
+    ProgressionRuleset: {
+      count: 1,
+      sha256:
+        '04eb87c3edd95874ec224949aabfd5d1a12231491e9f0cfa6d84425d56e8742f',
+    },
+    CollectionRuleset: {
+      count: 1,
+      sha256:
+        '8e4ddedf18fc7bb66ad37d0f76d8060e3a45ebacd403626849d353e60553d817',
+    },
+    AchievementDefinition: {
+      count: 65,
+      sha256:
+        '312fdb054f7d05f06642359c4f517b49ed118e2a559dcb934874670ad3c298af',
+    },
+    CollectionSetDefinition: {
+      count: 52,
+      sha256:
+        'a8960623ae7790457bce47270fe93cb405f072525d1635c73f145f09598732dd',
+    },
+    CollectionSetRequirement: {
+      count: 81,
+      sha256:
+        '312ac4a83d79b9dd7349b74888df2c70682db2e59b54e2a0e083a6ee591f3365',
+    },
+    CosmeticDefinition: {
+      count: 17,
+      sha256:
+        '37e415220c540864414a2399562c1b0c5784958e394f743e3b21e0ee47323a3c',
+    },
+  },
   outputs = { CollectorProgress: { count: 1, sha256: 'output' } };
 const frozen = () => ({
   id: 'fixture-proof',
@@ -82,6 +114,13 @@ const frozen = () => ({
   replayB: outputs,
   errorCode: null,
   differences: [],
+});
+const reviewedFrozen = () => ({
+  ...frozen(),
+  id: 'b6a1d45d-d9fc-454a-9771-37da3cb450c1',
+  commit: 'cd15cd36c835be38b316ea7bd6fc9c45bab0f77f',
+  inputHash: '83b5ec1c293e1452ee560ddd3afd35da72a6c2d61494b3273184d7419f7162f1',
+  configurationHash: null,
 });
 beforeEach(() => {
   vi.clearAllMocks();
@@ -125,10 +164,12 @@ describe('coherent current-live replay verification', () => {
     expect(mocks.derived).not.toHaveBeenCalled();
     expect(mocks.save).not.toHaveBeenCalled();
   });
-  it('accepts the reviewed Phase 11 frozen revision when configuration still matches', async () => {
-    mocks.proof.mockResolvedValue({ ...frozen(), commit: 'cd15cd3' });
+  it('accepts the reviewed Phase 11 frozen revision with matching rules and catalogs', async () => {
+    mocks.proof.mockResolvedValue(reviewedFrozen());
+    advance();
     expect(await verifyCurrentReplay()).toBe(true);
-    expect(mocks.derived).not.toHaveBeenCalled();
+    expect(mocks.derived).toHaveBeenCalled();
+    expect(mocks.provenance).toHaveBeenCalled();
   });
   it('requires review for an unregistered frozen derivation revision', async () => {
     mocks.proof.mockResolvedValue({ ...frozen(), commit: 'b'.repeat(40) });
@@ -136,7 +177,7 @@ describe('coherent current-live replay verification', () => {
     expect(mocks.derived).not.toHaveBeenCalled();
   });
   it('verifies advanced inputs with independent read-only recomputation and saves the captured boundary', async () => {
-    mocks.proof.mockResolvedValue({ ...frozen(), commit: 'cd15cd3' });
+    mocks.proof.mockResolvedValue(reviewedFrozen());
     advance();
     expect(await verifyCurrentReplay()).toBe(true);
     expect(mocks.execute).toHaveBeenCalledWith('SET TRANSACTION READ ONLY');
@@ -149,7 +190,7 @@ describe('coherent current-live replay verification', () => {
       data: expect.objectContaining({
         environment: 'staging',
         databaseFingerprint: 'fixture-db',
-        frozenProofId: 'fixture-proof',
+        frozenProofId: 'b6a1d45d-d9fc-454a-9771-37da3cb450c1',
         inputHash: hash({
           ...inputs,
           CollectorActivity: { count: 2, sha256: 'advanced' },
@@ -218,6 +259,23 @@ describe('coherent current-live replay verification', () => {
   it('cannot certify advanced inputs from a legacy proof without recorded configuration', async () => {
     advance();
     mocks.proof.mockResolvedValue({ ...frozen(), configurationHash: null });
+    expect(await verifyCurrentReplay()).toBe(false);
+    expect(mocks.derived).not.toHaveBeenCalled();
+  });
+  it.each([
+    'ProgressionRuleset',
+    'CollectionRuleset',
+    'AchievementDefinition',
+    'CollectionSetDefinition',
+    'CollectionSetRequirement',
+    'CosmeticDefinition',
+  ])('requires review when legacy frozen %s changes', async (name) => {
+    mocks.proof.mockResolvedValue(reviewedFrozen());
+    mocks.fingerprints.mockImplementation(async (_client, mode) =>
+      mode === 'input'
+        ? { ...inputs, [name]: { count: 1, sha256: 'changed' } }
+        : outputs,
+    );
     expect(await verifyCurrentReplay()).toBe(false);
     expect(mocks.derived).not.toHaveBeenCalled();
   });

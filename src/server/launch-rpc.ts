@@ -7,6 +7,9 @@ import { readEnv } from './env';
 import { assertDeploymentBinding } from './deployment';
 import { recordGate } from './launch';
 import { retryRpc } from '@/domain/provenance';
+import { decideStartBlock } from '@/domain/start-block';
+import { launchContext } from './launch';
+import { effectiveGateStatus } from '@/domain/launch';
 // Explicit bounded probe. No token-1 deployment inference and no automatic multi-million-block log scan.
 export async function verifyLaunchRpc() {
   await assertDeploymentBinding();
@@ -71,6 +74,95 @@ export async function verifyLaunchRpc() {
       block.hash
     )
       throw new Error('CHAIN_CHANGED_DURING_VERIFY');
+    const { db } = await import('./db');
+    const context = launchContext();
+    const storedMintEvidence = await db().$transaction(
+      async (tx) => {
+        const rows = await tx.$queryRaw<
+          {
+            tokenCount: bigint;
+            distinctTokens: bigint;
+            minTokenId: number | null;
+            maxTokenId: number | null;
+            earliestMintBlock: bigint | null;
+            invalidProvenance: bigint;
+          }[]
+        >`WITH token_ledger AS (
+          SELECT s."id", s."tokenId", p."dirty", p."complete", p."mintAt",
+            p."mintBlock", p."mintTransaction", p."verifiedAt", p."ownerMatches",
+            p."derivedThrough", count(t."id") AS mint_count,
+            min(t."blockNumber") AS canonical_mint_block,
+            min(t."transactionHash") AS canonical_mint_transaction
+          FROM "Squig" s
+          LEFT JOIN "SquigProvenance" p ON p."squigId" = s."id"
+          LEFT JOIN "NftTransfer" t ON t."squigId" = s."id"
+            AND t."chainId" = 1
+            AND lower(t."contractAddress") = lower(${SQUIGS_CONTRACT})
+            AND lower(t."fromAddress") = lower(${zeroAddress})
+            AND t."finalized" = true
+          WHERE s."chainId" = 1 AND lower(s."contractAddress") = lower(${SQUIGS_CONTRACT})
+          GROUP BY s."id", s."tokenId", p."dirty", p."complete", p."mintAt",
+            p."mintBlock", p."mintTransaction", p."verifiedAt", p."ownerMatches", p."derivedThrough"
+        )
+        SELECT count(*)::bigint AS "tokenCount",
+          count(DISTINCT "tokenId")::bigint AS "distinctTokens",
+          min("tokenId") AS "minTokenId", max("tokenId") AS "maxTokenId",
+          min(canonical_mint_block) AS "earliestMintBlock",
+          count(*) FILTER (WHERE mint_count <> 1 OR dirty IS DISTINCT FROM false
+            OR complete IS DISTINCT FROM true OR "mintAt" IS NULL OR "mintBlock" IS NULL
+            OR "verifiedAt" IS NULL OR "ownerMatches" IS DISTINCT FROM true
+            OR "derivedThrough" IS NULL OR "mintBlock" IS DISTINCT FROM canonical_mint_block
+            OR "mintTransaction" IS DISTINCT FROM canonical_mint_transaction)::bigint AS "invalidProvenance"
+        FROM token_ledger`;
+        const gates = await tx.launchGate.findMany({
+          where: {
+            key: { in: ['MINT_COVERAGE', 'OWNERSHIP_CONTINUITY', 'OWNER_OF'] },
+          },
+        });
+        const rowsByKey = new Map(gates.map((gate) => [gate.key, gate]));
+        const currentProvenanceGates = [
+          'MINT_COVERAGE',
+          'OWNERSHIP_CONTINUITY',
+          'OWNER_OF',
+        ].every((key) => {
+          const gate = rowsByKey.get(key);
+          return (
+            !!gate &&
+            gate.environment === context.environment &&
+            gate.databaseFingerprint === context.databaseFingerprint &&
+            gate.commit === context.commit &&
+            effectiveGateStatus(gate.status, true, gate.checkedAt) ===
+              'VERIFIED'
+          );
+        });
+        const row = rows[0];
+        const tokenCount = Number(row?.tokenCount ?? 0n);
+        const distinctTokens = Number(row?.distinctTokens ?? 0n);
+        const invalidProvenance = Number(row?.invalidProvenance ?? 0n);
+        return {
+          complete:
+            tokenCount === 4444 &&
+            distinctTokens === 4444 &&
+            row?.minTokenId === 1 &&
+            row?.maxTokenId === 4444,
+          count: tokenCount,
+          distinctTokens,
+          minTokenId: row?.minTokenId ?? null,
+          maxTokenId: row?.maxTokenId ?? null,
+          earliestMintBlock: row?.earliestMintBlock ?? null,
+          invalidProvenance,
+          currentProvenanceGates,
+        };
+      },
+      { isolationLevel: 'RepeatableRead' },
+    );
+    const decision = decideStartBlock({
+      deploymentBlock: low,
+      configuredStartBlock: env.SQUIGS_START_BLOCK,
+      archiveBoundaryValid: !!at && at !== '0x' && (!before || before === '0x'),
+      boundedMintBlock: first?.blockNumber ?? null,
+      ledger: storedMintEvidence,
+    });
     const evidence = {
       deploymentBlock: low.toString(),
       deploymentHash: block.hash,
@@ -84,6 +176,17 @@ export async function verifyLaunchRpc() {
         : null,
       probeLogs: logs.length,
       range: env.TRANSFER_BLOCK_BATCH,
+      storedMintLedger: {
+        count: storedMintEvidence.count,
+        distinctTokens: storedMintEvidence.distinctTokens,
+        minTokenId: storedMintEvidence.minTokenId,
+        maxTokenId: storedMintEvidence.maxTokenId,
+        earliestMintBlock:
+          storedMintEvidence.earliestMintBlock?.toString() ?? null,
+        invalidProvenance: storedMintEvidence.invalidProvenance,
+        currentProvenanceGates: storedMintEvidence.currentProvenanceGates,
+      },
+      startBlockEvidence: decision.evidence,
       retryCount,
       durationMs: Date.now() - started,
       providerFingerprint: createHash('sha256')
@@ -96,14 +199,12 @@ export async function verifyLaunchRpc() {
       'Chain, ERC721, historical bytecode and bounded historical logs verified',
       evidence,
     );
-    const configured = env.SQUIGS_START_BLOCK;
     await recordGate(
       'START_BLOCK',
-      configured === low && !!first ? 'VERIFIED' : 'PARTIAL',
-      `Archive deployment boundary ${low}; ${first ? 'mint observed in probe range' : 'mint boundary needs further bounded evidence'}; configured boundary ${configured === low ? 'matches' : 'does not match'}`,
+      decision.status,
+      `Archive deployment boundary ${low}; ${decision.evidence}`,
       evidence,
     );
-    const { db } = await import('./db');
     await db().operationalAudit.create({
       data: {
         actor: 'launch:rpc',

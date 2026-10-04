@@ -17,6 +17,11 @@ import { markWalletDirty } from '@/sync/provenance';
 export const sessionCookie = 'uglydex_session';
 export const walletCookie = 'uglydex_wallet_challenge';
 export const oauthCookie = 'uglydex_oauth_state';
+export class MergeConfirmationRequired extends Error {
+  constructor(readonly mergeRequestId: string) {
+    super('IDENTITY_REVIEW_REQUIRED');
+  }
+}
 export function authHash(value: string) {
   const secret = readEnv().AUTH_SECRET;
   if (!secret) throw new Error('AUTH_UNCONFIGURED');
@@ -103,7 +108,11 @@ export async function walletChallenge(address: string) {
   (await cookies()).set(walletCookie, token, cookieOptions(300));
   return { message, address: wallet };
 }
-async function installSession(collectorId: string, walletAddress?: string) {
+export async function installSession(
+  collectorId: string,
+  walletAddress?: string,
+  proof?: { method: 'WALLET_SIWE' | 'DISCORD_OAUTH'; credential: string },
+) {
   const jar = await cookies(),
     old = jar.get(sessionCookie)?.value,
     token = randomBytes(32).toString('hex');
@@ -122,6 +131,10 @@ async function installSession(collectorId: string, walletAddress?: string) {
       data: {
         tokenHash: authHash(token),
         collectorId,
+        authMethod: proof?.method ?? null,
+        credentialFingerprint: proof
+          ? authHash(`${proof.method}:${proof.credential}`)
+          : null,
         expiresAt: new Date(Date.now() + 7 * 86400000),
       },
     });
@@ -203,6 +216,39 @@ export async function verifyWallet(signature: Hex) {
         },
         update: {},
       });
+      if (
+        session &&
+        session.authMethod &&
+        session.credentialFingerprint &&
+        wallet?.status === 'ACTIVE' &&
+        wallet.collectorId !== session.collectorId &&
+        Date.now() - session.createdAt.getTime() <= 5 * 60_000
+      ) {
+        await tx.collectorMergeRequest.upsert({
+          where: { reviewKey: `auth-wallet:${challenge.subject}` },
+          create: {
+            survivorCollectorId: session.collectorId,
+            absorbedCollectorId: wallet.collectorId,
+            credentialType: 'WALLET_SIWE',
+            credentialFingerprint: authHash(`wallet:${challenge.subject}`),
+            survivorCredentialType: session.authMethod,
+            survivorCredentialFingerprint: session.credentialFingerprint,
+            reviewKey: `auth-wallet:${challenge.subject}`,
+            expiresAt: new Date(Date.now() + 5 * 60_000),
+          },
+          update: {
+            survivorCollectorId: session.collectorId,
+            absorbedCollectorId: wallet.collectorId,
+            credentialType: 'WALLET_SIWE',
+            credentialFingerprint: authHash(`wallet:${challenge.subject}`),
+            survivorCredentialType: session.authMethod,
+            survivorCredentialFingerprint: session.credentialFingerprint,
+            status: 'PENDING_CONFIRMATION',
+            expiresAt: new Date(Date.now() + 5 * 60_000),
+            confirmedAt: null,
+          },
+        });
+      }
       return null;
     }
     const collectorId =
@@ -279,8 +325,23 @@ export async function verifyWallet(signature: Hex) {
     return collectorId;
   });
   jar.delete(walletCookie);
-  if (!result) throw new Error('IDENTITY_REVIEW_REQUIRED');
-  await installSession(result, challenge.subject);
+  if (!result) {
+    const merge = await db().collectorMergeRequest.findFirst({
+      where: {
+        survivorCollectorId: session?.collectorId,
+        reviewKey: `auth-wallet:${challenge.subject}`,
+        status: 'PENDING_CONFIRMATION',
+        expiresAt: { gt: new Date() },
+      },
+      select: { id: true },
+    });
+    if (merge) throw new MergeConfirmationRequired(merge.id);
+    throw new Error('IDENTITY_REVIEW_REQUIRED');
+  }
+  await installSession(result, challenge.subject, {
+    method: 'WALLET_SIWE',
+    credential: challenge.subject,
+  });
   // A fresh proof may arrive after this wallet's ownership was indexed. Reconcile
   // current indexed holdings now; historical attribution still uses proof dates.
   const { reconcileCurrentDiscoveries } = await import('./discoveries');
@@ -298,16 +359,22 @@ export async function authenticateDiscord(
   username: string,
   collectorId: string | null,
 ) {
+  const activeSession = await currentSession();
   const result = await db().$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`discord:${id}`}, 0))`;
     const identity = await tx.externalIdentity.findUnique({
       where: { provider_externalId: { provider: 'DISCORD', externalId: id } },
     });
     if (identity && collectorId && identity.collectorId !== collectorId) {
+      const reviewKey = `discord:${id}:${collectorId}`;
+      await tx.externalIdentity.update({
+        where: { id: identity.id },
+        data: { username },
+      });
       await tx.identityReconciliation.upsert({
-        where: { dedupeKey: `discord:${id}:${collectorId}` },
+        where: { dedupeKey: reviewKey },
         create: {
-          dedupeKey: `discord:${id}:${collectorId}`,
+          dedupeKey: reviewKey,
           reason: 'COLLECTOR_CONFLICT',
           evidence: {
             authenticatedCollectorId: collectorId,
@@ -317,6 +384,41 @@ export async function authenticateDiscord(
         },
         update: {},
       });
+      if (
+        activeSession?.collectorId === collectorId &&
+        !!activeSession.authMethod &&
+        !!activeSession.credentialFingerprint &&
+        Date.now() - activeSession.createdAt.getTime() <= 5 * 60_000
+      ) {
+        await tx.externalIdentity.update({
+          where: { id: identity.id },
+          data: { authenticatedAt: new Date() },
+        });
+        await tx.collectorMergeRequest.upsert({
+          where: { reviewKey },
+          create: {
+            survivorCollectorId: collectorId,
+            absorbedCollectorId: identity.collectorId,
+            credentialType: 'DISCORD_OAUTH',
+            credentialFingerprint: authHash(`discord:${id}`),
+            survivorCredentialType: activeSession.authMethod!,
+            survivorCredentialFingerprint: activeSession.credentialFingerprint!,
+            reviewKey,
+            expiresAt: new Date(Date.now() + 5 * 60_000),
+          },
+          update: {
+            survivorCollectorId: collectorId,
+            absorbedCollectorId: identity.collectorId,
+            credentialType: 'DISCORD_OAUTH',
+            credentialFingerprint: authHash(`discord:${id}`),
+            survivorCredentialType: activeSession.authMethod!,
+            survivorCredentialFingerprint: activeSession.credentialFingerprint!,
+            status: 'PENDING_CONFIRMATION',
+            expiresAt: new Date(Date.now() + 5 * 60_000),
+            confirmedAt: null,
+          },
+        });
+      }
       return null;
     }
     const record =
@@ -332,8 +434,23 @@ export async function authenticateDiscord(
     });
     return record.collectorId;
   });
-  if (!result) throw new Error('IDENTITY_REVIEW_REQUIRED');
-  await installSession(result);
+  if (!result) {
+    const merge = await db().collectorMergeRequest.findFirst({
+      where: {
+        survivorCollectorId: collectorId ?? undefined,
+        reviewKey: `discord:${id}:${collectorId}`,
+        status: 'PENDING_CONFIRMATION',
+        expiresAt: { gt: new Date() },
+      },
+      select: { id: true },
+    });
+    if (merge) throw new MergeConfirmationRequired(merge.id);
+    throw new Error('IDENTITY_REVIEW_REQUIRED');
+  }
+  await installSession(result, undefined, {
+    method: 'DISCORD_OAUTH',
+    credential: id,
+  });
   return db().collector.findUniqueOrThrow({
     where: { id: result },
     select: { slug: true },

@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   auditCreate: vi.fn(),
   control: vi.fn(),
   lock: vi.fn(),
+  context: vi.fn(),
 }));
 vi.mock('../src/server/deployment', () => ({
   assertDeploymentBinding: mocks.binding,
@@ -39,13 +40,11 @@ vi.mock('../src/server/env', () => ({
 }));
 vi.mock('../src/server/launch', () => ({
   launchReport: mocks.report,
-  launchContext: () => ({
-    environment: 'staging',
-    commit: 'fixture-revision',
-    databaseFingerprint: 'fixture-database',
-  }),
+  launchContext: mocks.context,
 }));
-vi.mock('../src/sync/provenance', () => ({ chainKey: 'fixture-chain' }));
+vi.mock('../src/sync/provenance', () => ({
+  chainKey: 'transfers:1:0x8c9a02c0585200c4c65608df6b8def543d33792a',
+}));
 vi.mock('../src/integrations/bridge-config', () => ({
   integrationConfigured: (integration: string) => integration === 'gauntlet',
 }));
@@ -69,6 +68,11 @@ beforeAll(async () => {
 }, 60000);
 beforeEach(() => {
   vi.resetAllMocks();
+  mocks.context.mockReturnValue({
+    environment: 'staging',
+    commit: 'fixture-revision',
+    databaseFingerprint: 'fixture-database',
+  });
   mocks.stage.mockResolvedValue(null);
   mocks.admission.mockResolvedValue(null);
   mocks.anchor.mockResolvedValue({ hash: 'fixture-anchor' });
@@ -109,12 +113,12 @@ describe('LIVE worker readiness against completed independent launch evidence', 
       data: {
         actor: 'test-operator',
         action: 'BLOCKCHAIN_LIVE_ADMISSION',
-        subject: 'fixture-chain',
+        subject: 'transfers:1:0x8c9a02c0585200c4c65608df6b8def543d33792a',
         detail: {
           environment: 'staging',
           commit: 'fixture-revision',
           databaseFingerprint: 'fixture-database',
-          chainKey: 'fixture-chain',
+          chainKey: 'transfers:1:0x8c9a02c0585200c4c65608df6b8def543d33792a',
           startBlock: '25342921',
           blockNumber: '26068941',
           blockHash: 'fixture-anchor',
@@ -146,7 +150,7 @@ describe('LIVE worker readiness against completed independent launch evidence', 
         environment: 'staging',
         commit: 'fixture-revision',
         databaseFingerprint: 'fixture-database',
-        chainKey: 'fixture-chain',
+        chainKey: 'transfers:1:0x8c9a02c0585200c4c65608df6b8def543d33792a',
         startBlock: '25342921',
         blockNumber: '26068941',
         blockHash: 'fixture-anchor',
@@ -174,7 +178,7 @@ describe('LIVE worker readiness against completed independent launch evidence', 
         environment: 'staging',
         commit: 'fixture-revision',
         databaseFingerprint: 'fixture-database',
-        chainKey: 'fixture-chain',
+        chainKey: 'transfers:1:0x8c9a02c0585200c4c65608df6b8def543d33792a',
         startBlock: '25342921',
         blockNumber: '26068941',
         blockHash: 'fixture-anchor',
@@ -188,6 +192,39 @@ describe('LIVE worker readiness against completed independent launch evidence', 
   it('permits verified caught-up chain without fabricating ProductionStage', async () => {
     expect(await workerReadiness('blockchain', 'LIVE')).toBe('READY');
     expect(mocks.binding).toHaveBeenCalled();
+  });
+  it('continues an exact reviewed Phase 11 admission while live projections settle', async () => {
+    mocks.cursor.mockResolvedValue({
+      blockNumber: 26080000n,
+      finalizedBlock: 26080000n,
+      lastError: null,
+      blockHash: 'fixture-anchor',
+    });
+    mocks.context.mockReturnValue({
+      environment: 'staging',
+      commit: 'phase12-revision',
+      databaseFingerprint:
+        'f72c0bb40a9e5946a4d07dc63b5559c253bc85b48af83914aec99cd03fb4bc3a',
+    });
+    mocks.report.mockResolvedValue({
+      gates: required.map((key) => ({
+        key,
+        status: key === 'MINT_COVERAGE' ? 'PARTIAL' : 'VERIFIED',
+      })),
+    });
+    mocks.admission.mockResolvedValue({
+      detail: {
+        environment: 'staging',
+        commit: '0c8e5f8fc0d5db8c587c749479922accde723ae3',
+        databaseFingerprint:
+          'f72c0bb40a9e5946a4d07dc63b5559c253bc85b48af83914aec99cd03fb4bc3a',
+        chainKey: 'transfers:1:0x8c9a02c0585200c4c65608df6b8def543d33792a',
+        startBlock: '25342921',
+        blockNumber: '26079159',
+        blockHash: 'fixture-anchor',
+      },
+    });
+    expect(await workerReadiness('blockchain', 'LIVE')).toBe('READY');
   });
   it.each(required)(
     'requires effective current-revision %s evidence',
