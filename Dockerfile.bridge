@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY tsconfig.json ./
+COPY src/domain/validation.ts ./src/domain/validation.ts
 COPY src/integrations ./src/integrations
 COPY src/server/log.ts ./src/server/log.ts
 COPY scripts/source-bridge.ts ./scripts/source-bridge.ts
