@@ -155,3 +155,51 @@ The final current-revision launch report had 9 critical gates verified, 12 pendi
 - No DRIP balance sync was run after member access denial. The required next action is operator/DRIP support review of member/point-balance read permission; do not retry until permission is changed and a new key is supplied through Railway variables.
 
 The current blocking gate set is `BACKUP`, `RESTORE_DRILL`, `START_BLOCK` (PARTIAL), `REATTRIBUTION`, `ACTIVITY`, `DUPLICATE_REVIEW`, `PROGRESSION`, `COLLECTIONS`, `CHARM_DRIP`, `HANDOFF`, `PRIVACY_AUTH`, and `REAL_DEVICE_SHARE`. `DERIVED_REPLAY_STABLE` is now VERIFIED. The current staging decision remains **NOT READY**. Production remains unchanged.
+
+## Current checkpoint reconciliation — 2026-10-04
+
+This section supersedes earlier follow-up statements above where current source, deployment, gate, or feed state has since changed.
+
+### Branch and deployment
+
+- Fetched `origin/phase11-launch-evidence`; remote branch remains `36da807d00c59251d252e3050b527edce115d2fa`. Local branch head before this report update is `2da147ab5faa84ab1957ac5886616639105663de`, one test-only commit ahead (`2da147a`, Gauntlet online reward semantic fixtures). No history was reset.
+- Current application-bearing source revision is `6f91dc9faad3cafde0def21fcc34847b81d24496`. Staging web deployment `0158f6c6-e154-415e-9fc5-b5f43f0de106` succeeded. A fresh staging HTTPS smoke passed 10/10 and current-revision `WEB_DEPLOYMENT` evidence was recorded.
+- The staging blockchain worker was rebuilt from the verified `6f91dc9` worktree as deployment `6cea1b9d-5a46-45f6-a08c-10d6d90c0c6a`. Ecosystem `2a12b11b-c643-46b3-b85c-263717ec443f`, progression `0055c898-5b86-44c6-8191-3b4a1bc0b712`, and collections `6b428690-0967-47db-b410-60705a1673c6` remained deployed. All four services report `APP_COMMIT=6f91dc9faad3cafde0def21fcc34847b81d24496`; Railway's inherited `RAILWAY_GIT_COMMIT_SHA` in those services still reads `0c8e5f8fc0d5db8c587c749479922accde723ae3` and is not the application commit used by UglyDex launch context.
+- Production remains `c764e2810715be0608e5fadc47d45a6a391ba674`. No production app, worker, variable, source import, or bot deployment was changed.
+
+### Current live convergence and workers
+
+- Latest current-revision `LiveDerivationProof`: `720cc105-66f9-4e91-ae67-540be45a298e`, captured `2026-10-04T00:28:28.070Z`, commit `6f91dc9faad3cafde0def21fcc34847b81d24496`, input fingerprint `1e6489ac9ddc2eb867f33c1d5bf862a23d9083f3041bb6f2468c8f29903169f5`.
+- Attribution, progression, collection, failed-job, and dirty-provenance queues were all zero. Read-only recomputation passed for 4,444 provenance ledgers, 4,822 progression subjects, and collection/set state; all 11 derived fingerprints matched. **DERIVED_REPLAY_STABLE: VERIFIED.** Frozen Replay A/B semantics and evidence remain unchanged.
+- All four WorkerControl modes are `LIVE`. Latest heartbeats were fresh and successful for blockchain, ecosystem, progression, and collections; queues and dirty provenance remain zero. No chain reset, source reimport, or fifth worker was used.
+
+### DRIP permission and Gauntlet source
+
+- The currently configured operator-supplied Realm Client key was tested once with GET only: Realm, currencies, and one exact Discord-ID member lookup (3 requests). The Realm and configured active `$CHARM` point remained valid. The member response returned `credentials.access=false`, `credentials.approved` absent, with a sanitized reason category `OTHER`. **DRIP_MEMBER_CREDENTIAL_ACCESS_DENIED**. No retry, username lookup, realm scrape, member/balance sync, or write was made. No balances are stored; balance remains unknown, not zero. This validation observed 0 HTTP 429s and minimum remaining quota 22.
+- Earlier read-only alignment evidence still shows the existing point and Realm match UglyBot and The Gauntlet. UglyDex remains structurally GET-only with 0 DRIP writes. `CHARM_DRIP: PENDING` because exact member resolution and current balance reads are denied.
+- The source bridge and Gauntlet main application use the same physical database. The dedicated existing reader role was verified non-superuser and without unsafe membership, CREATE, or write privileges. The authorized narrow grant was applied: `SELECT` on exactly `public.gauntlet_online_reward_events` to `uglydex_reader`. Post-grant SELECT is allowed; INSERT, UPDATE, DELETE, TRUNCATE, table/schema CREATE and sequence grants remain absent.
+- The table is reachable through the deployed read-only bridge, schema-compatible, and currently contains 0 rows. It is **AVAILABLE / SOURCE_EXHAUSTED_CURRENTLY / TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME**. No records were invented and no historical activity was imported. With no live sample to pilot, fixture tests cover successful, pending, failed, privacy, and canonical-key behavior; the focused activity suite passed 82 tests. Commit `2da147a` contains only these tests.
+- Current source validation reports 17 schema-valid source rows, including onlineRewards. A one-page empty onlineRewards observation scanned 0 rows and made no activity writes.
+
+### START_BLOCK and bounded handoff
+
+- The archive deployment boundary and configured start are both block `25,342,921`; bytecode was absent immediately before and present at deployment. The complete stored canonical ledger derives earliest mint `25,349,689` and covers 4,444 unique token IDs, 1–4,444. Current owner verification matched 4,444/4,444 at block `26,114,192`, with zero provenance anomalies. **START_BLOCK: VERIFIED** using the bounded RPC boundary plus complete verified stored mint ledger.
+- Current-revision probes exist for the 16 reviewed historical feeds. Aggregate outcome: 0 inserts, 13 source corrections on `madlibPublications`, 0 failures, and 0 unresolved rejections. Seven latest per-feed records show reconciliation sweep complete. Nine do not: `duels`, `bountyEntries`, `bountyResults`, `claimEvents`, `runs`, `survival`, `imageUses`, `submissions`, and `liveImages`. The ecosystem worker was restored to LIVE after the bounded pass. **HANDOFF: PARTIAL** until those cursor proofs are safely completed and re-recorded. No unrestricted full import was run.
+- `onlineRewards` has a separate empty-source availability check; it is not fabricated into a historical handoff activity proof.
+
+### Semantic gates, backup, and restore
+
+- The reviewed identity attribution, activity normalization, duplicate canonicalization, progression, and collection code was compared with the last reviewed implementation and no semantic change was found. Current attribution queue is zero. The one signed-versus-legacy identity conflict remains unresolved; 47 Bounty entry activities remain intentionally unattributed because Collector ownership is unknown.
+- Historical gate rows for `ACTIVITY`, `DUPLICATE_REVIEW`, `PROGRESSION`, `COLLECTIONS`, and `REATTRIBUTION` remain bound to the earlier `cd15cd36` evidence context. The current launch report treats them as pending for `6f91dc9`; live convergence supports current progression/collection correctness but does not rewrite frozen or revision-bound evidence.
+- No new current-revision backup archive or populated restore was created in this continuation. Historical backup/restore rows remain bound to the older revision, so current `BACKUP` and `RESTORE_DRILL` are **PENDING**. The available backup helper requires `pg_dump`/`pg_restore`; neither binary is installed on the local Windows host, and the managed database service does not expose an SSH instance. No disposable database was created.
+
+### Tracked $CHARM history and privacy
+
+Current eligible tracked activity aggregates are EARN 14 / 1,400; SPEND 417 / 5,494,731; PAYOUT 76 / 2,917,500; REFUND 2 / 20; WAGER 229 / 183,557; OBSERVATION 1,858; METADATA 0. Current DRIP balance is **not** reconstructed from these incomplete tracked totals. Claimable remains **not implemented** because UglyBot's transfer-aware per-NFT calculation has no proven read-only parity path. Balance remains private by default and the existing automated public-surface privacy assertions pass; no member ID or API key is exposed.
+
+### Validation and current gate decision
+
+- The current application source had already passed the full `npm run release:check` on the isolated NTFS environment: 700 unit tests and 895 DB/HTTP/browser/catalog assertions, plus lint, Prettier, typecheck, catalog verification, and production build. This continuation added no application source changes; it added four focused Gauntlet online reward fixtures, and the focused suite passed 82 tests.
+- Current deployed staging smoke: 10/10. Current `launch:check` completed its convergence evaluation and correctly returned `NOT_READY`.
+- Current critical gate result: `DATABASE`, `MIGRATIONS`, `WEB_DEPLOYMENT`, `WORKERS`, `ARCHIVE_RPC`, `START_BLOCK`, `MINT_COVERAGE`, `OWNERSHIP_CONTINUITY`, `OWNER_OF`, and `DERIVED_REPLAY_STABLE` are VERIFIED. `BACKUP`, `RESTORE_DRILL`, `REATTRIBUTION`, `ACTIVITY`, `DUPLICATE_REVIEW`, `PROGRESSION`, `COLLECTIONS`, `CHARM_DRIP`, `PRIVACY_AUTH`, and `REAL_DEVICE_SHARE` are PENDING for the current revision; `HANDOFF` is PARTIAL. The final two manual gates remain intentionally open.
+- Therefore the only intended final decision is **NOT_READY_FOR_CHARM_HOOK_DEPLOYMENT_AND_FINAL_PRIVACY_DEVICE_VALIDATION**. Exact blockers are current-revision backup and restore evidence, completion/attestation of all handoff cursor proofs, revision-current semantic gate evidence, DRIP member credential permission/current balance validation, and the separately authorized privacy/device stage. Production remains unchanged.
