@@ -213,3 +213,27 @@ Current eligible tracked activity aggregates are EARN 14 / 1,400; SPEND 417 / 5,
 - After deployment, one current-revision alignment attempt successfully read the Realm but received HTTP 403 on the currencies GET. The alignment remains bound to the prior revision `4dec11d53828afaa7b68d38d74a55c9837256e7c`; no alignment evidence was copied or fabricated. Current `DripIdentity` resolved count and current `CharmBalance` count remain zero. The API sync error is `DRIP_HTTP_403`; balances remain UNKNOWN. Do not retry DRIP reads until the current staging key’s Realm/currency read permission is corrected and confirmed.
 - `CHARM_DRIP` remains **PENDING**. Production remains `c764e2810715be0608e5fadc47d45a6a391ba674` and was not changed. Overall staging remains **NOT READY**; the previous critical blockers remain, with DRIP permission/current-balance validation explicitly unresolved.
 - Deployment follow-up: the first uploaded web build had the old runtime `APP_COMMIT` because the variable was updated after that build started. The active `UglyDex-Staging` web container was therefore redeployed as `da5239f5-d1fa-4d2b-a803-d4d4425be1d7`. Its runtime now reports `APP_COMMIT=2668e0a`; all four running staging workers independently report the same revision. The web deployment is `SUCCESS` and startup configuration validation passed.
+
+## DRIP-ID linking form staging follow-up — 2026-10-04
+
+- Branch advanced without reset from `0fa78ef` through `5485036` (link-flow tests and empty-search handling) and `1b02bf5` (safe migration diagnostic names). Both commits are pushed to `phase11-launch-evidence`. The untracked visual-reference ZIP was left untouched.
+
+### Tests
+
+- `npm test`: 728 tests across 28 files passed. Focused API/link/readiness coverage: 30 tests passed. Focused Phase 12 database coverage: 52 assertions passed, including exact `drip-id` lookup, persistence, decimal balance, and zero DRIP writes.
+- `npm run lint`, `npm run typecheck`, and `npm run format:check` passed.
+- `npm run release:check` did not complete: it stopped at the existing Phase 7 preflight assertion `preflight CLI verifies live schema drift` (`migration.drift: Schema drift detected; inspect manually; nothing was repaired`). Do not count it as a passed release check.
+
+### Railway failure and recovery
+
+- The first failed deployment for `0fa78ef` was `31b19619-388e-433d-ad08-3dd865f5f369`. Build/image push, migration pre-deploy, and Next.js startup succeeded. Railway then received HTTP 503 from `/api/ready` and failed readiness at the configured 120-second health check because `migration.checksums` did not match.
+- The exact cause was mixed line endings in the already-applied migration files: the staging migration ledger checksums matched CRLF for the first 12 migrations and LF for the latest migration. Uniformly normalized deployment snapshots therefore failed startup checksum validation. A temporary source snapshot preserving the deployed hybrid line endings resolved this without changing database contents, weakening readiness, or changing the migration policy. Safe migration names are now available in server logs; public readiness responses remain redacted.
+- The later corrected deployment is active: `1bfb62f6-4c84-4bc1-8f8f-4d88e340cfc1`. Runtime `APP_COMMIT` is `1b02bf5a114cecec25b72ed4349473e5b52cb265`. `/api/ready` returned HTTP 200 with `{"status":"ready"}`. Public staging smoke passed 10/10.
+
+### Feature and security status
+
+- The `/charm` page and `POST /api/charm/link` are deployed. The deployed route returned the expected 403 for a deliberately invalid Origin. The real authenticated form flow has **not** yet been exercised: no browser session was available to enter the operator’s private DRIP ID. No live DRIP request was made for this form test, and no `DripIdentity` or `CharmBalance` was written by it.
+- Automated coverage verifies authentication, Origin checks, malformed IDs, throttling, identity ownership proofs and conflicts, exact member response matching, balance extraction/precision, UNKNOWN handling, safe API output, persistence, and zero DRIP writes. Production-facing privacy behavior remains private by default. No raw DRIP ID, Discord ID, wallet, balance, or API key was included in this report.
+- Production remains at `c764e2810715be0608e5fadc47d45a6a391ba674` and was not modified.
+
+**Required operator action:** open `https://uglydex-staging-staging.up.railway.app/charm`, authenticate, and enter the DRIP ID through the form. Share only the outcome category (success with balance, success without configured $CHARM balance, HTTP 403, or identity mismatch), not the ID. Until that test runs, the real-link result is pending; this report does not claim a successful account link or current balance.
