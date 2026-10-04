@@ -135,6 +135,18 @@ export class DripReader {
       }),
     );
   }
+  async searchMembersByDripId(ids: string[], page = 1) {
+    z.array(infrastructureId).min(1).max(DRIP_BATCH_SIZE).parse(ids);
+    return this.#get(
+      '/members/search',
+      new URLSearchParams({
+        type: 'drip-id',
+        values: [...new Set(ids)].join(','),
+        limit: '100',
+        page: String(z.number().int().min(1).max(100).parse(page)),
+      }),
+    );
+  }
 }
 export class DripReadError extends Error {
   constructor(
@@ -215,6 +227,31 @@ export function exactMembers(
       dripMemberId: m?.id ?? null,
       realmMemberId: m?.realmMemberId ?? null,
       balance: balances.length === 1 ? balances[0].balance : null,
+    } as const;
+  });
+}
+
+export function exactDripMembers(
+  values: unknown[],
+  requested: string[],
+  currency: string,
+) {
+  const members = values.map((value) => memberSchema.parse(value));
+  return requested.map((dripMemberId) => {
+    const matches = members.filter((member) => member.id === dripMemberId);
+    const member = matches.length === 1 ? matches[0] : null;
+    const balances =
+      member?.balances.filter((b) => b.currencyId === currency) ?? [];
+    return {
+      dripMemberId,
+      realmMemberId: member?.realmMemberId ?? null,
+      balance: balances.length === 1 ? balances[0].balance : null,
+      status:
+        matches.length > 1 || balances.length > 1
+          ? 'CONFLICT'
+          : member
+            ? 'RESOLVED'
+            : 'UNRESOLVED',
     } as const;
   });
 }

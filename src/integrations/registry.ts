@@ -49,7 +49,7 @@ export const tables = {
     'wallet_links',
     ['guild_id', 'discord_id', 'wallet_address'],
     ['verified'],
-    ['created_at', 'updated_at'],
+    ['created_at', 'updated_at', 'drip_member_id'],
   ),
   duels: spec(
     'uglybot',
