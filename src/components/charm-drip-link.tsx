@@ -71,6 +71,24 @@ export function CharmDripLink() {
       <p role="status" aria-live="polite">
         {message}
       </p>
+      <p>
+        Click{' '}
+        <a
+          href="https://app.drip.re/user/profile"
+          target="_blank"
+          rel="noreferrer"
+        >
+          this link
+        </a>{' '}
+        to get your DRIP ID.
+      </p>
+      <p>
+        If you are having troubles, let us know in{' '}
+        <a href="https://squigs.io/discord" target="_blank" rel="noreferrer">
+          Discord
+        </a>
+        .
+      </p>
     </section>
   );
 }

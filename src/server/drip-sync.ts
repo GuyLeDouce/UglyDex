@@ -256,6 +256,21 @@ export async function charmBalance(collectorId: string, enqueue = true) {
   return view;
 }
 
+export async function shouldPromptDripLink(collectorId: string) {
+  const parsed = configSchema.safeParse(process.env);
+  if (!parsed.success) return true;
+  const identity = await db().dripIdentity.findUnique({
+    where: {
+      realmId_collectorId: {
+        collectorId,
+        realmId: parsed.data.DRIP_REALM_ID,
+      },
+    },
+    select: { status: true },
+  });
+  return !identity || !['RESOLVED', 'CONFLICT'].includes(identity.status);
+}
+
 export async function syncDripDue() {
   try {
     return await syncDripBatch();

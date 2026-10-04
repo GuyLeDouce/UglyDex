@@ -12,12 +12,16 @@ import { CollectionGrid } from '@/components/collection';
 import { Artwork } from '@/components/artwork';
 import { Timeline } from '@/components/timeline';
 import { collectorHistory } from '@/server/provenance';
-import { charmBalance } from '@/server/drip-sync';
+import { charmBalance, shouldPromptDripLink } from '@/server/drip-sync';
 import { CharmBalanceCard } from '@/components/charm-balance';
+import { CharmDripLink } from '@/components/charm-drip-link';
 export default async function Me() {
   const id = await requireCollector();
   const history = await collectorHistory(id);
-  const charm = await charmBalance(id);
+  const [charm, promptDripLink] = await Promise.all([
+    charmBalance(id),
+    shouldPromptDripLink(id),
+  ]);
   const [c, s, status] = await Promise.all([
     db().collector.findUniqueOrThrow({
       where: { id },
@@ -56,7 +60,11 @@ export default async function Me() {
         </Link>
       </section>
       <Stats summary={s} />
-      <CharmBalanceCard value={charm} />
+      {promptDripLink ? (
+        <CharmDripLink />
+      ) : (
+        <CharmBalanceCard value={charm} />
+      )}
       <Link href="/charm">Your $CHARM activity →</Link>
       <DexSummary id={id} />
       <Progression subject="COLLECTOR" id={id} path="/me/achievements" />
