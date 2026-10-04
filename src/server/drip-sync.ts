@@ -434,30 +434,49 @@ async function syncDripBatch() {
     ...new Set(mappedCandidates.map((candidate) => candidate.dripMemberId)),
   ];
   if (mappedMemberIds.length) {
-    const response = await dripRead((reader) =>
-      reader.searchMembersByDripId(mappedMemberIds),
-    );
-    const body = z
-      .object({
-        data: z.array(z.unknown()),
-        meta: z.object({ totalPages: z.number().optional() }).optional(),
-      })
-      .parse(response.body);
-    if ((body.meta?.totalPages ?? 1) > 1)
-      throw Error('DRIP_ID_SEARCH_REQUIRES_PAGINATION');
-    for (const member of exactDripMembers(
-      body.data,
-      mappedMemberIds,
-      c.DRIP_REALM_POINT_ID,
-    )) {
-      const candidate = mappedCandidates.find(
-        (entry) => entry.dripMemberId === member.dripMemberId,
+    try {
+      const response = await dripRead((reader) =>
+        reader.searchMembersByDripId(mappedMemberIds),
       );
-      if (!candidate) continue;
-      resolvedByDiscord.set(candidate.discordId, {
-        discordId: candidate.discordId,
-        ...member,
-      });
+      const body = z
+        .object({
+          data: z.array(z.unknown()),
+          meta: z.object({ totalPages: z.number().optional() }).optional(),
+        })
+        .parse(response.body);
+      if ((body.meta?.totalPages ?? 1) > 1)
+        throw Error('DRIP_ID_SEARCH_REQUIRES_PAGINATION');
+      for (const member of exactDripMembers(
+        body.data,
+        mappedMemberIds,
+        c.DRIP_REALM_POINT_ID,
+      )) {
+        const candidate = mappedCandidates.find(
+          (entry) => entry.dripMemberId === member.dripMemberId,
+        );
+        if (!candidate) continue;
+        resolvedByDiscord.set(candidate.discordId, {
+          discordId: candidate.discordId,
+          ...member,
+        });
+      }
+    } catch (error) {
+      if (
+        !(error instanceof DripReadError) ||
+        error.message !== 'DRIP_HTTP_403'
+      )
+        throw error;
+      // A forbidden lookup is unresolved evidence, not a reason to pin the
+      // durable sweep cursor. This lets later exact wallet_links mappings be
+      // tried with drip-id while keeping these balances unknown.
+      for (const candidate of mappedCandidates)
+        resolvedByDiscord.set(candidate.discordId, {
+          discordId: candidate.discordId,
+          status: 'UNRESOLVED',
+          dripMemberId: null,
+          realmMemberId: null,
+          balance: null,
+        });
     }
   }
 
@@ -470,27 +489,57 @@ async function syncDripBatch() {
         (identity) => !ambiguousDiscords.has(identity.externalId),
       );
   if (directIdentities.length) {
-    const response = await dripRead((reader) =>
-      reader.searchMembers(
-        directIdentities.map((identity) => identity.externalId),
-      ),
-    );
-    const body = z
-      .object({
-        data: z.array(z.unknown()),
-        meta: z
-          .object({
-            totalPages: z.number().optional(),
-            credentials: z
-              .object({ access: z.boolean().optional() })
-              .optional(),
-          })
-          .optional(),
-      })
-      .parse(response.body);
-    if ((body.meta?.totalPages ?? 1) > 1)
-      throw Error('DRIP_SEARCH_REQUIRES_PAGINATION');
-    if (body.meta?.credentials?.access === false) {
+    try {
+      const response = await dripRead((reader) =>
+        reader.searchMembers(
+          directIdentities.map((identity) => identity.externalId),
+        ),
+      );
+      const body = z
+        .object({
+          data: z.array(z.unknown()),
+          meta: z
+            .object({
+              totalPages: z.number().optional(),
+              credentials: z
+                .object({ access: z.boolean().optional() })
+                .optional(),
+            })
+            .optional(),
+        })
+        .parse(response.body);
+      if ((body.meta?.totalPages ?? 1) > 1)
+        throw Error('DRIP_SEARCH_REQUIRES_PAGINATION');
+      if (body.meta?.credentials?.access === false) {
+        for (const identity of directIdentities)
+          resolvedByDiscord.set(identity.externalId, {
+            discordId: identity.externalId,
+            status: 'UNRESOLVED',
+            dripMemberId: null,
+            realmMemberId: null,
+            balance: null,
+          });
+        await db().dripSyncState.update({
+          where: { realmId: s.realmId },
+          data: { errorCode: 'DRIP_CREDENTIAL_READ_REQUIRED' },
+        });
+      } else {
+        for (const member of exactMembers(
+          body.data,
+          directIdentities.map((identity) => identity.externalId),
+          c.DRIP_REALM_POINT_ID,
+        ))
+          resolvedByDiscord.set(member.discordId, member);
+      }
+    } catch (error) {
+      if (
+        !(error instanceof DripReadError) ||
+        error.message !== 'DRIP_HTTP_403'
+      )
+        throw error;
+      // DRIP can deny Discord-credential reads while allowing exact drip-id
+      // reads. Record this batch as unresolved and advance; a later batch with
+      // a verified wallet_links mapping will use only the mapped drip-id.
       for (const identity of directIdentities)
         resolvedByDiscord.set(identity.externalId, {
           discordId: identity.externalId,
@@ -499,17 +548,6 @@ async function syncDripBatch() {
           realmMemberId: null,
           balance: null,
         });
-      await db().dripSyncState.update({
-        where: { realmId: s.realmId },
-        data: { errorCode: 'DRIP_CREDENTIAL_READ_REQUIRED' },
-      });
-    } else {
-      for (const member of exactMembers(
-        body.data,
-        directIdentities.map((identity) => identity.externalId),
-        c.DRIP_REALM_POINT_ID,
-      ))
-        resolvedByDiscord.set(member.discordId, member);
     }
   }
   const resolved = identities.map(
