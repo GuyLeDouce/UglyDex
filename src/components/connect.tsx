@@ -4,10 +4,11 @@ import { useRouter } from 'next/navigation';
 type Provider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
 };
-export function Connect() {
+export function Connect({ initialMessage = '' }: { initialMessage?: string }) {
   const router = useRouter();
-  const [message, setMessage] = useState(''),
-    [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState(initialMessage),
+    [busy, setBusy] = useState(false),
+    [mergeRequestId, setMergeRequestId] = useState<string | null>(null);
   async function connect() {
     setBusy(true);
     setMessage('');
@@ -46,13 +47,20 @@ export function Connect() {
         body: JSON.stringify({ signature }),
       });
       const result = await verified.json();
+      if (!verified.ok && typeof result.mergeRequestId === 'string') {
+        setMergeRequestId(result.mergeRequestId);
+        setMessage(
+          'Both accounts were proved. Review the account merge to continue.',
+        );
+        return;
+      }
       if (!verified.ok) throw new Error(result.error);
       router.push('/me');
       router.refresh();
     } catch (error) {
       setMessage(
         error instanceof Error && error.message === 'IDENTITY_REVIEW_REQUIRED'
-          ? 'This identity needs review before it can be linked.'
+          ? 'This credential belongs to a different Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.'
           : 'Wallet connection could not be completed. Check your wallet and try again.',
       );
     } finally {
@@ -75,6 +83,15 @@ export function Connect() {
       <p role="status" className="hint">
         {message || 'Your identity. Your collection. No transaction required.'}
       </p>
+      {mergeRequestId && (
+        <p>
+          <a
+            href={`/settings/identity/merge?request=${encodeURIComponent(mergeRequestId)}`}
+          >
+            Review and confirm account merge
+          </a>
+        </p>
+      )}
     </div>
   );
 }

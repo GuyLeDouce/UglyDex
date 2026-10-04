@@ -1,5 +1,10 @@
 import { Connect } from '@/components/connect';
-export default function ConnectPage() {
+export default async function ConnectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   return (
     <section className="page-heading">
       <p className="eyebrow">YOUR COLLECTION STARTS HERE</p>
@@ -8,7 +13,13 @@ export default function ConnectPage() {
         Sign a message to prove your wallet belongs to you. No transaction. No
         gas.
       </p>
-      <Connect />
+      <Connect
+        initialMessage={
+          error === 'IDENTITY_REVIEW_REQUIRED'
+            ? 'This credential belongs to another Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.'
+            : ''
+        }
+      />
     </section>
   );
 }

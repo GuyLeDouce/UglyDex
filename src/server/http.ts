@@ -20,12 +20,20 @@ export async function jsonBody(request: Request, limit = 16384) {
 }
 export function authError(error: unknown) {
   const code = error instanceof Error ? error.message : '';
+  const mergeRequestId =
+    error instanceof Error &&
+    'mergeRequestId' in error &&
+    typeof error.mergeRequestId === 'string'
+      ? error.mergeRequestId
+      : undefined;
   const allowed = [
     'ORIGIN_REJECTED',
     'RATE_LIMITED',
     'INVALID_CHALLENGE',
     'INVALID_SIGNATURE',
     'IDENTITY_REVIEW_REQUIRED',
+    'MERGE_REQUEST_EXPIRED',
+    'MERGE_CHARM_IDENTITY_CONFLICT',
     'AUTH_UNCONFIGURED',
     'INVALID_BODY',
     'BODY_TOO_LARGE',
@@ -37,7 +45,7 @@ export function authError(error: unknown) {
         ? code
         : 'AUTH_UNAVAILABLE';
   return Response.json(
-    { error: message },
+    { error: message, ...(mergeRequestId ? { mergeRequestId } : {}) },
     {
       status:
         message === 'RATE_LIMITED'

@@ -57,6 +57,9 @@ model Collector {
   holdingPeriods CollectorOwnershipPeriod[]
   dripIdentities DripIdentity[]
   charmBalances CharmBalance[]
+  mergedIntoCollectorId String? @db.Uuid
+  mergeSurvivorRequests CollectorMergeRequest[] @relation("MergeSurvivor")
+  mergeAbsorbedRequests CollectorMergeRequest[] @relation("MergeAbsorbed")
 }
 
 model ExternalIdentity {
@@ -734,6 +737,24 @@ model ReconciliationDecision {
   @@index([caseId, createdAt])
 }
 
+model CollectorMergeRequest {
+  id String @id @default(uuid()) @db.Uuid
+  survivorCollectorId String @db.Uuid
+  survivor Collector @relation("MergeSurvivor", fields: [survivorCollectorId], references: [id])
+  absorbedCollectorId String @db.Uuid
+  absorbed Collector @relation("MergeAbsorbed", fields: [absorbedCollectorId], references: [id])
+  credentialType String
+  credentialFingerprint String
+  survivorCredentialType String
+  survivorCredentialFingerprint String
+  reviewKey String @unique
+  status String @default("PENDING_CONFIRMATION")
+  expiresAt DateTime
+  confirmedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([survivorCollectorId, status, expiresAt])
+}
+
 model AuthChallenge {
   id          String    @id
   kind        String
@@ -750,6 +771,8 @@ model AuthSession {
   tokenHash   String    @id
   collectorId String    @db.Uuid
   collector   Collector @relation(fields: [collectorId], references: [id])
+  authMethod String?
+  credentialFingerprint String?
   expiresAt   DateTime
   createdAt   DateTime  @default(now())
 
