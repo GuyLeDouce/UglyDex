@@ -96,6 +96,7 @@ process.env.ADMIN_DIAGNOSTICS_TOKEN = randomBytes(32).toString('hex');
 process.env.ADMIN_DISCORD_IDS = '333333333333333333';
 let web: ChildProcess | undefined;
 let assertions = 0;
+const phase12Only = process.argv.includes('--phase12-only');
 const check = (condition: unknown, message: string) => {
   assert.ok(condition, message);
   assertions++;
@@ -243,33 +244,35 @@ try {
     );
   }
   console.log(JSON.stringify({ event: 'test.close_fixture' }));
-  console.log(JSON.stringify({ event: 'test.phase.start', phase: 1 }));
-  const { phase1DatabaseTests } = await import('../tests/db/phase1');
-  await phase1DatabaseTests(check);
-  console.log(JSON.stringify({ event: 'test.phase.start', phase: 2 }));
-  const { phase2DatabaseTests } = await import('../tests/db/phase2');
-  await phase2DatabaseTests(check);
-  console.log(JSON.stringify({ event: 'test.phase.start', phase: 3 }));
-  const { phase3DatabaseTests } = await import('../tests/db/phase3');
-  await phase3DatabaseTests(check, external);
-  console.log(JSON.stringify({ event: 'test.phase.start', phase: 4 }));
-  const { phase4DatabaseTests } = await import('../tests/db/phase4');
-  await phase4DatabaseTests(check);
-  console.log(JSON.stringify({ event: 'test.phase.start', phase: 5 }));
-  const { phase5DatabaseTests } = await import('../tests/db/phase5');
-  await phase5DatabaseTests(check);
-  console.log(JSON.stringify({ event: 'test.phase.start', phase: 6 }));
-  const { phase6DatabaseTests } = await import('../tests/db/phase6');
-  await phase6DatabaseTests(check);
-  console.log(JSON.stringify({ event: 'test.phase.start', phase: 7 }));
-  const { phase7DatabaseTests } = await import('../tests/db/phase7');
-  await phase7DatabaseTests(check);
-  console.log(JSON.stringify({ event: 'test.phase.start', phase: 8 }));
-  const { phase8DatabaseTests } = await import('../tests/db/phase8');
-  await phase8DatabaseTests(check);
-  console.log(JSON.stringify({ event: 'test.phase.start', phase: 9 }));
-  const { phase9DatabaseTests } = await import('../tests/db/phase9');
-  await phase9DatabaseTests(check);
+  if (!phase12Only) {
+    console.log(JSON.stringify({ event: 'test.phase.start', phase: 1 }));
+    const { phase1DatabaseTests } = await import('../tests/db/phase1');
+    await phase1DatabaseTests(check);
+    console.log(JSON.stringify({ event: 'test.phase.start', phase: 2 }));
+    const { phase2DatabaseTests } = await import('../tests/db/phase2');
+    await phase2DatabaseTests(check);
+    console.log(JSON.stringify({ event: 'test.phase.start', phase: 3 }));
+    const { phase3DatabaseTests } = await import('../tests/db/phase3');
+    await phase3DatabaseTests(check, external);
+    console.log(JSON.stringify({ event: 'test.phase.start', phase: 4 }));
+    const { phase4DatabaseTests } = await import('../tests/db/phase4');
+    await phase4DatabaseTests(check);
+    console.log(JSON.stringify({ event: 'test.phase.start', phase: 5 }));
+    const { phase5DatabaseTests } = await import('../tests/db/phase5');
+    await phase5DatabaseTests(check);
+    console.log(JSON.stringify({ event: 'test.phase.start', phase: 6 }));
+    const { phase6DatabaseTests } = await import('../tests/db/phase6');
+    await phase6DatabaseTests(check);
+    console.log(JSON.stringify({ event: 'test.phase.start', phase: 7 }));
+    const { phase7DatabaseTests } = await import('../tests/db/phase7');
+    await phase7DatabaseTests(check);
+    console.log(JSON.stringify({ event: 'test.phase.start', phase: 8 }));
+    const { phase8DatabaseTests } = await import('../tests/db/phase8');
+    await phase8DatabaseTests(check);
+    console.log(JSON.stringify({ event: 'test.phase.start', phase: 9 }));
+    const { phase9DatabaseTests } = await import('../tests/db/phase9');
+    await phase9DatabaseTests(check);
+  }
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
@@ -1237,8 +1240,10 @@ try {
       process.argv.includes('--browser'),
     );
   }
-  const { phase9ReplayTests } = await import('../tests/db/phase9-replay');
-  await phase9ReplayTests(check);
+  if (!phase12Only) {
+    const { phase9ReplayTests } = await import('../tests/db/phase9-replay');
+    await phase9ReplayTests(check);
+  }
   console.log(JSON.stringify({ event: 'test.phase.start', phase: 12 }));
   const { phase12DatabaseTests } = await import('../tests/db/phase12');
   await phase12DatabaseTests(check);
@@ -1250,17 +1255,19 @@ try {
       process.argv.includes('--browser'),
     );
   }
-  const bridgeExternal = postgres.getPgClient(
-    'uglydex_external_test',
-    '127.0.0.1',
-  );
-  await bridgeExternal.connect();
-  try {
-    const { sourceBridgeDatabaseTests } =
-      await import('../tests/db/source-bridge');
-    await sourceBridgeDatabaseTests(check, bridgeExternal);
-  } finally {
-    await bridgeExternal.end();
+  if (!phase12Only) {
+    const bridgeExternal = postgres.getPgClient(
+      'uglydex_external_test',
+      '127.0.0.1',
+    );
+    await bridgeExternal.connect();
+    try {
+      const { sourceBridgeDatabaseTests } =
+        await import('../tests/db/source-bridge');
+      await sourceBridgeDatabaseTests(check, bridgeExternal);
+    } finally {
+      await bridgeExternal.end();
+    }
   }
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));

@@ -33,6 +33,11 @@ export async function POST(request: Request) {
         { error: 'Please wait before trying another DRIP ID.' },
         { status: 429, headers: { 'Cache-Control': 'no-store' } },
       );
+    if (code === 'ORIGIN_REJECTED')
+      return Response.json(
+        { error: 'Request origin rejected.' },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } },
+      );
     if (error instanceof z.ZodError)
       return Response.json(
         { error: 'Enter a valid DRIP user ID.' },

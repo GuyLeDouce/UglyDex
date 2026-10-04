@@ -10,6 +10,7 @@ import { POST as dirty } from '../../src/app/api/internal/charm/dirty/route';
 import { dirtySignature } from '../../src/domain/charm-dirty';
 import { randomUUID } from 'node:crypto';
 import { launchContext } from '../../src/server/launch';
+import { verifyAndLinkDripMember } from '../../src/server/charm-link';
 export async function phase12DatabaseTests(
   check: (value: unknown, message: string) => void,
 ) {
@@ -99,6 +100,82 @@ export async function phase12DatabaseTests(
     );
     await syncDripDue();
     check(requests === 1, 'durable request checkpoint prevents restart storm');
+    const linkDiscord = '699999999999999997';
+    const linkMember = 'f'.repeat(24);
+    const linkCollector = await db().collector.create({
+      data: {
+        slug: 'charm-drip-id-link',
+        identities: {
+          create: {
+            provider: 'DISCORD',
+            externalId: linkDiscord,
+            authenticatedAt: new Date(),
+          },
+        },
+      },
+    });
+    await db().dripSyncState.update({
+      where: { realmId: realm },
+      data: { nextRequestAt: new Date(0) },
+    });
+    let linkRequests = 0;
+    globalThis.fetch = async (input, options) => {
+      linkRequests++;
+      const url = new URL(String(input));
+      check(
+        options?.method === 'GET' &&
+          url.searchParams.get('type') === 'drip-id' &&
+          url.searchParams.get('values') === linkMember,
+        'user-provided DRIP ID is verified by one exact GET request',
+      );
+      return new Response(
+        JSON.stringify({
+          data: [
+            {
+              id: linkMember,
+              realmMemberId: 'private-link-realm-fixture',
+              credentials: [
+                { oauthProvider: 'discord', oauthAccountId: linkDiscord },
+              ],
+              balances: [
+                { currencyId: currency, balance: '9007199254740993.125' },
+              ],
+            },
+          ],
+          meta: { totalPages: 1, credentials: { access: true } },
+        }),
+      );
+    };
+    const linkResult = await verifyAndLinkDripMember(
+      linkCollector.id,
+      linkMember,
+    );
+    const linkedIdentity = await db().dripIdentity.findUniqueOrThrow({
+      where: {
+        realmId_collectorId: {
+          realmId: realm,
+          collectorId: linkCollector.id,
+        },
+      },
+    });
+    const linkedBalance = await db().charmBalance.findUniqueOrThrow({
+      where: {
+        collectorId_realmId_currencyId: {
+          collectorId: linkCollector.id,
+          realmId: realm,
+          currencyId: currency,
+        },
+      },
+    });
+    check(
+      linkResult.balanceAvailable &&
+        linkRequests === 1 &&
+        linkedIdentity.status === 'RESOLVED' &&
+        linkedIdentity.source === 'EXACT_DRIP_CREDENTIAL' &&
+        linkedBalance.status === 'CURRENT' &&
+        linkedBalance.balance?.toString() === '9007199254740993.125',
+      'exact DRIP ID ownership and decimal balance persist safely in PostgreSQL',
+    );
     const mappedMember = 'e'.repeat(24);
     const mappedDiscord = '688888888888888888';
     const mappedWallet = `0x${'1'.repeat(40)}`;

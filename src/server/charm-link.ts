@@ -26,7 +26,7 @@ const responseSchema = z.object({
   data: z.array(z.unknown()),
   meta: z
     .object({
-      totalPages: z.number().int().positive().optional(),
+      totalPages: z.number().int().nonnegative().optional(),
       credentials: z.object({ access: z.boolean().optional() }).optional(),
     })
     .optional(),
