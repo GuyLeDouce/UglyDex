@@ -60,11 +60,7 @@ export default async function Me() {
         </Link>
       </section>
       <Stats summary={s} />
-      {promptDripLink ? (
-        <CharmDripLink />
-      ) : (
-        <CharmBalanceCard value={charm} />
-      )}
+      {promptDripLink ? <CharmDripLink /> : <CharmBalanceCard value={charm} />}
       <Link href="/charm">Your $CHARM activity →</Link>
       <DexSummary id={id} />
       <Progression subject="COLLECTOR" id={id} path="/me/achievements" />

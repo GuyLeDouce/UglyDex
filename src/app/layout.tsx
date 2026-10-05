@@ -1,14 +1,23 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { Montserrat } from 'next/font/google';
 import './globals.css';
 import './collections.css';
 import './sharing.css';
 import './appearance.css';
+import './visual.css';
 import { currentSession } from '@/server/auth';
 import { db } from '@/server/db';
+import { SiteHeader } from '@/components/site-header';
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+  variable: '--font-montserrat',
+});
 export const metadata: Metadata = {
   title: 'UglyDex — Every Squig has a story',
-  description: 'The identity layer for the Ugly ecosystem.',
+  description:
+    'A living field guide to Squigs Reloaded. Every Squig has a story.',
 };
 export default async function RootLayout({
   children,
@@ -30,46 +39,11 @@ export default async function RootLayout({
   } catch {}
   return (
     <html lang="en">
-      <body>
+      <body className={montserrat.variable}>
         <a className="skip" href="#main">
           Skip to content
         </a>
-        <header>
-          <Link className="wordmark" href="/">
-            UGLYDEX<span className="mark">✳</span>
-          </Link>
-          <nav aria-label="Main navigation">
-            {slug && (
-              <>
-                <Link href="/me">My UglyDex</Link>
-                <Link href="/collection">Collection</Link>
-                <Link href="/collection/dex">Dex</Link>
-                <Link href="/me/activity">Activity</Link>
-                <Link href="/me/achievements">Achievements</Link>
-                <Link href="/collection/discovered">Discovered</Link>
-              </>
-            )}
-            <Link href="/squigs">Explore</Link>
-            <Link href="/editions">Editions</Link>
-            {slug ? (
-              <>
-                <Link
-                  href={isPublic ? `/collector/${slug}` : '/settings/profile'}
-                >
-                  Profile
-                </Link>
-                <Link href="/settings/profile">Settings</Link>
-                <form action="/api/auth/logout" method="post">
-                  <button className="nav-button">Sign out</button>
-                </form>
-              </>
-            ) : (
-              <Link className="nav-connect" href="/connect">
-                Connect Wallet ↗
-              </Link>
-            )}
-          </nav>
-        </header>
+        <SiteHeader slug={slug} isPublic={isPublic} />
         <main id="main">{children}</main>
         <footer>
           <span>UGLY LABS · BEAUTIFULLY MALFORMED</span>

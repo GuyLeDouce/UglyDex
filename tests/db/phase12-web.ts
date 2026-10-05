@@ -1,4 +1,6 @@
 import { randomBytes } from 'node:crypto';
+import { mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { db } from '../../src/server/db';
 import { authHash } from '../../src/server/auth';
 
@@ -6,6 +8,7 @@ export async function phase12WebTests(
   base: string,
   check: (v: unknown, m: string) => void,
   browserTests: boolean,
+  visualPreviews = false,
 ) {
   const collector = await db().collector.findUniqueOrThrow({
     where: { slug: 'charm-fixture' },
@@ -156,6 +159,146 @@ export async function phase12WebTests(
         !(await page.locator('body').innerText()).includes('123,456,789.125'),
         'browser public profile honors private preference',
       );
+
+      if (visualPreviews) {
+        const visualDir = resolve('.data/phase13-visual');
+        await mkdir(visualDir, { recursive: true });
+        const visualCollector = await db().collector.findUniqueOrThrow({
+          where: { slug: 'sharing-test' },
+          select: { id: true },
+        });
+        const visualToken = randomBytes(32).toString('hex');
+        await db().authSession.create({
+          data: {
+            collectorId: visualCollector.id,
+            tokenHash: authHash(visualToken),
+            expiresAt: new Date(Date.now() + 3600000),
+          },
+        });
+        const capture = async (
+          path: string,
+          file: string,
+          width: number,
+          height: number,
+          session: string,
+        ) => {
+          await page.setViewportSize({ width, height });
+          await page.context().clearCookies();
+          await page
+            .context()
+            .addCookies([
+              { name: 'uglydex_session', value: session, url: base },
+            ]);
+          const response = await page.goto(base + path, {
+            waitUntil: 'domcontentloaded',
+          });
+          check(response?.status() === 200, `visual preview route ${path}`);
+          await page.evaluate(() => document.fonts.ready.then(() => true));
+          await page.locator('img').evaluateAll((images) => {
+            for (const image of images)
+              (image as HTMLImageElement).loading = 'eager';
+          });
+          await page
+            .waitForFunction(
+              () =>
+                Array.from(document.images).every((image) => image.complete),
+              undefined,
+              { timeout: 12000 },
+            )
+            .catch(() => undefined);
+          await page.waitForTimeout(250);
+          check(
+            await page.evaluate(
+              () => document.documentElement.scrollWidth <= innerWidth,
+            ),
+            `visual preview ${path} fits ${width}px viewport`,
+          );
+          await page.screenshot({
+            path: resolve(visualDir, file),
+            fullPage: true,
+            animations: 'disabled',
+            timeout: 90000,
+          });
+        };
+        await capture('/', 'landing-1440.png', 1440, 1000, visualToken);
+        await capture('/me', 'my-uglydex-1440.png', 1440, 1000, visualToken);
+        await capture(
+          '/collection',
+          'collection-1440.png',
+          1440,
+          1000,
+          visualToken,
+        );
+        await capture(
+          '/squig/3157',
+          'squig-3157-1440.png',
+          1440,
+          1000,
+          visualToken,
+        );
+        await capture(
+          '/me/achievements',
+          'achievements-1440.png',
+          1440,
+          1000,
+          visualToken,
+        );
+        await capture('/charm', 'charm-1440.png', 1440, 1000, token);
+
+        await capture(
+          '/collection',
+          'collection-1024.png',
+          1024,
+          900,
+          visualToken,
+        );
+        await capture(
+          '/collection',
+          'collection-768.png',
+          768,
+          900,
+          visualToken,
+        );
+
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.context().clearCookies();
+        await page
+          .context()
+          .addCookies([
+            { name: 'uglydex_session', value: visualToken, url: base },
+          ]);
+        await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
+        const mobileMenu = page.locator('.mobile-menu');
+        await mobileMenu.locator('summary').focus();
+        await page.keyboard.press('Enter');
+        check(
+          (await mobileMenu.getAttribute('open')) !== null,
+          'mobile navigation opens from keyboard',
+        );
+        check(
+          await mobileMenu
+            .getByRole('link', { name: 'Explore Squigs' })
+            .isVisible(),
+          'mobile navigation exposes primary routes',
+        );
+        await page.keyboard.press('Enter');
+        await capture('/', 'landing-390.png', 390, 844, visualToken);
+        await capture('/me', 'my-uglydex-390.png', 390, 844, visualToken);
+        await capture(
+          '/collection',
+          'collection-390.png',
+          390,
+          844,
+          visualToken,
+        );
+        await capture(
+          '/squig/3157',
+          'squig-3157-390.png',
+          390,
+          844,
+          visualToken,
+        );
+      }
     } finally {
       await browser.close();
     }

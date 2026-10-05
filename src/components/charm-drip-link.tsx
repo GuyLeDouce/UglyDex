@@ -45,7 +45,7 @@ export function CharmDripLink() {
   }
 
   return (
-    <section className="panel">
+    <section className="panel drip-link-panel">
       <h2>Link your DRIP account</h2>
       <p>
         Enter your DRIP user ID. UglyDex will verify it against a Discord or

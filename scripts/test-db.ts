@@ -1253,6 +1253,7 @@ try {
       `http://127.0.0.1:${webPort}`,
       check,
       process.argv.includes('--browser'),
+      process.argv.includes('--visual'),
     );
   }
   if (!phase12Only) {

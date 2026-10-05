@@ -3,6 +3,7 @@ import { db } from '@/server/db';
 import { cardSelect, cardDTO, catalogScope } from '@/server/collections';
 import { CollectionGrid } from '@/components/collection';
 import { Connect } from '@/components/connect';
+import Image from 'next/image';
 export const dynamic = 'force-dynamic';
 export default async function Home() {
   let sample: ReturnType<typeof cardDTO>[] = [];
@@ -17,8 +18,16 @@ export default async function Home() {
     ).map(cardDTO);
   } catch {}
   return (
-    <>
+    <div className="landing-world">
       <section className="landing-heading">
+        <Image
+          className="landing-logo"
+          src="/brand/uglydex-logo.svg"
+          alt="UglyDex"
+          width={270}
+          height={158}
+          priority
+        />
         <p className="eyebrow">UGLY LABS / FIELD GUIDE № 001</p>
         <h1>
           Every Squig
@@ -30,9 +39,6 @@ export default async function Home() {
         </h1>
         <p className="hero-description">
           4,444 strange little lives. One place to keep their stories.
-          <br />
-          Explore Squigs Reloaded, collect your favourites, and remember every
-          Squig you’ve discovered.
         </p>
         <div className="actions">
           <Link className="button primary" href="/connect">
@@ -72,6 +78,6 @@ export default async function Home() {
         </p>
         <Connect />
       </section>
-    </>
+    </div>
   );
 }

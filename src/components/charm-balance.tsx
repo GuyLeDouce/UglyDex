@@ -7,7 +7,7 @@ export function CharmBalanceCard({
 }) {
   const minutes = value.ageMinutes;
   return (
-    <section className="panel">
+    <section className="panel charm-balance">
       <p className="eyebrow">CURRENT $CHARM</p>
       <h2>
         {value.balance === null
