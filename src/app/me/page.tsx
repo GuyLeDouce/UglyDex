@@ -43,7 +43,7 @@ export default async function Me() {
     refreshStatus(),
   ]);
   return (
-    <>
+    <div className="collector-dashboard">
       <nav className="anchor-nav">
         <Link href="/settings/galleries">My galleries</Link>
         <Link href="/settings/sharing">Share studio</Link>
@@ -115,6 +115,6 @@ export default async function Me() {
           </Link>
         </section>
       </div>
-    </>
+    </div>
   );
 }

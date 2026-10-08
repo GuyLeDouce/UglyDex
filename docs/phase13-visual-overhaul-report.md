@@ -41,23 +41,38 @@ Captured and inspected at 1440px, 1024px, 768px, and 390px. The mobile header us
 
 ## Screenshots
 
-Twelve PNGs are in the ignored local folder `.data/phase13-visual/`:
+Fourteen regenerated PNGs are in the ignored local folder `.data/phase13-visual/review2/`. The previous-round files at the folder root were left untouched because they were open in the local image viewer.
 
-- Desktop: `landing-1440.png`, `my-uglydex-1440.png`, `collection-1440.png`, `squig-3157-1440.png`, `achievements-1440.png`, `charm-1440.png`.
+- Desktop: `landing-1440.png`, `my-uglydex-1440.png`, `collection-1440.png`, `squig-3157-1440.png`, `achievements-1440.png`, `charm-1440.png`, `connect-1440.png`.
 - Additional widths: `collection-1024.png`, `collection-768.png`.
-- Mobile: `landing-390.png`, `my-uglydex-390.png`, `collection-390.png`, `squig-3157-390.png`.
+- Mobile: `landing-390.png`, `my-uglydex-390.png`, `collection-390.png`, `squig-3157-390.png`, `connect-390.png`.
 
-They use the seeded app fixture and catalog artwork paths, not Vince's example records. The screenshot files and extracted reference project are ignored and are not part of Git.
+They use the local visual-test Collector fixture and the real canonical catalog artwork paths, not Vince's example records. The Collector fixture is intentionally empty, so `/me` and `/collection` show their true empty states; authenticated populated layouts remain available for operator review against staging data. The screenshot files and extracted reference project are ignored and are not part of Git.
 
 ## Validation
 
-- `npm test`: 728 tests passed across 28 files.
-- `npm run lint`: passed in the isolated C: NTFS validation copy.
-- `npm run typecheck`: passed in the isolated C: NTFS validation copy.
-- `npm run format:check`: passed; final changed CSS and screenshot helper also passed Prettier.
-- Production build: `npx next build --webpack` passed in the isolated C: validation copy; all app routes were generated.
-- Focused visual DB/browser capture: 688 assertions passed, including route responses and viewport overflow checks. It ran in the isolated copy with visual-only skips for unrelated legacy migration-drift, wallet-link environment, and compact-preference checks; the complete unit suite above ran without those skips.
-- No staging or production deployment was made.
+- `npm test`: 728 tests passed across 28 files in the isolated NTFS validation copy.
+- `npm run lint`: passed in the isolated NTFS validation copy.
+- `npm run typecheck`: passed in the isolated NTFS validation copy.
+- `npm run format:check`: passed in the repository workspace.
+- Production build: `npm run build -- --webpack` passed in the isolated NTFS validation copy; all 43 app routes were generated.
+- Focused visual DB/browser capture: 80 assertions passed, including route responses, desktop/mobile overflow, keyboard mobile navigation, exact 4-desktop/2-mobile artwork priority, and Squig detail share/caption behavior. It used local catalog and private-balance fixtures and skipped unrelated Phase 1–11 DB/replay/bridge checks.
+- The direct E: test/lint attempt hit filesystem-junction module-read errors; reruns in the NTFS copy passed. No application workaround was added for that environment issue.
+- Staging, production, workers, bridges, and database state were not changed before the dedicated visual-preview deploy.
+
+## Operator review round 1
+
+- Reduced the header logo by roughly one fifth and removed the duplicate hero logo. The landing hero now pairs its headline with an overlapping composition of real catalog Squigs; the manifesto uses a real specimen to balance the copy.
+- Refined the landing specimen layout so all three faces remain visible, widened the manifesto board into its intended balanced two-column composition, tightened section spacing, and moved the Ethereum / Squigs Reloaded badge beside its specimen heading. The existing three sample cards and their information density remain intact.
+- Rebuilt `/connect` as a centered, compact two-column onboarding panel with a decorative UglyDex lightning/ray treatment. Wallet and Discord actions, messaging, and identity behavior are unchanged.
+- Explore filters have less padding while retaining their controls and advanced filters. The first desktop row prioritizes four artworks and the first mobile row prioritizes two; remaining catalog art stays lazy-loaded. The count updates after client mount and when the viewport crosses the breakpoint. Artwork loading now shows a quiet color specimen rather than “Loading artwork…” text.
+- Left the approved Squig detail hero composition intact. Tightened its controls and breadcrumb spacing; distinguished image sharing from passport sharing; attached the canonical-art label as a caption strip; made the provenance summary a responsive set of evidence tiles; and reduced chain-event row height while keeping event details expandable.
+- Added compact, real-achievement mini cards for recently earned items. Ecosystem summaries now use small category-accented tiles rather than nested panels, and activity rows are tighter while observation-only styling remains distinct.
+- Continued restrained lilac, green, yellow, and blue accents below the hero. Ownership and UglyPoints cards now size to their content; collection filters, authenticated dashboard sections, and `$CHARM` totals use less padding and fewer nested outlines. All existing data, routes, filters, and actions remain present.
+
+## Operator review responsive checks
+
+The refreshed screenshots cover desktop at 1440px; the collection at 1024px and 768px; and mobile at 390px. The Connect route now has desktop and mobile captures. Browser assertions cover route responses, width overflow, native keyboard mobile navigation, desktop/mobile artwork priority counts, and the detail sharing/caption controls. Detailed test results are recorded below after the latest capture run.
 
 ## Backend preservation
 

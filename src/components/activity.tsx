@@ -35,9 +35,9 @@ export async function EcosystemSummary({
         </div>
         <Link href={path}>Explore activity →</Link>
       </div>
-      <div className="ecosystem-cards">
+      <div className="ecosystem-cards ecosystem-summary-cards">
         {s.duels.played > 0 && (
-          <div className="panel">
+          <article className="ecosystem-tile" data-source="DUELS">
             <h3>Duels</h3>
             <strong>{s.duels.played} completed</strong>
             <p>
@@ -48,10 +48,10 @@ export async function EcosystemSummary({
               {s.duels.uniqueSquigs} Squigs used · largest wager{' '}
               {s.duels.largest ? formatAmount(s.duels.largest) : 'unavailable'}
             </small>
-          </div>
+          </article>
         )}
         {s.survival.games > 0 && (
-          <div className="panel">
+          <article className="ecosystem-tile" data-source="SURVIVAL">
             <h3>Survival</h3>
             <strong>{s.survival.games} recorded games</strong>
             <p>
@@ -62,20 +62,20 @@ export async function EcosystemSummary({
               {s.survival.eliminations} eliminations · {s.survival.deaths}{' '}
               deaths · {s.survival.images} images used
             </small>
-          </div>
+          </article>
         )}
         {s.marketplace.purchases > 0 && (
-          <div className="panel">
+          <article className="ecosystem-tile" data-source="MARKETPLACE">
             <h3>Marketplace</h3>
             <strong>{s.marketplace.purchases} purchases</strong>
             <p>
               {s.marketplace.items} items · {formatAmount(s.marketplace.spent)}{' '}
               $CHARM spent
             </p>
-          </div>
+          </article>
         )}
         {s.creator.submitted > 0 && (
-          <div className="panel">
+          <article className="ecosystem-tile" data-source="CREATOR">
             <h3>Creator</h3>
             <strong>{s.creator.approved} approved</strong>
             <p>
@@ -86,7 +86,7 @@ export async function EcosystemSummary({
               {s.creator.rewardPoints} approved reward points (not confirmed
               payout)
             </small>
-          </div>
+          </article>
         )}
         {s.categories
           .filter(
@@ -96,10 +96,14 @@ export async function EcosystemSummary({
               ),
           )
           .map((c) => (
-            <div className="panel" key={c.category}>
+            <article
+              className="ecosystem-tile"
+              data-source={c.category}
+              key={c.category}
+            >
               <h3>{c.category.toLowerCase()}</h3>
               <strong>{c.events} recorded events</strong>
-            </div>
+            </article>
           ))}
       </div>
       {s.charm.length > 0 && (

@@ -220,6 +220,47 @@ export async function phase12WebTests(
             timeout: 90000,
           });
         };
+        await page.setViewportSize({ width: 1440, height: 1000 });
+        await page.goto(base + '/connect', { waitUntil: 'domcontentloaded' });
+        check(
+          (await page
+            .getByRole('heading', { name: 'Enter the UglyDex.' })
+            .isVisible()) &&
+            (await page
+              .getByRole('button', { name: /Connect Wallet/ })
+              .isVisible()) &&
+            (await page
+              .getByRole('button', { name: 'Connect Discord' })
+              .isVisible()),
+          'compact connect layout preserves both authentication actions',
+        );
+        await capture('/connect', 'connect-1440.png', 1440, 1000, visualToken);
+        await page.goto(base + '/squigs', { waitUntil: 'domcontentloaded' });
+        await page.waitForFunction(
+          () =>
+            document.querySelectorAll('.squig-card img[fetchpriority="high"]')
+              .length === 4,
+        );
+        check(
+          await page
+            .locator('.squig-card img')
+            .evaluateAll(
+              (images) =>
+                images
+                  .slice(0, 4)
+                  .every(
+                    (image) =>
+                      (image as HTMLImageElement).fetchPriority === 'high',
+                  ) &&
+                images
+                  .slice(4)
+                  .every(
+                    (image) =>
+                      (image as HTMLImageElement).fetchPriority !== 'high',
+                  ),
+            ),
+          'desktop explorer prioritizes only the first four catalog artworks',
+        );
         await capture('/', 'landing-1440.png', 1440, 1000, visualToken);
         await capture('/me', 'my-uglydex-1440.png', 1440, 1000, visualToken);
         await capture(
@@ -235,6 +276,16 @@ export async function phase12WebTests(
           1440,
           1000,
           visualToken,
+        );
+        check(
+          (await page
+            .getByRole('button', { name: 'Share image ↗' })
+            .isVisible()) &&
+            (await page
+              .getByRole('link', { name: 'Share Passport ↗' })
+              .isVisible()) &&
+            (await page.locator('.specimen-caption').isVisible()),
+          'Squig detail keeps distinct image and passport sharing with a readable art caption',
         );
         await capture(
           '/me/achievements',
@@ -283,6 +334,33 @@ export async function phase12WebTests(
         );
         await page.keyboard.press('Enter');
         await capture('/', 'landing-390.png', 390, 844, visualToken);
+        await capture('/connect', 'connect-390.png', 390, 844, visualToken);
+        await page.goto(base + '/squigs', { waitUntil: 'domcontentloaded' });
+        await page.waitForFunction(
+          () =>
+            document.querySelectorAll('.squig-card img[fetchpriority="high"]')
+              .length === 2,
+        );
+        check(
+          await page
+            .locator('.squig-card img')
+            .evaluateAll(
+              (images) =>
+                images
+                  .slice(0, 2)
+                  .every(
+                    (image) =>
+                      (image as HTMLImageElement).fetchPriority === 'high',
+                  ) &&
+                images
+                  .slice(2)
+                  .every(
+                    (image) =>
+                      (image as HTMLImageElement).fetchPriority !== 'high',
+                  ),
+            ),
+          'mobile explorer prioritizes only the first two catalog artworks',
+        );
         await capture('/me', 'my-uglydex-390.png', 390, 844, visualToken);
         await capture(
           '/collection',

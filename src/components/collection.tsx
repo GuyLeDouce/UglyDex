@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Artwork } from './artwork';
 import type { SquigCardData } from '@/server/collections';
 const subscribe = (fn: () => void) => {
@@ -16,13 +16,23 @@ const snapshot = () => {
     return 'grid';
   }
 };
-export function SquigCard({ item }: { item: SquigCardData }) {
+export function SquigCard({
+  item,
+  priority = false,
+}: {
+  item: SquigCardData;
+  priority?: boolean;
+}) {
   return (
     <Link
       href={`/squig/${item.tokenId}`}
       className={`squig-card ${item.currentlyOwned === false ? 'previous' : ''}`}
     >
-      <Artwork src={item.image} alt={`Squig #${item.tokenId}`} />
+      <Artwork
+        src={item.image}
+        alt={`Squig #${item.tokenId}`}
+        priority={priority}
+      />
       <div className="card-body">
         {item.representation && (
           <p className="eyebrow">{item.representation}</p>
@@ -129,6 +139,14 @@ export function CollectionGrid({
   controls?: boolean;
 }) {
   const mode = useSyncExternalStore(subscribe, snapshot, () => 'grid');
+  const [priorityCount, setPriorityCount] = useState(2);
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 561px)');
+    const update = () => setPriorityCount(query.matches ? 4 : 2);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
   function setMode(value: string) {
     try {
       localStorage.setItem('uglydex-view', value);
@@ -155,8 +173,12 @@ export function CollectionGrid({
       )}
       {items.length ? (
         <div className={`collection-grid ${controls ? mode : 'grid'}`}>
-          {items.map((item) => (
-            <SquigCard key={item.tokenId} item={item} />
+          {items.map((item, index) => (
+            <SquigCard
+              key={item.tokenId}
+              item={item}
+              priority={index < priorityCount}
+            />
           ))}
         </div>
       ) : (
