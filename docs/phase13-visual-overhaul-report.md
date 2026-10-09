@@ -107,3 +107,28 @@ This section supersedes the pending status above. The operator regenerated the s
 - Read-only aggregate checks found 4,444 Squigs, 11,105 transfers, 4,444 provenance rows, 378 Collectors, 33,903 activity rows, 14,003 XP ledger rows, populated achievements and collection/discovery state, one DRIP identity, one current balance record, and 13 migration records. Web migration logs reported no pending migrations. No database writes were performed during these checks.
 - The account-menu stacking regression test passed 3/3. The deployed revision includes the header stacking fix; an authenticated interactive menu click test was not run in a browser session during this rotation check.
 - Production was not accessed or changed. The visual preview was left untouched.
+
+### Worker recovery after post-rotation validation
+
+The current application revision was `18dea7c833e4294ac93d59898e9bb87009715df3`. No application code, schema, migration, or production service was changed.
+
+#### Blockchain
+
+- Before recovery, the durable cursor was at block `26,151,970`, with finalized boundary `26,151,970`, start block `25,342,921`, and `lastError=CHAIN_SYNC_FAILED`. The preceding worker log recorded only `OPERATION_FAILED`; the wrapper suppressed the underlying exception, so its precise original cause is not recoverable from retained evidence.
+- Read-only checks confirmed mainnet chain ID 1, the configured Squigs contract and start block, cursor below the live finalized head, matching live hashes at the cursor and four recent stored anchors, and the intact 4,444-token provenance baseline. No reorg or cursor-integrity discrepancy was found.
+- With only the blockchain WorkerControl disabled and its advisory lock free, one normal `transferBatch()` succeeded for blocks `26,151,971–26,152,161` (`0` transfer events). It advanced the durable cursor/finalized boundary to `26,152,161`, refreshed the block hash and success time, and cleared the stored error through the normal codepath. The transfer count stayed at 11,105; no rescan or rewind occurred.
+- Blockchain control was returned to LIVE through the guarded operator control API. Its latest worker cycle completed successfully at `2026-10-09T03:53:46Z`; state `IDLE`, heartbeat fresh, `errorCode=null`, circuit breaker clear.
+
+#### claimEvents
+
+- The prior run ended `FAILED/IMPORT_FAILED` after scanning 200 already-canonical records; it reported 200 duplicates, zero inserts, and zero unresolved identities. There are no unresolved ImportRejections. The source table is reachable through the configured read-only bridge; its seven columns include all required fields and match fingerprint `0ef037d6d807a714f3bc9105209ebb57774b518525f2413651454a3b39440c9d`. A bounded cursor-based read returned a row whose timestamp and amount were parseable, without exposing values or identifiers.
+- The retained failure is generic and does not identify whether the exception occurred during post-page persistence or another importer step. Current evidence rules out a present schema, permission, or bridge-query failure; the exact historical throw remains unavailable, so no more specific cause is asserted.
+- With only the ecosystem WorkerControl disabled and its worker lock free, one normal `runActivityFeed('claimEvents', { maxPages: 1 })` succeeded. It scanned 200 records, normalized 200, classified all 200 as duplicates, inserted or updated none, and failed on none. The existing backfill and keyset/reconciliation state were used; no source state or cursor was reset. The bounded run remains `PARTIAL` because one full page was deliberately limited; source validation is true, `lastSuccessAt` updated, the source is no longer ERROR, warning is `TRACKED_AVAILABLE_HISTORY_NOT_LIFETIME`, and unresolved rejections remain zero. The sync run stores both cursor endpoints; its `cursorStart` field reflects the source's base cursor rather than the reconciliation cursor for a rotating feed, so that audit field cannot independently establish the prior reconciliation-cursor comparison.
+- Ecosystem control was returned to LIVE through the guarded operator control API. Its latest worker cycle completed successfully at `2026-10-09T03:53:42Z`; state `IDLE`, heartbeat fresh, `errorCode=null`, circuit breaker clear. The source's remaining PARTIAL status is the normal bounded tracked-history state and does not block worker readiness.
+
+#### Final worker and data status
+
+- All four controls are LIVE and each latest heartbeat is fresh, state `IDLE`, with a successful cycle and no worker error: blockchain `03:53:46Z`, ecosystem `03:53:42Z`, progression `03:53:37Z`, collections `03:53:41Z`. Progression and collection failed-job counts are both zero.
+- Aggregate staging data remains present: 4,444 Squigs, 4,444 provenance rows, 378 Collectors, 11,105 transfers, 33,970 activity rows, populated progression and collection/discovery records, one DRIP identity and one CharmBalance record. Dirty provenance is zero. No migration was run and no schema change was made.
+- `launch:verify` and `launch:report` were run after recovery. `WORKERS` is VERIFIED; overall launch remains `NOT_READY` with 16 critical gates pending: `WEB_DEPLOYMENT`, `BACKUP`, `RESTORE_DRILL`, `ARCHIVE_RPC`, `START_BLOCK`, `OWNER_OF`, `REATTRIBUTION`, `ACTIVITY`, `DUPLICATE_REVIEW`, `PROGRESSION`, `COLLECTIONS`, `DERIVED_REPLAY_STABLE`, `CHARM_DRIP`, `HANDOFF`, `PRIVACY_AUTH`, and `REAL_DEVICE_SHARE`. No revision-bound gates were manually attested in this recovery.
+- Production was untouched. The web-only visual preview was left unchanged.
