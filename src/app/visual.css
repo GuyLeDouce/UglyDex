@@ -140,7 +140,7 @@ textarea:focus-visible {
 
 .site-header {
   position: relative;
-  z-index: 50;
+  z-index: 10;
   overflow: visible;
   display: grid;
   grid-template-columns: minmax(150px, 1fr) auto minmax(150px, 1fr);

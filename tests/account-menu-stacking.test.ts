@@ -2,10 +2,11 @@ import { readFile } from 'node:fs/promises';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { chromium, type Browser, type Page } from '@playwright/test';
 
-const stylesheet = await readFile(
-  new URL('../src/app/visual.css', import.meta.url),
-  'utf8',
-);
+const [baseStylesheet, visualStylesheet] = await Promise.all([
+  readFile(new URL('../src/app/globals.css', import.meta.url), 'utf8'),
+  readFile(new URL('../src/app/visual.css', import.meta.url), 'utf8'),
+]);
+const stylesheet = `${baseStylesheet}\n${visualStylesheet}`;
 
 let browser: Browser;
 
@@ -20,6 +21,7 @@ afterAll(async () => {
 async function renderHeader(page: Page) {
   await page.setContent(`
     <style>${stylesheet}</style>
+    <a class="skip" href="#main">Skip to content</a>
     <header class="site-header">
       <a class="brand-mark" href="/">UglyDex</a>
       <nav class="primary-nav" aria-label="Primary navigation">
@@ -122,11 +124,37 @@ describe('account menu stacking', () => {
     await page.close();
   });
 
+  it('keeps Skip to content above the raised header when focused', async () => {
+    const page = await browser.newPage({
+      viewport: { width: 1440, height: 900 },
+    });
+    await renderHeader(page);
+    await page.keyboard.press('Tab');
+
+    const skip = page.locator('.skip');
+    expect(
+      await skip.evaluate((node) => node.getBoundingClientRect().top),
+    ).toBe(10);
+    expect(
+      await skip.evaluate((node) => {
+        const rect = node.getBoundingClientRect();
+        return (
+          document
+            .elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+            ?.closest('.skip') !== null
+        );
+      }),
+    ).toBe(true);
+
+    await page.close();
+  });
+
   it('keeps the mobile disclosure menu unclipped, above content, and keyboard operable', async () => {
     const page = await browser.newPage({
       viewport: { width: 390, height: 844 },
     });
     await renderHeader(page);
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     expect(
