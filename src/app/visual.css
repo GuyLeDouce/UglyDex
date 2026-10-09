@@ -556,11 +556,6 @@ button.button:hover,
   gap: 22px;
 }
 
-.landing-world .squig-card {
-  background: var(--ugly-paper);
-  color: var(--ugly-ink);
-}
-
 .manifesto {
   position: relative;
   margin: 72px 0 12px;
@@ -873,7 +868,7 @@ button.button:hover,
   overflow: hidden;
   border: var(--ugly-border);
   border-radius: 19px;
-  background: linear-gradient(140deg, var(--ugly-lilac), var(--ugly-pink));
+  background: linear-gradient(145deg, #eceef1, #dde1e7);
   box-shadow: var(--ugly-shadow-md);
   color: var(--ugly-ink);
   transition:
@@ -881,16 +876,28 @@ button.button:hover,
     box-shadow 160ms ease;
 }
 
-.squig-card:nth-child(4n + 2) {
-  background: linear-gradient(145deg, #d9ffdf, var(--ugly-green));
+.squig-card.rarity-common {
+  background: linear-gradient(145deg, #f7f7f3, #f1f0ea);
 }
 
-.squig-card:nth-child(4n + 3) {
-  background: linear-gradient(145deg, #fff5ba, var(--ugly-yellow));
+.squig-card.rarity-uncommon {
+  background: linear-gradient(145deg, #bff5c9, #5be87f);
 }
 
-.squig-card:nth-child(4n) {
-  background: linear-gradient(145deg, #e9f4ff, #cbdfff);
+.squig-card.rarity-rare {
+  background: linear-gradient(145deg, #d9ecff, #a9ccff);
+}
+
+.squig-card.rarity-epic {
+  background: linear-gradient(145deg, #efe9ff, #d8c5ff);
+}
+
+.squig-card.rarity-legendary {
+  background: linear-gradient(145deg, #fff3b0, #ffd84d);
+}
+
+.squig-card.rarity-unclassified {
+  background: linear-gradient(145deg, #eceef1, #dde1e7);
 }
 
 .squig-card:hover {

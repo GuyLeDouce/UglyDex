@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Artwork } from './artwork';
 import type { SquigCardData } from '@/server/collections';
+import { squigRarityClass } from '@/domain/squig-rarity';
 const subscribe = (fn: () => void) => {
   window.addEventListener('storage', fn);
   return () => window.removeEventListener('storage', fn);
@@ -26,7 +27,7 @@ export function SquigCard({
   return (
     <Link
       href={`/squig/${item.tokenId}`}
-      className={`squig-card ${item.currentlyOwned === false ? 'previous' : ''}`}
+      className={`squig-card ${squigRarityClass(item.rarity)} ${item.currentlyOwned === false ? 'previous' : ''}`}
     >
       <Artwork
         src={item.image}
