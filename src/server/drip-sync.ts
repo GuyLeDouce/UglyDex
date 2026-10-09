@@ -7,7 +7,6 @@ import {
   DripReadError,
   exactMembers,
   exactDripMembers,
-  validateCurrency,
   type DripResponse,
 } from '@/integrations/drip';
 import { getDripMemberMappings } from '@/integrations/wallet-links';
@@ -16,6 +15,7 @@ import { hash } from '@/domain/events';
 import { launchContext, recordGate } from './launch';
 import { assertOperation } from './deployment';
 import { Prisma } from '@/generated/prisma/client';
+import { proveDripAlignment } from './drip-alignment';
 
 const configSchema = z.object({
   DRIP_READ_API_KEY: z.string().min(1),
@@ -168,38 +168,40 @@ async function checkDripAlignment(bots: {
   gauntletCurrency: string;
 }) {
   const c = dripConfig();
-  const matches = {
-    uglyBotRealm: bots.uglyBotRealm === c.DRIP_REALM_ID,
-    uglyBotCurrency: bots.uglyBotCurrency === c.DRIP_REALM_POINT_ID,
-    gauntletRealm: bots.gauntletRealm === c.DRIP_REALM_ID,
-    gauntletCurrency: bots.gauntletCurrency === c.DRIP_REALM_POINT_ID,
-  };
-  if (Object.values(matches).some((v) => !v))
-    throw Error('CHARM_ECONOMY_MISMATCH');
-  const realm = z
-    .object({ id: z.string() })
-    .parse((await dripRead((r) => r.getRealm())).body);
-  if (realm.id !== c.DRIP_REALM_ID) throw Error('CHARM_ECONOMY_MISMATCH');
-  await delay(Math.ceil(60000 / c.DRIP_MAX_RPM) + 50);
-  const currencies = z
-    .object({ data: z.array(z.unknown()) })
-    .parse((await dripRead((r) => r.getCurrencies())).body);
-  const currency = currencies.data.find(
-    (v) =>
-      typeof v === 'object' &&
-      v !== null &&
-      'id' in v &&
-      v.id === c.DRIP_REALM_POINT_ID,
+  const evidence = await proveDripAlignment(
+    bots,
+    { realm: c.DRIP_REALM_ID, currency: c.DRIP_REALM_POINT_ID },
+    {
+      getRealm: () => dripRead((reader) => reader.getRealm()),
+      getCurrencies: () => dripRead((reader) => reader.getCurrencies()),
+      findResolvedDripMemberId: async () =>
+        (
+          await db().dripIdentity.findFirst({
+            where: {
+              realmId: c.DRIP_REALM_ID,
+              status: 'RESOLVED',
+              dripMemberId: { not: null },
+            },
+            orderBy: { lastResolvedAt: 'desc' },
+            select: { dripMemberId: true },
+          })
+        )?.dripMemberId ?? null,
+      searchMembersByDripId: (ids) =>
+        dripRead((reader) => reader.searchMembersByDripId(ids)),
+      waitAfterRealm: () => delay(Math.ceil(60000 / c.DRIP_MAX_RPM) + 50),
+      waitBeforeFallback: async () => {
+        const syncState = await db().dripSyncState.findUnique({
+          where: { realmId: c.DRIP_REALM_ID },
+          select: { nextRequestAt: true },
+        });
+        const waitMs = Math.max(
+          0,
+          syncState ? +syncState.nextRequestAt - Date.now() : 0,
+        );
+        if (waitMs > 0) await delay(waitMs + 50);
+      },
+    },
   );
-  if (!validateCurrency(currency, c.DRIP_REALM_ID, c.DRIP_REALM_POINT_ID))
-    throw Error('CHARM_ECONOMY_MISMATCH');
-  const evidence = {
-    ...matches,
-    realmHash: hash(c.DRIP_REALM_ID),
-    currencyHash: hash(c.DRIP_REALM_POINT_ID),
-    currencyActive: true,
-    readOnly: true,
-  };
   await db().dripSyncState.update({
     where: { realmId: c.DRIP_REALM_ID },
     data: {
