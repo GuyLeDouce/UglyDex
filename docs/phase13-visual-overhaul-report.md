@@ -79,3 +79,19 @@ The refreshed screenshots cover desktop at 1440px; the collection at 1024px and 
 No changes were made to Prisma schema, migrations, authentication or identity semantics, DRIP integration semantics, source integrations, progression rules, collection engine, worker behavior, or launch gates. The landing page only reads existing catalog records. $CHARM and its DRIP-ID link flow retain their existing server behavior and privacy rules.
 
 No unresolved visual preference is blocking operator review. Landing catalog image delivery should be reviewed in the deployed network context alongside these local previews.
+
+## Final operator approval / staging merge
+
+- Approved visual source: `b474298232da01c99a7be37e30da1e64408ec740`. The final optional polish improved contrast on the landing collection badge and provenance caption readability. The merged functional branch is `bf125c7715003418045a662f2e4f1b61376b8fdc`.
+- Staging deployment used the reviewed migration-byte snapshot for this schema-neutral visual revision. Web deployment `d43d16d0-09ca-4ec4-a168-7131fe6cbb27`; worker deployments: blockchain `4bbefa16-a9dc-4bba-a4a5-11759e4de91e`, ecosystem `f94f6be6-de90-4967-9abd-c6b7c030c6c8`, progression `73124948-9152-469b-b20d-842fc653f10b`, collections `351222ae-f72f-4a31-9a75-0cd6dcf6efbf`. All five staging services reported the intended `APP_COMMIT` value. The web healthcheck and public `/api/ready` returned 200; staging smoke passed 10/10.
+- Public routes returned 200 for `/`, `/connect`, `/squigs`, `/squig/1`, and `/editions`. Protected routes redirected to authentication when checked without a session. Authenticated real-account QA was not completed in this environment.
+- Read-only browser QA against staging at 1440, 1024, 768, and 390 pixels found no horizontal overflow on the checked routes. First-row artwork loaded for four desktop cards and two mobile cards; the mobile navigation opened; Squig detail artwork, traits, UglyPoints, provenance, events, and progression rendered. The existing staging smoke explicitly left authenticated wallet/OAuth and private-resource checks pending.
+- `npm run staging:smoke`: 10/10. Unit, lint, typecheck, format, and production build passed in the isolated NTFS validation copy as recorded above. A new focused visual DB/browser harness attempt was blocked by existing Phase 7 migration-drift and Phase 12 fixture-phase assumptions; it did not invalidate the independent 80-assertion visual run from the approved visual branch.
+- No $CHARM, DRIP identity, balance, or privacy code changed. No authenticated $CHARM account regression was run here; existing balance/link behavior was not exercised with an authenticated browser session during this deployment check.
+- Production was not deployed or changed. The web-only visual preview remains available at `https://uglydex-visual-preview-staging.up.railway.app/` (deployment `60d7d889-8af4-42bd-b620-772316e1a3c5`).
+
+### Staging credential follow-up
+
+During a staging-only diagnostic, Railway tunnel output exposed the staging database credential in tool output; no database write or SQL operation occurred. The operator authorized rotation. Railway's current supported procedure is the Postgres service's Config → Connection → Regenerate control, which synchronizes the in-database password and Railway variables. This environment has no Railway dashboard browser session, and the Railway CLI exposes no Postgres password-regeneration command. No manual variable edit or `ALTER USER` was attempted because either alone would leave credential state inconsistent.
+
+The staging credential rotation and the authorized restart/redeploy of the five staging app services therefore remain pending. In particular, a fresh ecosystem-worker heartbeat/cycle could not be verified after the uncompleted rotation. The staging deployments above remain the last observed successful deployment set; production remains untouched.
