@@ -539,7 +539,7 @@ button.button:hover,
 .landing-world .badge {
   border: 2px solid var(--ugly-paper);
   border-radius: 999px;
-  color: var(--ugly-paper);
+  color: var(--ugly-ink);
   font-family: inherit;
   font-weight: 700;
 }
@@ -2563,7 +2563,7 @@ main#main:has(.connect-layout) {
   border-top: 2px solid var(--ugly-ink);
   background: #dcfbe4;
   color: #39434d;
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   font-weight: 850;
   letter-spacing: 0.1em;
   line-height: 1.45;
@@ -2887,7 +2887,7 @@ main#main:has(.connect-layout) {
 
   .specimen-caption {
     padding: 8px;
-    font-size: 0.55rem;
+    font-size: 0.62rem;
   }
 
   .provenance-summary > div {
