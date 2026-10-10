@@ -7,11 +7,66 @@ import { canonicalTokens, verifyCatalog } from '@/domain/dex-catalog';
 import { verifyDerived } from './derived-verification';
 import { migrationChecks } from './production';
 import { chainKey } from '@/sync/provenance';
+import { appEnvironment, databaseFingerprint } from '@/domain/deployment';
+
+const RESTORE_CONFIRMATION = 'RESTORE_INTO_EMPTY_DISPOSABLE_DATABASE';
+
+async function assertContainedRestore(sourceDatabaseFingerprint?: string) {
+  const databaseUrl = process.env.DATABASE_URL;
+  let currentFingerprint: string;
+  let currentDatabase: URL;
+  try {
+    if (!databaseUrl) throw new Error();
+    currentDatabase = new URL(databaseUrl);
+    currentFingerprint = databaseFingerprint(databaseUrl);
+  } catch {
+    throw new Error('RESTORE_DATABASE_NOT_CONTAINED');
+  }
+  if (
+    !sourceDatabaseFingerprint ||
+    !/^[a-f0-9]{64}$/.test(sourceDatabaseFingerprint) ||
+    process.env.APP_ENV !== 'development' ||
+    process.env.RESTORE_DRILL_CONFIRM !== RESTORE_CONFIRMATION ||
+    !/^\/uglydex_restore_[a-z0-9_]{6,60}$/.test(currentDatabase.pathname) ||
+    /prod/i.test(currentDatabase.hostname + currentDatabase.pathname) ||
+    currentFingerprint === sourceDatabaseFingerprint
+  )
+    throw new Error('RESTORE_DATABASE_NOT_CONTAINED');
+
+  let environment: string;
+  try {
+    environment = appEnvironment(process.env);
+  } catch {
+    throw new Error('RESTORE_DATABASE_NOT_CONTAINED');
+  }
+  if (environment !== 'development')
+    throw new Error('RESTORE_DATABASE_NOT_CONTAINED');
+
+  const client = db();
+  const [controls, enabledContracts, deploymentIdentities] = await Promise.all([
+    client.workerControl.findMany({ select: { mode: true } }),
+    client.editionContract.count({ where: { enabled: true } }),
+    client.deploymentIdentity.count(),
+  ]);
+  if (
+    controls.length === 0 ||
+    controls.some((control) => control.mode !== 'DISABLED') ||
+    enabledContracts !== 0 ||
+    deploymentIdentities !== 0
+  )
+    throw new Error('RESTORE_DATABASE_NOT_CONTAINED');
+}
 
 // Read-only verification. Run with workers paused for a stable evidence view.
 export async function productionVerify(
-  options: { owners?: 'spot' | 'full' } = {},
+  options: {
+    owners?: 'spot' | 'full';
+    containedRestore?: boolean;
+    sourceDatabaseFingerprint?: string;
+  } = {},
 ): Promise<Check[]> {
+  if (options.containedRestore)
+    await assertContainedRestore(options.sourceDatabaseFingerprint);
   const checks = await migrationChecks();
   if (checks.some((c) => c.status === 'FAIL')) return checks;
   const add = (name: string, failures: number, detail: string) =>
@@ -82,12 +137,32 @@ export async function productionVerify(
     (await db().collectionJob.count()) +
     (await db().activityAttributionJob.count());
   add('derived.queues', jobs, 'All evaluation and attribution queues drained');
-  checks.push(
-    ...(await db().$transaction((tx) => verifyDerived(tx), {
-      isolationLevel: 'RepeatableRead',
-      timeout: 1800000,
-    })),
-  );
+  if (options.containedRestore) {
+    const startedAt = performance.now();
+    const derivedChecks = await verifyDerived(db());
+    const durationMs = Math.round(performance.now() - startedAt);
+    const progression = derivedChecks.find(
+      (check) => check.name === 'progression.replay',
+    );
+    const collections = derivedChecks.find(
+      (check) => check.name === 'collections.replay',
+    );
+    checks.push(
+      {
+        name: 'restore.contained_static',
+        status: 'PASS',
+        detail: `containment passed; mode=CONTAINED_STATIC_RESTORE; derivedVerificationMs=${durationMs}; progression.replay=${progression?.status ?? 'MISSING'}; collections.replay=${collections?.status ?? 'MISSING'}`,
+      },
+      ...derivedChecks,
+    );
+  } else {
+    checks.push(
+      ...(await db().$transaction((tx) => verifyDerived(tx), {
+        isolationLevel: 'RepeatableRead',
+        timeout: 1800000,
+      })),
+    );
+  }
   const { shareCard } = await import('./sharing');
   const { shareSchema } = await import('@/domain/sharing');
   let privacyFailures = 0;

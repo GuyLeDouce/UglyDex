@@ -1,5 +1,6 @@
 import 'server-only';
 import type { Prisma } from '@/generated/prisma/client';
+import type { PrismaClient } from '@/generated/prisma/client';
 import type { Check } from '@/domain/operations';
 import { RULESET, evaluate } from '@/domain/progression';
 import { hash } from '@/domain/events';
@@ -13,9 +14,10 @@ import {
 import { traitCatalog, collectionSets } from '@/domain/dex-catalog';
 import { progressionFacts } from './progression-engine';
 import { collectionEvidence, candidateMap } from './dex-engine';
-export async function verifyDerived(
-  tx: Prisma.TransactionClient,
-): Promise<Check[]> {
+
+export type DerivedReadClient = Prisma.TransactionClient | PrismaClient;
+
+export async function verifyDerived(tx: DerivedReadClient): Promise<Check[]> {
   const checks: Check[] = [];
   const add = (name: string, failures: number, detail: string) =>
     checks.push({
