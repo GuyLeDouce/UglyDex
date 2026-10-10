@@ -89,9 +89,15 @@ export function SiteHeader({
           </span>
         </summary>
         <nav aria-label="Mobile navigation">
-          <Link href={homeHref}>My UglyDex</Link>
-          <Link href="/squigs">Explore Squigs</Link>
-          <Link href="/editions">Editions</Link>
+          <Link className="mobile-primary-link" href={homeHref}>
+            My UglyDex
+          </Link>
+          <Link className="mobile-primary-link" href="/squigs">
+            Explore Squigs
+          </Link>
+          <Link className="mobile-primary-link" href="/editions">
+            Editions
+          </Link>
           {slug && <AccountLinks slug={slug} isPublic={isPublic} />}
           {!slug && (
             <Link className="button primary" href="/connect">

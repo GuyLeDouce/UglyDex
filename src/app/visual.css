@@ -1,4 +1,5 @@
 :root {
+  --font-uglydex-display: var(--font-lilita-one), 'Lilita One', sans-serif;
   --ugly-night: #060a16;
   --ugly-night-2: #0a1130;
   --ugly-night-3: #17255e;
@@ -191,10 +192,11 @@ textarea:focus-visible {
   border: 2px solid var(--ugly-paper);
   border-radius: 999px;
   color: var(--ugly-paper);
+  font-family: var(--font-uglydex-display);
   font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
   transition:
     background-color 150ms ease,
     color 150ms ease,
@@ -396,16 +398,21 @@ h2,
 h3,
 h4 {
   color: var(--ugly-ink);
-  font-family: var(--font-montserrat), Montserrat, Arial, sans-serif;
-  font-weight: 800;
-  line-height: 1.12;
-  letter-spacing: -0.055em;
+  line-height: 1.08;
+}
+
+h1,
+h2 {
+  font-family: var(--font-uglydex-display);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: 0;
+  text-wrap: balance;
 }
 
 h1 {
   margin: 0.38em 0 0.34em;
   font-size: clamp(2.5rem, 6vw, 5rem);
-  letter-spacing: -0.075em;
 }
 
 h2 {
@@ -415,7 +422,27 @@ h2 {
 
 h3 {
   font-size: 1.1rem;
-  letter-spacing: -0.035em;
+  letter-spacing: 0;
+}
+
+.section-heading h3,
+.page-heading h3,
+.manifesto h3,
+.progression-summary h3,
+.connect-panel h3 {
+  font-family: var(--font-uglydex-display);
+  font-weight: 400;
+  line-height: 1.08;
+}
+
+.primary-nav a,
+.account-menu > summary,
+.mobile-menu > summary,
+.mobile-menu > nav > .mobile-primary-link {
+  font-family: var(--font-uglydex-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 p {
@@ -444,9 +471,9 @@ main .feature-grid p {
   margin: 22px 0 20px;
   color: var(--ugly-paper);
   font-size: clamp(4rem, 10vw, 9.2rem);
-  font-weight: 900;
+  font-weight: 400;
   line-height: 0.88;
-  letter-spacing: -0.095em;
+  letter-spacing: 0;
 }
 
 .landing-heading h1 em {
@@ -511,6 +538,14 @@ button.button:hover,
 .button.primary,
 .landing-world .button.primary {
   background: var(--ugly-green);
+}
+
+.landing-world .actions .button,
+.connect-panel .actions .button {
+  font-family: var(--font-uglydex-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 .button.primary:hover,
@@ -755,12 +790,18 @@ button.button:hover,
 }
 
 .charm-balance h2 {
+  font-family: var(--font-montserrat), Montserrat, Arial, sans-serif;
   margin: 5px 0 12px;
   font-size: clamp(2.4rem, 7vw, 5.5rem);
   font-weight: 900;
   line-height: 0.98;
   letter-spacing: -0.08em;
   overflow-wrap: anywhere;
+}
+
+.progression-summary h2,
+.dex-score h2 {
+  font-family: var(--font-montserrat), Montserrat, Arial, sans-serif;
 }
 
 .charm-balance .eyebrow {

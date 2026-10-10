@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Montserrat } from 'next/font/google';
+import { Lilita_One, Montserrat } from 'next/font/google';
 import './globals.css';
 import './collections.css';
 import './sharing.css';
@@ -13,6 +13,12 @@ const montserrat = Montserrat({
   weight: ['400', '500', '600', '700', '800', '900'],
   display: 'swap',
   variable: '--font-montserrat',
+});
+const lilitaOne = Lilita_One({
+  subsets: ['latin'],
+  weight: '400',
+  display: 'swap',
+  variable: '--font-lilita-one',
 });
 export const metadata: Metadata = {
   title: 'UglyDex — Every Squig has a story',
@@ -38,8 +44,8 @@ export default async function RootLayout({
     }
   } catch {}
   return (
-    <html lang="en">
-      <body className={montserrat.variable}>
+    <html lang="en" className={`${montserrat.variable} ${lilitaOne.variable}`}>
+      <body>
         <a className="skip" href="#main">
           Skip to content
         </a>
