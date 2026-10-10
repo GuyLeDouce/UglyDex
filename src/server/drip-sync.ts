@@ -621,6 +621,21 @@ async function syncDripBatch() {
           r.dripMemberId &&
           prior.dripMemberId !== r.dripMemberId);
       const status = conflict ? 'CONFLICT' : r.status;
+      const hasVerifiedPriorIdentity =
+        prior?.status === 'RESOLVED' &&
+        !!prior.dripMemberId &&
+        [
+          'VERIFIED_WALLET_LINK',
+          'EXACT_DRIP_CREDENTIAL',
+          'EXACT_DISCORD_CREDENTIAL',
+        ].includes(prior.source);
+      if (status === 'UNRESOLVED' && hasVerifiedPriorIdentity) {
+        // A missing member result or a read failure cannot revoke proof that
+        // was previously established. Leave identity and balance timestamps
+        // untouched so normal age checks make the cached balance stale.
+        counts.unresolved++;
+        continue;
+      }
       if (status !== 'RESOLVED') {
         counts[status === 'CONFLICT' ? 'conflicts' : 'unresolved']++;
         await tx.dripIdentity.upsert({
