@@ -47,7 +47,7 @@ export function SiteHeader({
     <header className="site-header">
       <Link className="brand-mark" href="/" aria-label="UglyDex home">
         <Image
-          src="/brand/uglydex-logo.svg"
+          src="https://i.imgur.com/cFeByAf.png"
           alt="UglyDex"
           width={270}
           height={158}

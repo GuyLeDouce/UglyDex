@@ -2208,6 +2208,22 @@ footer {
   width: clamp(100px, 11.5vw, 154px);
 }
 
+.landing-headline-image-wrap {
+  position: relative;
+  max-width: 760px;
+  height: clamp(150px, 22vw, 270px);
+}
+
+.landing-headline-image {
+  object-fit: contain;
+  object-position: left center;
+}
+
+.manifesto-copy .manifesto-signoff {
+  margin-top: 22px;
+  font-weight: 900;
+}
+
 .landing-heading {
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(330px, 0.88fr);
