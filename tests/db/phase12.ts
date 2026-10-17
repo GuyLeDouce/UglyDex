@@ -11,6 +11,7 @@ import { dirtySignature } from '../../src/domain/charm-dirty';
 import { randomUUID } from 'node:crypto';
 import { launchContext } from '../../src/server/launch';
 import { verifyAndLinkDripMember } from '../../src/server/charm-link';
+import { verifyCharmGate } from '../../src/server/charm-gate';
 export async function phase12DatabaseTests(
   check: (value: unknown, message: string) => void,
 ) {
@@ -261,6 +262,212 @@ export async function phase12DatabaseTests(
       'mapped DRIP identity records its verified wallet_links source',
     );
 
+    const staleSince = new Date(Date.now() - 10 * 60 * 1000);
+    const mappedWhere = {
+      realmId_collectorId: { realmId: realm, collectorId: mappedCollector.id },
+    };
+    const mappedBalanceWhere = {
+      collectorId_realmId_currencyId: {
+        collectorId: mappedCollector.id,
+        realmId: realm,
+        currencyId: currency,
+      },
+    };
+    const mappedIdentityBeforeFailure = await db().dripIdentity.update({
+      where: mappedWhere,
+      data: { lastResolvedAt: staleSince },
+    });
+    await db().charmBalance.update({
+      where: mappedBalanceWhere,
+      data: {
+        observedAt: staleSince,
+        lastApiSuccessAt: staleSince,
+        status: 'CURRENT',
+      },
+    });
+    await queueCharmRefresh(mappedCollector.id);
+    await db().dripSyncState.update({
+      where: { realmId: realm },
+      data: { nextRequestAt: new Date(0) },
+    });
+    let dripForbiddenReads = 0;
+    globalThis.fetch = async (input, options) => {
+      const url = new URL(String(input));
+      if (url.pathname === '/v1/lookups/dripIdentity')
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            data: [
+              {
+                discord_id: mappedDiscord,
+                wallet_address: mappedWallet,
+                drip_member_id: mappedMember,
+              },
+            ],
+          }),
+          { headers: { 'content-type': 'application/json' } },
+        );
+      dripForbiddenReads++;
+      check(options?.method === 'GET', 'DRIP 403 refresh remains GET-only');
+      return new Response('denied', { status: 403 });
+    };
+    const forbiddenRefresh = await syncDripDue();
+    const mappedIdentityAfterFailure =
+      await db().dripIdentity.findUniqueOrThrow({
+        where: mappedWhere,
+      });
+    const mappedBalanceAfterFailure = await db().charmBalance.findUniqueOrThrow(
+      { where: mappedBalanceWhere },
+    );
+    const staleMappedView = await charmBalance(mappedCollector.id, false);
+    check(
+      forbiddenRefresh.status === 'SYNCED' && dripForbiddenReads === 1,
+      `a forbidden member refresh is handled as one failed read without retrying (status=${forbiddenRefresh.status}, reads=${dripForbiddenReads})`,
+    );
+    check(
+      mappedIdentityAfterFailure.status === 'RESOLVED' &&
+        mappedIdentityAfterFailure.dripMemberId === mappedMember &&
+        mappedIdentityAfterFailure.source === 'VERIFIED_WALLET_LINK' &&
+        +mappedIdentityAfterFailure.lastResolvedAt! === +staleSince &&
+        mappedIdentityBeforeFailure.status === 'RESOLVED',
+      'DRIP 403 preserves previously verified identity proof and its resolution time',
+    );
+    check(
+      mappedBalanceAfterFailure.balance?.toString() === '88.75' &&
+        +mappedBalanceAfterFailure.observedAt! === +staleSince &&
+        +mappedBalanceAfterFailure.lastApiSuccessAt! === +staleSince &&
+        mappedBalanceAfterFailure.status === 'CURRENT' &&
+        staleMappedView.balance === '88.75' &&
+        staleMappedView.stale,
+      'DRIP 403 preserves the old balance and timestamps while normal age logic marks it stale',
+    );
+    check(
+      (
+        await db().dripSyncState.findUniqueOrThrow({
+          where: { realmId: realm },
+        })
+      ).errorCode === 'DRIP_HTTP_403',
+      'DRIP 403 is retained as the current safe sync error',
+    );
+
+    await queueCharmRefresh(mappedCollector.id);
+    await db().dripSyncState.update({
+      where: { realmId: realm },
+      data: { nextRequestAt: new Date(0) },
+    });
+    globalThis.fetch = async (input, options) => {
+      const url = new URL(String(input));
+      if (url.pathname === '/v1/lookups/dripIdentity')
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            data: [
+              {
+                discord_id: mappedDiscord,
+                wallet_address: mappedWallet,
+                drip_member_id: mappedMember,
+              },
+            ],
+          }),
+          { headers: { 'content-type': 'application/json' } },
+        );
+      check(
+        options?.method === 'GET',
+        'successful DRIP refresh remains GET-only',
+      );
+      return new Response(
+        JSON.stringify({
+          data: [
+            {
+              id: mappedMember,
+              balances: [{ currencyId: currency, balance: '91.25' }],
+            },
+          ],
+          meta: { totalPages: 1 },
+        }),
+      );
+    };
+    const successfulRefresh = await syncDripDue();
+    const mappedBalanceAfterSuccess = await db().charmBalance.findUniqueOrThrow(
+      {
+        where: mappedBalanceWhere,
+      },
+    );
+    const mappedIdentityAfterSuccess =
+      await db().dripIdentity.findUniqueOrThrow({ where: mappedWhere });
+    check(
+      successfulRefresh.status === 'SYNCED' &&
+        mappedIdentityAfterSuccess.status === 'RESOLVED' &&
+        mappedBalanceAfterSuccess.balance?.toString() === '91.25' &&
+        +mappedBalanceAfterSuccess.observedAt! > +staleSince &&
+        +mappedBalanceAfterSuccess.lastApiSuccessAt! > +staleSince &&
+        +mappedIdentityAfterSuccess.lastResolvedAt! > +staleSince,
+      'successful exact member refresh advances identity and balance proof timestamps',
+    );
+
+    const staleAfterSuccess = new Date(Date.now() - 10 * 60 * 1000);
+    await db().dripIdentity.update({
+      where: mappedWhere,
+      data: { lastResolvedAt: staleAfterSuccess },
+    });
+    await db().charmBalance.update({
+      where: mappedBalanceWhere,
+      data: {
+        observedAt: staleAfterSuccess,
+        lastApiSuccessAt: staleAfterSuccess,
+        status: 'CURRENT',
+      },
+    });
+    await queueCharmRefresh(mappedCollector.id);
+    await db().dripSyncState.update({
+      where: { realmId: realm },
+      data: { nextRequestAt: new Date(0) },
+    });
+    globalThis.fetch = async (input, options) => {
+      if (new URL(String(input)).pathname === '/v1/lookups/dripIdentity')
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            data: [
+              {
+                discord_id: mappedDiscord,
+                wallet_address: mappedWallet,
+                drip_member_id: mappedMember,
+              },
+            ],
+          }),
+          { headers: { 'content-type': 'application/json' } },
+        );
+      check(
+        options?.method === 'GET',
+        'network failure attempt remains GET-only',
+      );
+      throw Error('temporary network failure');
+    };
+    const networkFailure = await syncDripDue();
+    const mappedIdentityAfterNetworkFailure =
+      await db().dripIdentity.findUniqueOrThrow({ where: mappedWhere });
+    const mappedBalanceAfterNetworkFailure =
+      await db().charmBalance.findUniqueOrThrow({ where: mappedBalanceWhere });
+    check(
+      networkFailure.status === 'DRIP_NETWORK' &&
+        mappedIdentityAfterNetworkFailure.status === 'RESOLVED' &&
+        mappedIdentityAfterNetworkFailure.dripMemberId === mappedMember &&
+        mappedIdentityAfterNetworkFailure.source === 'VERIFIED_WALLET_LINK' &&
+        +mappedIdentityAfterNetworkFailure.lastResolvedAt! ===
+          +staleAfterSuccess &&
+        mappedBalanceAfterNetworkFailure.balance?.toString() === '91.25' &&
+        +mappedBalanceAfterNetworkFailure.observedAt! === +staleAfterSuccess &&
+        +mappedBalanceAfterNetworkFailure.lastApiSuccessAt! ===
+          +staleAfterSuccess &&
+        (await charmBalance(mappedCollector.id, false)).stale,
+      'network failure preserves verified identity and balance while marking the balance stale by age',
+    );
+    await db().charmRefreshRequest.updateMany({
+      where: { collectorId: mappedCollector.id, pending: true },
+      data: { pending: false },
+    });
+
     const deniedDiscord = '688888888888888889';
     const deniedCollector = await db().collector.create({
       data: {
@@ -362,6 +569,20 @@ export async function phase12DatabaseTests(
       where: { realmId: realm },
       data: { nextRequestAt: new Date(0) },
     });
+    const identityBeforeRateLimit = await db().dripIdentity.findUniqueOrThrow({
+      where: {
+        realmId_collectorId: { realmId: realm, collectorId: c.id },
+      },
+    });
+    const balanceBeforeRateLimit = await db().charmBalance.findUniqueOrThrow({
+      where: {
+        collectorId_realmId_currencyId: {
+          collectorId: c.id,
+          realmId: realm,
+          currencyId: currency,
+        },
+      },
+    });
     globalThis.fetch = async () =>
       new Response('redacted upstream failure', {
         status: 429,
@@ -378,6 +599,33 @@ export async function phase12DatabaseTests(
     check(
       (await charmBalance(c.id, false)).balance === '123456789.125',
       'DRIP outage preserves last known balance',
+    );
+    const identityAfterRateLimit = await db().dripIdentity.findUniqueOrThrow({
+      where: {
+        realmId_collectorId: { realmId: realm, collectorId: c.id },
+      },
+    });
+    const balanceAfterRateLimit = await db().charmBalance.findUniqueOrThrow({
+      where: {
+        collectorId_realmId_currencyId: {
+          collectorId: c.id,
+          realmId: realm,
+          currencyId: currency,
+        },
+      },
+    });
+    check(
+      identityBeforeRateLimit.status === 'RESOLVED' &&
+        identityAfterRateLimit.status === 'RESOLVED' &&
+        +identityAfterRateLimit.lastResolvedAt! ===
+          +identityBeforeRateLimit.lastResolvedAt! &&
+        balanceAfterRateLimit.balance?.toString() ===
+          balanceBeforeRateLimit.balance?.toString() &&
+        +balanceAfterRateLimit.observedAt! ===
+          +balanceBeforeRateLimit.observedAt! &&
+        +balanceAfterRateLimit.lastApiSuccessAt! ===
+          +balanceBeforeRateLimit.lastApiSuccessAt!,
+      '429 preserves previously verified identity and balance timestamps',
     );
     await db().dripSyncState.update({
       where: { realmId: realm },
@@ -524,6 +772,36 @@ export async function phase12DatabaseTests(
     check(
       conflictedProfile.status === 'ready' && !('charm' in conflictedProfile),
       'a newly conflicted mapping revokes a previously public opt-in balance',
+    );
+
+    const oldBalanceRead = new Date(Date.now() - 25 * 60 * 60 * 1000);
+    await db().charmBalance.updateMany({
+      where: { realmId: realm },
+      data: { lastApiSuccessAt: oldBalanceRead },
+    });
+    await db().dripSyncState.update({
+      where: { realmId: realm },
+      data: {
+        alignmentHash: 'fixture-reviewed',
+        alignmentCommit: launchContext().commit,
+        alignmentAt: new Date(),
+        lastFullSweep: new Date(),
+        lastSuccessAt: new Date(),
+        monthRequests: 0,
+        errorCode: null,
+      },
+    });
+    check(
+      !(await verifyCharmGate()),
+      'CHARM_DRIP remains pending when no balance has a recent successful API read',
+    );
+    check(
+      (
+        await db().launchGate.findUniqueOrThrow({
+          where: { key: 'CHARM_DRIP' },
+        })
+      ).status === 'PENDING',
+      'stale balance evidence is not enough to verify CHARM_DRIP',
     );
   } finally {
     globalThis.fetch = fetcher;

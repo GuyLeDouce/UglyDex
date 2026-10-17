@@ -29,7 +29,7 @@ export default async function Charm({
   );
   next.set('page', String(history.filters.page + 1));
   return (
-    <>
+    <div className="charm-dashboard">
       <section className="page-heading">
         <p className="eyebrow">YOUR ECOSYSTEM CURRENCY</p>
         <h1>$CHARM</h1>
@@ -120,6 +120,6 @@ export default async function Charm({
         )}
         {history.more && <Link href={'/charm?' + next}>Older activity →</Link>}
       </section>
-    </>
+    </div>
   );
 }

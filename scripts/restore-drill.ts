@@ -195,11 +195,20 @@ async function main() {
       await client.query('DELETE FROM "DeploymentIdentity"');
       process.env.DATABASE_URL = target.href;
       process.env.APP_ENV = 'development';
+      process.env.RESTORE_DRILL_CONFIRM =
+        'RESTORE_INTO_EMPTY_DISPOSABLE_DATABASE';
       const { productionVerify } =
         await import('../src/server/production-verify');
       const { db } = await import('../src/server/db');
-      const checks = await productionVerify();
-      await db().$disconnect();
+      let checks: Awaited<ReturnType<typeof productionVerify>>;
+      try {
+        checks = await productionVerify({
+          containedRestore: true,
+          sourceDatabaseFingerprint: manifest.source,
+        });
+      } finally {
+        await db().$disconnect();
+      }
       for (const c of checks) console.log(`${c.status} ${c.name}: ${c.detail}`);
       if (checks.some((c) => c.status === 'FAIL'))
         throw new Error('RESTORED_VERIFICATION_FAILED');

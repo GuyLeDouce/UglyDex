@@ -6,11 +6,13 @@ export function ShareControls({
   url,
   copy,
   owner = false,
+  label = 'Share ↗',
 }: {
   spec: Partial<ShareSpec> & { entity: string };
   url: string;
   copy: string;
   owner?: boolean;
+  label?: string;
 }) {
   const [open, setOpen] = useState(false),
     [ratio, setRatio] = useState<'landscape' | 'square'>('landscape'),
@@ -72,7 +74,7 @@ export function ShareControls({
         aria-expanded={open}
         onClick={() => setOpen(!open)}
       >
-        Share ↗
+        {label}
       </button>
       {open && (
         <section className="share-panel" aria-label="Share card">

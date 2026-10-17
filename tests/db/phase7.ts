@@ -60,7 +60,7 @@ export async function phase7DatabaseTests(
     ],
     { env: process.env, encoding: 'utf8', windowsHide: true, timeout: 90000 },
   );
-  if (!preflightCLI.stdout.includes('PASS migration.drift'))
+  if (!preflightCLI.stdout.includes('PASS migration.drift')) {
     console.error(
       (
         preflightCLI.stdout +
@@ -70,6 +70,23 @@ export async function phase7DatabaseTests(
         .replaceAll(process.env.DATABASE_URL!, '[fixture database]')
         .replaceAll(process.env.AUTH_SECRET!, '[fixture secret]'),
     );
+    const drift = spawnSync(
+      process.execPath,
+      [
+        'node_modules/prisma/build/index.js',
+        'migrate',
+        'diff',
+        '--from-config-datasource',
+        '--to-schema',
+        'prisma/schema.prisma',
+        '--script',
+      ],
+      { env: process.env, encoding: 'utf8', windowsHide: true, timeout: 90000 },
+    );
+    console.error(
+      drift.stdout.replaceAll(process.env.DATABASE_URL!, '[fixture database]'),
+    );
+  }
   check(
     preflightCLI.stdout.includes('PASS migration.drift'),
     'preflight CLI verifies live schema drift',

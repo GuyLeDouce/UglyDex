@@ -315,7 +315,9 @@ export async function phase6WebTests(
         }
       }
       await page.goto(base + '/squig/4202');
-      await page.getByRole('button', { name: 'Share ↗', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'Share image ↗', exact: true })
+        .click();
       await page
         .getByRole('img', { name: 'UglyDex share card preview' })
         .waitFor();

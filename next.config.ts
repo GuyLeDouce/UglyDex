@@ -8,6 +8,11 @@ const config: NextConfig = {
         hostname: 'gateway.pinata.cloud',
         pathname: '/ipfs/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.imgur.com',
+        pathname: '/**',
+      },
     ],
     minimumCacheTTL: 86400,
     maximumRedirects: 0,

@@ -7,3 +7,4 @@ data
 package-lock.json
 coverage
 next-env.d.ts
+release-manifest.json

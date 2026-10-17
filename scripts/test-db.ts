@@ -932,12 +932,12 @@ try {
         );
         if (process.argv.includes('--catalog')) {
           await page
-            .getByRole('img', { name: 'Squig #1', exact: true })
+            .locator('.landing-specimens img[alt="Squig #1"]')
             .scrollIntoViewIfNeeded();
           await page.waitForFunction(
             () => {
               const img = document.querySelector<HTMLImageElement>(
-                'img[alt="Squig #1"]',
+                '.landing-specimens img[alt="Squig #1"]',
               );
               return !!img?.complete && img.naturalWidth > 0;
             },
@@ -947,7 +947,7 @@ try {
           check(
             (
               await page
-                .getByRole('img', { name: 'Squig #1', exact: true })
+                .locator('.landing-specimens img[alt="Squig #1"]')
                 .getAttribute('src')
             )?.includes('/_next/image?'),
             'controlled artwork renders at the canonical optimizer URL',
@@ -1253,6 +1253,7 @@ try {
       `http://127.0.0.1:${webPort}`,
       check,
       process.argv.includes('--browser'),
+      process.argv.includes('--visual'),
     );
   }
   if (!phase12Only) {

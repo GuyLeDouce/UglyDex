@@ -2,6 +2,7 @@ import 'server-only';
 import { db } from './db';
 import { Prisma } from '@/generated/prisma/client';
 import { hash } from '@/domain/events';
+import type { DerivedReadClient } from './derived-verification';
 import {
   RULESET,
   xpRules,
@@ -64,7 +65,7 @@ export async function seedProgression() {
   );
 }
 export async function progressionFacts(
-  tx: Prisma.TransactionClient,
+  tx: DerivedReadClient,
   subject: Subject,
   id: string,
 ) {

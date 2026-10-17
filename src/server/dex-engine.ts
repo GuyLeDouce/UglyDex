@@ -2,6 +2,7 @@ import 'server-only';
 import { db } from './db';
 import { Prisma } from '@/generated/prisma/client';
 import { hash } from '@/domain/events';
+import type { DerivedReadClient } from './derived-verification';
 import { SQUIGS_CONTRACT } from '@/domain/validation';
 import {
   COLLECTION_RULESET as R,
@@ -98,10 +99,7 @@ export async function seedCollections() {
     { timeout: 30000 },
   );
 }
-export async function collectionEvidence(
-  tx: Prisma.TransactionClient,
-  id: string,
-) {
+export async function collectionEvidence(tx: DerivedReadClient, id: string) {
   const rows = await tx.squig.findMany({
     where: { chainId: 1, contractAddress: SQUIGS_CONTRACT },
     select: {

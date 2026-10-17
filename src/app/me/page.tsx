@@ -43,7 +43,7 @@ export default async function Me() {
     refreshStatus(),
   ]);
   return (
-    <>
+    <div className="collector-dashboard">
       <nav className="anchor-nav">
         <Link href="/settings/galleries">My galleries</Link>
         <Link href="/settings/sharing">Share studio</Link>
@@ -60,11 +60,7 @@ export default async function Me() {
         </Link>
       </section>
       <Stats summary={s} />
-      {promptDripLink ? (
-        <CharmDripLink />
-      ) : (
-        <CharmBalanceCard value={charm} />
-      )}
+      {promptDripLink ? <CharmDripLink /> : <CharmBalanceCard value={charm} />}
       <Link href="/charm">Your $CHARM activity →</Link>
       <DexSummary id={id} />
       <Progression subject="COLLECTOR" id={id} path="/me/achievements" />
@@ -119,6 +115,6 @@ export default async function Me() {
           </Link>
         </section>
       </div>
-    </>
+    </div>
   );
 }

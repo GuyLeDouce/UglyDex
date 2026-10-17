@@ -33,6 +33,8 @@ export function Artwork({
                 : '(max-width: 600px) 90vw, (max-width: 1000px) 45vw, 30vw'
             }
             priority={priority}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : 'auto'}
             unoptimized={!src.startsWith('https://gateway.pinata.cloud/ipfs/')}
             onLoad={() => setLoaded(src)}
             onError={() => setFailed(src)}

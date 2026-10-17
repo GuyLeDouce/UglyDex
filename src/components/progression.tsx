@@ -74,16 +74,19 @@ export async function Progression({
         <div>
           <h3>Recently earned</h3>
           {p.recent.length ? (
-            p.recent.map((a) => (
-              <p key={a.name}>
-                {a.name}
-                <small>
-                  {new Date(a.at!).toLocaleDateString('en-US', {
-                    timeZone: 'UTC',
-                  })}
-                </small>
-              </p>
-            ))
+            <div className="achievement-minis">
+              {p.recent.map((a) => (
+                <article className="achievement-mini" key={a.name}>
+                  <span aria-hidden>✦</span>
+                  <strong>{a.name}</strong>
+                  <small>
+                    {new Date(a.at!).toLocaleDateString('en-US', {
+                      timeZone: 'UTC',
+                    })}
+                  </small>
+                </article>
+              ))}
+            </div>
           ) : (
             <p>Your story is still unfolding.</p>
           )}

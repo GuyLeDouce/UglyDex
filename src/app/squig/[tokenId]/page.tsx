@@ -56,27 +56,35 @@ export default async function Squig({
       : null;
   return (
     <>
-      <ShareControls
-        spec={{ kind: 'squig', entity: String(s.tokenId) }}
-        url={absoluteUrl('/squig/' + s.tokenId)}
-        copy={'Squig #' + s.tokenId + ' has a story.'}
-      />
-      <Link href={'/share?kind=passport&entity=' + s.tokenId}>
-        Share Passport ↗
-      </Link>
-      <div className="breadcrumb">
-        <Link href="/squigs">Field guide</Link>
-        <span>/ Squig #{s.tokenId}</span>
+      <div className="squig-detail-top">
+        <ShareControls
+          spec={{ kind: 'squig', entity: String(s.tokenId) }}
+          url={absoluteUrl('/squig/' + s.tokenId)}
+          copy={'Squig #' + s.tokenId + ' has a story.'}
+          label="Share image ↗"
+        />
+        <Link
+          className="button share-passport-link"
+          href={'/share?kind=passport&entity=' + s.tokenId}
+        >
+          Share Passport ↗
+        </Link>
+        <div className="breadcrumb">
+          <Link href="/squigs">Field guide</Link>
+          <span>/ Squig #{s.tokenId}</span>
+        </div>
       </div>
       <section className="specimen">
-        <div>
+        <figure className="specimen-art">
           <Artwork
             src={s.image}
             alt={`Original Squig #${s.tokenId}`}
             priority
           />
-          <p className="eyebrow">Original · canonical Reloaded artwork</p>
-        </div>
+          <figcaption className="specimen-caption">
+            Original · canonical Reloaded artwork
+          </figcaption>
+        </figure>
         <div className="specimen-info">
           <p className="eyebrow">SQUIGS RELOADED / ETHEREUM</p>
           <h1>
