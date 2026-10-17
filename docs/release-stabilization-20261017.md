@@ -21,6 +21,11 @@ restore earlier browser-fixture refresh hints, retaining all meaningful assertio
 Deployment packaging now reproduces the reviewed migration bytes for each database;
 see [migration packaging](migration-bytes.md).
 
+Populated gallery review found decorative pale accents still applied to text on
+the Phase 13 white surfaces. Gallery labels and links now use the approved dark
+green, while decorative accent choices remain intact. Browser coverage measures
+normal-text contrast for all four accent choices against computed surfaces.
+
 Next and Sharp security patches remove the reported runtime dependency advisories.
 `npm audit --omit=dev` reported zero vulnerabilities. Five high development-tool
 advisories remain in the braces/micromatch/fast-glob ESLint dependency chain; the
@@ -35,6 +40,12 @@ Use it only while resolving the denied read access, then revalidate a complete
 scheduled cycle. It does not waive any launch requirement.
 
 ## Observed checkpoints
+
+At `8ace28f69b42b4cf870bc0bbe251b616382295ae`,
+[GitHub CI](https://github.com/GuyLeDouce/UglyDex/actions/runs/39060875356)
+passed all steps after the DRIP sweep freshness/pause change. All five staging
+images had matching APP_COMMIT and baked release manifests, including the staging
+migration-byte profile. These results precede the final gallery contrast fix.
 
 At `7bba4be92dce6fb12a50f1e9f41336bd6c853410`,
 [GitHub CI](https://github.com/GuyLeDouce/UglyDex/actions/runs/39057761160)

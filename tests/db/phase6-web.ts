@@ -308,6 +308,59 @@ export async function phase6WebTests(
             !(await page.evaluate(() => Reflect.get(window, 'GALLERY_XSS'))),
             'gallery captions cannot execute HTML',
           );
+          const contrast = await page.evaluate(() => {
+            const showcase = document.querySelector('.personal-showcase')!;
+            const original = showcase.className;
+            const luminance = (color: string) => {
+              const channels = color
+                .match(/[\d.]+/g)!
+                .slice(0, 3)
+                .map(Number);
+              const linear = channels.map((channel) => {
+                const value = channel / 255;
+                return value <= 0.04045
+                  ? value / 12.92
+                  : ((value + 0.055) / 1.055) ** 2.4;
+              });
+              return (
+                linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722
+              );
+            };
+            try {
+              return ['green', 'bone', 'violet', 'amber'].map((accent) => {
+                showcase.className =
+                  original.replace(/accent-\S+/g, '') + ' accent-' + accent;
+                const ratios = [
+                  ...showcase.querySelectorAll('.eyebrow, .text-link'),
+                ].map((label) => {
+                  let parent: Element | null = label;
+                  let background = 'rgba(0, 0, 0, 0)';
+                  while (parent && background === 'rgba(0, 0, 0, 0)') {
+                    background = getComputedStyle(parent).backgroundColor;
+                    parent = parent.parentElement;
+                  }
+                  const foreground = luminance(getComputedStyle(label).color);
+                  const surface = luminance(background);
+                  return (
+                    (Math.max(foreground, surface) + 0.05) /
+                    (Math.min(foreground, surface) + 0.05)
+                  );
+                });
+                return {
+                  accent,
+                  count: ratios.length,
+                  minimum: Math.min(...ratios),
+                };
+              });
+            } finally {
+              showcase.className = original;
+            }
+          });
+          for (const result of contrast)
+            check(
+              result.count > 0 && result.minimum >= 4.5,
+              `gallery ${result.accent} labels meet normal-text contrast (${result.minimum.toFixed(2)}:1)`,
+            );
           await page.screenshot({
             path: '.data/phase6-gallery-mobile.png',
             fullPage: true,
