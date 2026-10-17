@@ -26,6 +26,13 @@ the Phase 13 white surfaces. Gallery labels and links now use the approved dark
 green, while decorative accent choices remain intact. Browser coverage measures
 normal-text contrast for all four accent choices against computed surfaces.
 
+A cross-platform restore exposed timezone-dependent JSON digests in the migration
+ledger: identical rows differed between UTC and America/Toronto sessions. Inventory
+serialization now uses transaction-local UTC. Stored timestamps, migration SQL and
+ledger checksums are unchanged. A populated database regression verifies identical
+inventories across both zones and confirms that the session change is scoped to
+the transaction.
+
 Next and Sharp security patches remove the reported runtime dependency advisories.
 `npm audit --omit=dev` reported zero vulnerabilities. Five high development-tool
 advisories remain in the braces/micromatch/fast-glob ESLint dependency chain; the
@@ -40,6 +47,28 @@ Use it only while resolving the denied read access, then revalidate a complete
 scheduled cycle. It does not waive any launch requirement.
 
 ## Observed checkpoints
+
+At `8d04ab99cf292a77b3b06948f4388bb600a08934`,
+[GitHub CI](https://github.com/GuyLeDouce/UglyDex/actions/runs/39063718407)
+and the complete local release check passed: 780 unit tests and 921 database,
+HTTP, browser and catalog assertions. Node was upgraded to 24.22.0 and npm to
+12.2.0 at the owner's request. All five staging images matched that revision.
+Replay A/B matched with stable inputs and no differences. Ten staging smoke
+checks passed. Stored privacy checks covered 35,957 active activity projections
+and 379 private profiles with zero failures; genuine account flows remain pending.
+
+The first backup captured 190 queued derivations and 62 stale collection results;
+its restore correctly failed. After normal replay recovery, a fresh archive passed
+all 31 selected-table inventories and contained verification, with zero queued
+derivations or collection discrepancies. Both disposable staging restore targets
+were removed and verified absent. Further Windows HTTP restore validation exposed
+the timezone issue fixed above. Final-revision reruns belong in the PR record.
+
+Paced desktop/mobile browsing found no horizontal overflow or page-script errors.
+The public artwork gateway returned HTTP 429 for the tested passport image and
+occasional timeouts. Artwork fallback is honest but does not certify availability;
+gateway capacity remains an operational launch issue. No alternate gateway was
+substituted to bypass its limits.
 
 At `8ace28f69b42b4cf870bc0bbe251b616382295ae`,
 [GitHub CI](https://github.com/GuyLeDouce/UglyDex/actions/runs/39060875356)

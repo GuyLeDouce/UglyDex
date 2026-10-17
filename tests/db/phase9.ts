@@ -87,6 +87,26 @@ export async function phase9DatabaseTests(
       }),
       client = await pool.connect();
     try {
+      const { restoreInventory } = await import('../../scripts/restore-drill');
+      const originalTimezone = (
+        await client.query("SELECT current_setting('TimeZone') AS timezone")
+      ).rows[0].timezone;
+      await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+      await client.query("SET LOCAL TIME ZONE 'UTC'");
+      const utcInventory = await restoreInventory(client);
+      await client.query("SET LOCAL TIME ZONE 'America/Toronto'");
+      const torontoInventory = await restoreInventory(client);
+      check(
+        utcInventory._prisma_migrations.count > 0 &&
+          JSON.stringify(utcInventory) === JSON.stringify(torontoInventory),
+        'populated restore inventory is identical across session timezones',
+      );
+      await client.query('ROLLBACK');
+      check(
+        (await client.query("SELECT current_setting('TimeZone') AS timezone"))
+          .rows[0].timezone === originalTimezone,
+        'inventory timezone normalization stays inside the transaction',
+      );
       const a = await semanticFingerprints(client, 'derived');
       await db().collectorProgress.updateMany({
         data: { calculatedAt: new Date() },
@@ -119,6 +139,7 @@ export async function phase9DatabaseTests(
         'input fingerprint covers provenance identity source and catalogs',
       );
     } finally {
+      await client.query('ROLLBACK');
       client.release();
       await pool.end();
     }
