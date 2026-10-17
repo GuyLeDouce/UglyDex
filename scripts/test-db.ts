@@ -5,7 +5,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { createServer } from 'node:net';
 import { resolve, relative } from 'node:path';
 import { tmpdir } from 'node:os';
-import { rm } from 'node:fs/promises';
+import { mkdir, rm } from 'node:fs/promises';
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -102,6 +102,7 @@ const check = (condition: unknown, message: string) => {
   assertions++;
 };
 try {
+  await mkdir(resolve('.data'), { recursive: true });
   console.log(JSON.stringify({ event: 'test.initialise_postgres' }));
   await postgres.initialise();
   console.log(JSON.stringify({ event: 'test.start_postgres' }));
@@ -920,6 +921,7 @@ try {
           await page
             .getByRole('heading', {
               name: /Every Squig.*has a story/,
+              level: 1,
             })
             .isVisible(),
           'browser hero visible',
