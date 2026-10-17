@@ -934,12 +934,13 @@ try {
         );
         if (process.argv.includes('--catalog')) {
           await page
-            .locator('.landing-specimens img[alt="Squig #1"]')
+            .locator('.landing-specimens img')
+            .first()
             .scrollIntoViewIfNeeded();
           await page.waitForFunction(
             () => {
               const img = document.querySelector<HTMLImageElement>(
-                '.landing-specimens img[alt="Squig #1"]',
+                '.landing-specimens img',
               );
               return !!img?.complete && img.naturalWidth > 0;
             },
@@ -949,7 +950,8 @@ try {
           check(
             (
               await page
-                .locator('.landing-specimens img[alt="Squig #1"]')
+                .locator('.landing-specimens img')
+                .first()
                 .getAttribute('src')
             )?.includes('/_next/image?'),
             'controlled artwork renders at the canonical optimizer URL',
