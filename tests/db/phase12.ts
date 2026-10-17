@@ -59,6 +59,16 @@ export async function phase12DatabaseTests(
         alignmentAt: new Date(),
       },
     });
+    process.env.DRIP_SWEEP_PAUSED = 'true';
+    let pausedRequests = 0;
+    globalThis.fetch = async () => {
+      pausedRequests++;
+      throw Error('PAUSED_SWEEP_MUST_NOT_READ');
+    };
+    check(
+      (await syncDripDue()).status === 'SWEEP_PAUSED' && pausedRequests === 0,
+      'permission recovery pause stops automatic sweeps before any external request',
+    );
     await queueCharmRefresh(c.id, true);
     check(
       !(await queueCharmRefresh(c.id, true)),
@@ -114,6 +124,7 @@ export async function phase12DatabaseTests(
     );
     await syncDripDue();
     check(requests === 1, 'durable request checkpoint prevents restart storm');
+    process.env.DRIP_SWEEP_PAUSED = 'false';
     const linkDiscord = '699999999999999997';
     const linkMember = 'f'.repeat(24);
     const linkCollector = await db().collector.create({

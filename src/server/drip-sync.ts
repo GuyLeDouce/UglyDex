@@ -21,6 +21,10 @@ const configSchema = z.object({
   DRIP_READ_API_KEY: z.string().min(1),
   DRIP_REALM_ID: z.string().regex(/^[a-f0-9]{24}$/i),
   DRIP_REALM_POINT_ID: z.string().regex(/^[a-f0-9]{24}$/i),
+  DRIP_SWEEP_PAUSED: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((value) => value === 'true'),
   DRIP_MAX_RPM: z.coerce.number().int().min(1).max(6).default(6),
   DRIP_SYNC_INTERVAL_MS: z.coerce
     .number()
@@ -314,6 +318,7 @@ async function syncDripBatch() {
     take: 25,
   });
   const sweep = requests.length === 0;
+  if (sweep && c.DRIP_SWEEP_PAUSED) return { status: 'SWEEP_PAUSED' };
   if (sweep && !s.sweepStartedAt && s.nextSweepAt > new Date())
     return { status: 'NOT_DUE' };
   if (sweep && !s.sweepStartedAt)

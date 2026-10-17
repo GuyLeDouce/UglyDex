@@ -89,6 +89,7 @@ Object.assign(process.env, {
   DRIP_MAX_RPM: '6',
   DRIP_SYNC_INTERVAL_MS: '1800000',
   DRIP_STALE_AFTER_MS: '300000',
+  DRIP_SWEEP_PAUSED: 'false',
 });
 process.env.PUBLIC_BASE_URL = `https://localhost:${webPort}`;
 process.env.AUTH_SECRET = randomBytes(32).toString('hex');
