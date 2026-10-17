@@ -738,7 +738,7 @@ model ReconciliationDecision {
 }
 
 model CollectorMergeRequest {
-  id String @id @default(uuid()) @db.Uuid
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   survivorCollectorId String @db.Uuid
   survivor Collector @relation("MergeSurvivor", fields: [survivorCollectorId], references: [id])
   absorbedCollectorId String @db.Uuid

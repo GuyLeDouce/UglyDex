@@ -1,0 +1,2 @@
+# Source SQL stays LF. Deployment packaging reproduces reviewed applied bytes.
+prisma/migrations/**/migration.sql text eol=lf

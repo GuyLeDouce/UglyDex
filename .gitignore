@@ -17,6 +17,7 @@ Thumbs.db
 .railway/
 test-results/
 playwright-report/
+release-manifest.json
 *.dump
 *.backup
 *.inventory.json

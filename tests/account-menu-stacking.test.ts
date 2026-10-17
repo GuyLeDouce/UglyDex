@@ -15,7 +15,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await browser.close();
+  await browser?.close();
 });
 
 async function renderHeader(page: Page) {
