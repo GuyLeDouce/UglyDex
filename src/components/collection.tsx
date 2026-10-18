@@ -25,11 +25,13 @@ export function SquigCard({
   priority = false,
   listing,
   marketStatus,
+  marketComplete,
 }: {
   item: SquigCardData;
   priority?: boolean;
   listing?: SquigListing;
   marketStatus?: OpenSeaListings['status'];
+  marketComplete?: boolean;
 }) {
   return (
     <article
@@ -147,6 +149,7 @@ export function SquigCard({
         tokenId={item.tokenId}
         listing={listing}
         status={marketStatus}
+        complete={marketComplete}
       />
     </article>
   );
@@ -204,6 +207,7 @@ export function CollectionGrid({
               priority={index < priorityCount}
               listing={listings.get(item.tokenId)}
               marketStatus={market?.status}
+              marketComplete={market?.complete}
             />
           ))}
         </div>
