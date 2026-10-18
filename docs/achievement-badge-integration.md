@@ -53,6 +53,8 @@ The database suite includes the existing ownership, progression, provenance, mar
 
 The full database suite requires `--catalog`: a reduced-fixture invocation stopped at the existing full-catalog restore assertion. The documented full invocation passed. No unresolved badge integration failures remain.
 
+The first GitHub CI run reached the badge browser matrix but timed out waiting for global network idleness on a Squig page. Navigation now waits for DOM readiness and the badge elements explicitly; every badge still must finish decoding. This avoids coupling the badge checks to external NFT artwork requests.
+
 The E: workspace contains an unrelated untracked staging source copy and an older installed Next version. Final verification uses an isolated NTFS copy of tracked files plus this feature, with the existing dependency installation whose lockfile matches the branch (Next 16.3.8). Direct E: builds hit the same filesystem junction/readlink problem documented in earlier project reports. The isolated build uses `npm run build -- --webpack`; no application workaround or dependency change was introduced for that environment issue.
 
 Screenshots are captured from the production build using disposable local fixtures with 25 verified Duel wins. They are review evidence, not production account records. The full suite creates and cleans up its own PostgreSQL cluster.

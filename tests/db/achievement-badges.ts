@@ -286,7 +286,10 @@ export async function achievementBadgeWebTests(
     for (const width of [1440, 390, 320]) {
       await page.setViewportSize({ width, height: width > 1000 ? 1000 : 844 });
       for (const [path, name, cardCount] of paths) {
-        await page.goto(base + path, { waitUntil: 'networkidle' });
+        // External NFT artwork may keep requests open. Wait for the tested
+        // content explicitly; badge decoding is checked below for every image.
+        await page.goto(base + path, { waitUntil: 'domcontentloaded' });
+        await page.locator('.achievement-badge img').first().waitFor();
         if (cardCount)
           check(
             (await page.locator('.achievement-grid .achievement').count()) ===
