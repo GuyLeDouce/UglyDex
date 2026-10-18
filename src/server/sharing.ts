@@ -103,12 +103,11 @@ export async function shareCard(
         q.kind === 'passport' ? 'EVERY SQUIG HAS A STORY' : 'SQUIGS RELOADED',
       description: 'Traits, provenance and a beautifully strange history.',
       stats: stats.slice(0, 6),
+      achievementBadges:
+        p?.status === 'ready' ? p.badgeSummary.badges.slice(0, 3) : [],
       badges:
         p?.status === 'ready'
-          ? p.cards
-              .filter((a) => a.unlocked)
-              .slice(0, 3)
-              .map((a) => a.name)
+          ? p.badgeSummary.badges.slice(0, 3).map((a) => a.name)
           : [],
       tokens: [n],
       path:
@@ -179,6 +178,10 @@ export async function shareCard(
     description: 'Still ugly. Still hunting.',
     path: base,
     indexable: c.isPublic,
+    achievementBadges:
+      p?.status === 'ready' && ['collector', 'trophy'].includes(q.kind)
+        ? p.badgeSummary.badges.slice(0, 3)
+        : [],
     tokens: featured.slice(0, 4),
     stats: [
       ...(p?.status === 'ready' ? ['Level ' + p.level] : []),
@@ -191,7 +194,12 @@ export async function shareCard(
     ],
     badges:
       p?.status === 'ready'
-        ? [...(p.title ? [p.title] : []), ...p.featured].slice(0, 4)
+        ? [
+            ...new Set([
+              ...(p.title ? [p.title] : []),
+              ...p.badgeSummary.badges.slice(0, 3).map((a) => a.name),
+            ]),
+          ]
         : [],
   };
   if (q.kind === 'completion') {
@@ -230,6 +238,7 @@ export async function shareCard(
     card = {
       ...card,
       title: a.name,
+      achievementBadges: a.badge.status === 'earned' ? [a.badge] : [],
       eyebrow: 'UNLOCKED BY ' + name,
       description: a.description,
       date: a.at ?? undefined,

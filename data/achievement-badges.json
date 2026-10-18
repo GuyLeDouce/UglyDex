@@ -1,0 +1,587 @@
+[
+  {
+    "key": "collector-discoveries-1",
+    "source": "collector/collector_01_first-ugly.png",
+    "file": "public/achievements/collector/first-ugly.png",
+    "sha256": "6d702c41fce60eb7044a5cee4ff32b9ab27e1580bd5f36afe5146b592c1428e9",
+    "type": "Collector",
+    "achievement": "First Ugly",
+    "tier_name": "iron"
+  },
+  {
+    "key": "collector-discoveries-5",
+    "source": "collector/collector_01_getting-ugly.png",
+    "file": "public/achievements/collector/getting-ugly.png",
+    "sha256": "bba010bd0ffb200b8c122a84d71fc1869677adca75f226d7d2376afd2bf9f7c2",
+    "type": "Collector",
+    "achievement": "Getting Ugly",
+    "tier_name": "copper"
+  },
+  {
+    "key": "collector-discoveries-10",
+    "source": "collector/collector_01_certified-hoarder.png",
+    "file": "public/achievements/collector/certified-hoarder.png",
+    "sha256": "341097f9319348c9a0876ea3cb2a48b07e6b57b40dcf1875dad54e8096187df7",
+    "type": "Collector",
+    "achievement": "Certified Hoarder",
+    "tier_name": "burnished_bronze"
+  },
+  {
+    "key": "collector-discoveries-20",
+    "source": "collector/collector_01_deep-in-the-dex.png",
+    "file": "public/achievements/collector/deep-in-the-dex.png",
+    "sha256": "956c0055b32293ec65f56f6b956a5f3a5563884285d7cab58667421fba0cb564",
+    "type": "Collector",
+    "achievement": "Deep in the Dex",
+    "tier_name": "bronze"
+  },
+  {
+    "key": "collector-discoveries-25",
+    "source": "collector/collector_01_field-researcher.png",
+    "file": "public/achievements/collector/field-researcher.png",
+    "sha256": "3c2f6cb4344b5bdba277d6bc2e7bd23bced4671fd52ab0a91d97caf655011ae6",
+    "type": "Collector",
+    "achievement": "Field Researcher",
+    "tier_name": "silver"
+  },
+  {
+    "key": "collector-discoveries-50",
+    "source": "collector/collector_01_ugly-archivist.png",
+    "file": "public/achievements/collector/ugly-archivist.png",
+    "sha256": "fe9c7d7849f918dab0953e12194a792c7fbe2f1232d468666bc1d5eecf343739",
+    "type": "Collector",
+    "achievement": "Ugly Archivist",
+    "tier_name": "gold"
+  },
+  {
+    "key": "collector-discoveries-100",
+    "source": "collector/collector_01_creature-curator.png",
+    "file": "public/achievements/collector/creature-curator.png",
+    "sha256": "d2730fc39a564bf3ad7ea9ca4b59c6bf915f389b63bdced0efa2c77cce4461bb",
+    "type": "Collector",
+    "achievement": "Creature Curator",
+    "tier_name": "platinum"
+  },
+  {
+    "key": "collector-discoveries-250",
+    "source": "collector/collector_01_walking-encyclopedia.png",
+    "file": "public/achievements/collector/walking-encyclopedia.png",
+    "sha256": "427a7b1c312d2fc847122453470f4679200b3f7b06bc47078b2ab69add480b3a",
+    "type": "Collector",
+    "achievement": "Walking Encyclopedia",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-discoveries-500",
+    "source": "collector/collector_01_the-living-dex.png",
+    "file": "public/achievements/collector/the-living-dex.png",
+    "sha256": "af87dbb3f69db36a40ac950565a913d688fd62a11b4de305090382ac2c84e668",
+    "type": "Collector",
+    "achievement": "The Living Dex",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-og-1",
+    "source": "collector/collector_02_original-encounter.png",
+    "file": "public/achievements/collector/original-encounter.png",
+    "sha256": "64a741173bf862d74005c29f88ce0455ae9d199f263745ef66dc5cf8ddbc749f",
+    "type": "Collector",
+    "achievement": "Original Encounter",
+    "tier_name": "platinum"
+  },
+  {
+    "key": "collector-og-5",
+    "source": "collector/collector_02_old-guard.png",
+    "file": "public/achievements/collector/old-guard.png",
+    "sha256": "747ab0ee6cdc6a7be282cdea9c1b2748721fdbe0def7d05b343030179397bd01",
+    "type": "Collector",
+    "achievement": "Old Guard",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-og-10",
+    "source": "collector/collector_02_og-obsession.png",
+    "file": "public/achievements/collector/og-obsession.png",
+    "sha256": "617b5071c009ad44c3078ab7d289cb7267d2f57f7e8e674d2a8f84dcfeb1e985",
+    "type": "Collector",
+    "achievement": "OG Obsession",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-legendary-1",
+    "source": "collector/collector_03_an-unlikely-legend.png",
+    "file": "public/achievements/collector/an-unlikely-legend.png",
+    "sha256": "fea79665253e50b75c6d9167c805159139f39d3c3dd9406275c8df8fc3834109",
+    "type": "Collector",
+    "achievement": "An Unlikely Legend",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-duels-1",
+    "source": "collector/collector_04_step-into-the-ring.png",
+    "file": "public/achievements/collector/step-into-the-ring.png",
+    "sha256": "1dd23460094e77f3dcdb074fc6d8f01948ca69164b4e6e848a5de27ffc8bc21c",
+    "type": "Collector",
+    "achievement": "Step into the Ring",
+    "tier_name": "platinum"
+  },
+  {
+    "key": "collector-duels-10",
+    "source": "collector/collector_04_battle-regular.png",
+    "file": "public/achievements/collector/battle-regular.png",
+    "sha256": "64fb7ca7f8e7bb53fca869ada564c20e66c38f7fa69c94066c00b9e0eeb97a7b",
+    "type": "Collector",
+    "achievement": "Battle Regular",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-duels-50",
+    "source": "collector/collector_04_ring-resident.png",
+    "file": "public/achievements/collector/ring-resident.png",
+    "sha256": "5c298230cd9df12b870743bbb0a1095ab4a4b5ddcef6e4e4ca7123f5c8b8b84e",
+    "type": "Collector",
+    "achievement": "Ring Resident",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-wins-1",
+    "source": "collector/collector_05_first-victory.png",
+    "file": "public/achievements/collector/first-victory.png",
+    "sha256": "78243ac3fcf84bef9fe8de30ca401a84eba0d575d04d788ef955afc5b2615f5b",
+    "type": "Collector",
+    "achievement": "First Victory",
+    "tier_name": "gold"
+  },
+  {
+    "key": "collector-wins-10",
+    "source": "collector/collector_05_duel-freak.png",
+    "file": "public/achievements/collector/duel-freak.png",
+    "sha256": "02d151de74570deb6e64a04fe22c0a37de59c3cf81faa683956cbff77967d968",
+    "type": "Collector",
+    "achievement": "Duel Freak",
+    "tier_name": "platinum"
+  },
+  {
+    "key": "collector-wins-25",
+    "source": "collector/collector_05_certified-menace.png",
+    "file": "public/achievements/collector/certified-menace.png",
+    "sha256": "5f6577536a357e0b1f7155b9f939c596a59259d63d22a6fc6ad77ae91fee7915",
+    "type": "Collector",
+    "achievement": "Certified Menace",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-wins-50",
+    "source": "collector/collector_05_arena-apparition.png",
+    "file": "public/achievements/collector/arena-apparition.png",
+    "sha256": "eca04bb83eb36c369a3c78d8a000577d9d5f79904256c2919133b36669bc36ad",
+    "type": "Collector",
+    "achievement": "Arena Apparition",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-survival-1",
+    "source": "collector/collector_06_into-the-gauntlet.png",
+    "file": "public/achievements/collector/into-the-gauntlet.png",
+    "sha256": "617b999f61a3aadb36b9e67585cc465b27f13c9667bb87d1f9b20aea2fe8beab",
+    "type": "Collector",
+    "achievement": "Into the Gauntlet",
+    "tier_name": "platinum"
+  },
+  {
+    "key": "collector-survival-10",
+    "source": "collector/collector_06_still-here.png",
+    "file": "public/achievements/collector/still-here.png",
+    "sha256": "a177a0f15e49fd74ca1954e3877fd57040ac53464be0c2428716cccb61ce1b2e",
+    "type": "Collector",
+    "achievement": "Still Here",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-survival-50",
+    "source": "collector/collector_06_hard-to-kill.png",
+    "file": "public/achievements/collector/hard-to-kill.png",
+    "sha256": "b26f8d8789e5ca7377d919b077f0cef71b62ddbbfe1a0c3f52ed34138c9d5279",
+    "type": "Collector",
+    "achievement": "Hard to Kill",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-podiums-1",
+    "source": "collector/collector_07_on-the-podium.png",
+    "file": "public/achievements/collector/on-the-podium.png",
+    "sha256": "a5aea3700eebba2f1413ba6b0d61985eb8b042ab78ed70312db416c8ad6ae3a5",
+    "type": "Collector",
+    "achievement": "On the Podium",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-survivalWins-1",
+    "source": "collector/collector_08_survivor.png",
+    "file": "public/achievements/collector/survivor.png",
+    "sha256": "4f3ed45c5401d52ee6914dc92be7df179bada0d38aee4b74e74351593a6b660c",
+    "type": "Collector",
+    "achievement": "Survivor",
+    "tier_name": "platinum"
+  },
+  {
+    "key": "collector-survivalWins-5",
+    "source": "collector/collector_08_last-ugly-standing.png",
+    "file": "public/achievements/collector/last-ugly-standing.png",
+    "sha256": "4890f6937c659c184f17530d8b2566637e759039ba075cf6688fc91eb566b210",
+    "type": "Collector",
+    "achievement": "Last Ugly Standing",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-survivalWins-25",
+    "source": "collector/collector_08_survival-instinct.png",
+    "file": "public/achievements/collector/survival-instinct.png",
+    "sha256": "f0383220a8afd7b1226c0b5f6926b1758b765efde0d536a81a782c440094d525",
+    "type": "Collector",
+    "achievement": "Survival Instinct",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-creator-1",
+    "source": "collector/collector_09_make-it-ugly.png",
+    "file": "public/achievements/collector/make-it-ugly.png",
+    "sha256": "2c9aa0389ff3caf74628508b7a9a506496c026f2eb01968adc87517c63e42a0c",
+    "type": "Collector",
+    "achievement": "Make it Ugly",
+    "tier_name": "platinum"
+  },
+  {
+    "key": "collector-creator-5",
+    "source": "collector/collector_09_ugly-city-builder.png",
+    "file": "public/achievements/collector/ugly-city-builder.png",
+    "sha256": "8a2b47438d1df15f48b127286e40459c12c18ce4231b350336c9d18e8bc4b3f4",
+    "type": "Collector",
+    "achievement": "Ugly City Builder",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-creator-10",
+    "source": "collector/collector_09_prolific-freak.png",
+    "file": "public/achievements/collector/prolific-freak.png",
+    "sha256": "f6308873c579e6c3859627ea25105bf8737016e80ccf2ce50570354d27193c7b",
+    "type": "Collector",
+    "achievement": "Prolific Freak",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-milestones-1",
+    "source": "collector/collector_10_milestone-maker.png",
+    "file": "public/achievements/collector/milestone-maker.png",
+    "sha256": "1f81a571f2df3d2ff6ae09a39b59e24cad8ef23cdde1e68d0df1faecf509a2e9",
+    "type": "Collector",
+    "achievement": "Milestone Maker",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-milestones-5",
+    "source": "collector/collector_10_city-cartographer.png",
+    "file": "public/achievements/collector/city-cartographer.png",
+    "sha256": "9ac5acefca6c700a952d2f0dd9c068d9ac24ffc38dec0d441043e48469910733",
+    "type": "Collector",
+    "achievement": "City Cartographer",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-madlibs-1",
+    "source": "collector/collector_11_published-weirdness.png",
+    "file": "public/achievements/collector/published-weirdness.png",
+    "sha256": "a0b736fb7b0126d1fd79cf8088563383465cbea05aea60454f66d85c6ad5a9d3",
+    "type": "Collector",
+    "achievement": "Published Weirdness",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-bounty-1",
+    "source": "collector/collector_12_vault-contributor.png",
+    "file": "public/achievements/collector/vault-contributor.png",
+    "sha256": "354cdc598767dfb2b5e344291effc5349d7e8b90c11edb8381ef7ad8f8e5c098",
+    "type": "Collector",
+    "achievement": "Vault Contributor",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-bounty-5",
+    "source": "collector/collector_12_vault-regular.png",
+    "file": "public/achievements/collector/vault-regular.png",
+    "sha256": "8dc7ea7d2082139bbfc82f070e7273be4102503b83d085cd035566ce389ced18",
+    "type": "Collector",
+    "achievement": "Vault Regular",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-bountyWins-1",
+    "source": "collector/collector_13_bounty-claimed.png",
+    "file": "public/achievements/collector/bounty-claimed.png",
+    "sha256": "7ed0b7a7a6d27e3215d2f9b189446f4eca640dbca54278150da7c530c58077f4",
+    "type": "Collector",
+    "achievement": "Bounty Claimed",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-maw-1",
+    "source": "collector/collector_14_dinner-is-served.png",
+    "file": "public/achievements/collector/dinner-is-served.png",
+    "sha256": "d211d534637f317a71c9dd5c5b338b523c3b2ce657f845aa93c06fbabec07274",
+    "type": "Collector",
+    "achievement": "Dinner is Served",
+    "tier_name": "platinum"
+  },
+  {
+    "key": "collector-maw-5",
+    "source": "collector/collector_14_maw-regular.png",
+    "file": "public/achievements/collector/maw-regular.png",
+    "sha256": "4c65e321e1f625b5a3c339cf8ea24801706de75859456fda316b023f4a41977b",
+    "type": "Collector",
+    "achievement": "Maw Regular",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-maw-10",
+    "source": "collector/collector_14_the-maw-remembers.png",
+    "file": "public/achievements/collector/the-maw-remembers.png",
+    "sha256": "bed14620f7db07989ae46bbd4eee5e780a9c6739a98e975374906bc629c93d1b",
+    "type": "Collector",
+    "achievement": "The Maw Remembers",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-marketplace-1",
+    "source": "collector/collector_15_malformed-taste.png",
+    "file": "public/achievements/collector/malformed-taste.png",
+    "sha256": "88b9abbf1e7eca154d0cc07d41096c749591dbf80ba3dccdb4cdc534cc797a0b",
+    "type": "Collector",
+    "achievement": "Malformed Taste",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "collector-systems-3",
+    "source": "collector/collector_16_ugly-around-town.png",
+    "file": "public/achievements/collector/ugly-around-town.png",
+    "sha256": "459be5d7d292944228c3c3c622ffc0e64d14b7f496c003a59c20ea5e3d547307",
+    "type": "Collector",
+    "achievement": "Ugly Around Town",
+    "tier_name": "platinum"
+  },
+  {
+    "key": "collector-systems-5",
+    "source": "collector/collector_16_ugly-everywhere.png",
+    "file": "public/achievements/collector/ugly-everywhere.png",
+    "sha256": "194e29136417c0580e99752c1fe98ee0f3395fe61d543bd77b80e676bb478c1e",
+    "type": "Collector",
+    "achievement": "Ugly Everywhere",
+    "tier_name": "diamond"
+  },
+  {
+    "key": "collector-systems-7",
+    "source": "collector/collector_16_part-of-the-furniture.png",
+    "file": "assets/achievements/collector/part-of-the-furniture.png",
+    "sha256": "fac64358645b9285e9c25176153b395a0f1ace89de227958624b62077dcdc575",
+    "type": "Collector",
+    "achievement": "Part of the Furniture",
+    "tier_name": "obsidian"
+  },
+  {
+    "key": "squig-mint-1",
+    "source": "squig/squig_17_born-ugly.png",
+    "file": "public/achievements/squig/born-ugly.png",
+    "sha256": "9e1a5a4b1ebe5e95acecc615d6a1be685de073d4227377b96045aa34458958c4",
+    "type": "Squig",
+    "achievement": "Born Ugly",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-og-1",
+    "source": "squig/squig_18_original-ugly.png",
+    "file": "public/achievements/squig/original-ugly.png",
+    "sha256": "f48036040eef82e61761c75a2ffbbea8361642a87563c8cdec4335b8e7804506",
+    "type": "Squig",
+    "achievement": "Original Ugly",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-legendary-1",
+    "source": "squig/squig_19_legendary-specimen.png",
+    "file": "public/achievements/squig/legendary-specimen.png",
+    "sha256": "75c9c9e7ad232ea0c8bad4bfb75d4a89057d27c0607aa723934b7a46c02d9a48",
+    "type": "Squig",
+    "achievement": "Legendary Specimen",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-collectors-3",
+    "source": "squig/squig_20_well-travelled.png",
+    "file": "public/achievements/squig/well-travelled.png",
+    "sha256": "a10b6b41575b2da7ea4719f014babc5f72ca79af84f81e513e9ee79c3d288b97",
+    "type": "Squig",
+    "achievement": "Well Travelled",
+    "tier_name": "elite"
+  },
+  {
+    "key": "squig-collectors-5",
+    "source": "squig/squig_20_many-homes.png",
+    "file": "public/achievements/squig/many-homes.png",
+    "sha256": "b00dd5256942119ca6c8a19a904eff4a0bcc800faec3fdefbf382a8ffd3d2e44",
+    "type": "Squig",
+    "achievement": "Many Homes",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-duels-1",
+    "source": "squig/squig_21_into-the-ring.png",
+    "file": "public/achievements/squig/into-the-ring.png",
+    "sha256": "a958ded65200c3b1d73d9932b912c5db423d6e8a704baca0ff1611fd3bb23710",
+    "type": "Squig",
+    "achievement": "Into the Ring",
+    "tier_name": "reinforced"
+  },
+  {
+    "key": "squig-duels-10",
+    "source": "squig/squig_21_battle-tested.png",
+    "file": "public/achievements/squig/battle-tested.png",
+    "sha256": "bd844730262ee3226b6f54d7232ecf201eec7066033d9887e74874c51143c16a",
+    "type": "Squig",
+    "achievement": "Battle Tested",
+    "tier_name": "carved"
+  },
+  {
+    "key": "squig-duels-25",
+    "source": "squig/squig_21_arena-veteran.png",
+    "file": "public/achievements/squig/arena-veteran.png",
+    "sha256": "f55df6f96527762c7e44bfb3099eabc85de088dbc032dac88dbeca5278be5b40",
+    "type": "Squig",
+    "achievement": "Arena Veteran",
+    "tier_name": "gemmed"
+  },
+  {
+    "key": "squig-duels-50",
+    "source": "squig/squig_21_scar-tissue.png",
+    "file": "public/achievements/squig/scar-tissue.png",
+    "sha256": "772e71cf5c3dc8d2e5a9b6551e17d9d2ff44b81cf65df78c938d1166162622d3",
+    "type": "Squig",
+    "achievement": "Scar Tissue",
+    "tier_name": "elite"
+  },
+  {
+    "key": "squig-duels-100",
+    "source": "squig/squig_21_living-weapon.png",
+    "file": "public/achievements/squig/living-weapon.png",
+    "sha256": "53cb627418a336e7158b055bda3a3f9141a13f916effc715cd0c094305a5c23f",
+    "type": "Squig",
+    "achievement": "Living Weapon",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-wins-1",
+    "source": "squig/squig_22_first-blood.png",
+    "file": "public/achievements/squig/first-blood.png",
+    "sha256": "b50191538f707b8b8eab2c74453c07e420c2cbe0b6e742268638ade4ceabbdfd",
+    "type": "Squig",
+    "achievement": "First Blood",
+    "tier_name": "reinforced"
+  },
+  {
+    "key": "squig-wins-5",
+    "source": "squig/squig_22_troublemaker.png",
+    "file": "public/achievements/squig/troublemaker.png",
+    "sha256": "db6d92587e05cdf7484e161967ea36ef12643cc74f8fc2c6cd3ddf05a70cbee4",
+    "type": "Squig",
+    "achievement": "Troublemaker",
+    "tier_name": "carved"
+  },
+  {
+    "key": "squig-wins-10",
+    "source": "squig/squig_22_dangerous-company.png",
+    "file": "public/achievements/squig/dangerous-company.png",
+    "sha256": "86c6785e9e4e8fb62a7ea4463bc9b8e41997bf70d1fe6dedf2db2c9502abdbd6",
+    "type": "Squig",
+    "achievement": "Dangerous Company",
+    "tier_name": "gemmed"
+  },
+  {
+    "key": "squig-wins-25",
+    "source": "squig/squig_22_certified-menace.png",
+    "file": "public/achievements/squig/certified-menace.png",
+    "sha256": "738eb17d935db8ae0ce97f8c69e1dbe1b8f51bf5d55ffeace2155ab7bb224e93",
+    "type": "Squig",
+    "achievement": "Certified Menace",
+    "tier_name": "elite"
+  },
+  {
+    "key": "squig-wins-50",
+    "source": "squig/squig_22_arena-legend.png",
+    "file": "public/achievements/squig/arena-legend.png",
+    "sha256": "c1e49593e3daf2e7122c2a307c8303dc69a6d0992fe8244ab80c34379e29d39d",
+    "type": "Squig",
+    "achievement": "Arena Legend",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-bountyEntries-1",
+    "source": "squig/squig_23_bounty-hunter.png",
+    "file": "public/achievements/squig/bounty-hunter.png",
+    "sha256": "b402e74fcaeda6560ffa4e1540d7119e727b2f57276ac9685a1b73efd6295fa1",
+    "type": "Squig",
+    "achievement": "Bounty Hunter",
+    "tier_name": "elite"
+  },
+  {
+    "key": "squig-bountyEntries-5",
+    "source": "squig/squig_23_vault-familiar.png",
+    "file": "public/achievements/squig/vault-familiar.png",
+    "sha256": "fc048508ccb295aa937bc6b4a8e66d337e66f73cd9cba00b315f59d61d02a5e3",
+    "type": "Squig",
+    "achievement": "Vault Familiar",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-bountyWins-1",
+    "source": "squig/squig_24_prize-fighter.png",
+    "file": "public/achievements/squig/prize-fighter.png",
+    "sha256": "deec5115c4e016b6eca50a9ab8380df4d976345ade6e67559e1d6f89f6203f46",
+    "type": "Squig",
+    "achievement": "Prize Fighter",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-maw-1",
+    "source": "squig/squig_25_fed-to-the-maw.png",
+    "file": "public/achievements/squig/fed-to-the-maw.png",
+    "sha256": "7305ec16eb457aef3dc90b7d7a98a6bec8c24cf3613b61b776d2609762dacb00",
+    "type": "Squig",
+    "achievement": "Fed to the Maw",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-regurgitated-1",
+    "source": "squig/squig_26_regurgitated.png",
+    "file": "public/achievements/squig/regurgitated.png",
+    "sha256": "4d2700a431863e2a4ee59e89047bebcc881ea0b2092c4304b932ab99591bccc4",
+    "type": "Squig",
+    "achievement": "Regurgitated",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-swallowed-1",
+    "source": "squig/squig_27_swallowed.png",
+    "file": "public/achievements/squig/swallowed.png",
+    "sha256": "02e28efc9bbc1f20684f743786c9931afa7c5f89e3a5060f09dccde7a0d406b1",
+    "type": "Squig",
+    "achievement": "Swallowed",
+    "tier_name": "legendary"
+  },
+  {
+    "key": "squig-digested-1",
+    "source": "squig/squig_28_remembered-forever.png",
+    "file": "public/achievements/squig/remembered-forever.png",
+    "sha256": "1dec3e7cd2b0b415fe480e88a02d5e5816aa711b2c470f22e7c7a2fcd3ff8f4f",
+    "type": "Squig",
+    "achievement": "Remembered Forever",
+    "tier_name": "legendary"
+  }
+]

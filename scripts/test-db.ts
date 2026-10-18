@@ -1275,6 +1275,15 @@ try {
       await bridgeExternal.end();
     }
   }
+  if (process.argv.includes('--web')) {
+    const { achievementBadgeWebTests } =
+      await import('../tests/db/achievement-badges');
+    await achievementBadgeWebTests(
+      `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
+  }
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));
 } catch (error) {

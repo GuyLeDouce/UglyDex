@@ -11,6 +11,7 @@ import {
   activeAddresses,
   cardDTO,
   cardSelect,
+  cardsWithBadges,
   collectionSummary,
   ownedScope,
   catalogScope,
@@ -47,6 +48,7 @@ export async function collectorProfile(slug: string) {
     const charm = c.showCharmBalance
       ? publicCharm(true, await charmBalance(c.id, false))
       : null;
+    const featuredCards = await cardsWithBadges(featured);
     return {
       status: 'ready',
       collectorId: c.id,
@@ -59,9 +61,7 @@ export async function collectorProfile(slug: string) {
           ? []
           : await Promise.all(
               c.featuredTokenIds
-                .flatMap((id) =>
-                  featured.filter((s) => s.tokenId === id).map(cardDTO),
-                )
+                .flatMap((id) => featuredCards.filter((s) => s.tokenId === id))
                 .map(async (s) => {
                   const art = await displayCustom(c.id, s.tokenId);
                   return {

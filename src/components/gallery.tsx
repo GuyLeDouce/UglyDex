@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Artwork } from './artwork';
+import { AchievementStrip } from './achievement-strip';
 import type { galleryView } from '@/server/galleries';
 type Gallery = NonNullable<Awaited<ReturnType<typeof galleryView>>>;
 export function GalleryArt({ gallery }: { gallery: Gallery }) {
@@ -34,6 +35,17 @@ export function GalleryArt({ gallery }: { gallery: Gallery }) {
                     </span>
                   </div>
                   <p>{item.caption}</p>
+                  {item.achievements && (
+                    <Link
+                      href={'/squig/' + item.tokenId + '/achievements'}
+                      aria-label={`View Squig #${item.tokenId} achievements`}
+                    >
+                      <AchievementStrip
+                        summary={item.achievements}
+                        subject="SQUIG"
+                      />
+                    </Link>
+                  )}
                   <p className="eyebrow">{item.representation}</p>
                   <small>
                     {item.uglyPoints !== null

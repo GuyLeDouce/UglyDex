@@ -11,6 +11,8 @@ import {
 import { resolveAsset } from '@/domain/assets';
 import type { Prisma } from '@/generated/prisma/client';
 import { chainKey } from '@/sync/provenance';
+import { squigBadgeSummaries } from './achievement-badges';
+import type { AchievementBadgeSummary } from '@/domain/achievement-badges';
 export const catalogScope = { chainId: 1, contractAddress: SQUIGS_CONTRACT };
 export const cardSelect = {
   id: true,
@@ -41,7 +43,15 @@ export function cardDTO(row: CardRow) {
     traits: row.traits,
   };
 }
+export async function cardsWithBadges(rows: CardRow[]) {
+  const summaries = await squigBadgeSummaries(rows.map((r) => r.id));
+  return rows.map((row) => ({
+    ...cardDTO(row),
+    achievements: summaries.get(row.id)!,
+  }));
+}
 export type SquigCardData = ReturnType<typeof cardDTO> & {
+  achievements?: AchievementBadgeSummary;
   representation?: string;
   personalization?: {
     discovered: boolean;
@@ -151,6 +161,7 @@ export async function collectionPage(
   });
   if (recentIds)
     rows.sort((a, b) => recentIds.indexOf(a.id) - recentIds.indexOf(b.id));
+  const badgeSummaries = await squigBadgeSummaries(rows.map((r) => r.id));
   const [owned, discoveries, traits, history] = await Promise.all([
     collectorId
       ? db().squigOwnership.findMany({
@@ -235,6 +246,7 @@ export async function collectionPage(
   return {
     items: rows.map((r): SquigCardData => ({
       ...cardDTO(r),
+      achievements: badgeSummaries.get(r.id),
       ...(candidates?.[r.tokenId]
         ? {
             personalization: {
@@ -344,7 +356,7 @@ export async function collectionSummary(collectorId: string) {
       name: r.rarityTier ?? 'Unclassified',
       count: r._count._all,
     })),
-    top: top.map(cardDTO),
+    top: await cardsWithBadges(top),
     traits: traits.map((t) => ({
       type: t.traitType,
       value: t.value,

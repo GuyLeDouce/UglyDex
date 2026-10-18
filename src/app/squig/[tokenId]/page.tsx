@@ -249,6 +249,7 @@ export default async function Squig({
         id={r.squigId}
         path={`/squig/${s.tokenId}/achievements`}
         public
+        full
       />
       <EcosystemSummary
         squigId={r.squigId}

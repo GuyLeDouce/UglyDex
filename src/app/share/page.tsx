@@ -6,6 +6,7 @@ import { ShareControls } from '@/components/share-controls';
 import { Artwork } from '@/components/artwork';
 import { resolveAsset, squigArtwork } from '@/domain/assets';
 import { collectibleImageUrl } from '@/domain/collectibles';
+import { AchievementBadge } from '@/components/achievement-badge';
 type Props = { searchParams: Promise<Record<string, string | undefined>> };
 export async function generateMetadata({ searchParams }: Props) {
   const p = shareSchema.safeParse(await searchParams);
@@ -30,6 +31,18 @@ export default async function Page({ searchParams }: Props) {
           ))}
         </div>
         {c.date && <p>{new Date(c.date).toISOString().slice(0, 10)}</p>}
+        <div className="share-achievement-badges">
+          {c.achievementBadges?.map((badge) => (
+            <figure key={badge.key}>
+              <AchievementBadge
+                badge={badge}
+                size={q.data.kind === 'achievement' ? 'showcase' : 'large'}
+                showTooltip
+              />
+              <figcaption>{badge.name}</figcaption>
+            </figure>
+          ))}
+        </div>
         <ShareControls
           spec={q.data}
           url={absoluteUrl(c.path)}

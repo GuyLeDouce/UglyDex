@@ -5,6 +5,8 @@ import { dexView } from '@/server/dex';
 import { progressionView } from '@/server/progression';
 import { activityPage, ecosystemSummary } from '@/server/activity';
 import { Timeline } from './timeline';
+import { AchievementBadge } from './achievement-badge';
+import { AchievementStrip } from './achievement-strip';
 export async function CollectorHighlights({
   id,
   slug,
@@ -24,6 +26,12 @@ export async function CollectorHighlights({
             Level {p.level}
           </Link>
           {p.title && <span>{p.title}</span>}
+          <Link
+            href={'/collector/' + slug + '/achievements'}
+            aria-label="View all Collector achievements"
+          >
+            <AchievementStrip summary={p.badgeSummary} subject="COLLECTOR" />
+          </Link>
         </div>
       )}
       {d?.status === 'ready' && (
@@ -176,7 +184,8 @@ export async function TrophyCase({ id, slug }: { id: string; slug: string }) {
             href={'/share?kind=achievement&entity=' + slug + '&key=' + b.key}
           >
             <small>ACHIEVEMENT · {b.tier}</small>
-            <h3>✳ {b.name}</h3>
+            <AchievementBadge badge={b.badge} size="xl" />
+            <h3>{b.name}</h3>
             <p>{b.description}</p>
           </Link>
         ))}

@@ -1,0 +1,152 @@
+{
+  "evidence": [
+    {
+      "path": "/me/achievements",
+      "width": 1440,
+      "catalogCards": 43,
+      "images": 53,
+      "overflow": false
+    },
+    {
+      "path": "/squig/4398",
+      "width": 1440,
+      "catalogCards": 22,
+      "images": 28,
+      "overflow": false
+    },
+    {
+      "path": "/squig/4398/achievements",
+      "width": 1440,
+      "catalogCards": 22,
+      "images": 28,
+      "overflow": false
+    },
+    {
+      "path": "/collector/badge-review",
+      "width": 1440,
+      "catalogCards": 0,
+      "images": 3,
+      "overflow": false
+    },
+    {
+      "path": "/collector/badge-review/achievements",
+      "width": 1440,
+      "catalogCards": 43,
+      "images": 48,
+      "overflow": false
+    },
+    {
+      "path": "/squigs?q=4398",
+      "width": 1440,
+      "catalogCards": 0,
+      "images": 3,
+      "overflow": false
+    },
+    {
+      "path": "/share?kind=achievement&entity=badge-review&key=collector-wins-25",
+      "width": 1440,
+      "catalogCards": 0,
+      "images": 1,
+      "overflow": false
+    },
+    {
+      "path": "/me/achievements",
+      "width": 390,
+      "catalogCards": 43,
+      "images": 53,
+      "overflow": false
+    },
+    {
+      "path": "/squig/4398",
+      "width": 390,
+      "catalogCards": 22,
+      "images": 28,
+      "overflow": false
+    },
+    {
+      "path": "/squig/4398/achievements",
+      "width": 390,
+      "catalogCards": 22,
+      "images": 28,
+      "overflow": false
+    },
+    {
+      "path": "/collector/badge-review",
+      "width": 390,
+      "catalogCards": 0,
+      "images": 3,
+      "overflow": false
+    },
+    {
+      "path": "/collector/badge-review/achievements",
+      "width": 390,
+      "catalogCards": 43,
+      "images": 48,
+      "overflow": false
+    },
+    {
+      "path": "/squigs?q=4398",
+      "width": 390,
+      "catalogCards": 0,
+      "images": 3,
+      "overflow": false
+    },
+    {
+      "path": "/share?kind=achievement&entity=badge-review&key=collector-wins-25",
+      "width": 390,
+      "catalogCards": 0,
+      "images": 1,
+      "overflow": false
+    },
+    {
+      "path": "/me/achievements",
+      "width": 320,
+      "catalogCards": 43,
+      "images": 53,
+      "overflow": false
+    },
+    {
+      "path": "/squig/4398",
+      "width": 320,
+      "catalogCards": 22,
+      "images": 28,
+      "overflow": false
+    },
+    {
+      "path": "/squig/4398/achievements",
+      "width": 320,
+      "catalogCards": 22,
+      "images": 28,
+      "overflow": false
+    },
+    {
+      "path": "/collector/badge-review",
+      "width": 320,
+      "catalogCards": 0,
+      "images": 3,
+      "overflow": false
+    },
+    {
+      "path": "/collector/badge-review/achievements",
+      "width": 320,
+      "catalogCards": 43,
+      "images": 48,
+      "overflow": false
+    },
+    {
+      "path": "/squigs?q=4398",
+      "width": 320,
+      "catalogCards": 0,
+      "images": 3,
+      "overflow": false
+    },
+    {
+      "path": "/share?kind=achievement&entity=badge-review&key=collector-wins-25",
+      "width": 320,
+      "catalogCards": 0,
+      "images": 1,
+      "overflow": false
+    }
+  ],
+  "errors": []
+}
