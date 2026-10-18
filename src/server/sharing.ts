@@ -1,4 +1,5 @@
 import 'server-only';
+import { resolveShareStyle } from '@/domain/share-styles';
 import type { Metadata } from 'next';
 import { db } from './db';
 import { readEnv } from './env';
@@ -461,7 +462,13 @@ export async function shareMetadata(
     if (!c)
       return { title: 'UglyDex', robots: { index: false, follow: false } };
     const url = absoluteUrl(c.path),
-      image = absoluteUrl('/api/share?' + shareQuery(q));
+      image = absoluteUrl(
+        '/api/share?' +
+          shareQuery({
+            ...q,
+            template: resolveShareStyle(spec.template, c.appearance?.share),
+          }),
+      );
     return {
       title: c.title + ' | UglyDex',
       description: c.description,

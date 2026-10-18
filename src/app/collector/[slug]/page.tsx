@@ -78,7 +78,7 @@ export default async function Collector({
         <span className="badge">UGLYDEX COLLECTOR</span>
       </section>
       <ShareControls
-        spec={{ kind: 'collector', entity: p.slug }}
+        spec={{ kind: 'collector', entity: p.slug, template: style.share }}
         url={absoluteUrl('/collector/' + p.slug)}
         copy={(p.displayName || p.slug) + ' — still ugly. Still hunting.'}
       />

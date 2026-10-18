@@ -27,7 +27,7 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
           card,
           ratio: spec.ratio,
           template: spec.template,
-          version: 1,
+          version: 2,
         }),
       )
       .digest('hex');

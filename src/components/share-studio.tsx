@@ -10,6 +10,7 @@ export function ShareStudio({
   sets,
   galleries,
   milestones,
+  template,
 }: {
   slug: string;
   isPublic: boolean;
@@ -18,6 +19,7 @@ export function ShareStudio({
   sets: { key: string; name: string }[];
   galleries: { slug: string; name: string; visibility: string }[];
   milestones: string[];
+  template: ShareSpec['template'];
 }) {
   const [kind, setKind] = useState<ShareSpec['kind']>('collector'),
     [privatePreview, setPrivatePreview] = useState(false),
@@ -37,6 +39,7 @@ export function ShareStudio({
             ? milestones.map((m) => ({ key: m, name: m }))
             : [];
   const spec = {
+    template,
     entity: slug,
     kind,
     ...(key ? { key } : {}),

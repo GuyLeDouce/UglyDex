@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { shareStyleLabels } from './share-styles';
 export const COSMETIC_VERSION = 'uglydex-cosmetics-v1';
 export const cosmeticKinds = [
   'PROFILE_THEME',
@@ -116,21 +117,21 @@ export const cosmeticCatalog: {
   {
     id: 'share-clean',
     kind: 'SHARE_STYLE',
-    name: 'Clean',
+    name: shareStyleLabels.clean,
     source: 'FREE',
     value: 'clean',
   },
   {
     id: 'share-ugly',
     kind: 'SHARE_STYLE',
-    name: 'Ugly',
+    name: shareStyleLabels.ugly,
     source: 'FREE',
     value: 'ugly',
   },
   {
     id: 'share-stats',
     kind: 'SHARE_STYLE',
-    name: 'Stats',
+    name: shareStyleLabels.stats,
     source: 'FREE',
     value: 'stats',
   },

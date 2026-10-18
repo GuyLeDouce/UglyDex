@@ -7,15 +7,21 @@ import { Artwork } from '@/components/artwork';
 import { resolveAsset, squigArtwork } from '@/domain/assets';
 import { collectibleImageUrl } from '@/domain/collectibles';
 import { AchievementBadge } from '@/components/achievement-badge';
+import { resolveShareStyle } from '@/domain/share-styles';
 type Props = { searchParams: Promise<Record<string, string | undefined>> };
 export async function generateMetadata({ searchParams }: Props) {
-  const p = shareSchema.safeParse(await searchParams);
+  const query = await searchParams;
+  const p = shareSchema.safeParse(query);
   return p.success
-    ? shareMetadata(p.data)
+    ? shareMetadata({
+        ...p.data,
+        template: query.template ? p.data.template : undefined,
+      })
     : { title: 'UglyDex', robots: { index: false } };
 }
 export default async function Page({ searchParams }: Props) {
-  const q = shareSchema.safeParse(await searchParams);
+  const query = await searchParams;
+  const q = shareSchema.safeParse(query);
   if (!q.success) notFound();
   const c = await shareCard(q.data);
   if (!c) notFound();
@@ -44,7 +50,13 @@ export default async function Page({ searchParams }: Props) {
           ))}
         </div>
         <ShareControls
-          spec={q.data}
+          spec={{
+            ...q.data,
+            template: resolveShareStyle(
+              query.template ? q.data.template : undefined,
+              c.appearance?.share,
+            ),
+          }}
           url={absoluteUrl(c.path)}
           copy={suggestedCopy(c)}
         />

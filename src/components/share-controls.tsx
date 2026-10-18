@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { shareQuery, type ShareSpec } from '@/domain/sharing';
+import { shareStyleLabels } from '@/domain/share-styles';
 export function ShareControls({
   spec,
   url,
@@ -15,8 +16,10 @@ export function ShareControls({
   label?: string;
 }) {
   const [open, setOpen] = useState(false),
-    [ratio, setRatio] = useState<'landscape' | 'square'>('landscape'),
-    [template, setTemplate] = useState<'clean' | 'ugly' | 'stats'>('clean'),
+    [ratio, setRatio] = useState<ShareSpec['ratio']>(spec.ratio ?? 'landscape'),
+    [template, setTemplate] = useState<ShareSpec['template']>(
+      spec.template ?? 'clean',
+    ),
     [message, setMessage] = useState(''),
     [busy, setBusy] = useState(false),
     [prepared, setPrepared] = useState<{ image: string; file: File } | null>(
@@ -103,9 +106,11 @@ export function ShareControls({
                 value={template}
                 onChange={(e) => setTemplate(e.target.value as typeof template)}
               >
-                <option value="clean">Clean</option>
-                <option value="ugly">Ugly</option>
-                <option value="stats">Stats</option>
+                {Object.entries(shareStyleLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </select>
             </label>
           </div>

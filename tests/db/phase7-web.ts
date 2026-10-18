@@ -1,4 +1,6 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHash } from 'node:crypto';
+import { mkdir, readFile } from 'node:fs/promises';
+import sharp from 'sharp';
 import { db } from '../../src/server/db';
 import { authHash } from '../../src/server/auth';
 export async function phase7WebTests(
@@ -272,6 +274,9 @@ export async function phase7WebTests(
       await page
         .getByLabel('profile theme', { exact: true })
         .selectOption('theme-labs');
+      await page
+        .getByLabel('share style', { exact: true })
+        .selectOption({ label: 'Intergalactic' });
       await page.getByRole('button', { name: 'Save appearance' }).click();
       await page
         .getByRole('status')
@@ -295,6 +300,65 @@ export async function phase7WebTests(
       );
       await page.screenshot({
         path: '.data/phase7-appearance-mobile.png',
+        fullPage: true,
+      });
+      await page.goto(base + '/collector/phase7-collector');
+      await page.getByRole('button', { name: 'Share ↗', exact: true }).click();
+      check(
+        (await page.getByLabel('Style').inputValue()) === 'stats',
+        'share controls initialize from saved Intergalactic preference',
+      );
+      await mkdir('.data/share-backgrounds', { recursive: true });
+      const backgrounds = new Set<string>();
+      for (const template of ['clean', 'ugly', 'stats']) {
+        await page.getByLabel('Style').selectOption(template);
+        for (const ratio of ['landscape', 'square']) {
+          await page.getByLabel('Shape').selectOption(ratio);
+          await page.waitForFunction(
+            ({ template, ratio }) => {
+              const img =
+                document.querySelector<HTMLImageElement>('.share-preview');
+              if (!img) return false;
+              const params = new URL(img.src).searchParams;
+              return (
+                params.get('template') === template &&
+                params.get('ratio') === ratio &&
+                img.complete &&
+                img.naturalWidth > 0
+              );
+            },
+            { template, ratio },
+          );
+          const [download] = await Promise.all([
+            page.waitForEvent('download'),
+            page
+              .getByRole('button', { name: 'Download PNG', exact: true })
+              .click(),
+          ]);
+          const file = `.data/share-backgrounds/download-${template}-${ratio}.png`;
+          await download.saveAs(file);
+          const png = await readFile(file);
+          const size = await sharp(png).metadata();
+          check(
+            size.width === (ratio === 'square' ? 1080 : 1200) &&
+              size.height === (ratio === 'square' ? 1080 : 630),
+            `${template} ${ratio} downloads the expected PNG dimensions`,
+          );
+          backgrounds.add(createHash('sha256').update(png).digest('hex'));
+        }
+      }
+      check(
+        backgrounds.size === 6,
+        'each selected style and shape produces a distinct download',
+      );
+      check(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+        'sharing controls remain within the mobile viewport',
+      );
+      await page.screenshot({
+        path: '.data/share-backgrounds/sharing-controls-mobile.png',
         fullPage: true,
       });
       await page.goto(base + '/editions/phase7-edition');
