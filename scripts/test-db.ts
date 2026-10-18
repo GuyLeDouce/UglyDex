@@ -643,8 +643,8 @@ try {
     const passportBody = await (await fetch(`${base}/squig/1`)).text();
     check(
       !passportBody.includes('http-collector') &&
-        !passportBody.includes(account.address.toLowerCase()),
-      'Squig owner association is hidden when wallet visibility is disabled',
+        passportBody.includes(account.address.toLowerCase()),
+      'Squig holding wallet stays public while its collector association is hidden',
     );
     check(
       (
@@ -1286,6 +1286,12 @@ try {
     );
     const { openSeaWebTests } = await import('../tests/db/opensea-web');
     await openSeaWebTests(
+      `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
+    const { ownershipWebTests } = await import('../tests/db/ownership-web');
+    await ownershipWebTests(
       `http://127.0.0.1:${webPort}`,
       check,
       process.argv.includes('--browser'),

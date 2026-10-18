@@ -141,10 +141,18 @@ export function ProfileForm({ initial }: { initial: Values }) {
           <input
             name="showWallets"
             type="checkbox"
+            aria-label="Show my UglyDex identity with linked wallets"
+            aria-describedby="wallet-identity-help"
             defaultChecked={initial.showWallets}
           />{' '}
-          Show linked wallet addresses publicly
+          Show my UglyDex identity with linked wallets
         </label>
+        <p id="wallet-identity-help" className="hint">
+          Shows your name and profile link alongside your wallet holdings and
+          ownership history, and lists linked wallets on your public profile.
+          Turn this off to hide those identity links. A Squig’s indexed holding
+          wallet remains public regardless of this setting.
+        </p>
         <label className="check">
           <input
             name="showDiscord"

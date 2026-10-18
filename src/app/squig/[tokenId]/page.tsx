@@ -163,22 +163,22 @@ export default async function Squig({
               history remain part of UglyDex.
             </p>
           )}
-          {r.owner ? (
-            <>
-              <Link className="text-link" href={`/collector/${r.owner.slug}`}>
-                {r.owner.displayName || r.owner.slug} ↗
-              </Link>
-              {r.owner.wallet && (
-                <p className="wallet-line">{r.owner.wallet}</p>
+          {r.holdingWallet ? (
+            <div>
+              <p className="wallet-line">
+                <small>Holding wallet</small>
+                <br />
+                {r.holdingWallet}
+              </p>
+              {r.owner && (
+                <Link className="text-link" href={`/collector/${r.owner.slug}`}>
+                  {r.owner.displayName || r.owner.slug} ↗
+                </Link>
               )}
-            </>
-          ) : (
-            <p>
-              {r.ownershipUpdatedAt
-                ? 'Owner identity is private or unlinked.'
-                : 'Current ownership has not been indexed.'}
-            </p>
-          )}
+            </div>
+          ) : !r.digested ? (
+            <p>Current ownership has not been indexed.</p>
+          ) : null}
           {r.ownershipUpdatedAt && (
             <small>
               Observed{' '}
