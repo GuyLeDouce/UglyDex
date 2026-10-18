@@ -135,7 +135,7 @@ export default async function ListedSquigs({
         <div className="filter-top">
           <label>
             Sort
-            <select name="sort" defaultValue={sort}>
+            <select name="sort" aria-label="Sort" defaultValue={sort}>
               <ListingSortOptions />
             </select>
           </label>

@@ -57,7 +57,7 @@ export async function Catalog({
           </label>
           <label>
             Sort
-            <select name="sort" defaultValue={f.sort}>
+            <select name="sort" aria-label="Sort" defaultValue={f.sort}>
               <option value="token">Token ID</option>
               <option value="points-desc">UglyPoints ↓</option>
               <option value="points-asc">UglyPoints ↑</option>
