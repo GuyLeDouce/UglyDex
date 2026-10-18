@@ -1,4 +1,5 @@
 import 'server-only';
+import { squigBadgeSummaries } from './achievement-badges';
 import { db } from './db';
 import { gallerySchema, galleryAccess } from '@/domain/sharing';
 import {
@@ -178,6 +179,11 @@ export async function galleryView(
   )
     return null;
   const allowed = await eligibleGalleryTokens(g.collectorId, g.mode);
+  const badgeSummaries = await squigBadgeSummaries(
+    g.items
+      .filter((i) => allowed.eligible.includes(i.squig.tokenId))
+      .map((i) => i.squigId),
+  );
   const items = g.items
     .filter((i) => allowed.eligible.includes(i.squig.tokenId))
     .map((i) => {
@@ -189,6 +195,7 @@ export async function galleryView(
           : null;
       return {
         ...cardDTO(i.squig),
+        achievements: badgeSummaries.get(i.squigId),
         ...(custom ? { image: collectibleImageUrl(custom.artwork.uri) } : {}),
         representation: custom
           ? 'Official Custom · ' + custom.name

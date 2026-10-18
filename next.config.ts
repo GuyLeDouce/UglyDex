@@ -2,6 +2,11 @@ import type { NextConfig } from 'next';
 const config: NextConfig = {
   poweredByHeader: false,
   images: {
+    // Protected badge routes must never pass through the shared image cache.
+    localPatterns: [
+      { pathname: '/achievements/**', search: '' },
+      { pathname: '/brand/**', search: '' },
+    ],
     remotePatterns: [
       {
         protocol: 'https',

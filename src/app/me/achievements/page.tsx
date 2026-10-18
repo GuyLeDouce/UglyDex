@@ -16,7 +16,12 @@ export default async function Page() {
         <ProgressionPreferences
           choices={p.cards
             .filter((c) => c.unlocked)
-            .map((c) => ({ key: c.key, name: c.name, title: c.title }))}
+            .map((c) => ({
+              key: c.key,
+              name: c.name,
+              title: c.title,
+              badge: c.badge,
+            }))}
           title={p.cards.find((c) => c.title === p.title && c.title)?.key ?? ''}
           featured={p.cards
             .filter((c) => p.featured.includes(c.name))

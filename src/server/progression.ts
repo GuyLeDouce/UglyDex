@@ -2,6 +2,10 @@ import type { Prisma } from '@/generated/prisma/client';
 import 'server-only';
 import { db } from './db';
 import {
+  achievementBadgePresentation,
+  earnedBadgeSummary,
+} from './achievement-badges';
+import {
   RULESET,
   achievements,
   levelInfo,
@@ -85,6 +89,7 @@ async function readProjection(
           at: null,
           title: null,
           blocked: false,
+          badge: achievementBadgePresentation(a.key, false),
         };
       return {
         key: a.key,
@@ -98,6 +103,12 @@ async function readProjection(
         at: unlocked ? award!.awardedAt!.toISOString() : null,
         title: unlocked ? (a.title ?? null) : null,
         blocked: !award?.gateSatisfied,
+        badge: achievementBadgePresentation(
+          a.key,
+          unlocked,
+          !award?.gateSatisfied,
+          subject === 'COLLECTOR' ? id : undefined,
+        ),
       };
     });
   const unlocked = cards.filter((c) => c.unlocked);
@@ -117,6 +128,7 @@ async function readProjection(
     }),
     ...levelInfo(subject, progress.xp),
     cards,
+    badgeSummary: earnedBadgeSummary(subject, cards),
     count: unlocked.length,
     title:
       unlocked.find((a) => `${RULESET}:${a.key}` === collector?.selectedTitleId)
@@ -130,7 +142,7 @@ async function readProjection(
     recent: [...unlocked]
       .sort((a, b) => b.at!.localeCompare(a.at!))
       .slice(0, 3)
-      .map((a) => ({ name: a.name, at: a.at })),
+      .map((a) => ({ key: a.key, name: a.name, at: a.at, badge: a.badge })),
     milestones: milestones.map((m) => ({
       level: m.level,
       at: m.reachedAt.toISOString(),

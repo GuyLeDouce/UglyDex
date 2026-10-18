@@ -1,0 +1,80 @@
+import 'server-only';
+
+// Approved originals. Keep this registry server-only: locked secrets must never enter client bundles.
+export const achievementBadgeAssets = {
+  'collector-discoveries-1': '/achievements/collector/first-ugly.png',
+  'collector-discoveries-5': '/achievements/collector/getting-ugly.png',
+  'collector-discoveries-10': '/achievements/collector/certified-hoarder.png',
+  'collector-discoveries-20': '/achievements/collector/deep-in-the-dex.png',
+  'collector-discoveries-25': '/achievements/collector/field-researcher.png',
+  'collector-discoveries-50': '/achievements/collector/ugly-archivist.png',
+  'collector-discoveries-100': '/achievements/collector/creature-curator.png',
+  'collector-discoveries-250':
+    '/achievements/collector/walking-encyclopedia.png',
+  'collector-discoveries-500': '/achievements/collector/the-living-dex.png',
+  'collector-og-1': '/achievements/collector/original-encounter.png',
+  'collector-og-5': '/achievements/collector/old-guard.png',
+  'collector-og-10': '/achievements/collector/og-obsession.png',
+  'collector-legendary-1': '/achievements/collector/an-unlikely-legend.png',
+  'collector-duels-1': '/achievements/collector/step-into-the-ring.png',
+  'collector-duels-10': '/achievements/collector/battle-regular.png',
+  'collector-duels-50': '/achievements/collector/ring-resident.png',
+  'collector-wins-1': '/achievements/collector/first-victory.png',
+  'collector-wins-10': '/achievements/collector/duel-freak.png',
+  'collector-wins-25': '/achievements/collector/certified-menace.png',
+  'collector-wins-50': '/achievements/collector/arena-apparition.png',
+  'collector-survival-1': '/achievements/collector/into-the-gauntlet.png',
+  'collector-survival-10': '/achievements/collector/still-here.png',
+  'collector-survival-50': '/achievements/collector/hard-to-kill.png',
+  'collector-podiums-1': '/achievements/collector/on-the-podium.png',
+  'collector-survivalWins-1': '/achievements/collector/survivor.png',
+  'collector-survivalWins-5': '/achievements/collector/last-ugly-standing.png',
+  'collector-survivalWins-25': '/achievements/collector/survival-instinct.png',
+  'collector-creator-1': '/achievements/collector/make-it-ugly.png',
+  'collector-creator-5': '/achievements/collector/ugly-city-builder.png',
+  'collector-creator-10': '/achievements/collector/prolific-freak.png',
+  'collector-milestones-1': '/achievements/collector/milestone-maker.png',
+  'collector-milestones-5': '/achievements/collector/city-cartographer.png',
+  'collector-madlibs-1': '/achievements/collector/published-weirdness.png',
+  'collector-bounty-1': '/achievements/collector/vault-contributor.png',
+  'collector-bounty-5': '/achievements/collector/vault-regular.png',
+  'collector-bountyWins-1': '/achievements/collector/bounty-claimed.png',
+  'collector-maw-1': '/achievements/collector/dinner-is-served.png',
+  'collector-maw-5': '/achievements/collector/maw-regular.png',
+  'collector-maw-10': '/achievements/collector/the-maw-remembers.png',
+  'collector-marketplace-1': '/achievements/collector/malformed-taste.png',
+  'collector-systems-3': '/achievements/collector/ugly-around-town.png',
+  'collector-systems-5': '/achievements/collector/ugly-everywhere.png',
+  'collector-systems-7': '/api/achievement-badges/collector-systems-7',
+  'squig-mint-1': '/achievements/squig/born-ugly.png',
+  'squig-og-1': '/achievements/squig/original-ugly.png',
+  'squig-legendary-1': '/achievements/squig/legendary-specimen.png',
+  'squig-collectors-3': '/achievements/squig/well-travelled.png',
+  'squig-collectors-5': '/achievements/squig/many-homes.png',
+  'squig-duels-1': '/achievements/squig/into-the-ring.png',
+  'squig-duels-10': '/achievements/squig/battle-tested.png',
+  'squig-duels-25': '/achievements/squig/arena-veteran.png',
+  'squig-duels-50': '/achievements/squig/scar-tissue.png',
+  'squig-duels-100': '/achievements/squig/living-weapon.png',
+  'squig-wins-1': '/achievements/squig/first-blood.png',
+  'squig-wins-5': '/achievements/squig/troublemaker.png',
+  'squig-wins-10': '/achievements/squig/dangerous-company.png',
+  'squig-wins-25': '/achievements/squig/certified-menace.png',
+  'squig-wins-50': '/achievements/squig/arena-legend.png',
+  'squig-bountyEntries-1': '/achievements/squig/bounty-hunter.png',
+  'squig-bountyEntries-5': '/achievements/squig/vault-familiar.png',
+  'squig-bountyWins-1': '/achievements/squig/prize-fighter.png',
+  'squig-maw-1': '/achievements/squig/fed-to-the-maw.png',
+  'squig-regurgitated-1': '/achievements/squig/regurgitated.png',
+  'squig-swallowed-1': '/achievements/squig/swallowed.png',
+  'squig-digested-1': '/achievements/squig/remembered-forever.png',
+} as const;
+export type AchievementBadgeId = keyof typeof achievementBadgeAssets;
+
+export function achievementBadgeFile(key: string) {
+  if (!Object.hasOwn(achievementBadgeAssets, key)) return null;
+  const url = achievementBadgeAssets[key as AchievementBadgeId];
+  return url.startsWith('/api/')
+    ? 'assets/achievements/collector/part-of-the-furniture.png'
+    : 'public' + url;
+}

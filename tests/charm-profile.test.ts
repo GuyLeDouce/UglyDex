@@ -12,6 +12,7 @@ vi.mock('../src/server/drip-sync', () => ({ charmBalance: mocks.balance }));
 vi.mock('../src/server/collections', () => ({
   collectionSummary: async () => ({}),
   cardDTO: vi.fn(),
+  cardsWithBadges: async () => [],
   cardSelect: {},
   ownedScope: () => ({}),
   catalogScope: {},

@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Artwork } from './artwork';
 import type { SquigCardData } from '@/server/collections';
 import { squigRarityClass } from '@/domain/squig-rarity';
+import { AchievementStrip } from './achievement-strip';
 const subscribe = (fn: () => void) => {
   window.addEventListener('storage', fn);
   return () => window.removeEventListener('storage', fn);
@@ -59,6 +60,9 @@ export function SquigCard({
               <span key={t.traitType}>{t.value}</span>
             ))}
         </div>
+        {item.achievements && (
+          <AchievementStrip summary={item.achievements} subject="SQUIG" />
+        )}
         {item.personalization && (
           <p className="ownership-label">
             {item.personalization.owned

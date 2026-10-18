@@ -1,12 +1,19 @@
 'use client';
 import { useActionState, useState } from 'react';
 import { savePresentation } from '@/app/me/achievements/save';
+import { AchievementBadge } from './achievement-badge';
+import type { AchievementBadgePresentation } from '@/domain/achievement-badges';
 export function ProgressionPreferences({
   choices,
   title,
   featured,
 }: {
-  choices: { key: string; name: string; title: string | null }[];
+  choices: {
+    key: string;
+    name: string;
+    title: string | null;
+    badge: AchievementBadgePresentation;
+  }[];
   title: string;
   featured: string[];
 }) {
@@ -48,6 +55,9 @@ export function ProgressionPreferences({
                 )
               }
             />
+            <span aria-hidden="true">
+              <AchievementBadge badge={c.badge} size="medium" />
+            </span>
             {c.name}
           </label>
         ))}

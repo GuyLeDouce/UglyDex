@@ -2,13 +2,18 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { randomInt } from 'node:crypto';
 import { db } from '@/server/db';
-import { cardSelect, cardDTO, catalogScope } from '@/server/collections';
+import {
+  cardSelect,
+  cardsWithBadges,
+  catalogScope,
+  type SquigCardData,
+} from '@/server/collections';
 import { CollectionGrid } from '@/components/collection';
 import { Connect } from '@/components/connect';
 import { Artwork } from '@/components/artwork';
 export const dynamic = 'force-dynamic';
 export default async function Home() {
-  let sample: ReturnType<typeof cardDTO>[] = [];
+  let sample: SquigCardData[] = [];
   try {
     const where = { ...catalogScope, imageUrl: { not: null } };
     const tokenIds = await db().squig.findMany({
@@ -23,7 +28,7 @@ export default async function Home() {
         tokenIds[index],
       ];
     }
-    sample = (
+    sample = await cardsWithBadges(
       await db().squig.findMany({
         where: {
           ...where,
@@ -31,8 +36,8 @@ export default async function Home() {
         },
         select: cardSelect,
         orderBy: { tokenId: 'asc' },
-      })
-    ).map(cardDTO);
+      }),
+    );
   } catch {}
   return (
     <div className="landing-world">

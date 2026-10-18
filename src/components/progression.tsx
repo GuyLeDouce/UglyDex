@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { progressionView } from '@/server/progression';
 import type { Subject } from '@/domain/progression';
+import { AchievementBadge } from './achievement-badge';
+import { AchievementStrip } from './achievement-strip';
 export async function Progression({
   subject,
   id,
@@ -51,11 +53,9 @@ export async function Progression({
             {p.count} achievements ·{' '}
             <Link href={path}>View achievements →</Link>
           </p>
-          {p.featured.map((name) => (
-            <span className="badge" key={name}>
-              {name}
-            </span>
-          ))}
+          <Link href={path} aria-label="Explore all achievements">
+            <AchievementStrip summary={p.badgeSummary} subject={subject} />
+          </Link>
           <details>
             <summary>How this XP was earned</summary>
             {p.breakdown.length ? (
@@ -77,7 +77,7 @@ export async function Progression({
             <div className="achievement-minis">
               {p.recent.map((a) => (
                 <article className="achievement-mini" key={a.name}>
-                  <span aria-hidden>✦</span>
+                  <AchievementBadge badge={a.badge} size="large" showTooltip />
                   <strong>{a.name}</strong>
                   <small>
                     {new Date(a.at!).toLocaleDateString('en-US', {
@@ -113,8 +113,14 @@ export async function Progression({
                     className={`panel achievement ${c.unlocked ? 'unlocked' : 'locked'}`}
                     key={c.key}
                   >
+                    <AchievementBadge badge={c.badge} size="xl" showTooltip />
                     <p className="eyebrow">
-                      {c.tier} · {c.unlocked ? 'EARNED' : 'LOCKED'}
+                      {c.tier} ·{' '}
+                      {c.unlocked
+                        ? 'EARNED'
+                        : c.blocked
+                          ? 'AWAITING EVIDENCE'
+                          : 'LOCKED'}
                     </p>
                     <h3>{c.name}</h3>
                     {c.unlocked &&

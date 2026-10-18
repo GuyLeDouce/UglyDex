@@ -5,6 +5,7 @@ import './collections.css';
 import './sharing.css';
 import './appearance.css';
 import './visual.css';
+import './achievement-badges.css';
 import { currentSession } from '@/server/auth';
 import { db } from '@/server/db';
 import { SiteHeader } from '@/components/site-header';

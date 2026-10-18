@@ -92,6 +92,7 @@ export const shareSchema = z
   .strict();
 export type ShareSpec = z.infer<typeof shareSchema>;
 export type ShareCard = {
+  achievementBadges?: import('./achievement-badges').VisibleAchievementBadge[];
   appearance?: { accent: string; share: 'clean' | 'ugly' | 'stats' };
   variants?: Record<number, { uri: string; sha256: string }>;
   title: string;

@@ -3,6 +3,19 @@ import 'server-only';
 import { ImageResponse } from 'next/og';
 import type { ShareCard, ShareSpec } from '@/domain/sharing';
 import { accentColors } from '@/domain/cosmetics';
+import { readFileSync } from 'node:fs';
+import { achievementBadgeFile } from './achievement-badge-assets';
+const badgeImages = new Map<string, string>();
+function badgeImage(key: string) {
+  const file = achievementBadgeFile(key);
+  if (!file) return null;
+  if (!badgeImages.has(key))
+    badgeImages.set(
+      key,
+      'data:image/png;base64,' + readFileSync(file).toString('base64'),
+    );
+  return badgeImages.get(key)!;
+}
 // ImageResponse bundles its font; no dependency on a desktop font installation.
 export function renderShare(
   card: ShareCard,
@@ -183,6 +196,24 @@ export function renderShare(
               </div>
             ))}
           </div>
+          {!!card.achievementBadges?.length && (
+            <div style={{ display: 'flex', gap: 12 }}>
+              {card.achievementBadges.slice(0, 3).map((badge) => {
+                const src =
+                  badge.status === 'earned' ? badgeImage(badge.key) : null;
+                return src ? (
+                  <img
+                    key={badge.key}
+                    src={src}
+                    width={card.achievementBadges?.length === 1 ? 96 : 64}
+                    height={card.achievementBadges?.length === 1 ? 96 : 64}
+                    alt={badge.name}
+                    style={{ objectFit: 'contain' }}
+                  />
+                ) : null;
+              })}
+            </div>
+          )}
           {card.badges.length > 0 && (
             <div
               style={{
