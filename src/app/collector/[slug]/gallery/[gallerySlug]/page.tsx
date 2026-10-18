@@ -32,7 +32,12 @@ export default async function Page({ params }: Props) {
           · {g.visibility.toLowerCase()}
         </p>
         <ShareControls
-          spec={{ kind: 'gallery', entity: p.slug, key: p.gallerySlug }}
+          spec={{
+            kind: 'gallery',
+            entity: p.slug,
+            key: p.gallerySlug,
+            template: g.appearance.share,
+          }}
           url={absoluteUrl(
             '/collector/' + p.slug + '/gallery/' + p.gallerySlug,
           )}

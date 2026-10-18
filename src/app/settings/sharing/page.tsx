@@ -6,13 +6,14 @@ import { galleryList } from '@/server/galleries';
 import { absoluteUrl } from '@/server/sharing';
 import { ShareStudio } from '@/components/share-studio';
 import { COLLECTION_RULESET } from '@/domain/dex';
+import { appearance } from '@/server/cosmetics';
 export default async function Page() {
   const id = await requireCollector(),
     c = await db().collector.findUniqueOrThrow({
       where: { id },
       select: { slug: true, isPublic: true },
     });
-  const [p, d, g, m] = await Promise.all([
+  const [p, d, g, m, style] = await Promise.all([
     progressionView('COLLECTOR', id),
     dexView(id),
     galleryList(id, true),
@@ -25,6 +26,7 @@ export default async function Page() {
       },
       select: { key: true },
     }),
+    appearance(id),
   ]);
   return (
     <>
@@ -36,6 +38,7 @@ export default async function Page() {
         </p>
       </section>
       <ShareStudio
+        template={style.share}
         slug={c.slug}
         isPublic={c.isPublic}
         base={absoluteUrl('/').slice(0, -1)}

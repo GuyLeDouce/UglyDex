@@ -5,6 +5,7 @@ import type { ShareCard, ShareSpec } from '@/domain/sharing';
 import { accentColors } from '@/domain/cosmetics';
 import { readFileSync } from 'node:fs';
 import { achievementBadgeFile } from './achievement-badge-assets';
+import { shareBackground } from './share-backgrounds';
 const badgeImages = new Map<string, string>();
 function badgeImage(key: string) {
   const file = achievementBadgeFile(key);
@@ -22,8 +23,6 @@ export function renderShare(
   spec: Pick<ShareSpec, 'ratio' | 'template'>,
   art: Record<number, string | null>,
 ) {
-  if (card.appearance && spec.template === 'clean')
-    spec = { ...spec, template: card.appearance.share };
   const text = (value: string) =>
     value
       .normalize('NFKD')
@@ -50,7 +49,7 @@ export function renderShare(
     cols = count <= 1 ? 1 : count <= 4 ? 2 : count <= 9 ? 3 : 4;
   const artWidth = square ? 970 : 510,
     artHeight =
-      spec.template === 'stats' ? 300 : square ? (count > 4 ? 620 : 480) : 480,
+      spec.template === 'stats' ? 300 : square ? (count > 4 ? 540 : 480) : 432,
     cell =
       Math.floor(
         Math.min(
@@ -66,6 +65,9 @@ export function renderShare(
         display: 'flex',
         flexDirection: 'column',
         background: '#101210',
+        backgroundImage: `url(${shareBackground(spec.template)})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         color: '#f4f4ed',
         fontFamily: 'sans-serif',
         padding: square ? 48 : 40,
@@ -79,6 +81,9 @@ export function renderShare(
           fontSize: 17,
           color: accent,
           letterSpacing: 2,
+          background: 'rgba(9, 12, 24, 0.88)',
+          padding: '8px 12px',
+          borderRadius: 8,
         }}
       >
         <span>UGLYDEX /</span>
@@ -164,73 +169,83 @@ export function renderShare(
             flex: 1,
             ...(square ? { width: '100%' } : {}),
             justifyContent: 'center',
-            gap: 12,
           }}
         >
           <div
             style={{
               display: 'flex',
-              fontSize: square ? 46 : 48,
-              fontWeight: 800,
-              lineHeight: 1.08,
+              flexDirection: 'column',
+              gap: 12,
+              background: 'rgba(9, 12, 24, 0.88)',
+              padding: 20,
+              borderRadius: 16,
             }}
           >
-            {card.title.slice(0, 100)}
-          </div>
-          <div style={{ display: 'flex', fontSize: 22, color: '#c5c8bd' }}>
-            {card.description.slice(0, 150)}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            {card.stats.slice(0, 6).map((t) => (
-              <div
-                key={t}
-                style={{
-                  display: 'flex',
-                  fontSize: 22,
-                  color: accent,
-                  border: '1px solid #46513f',
-                  padding: '8px 12px',
-                }}
-              >
-                {t}
-              </div>
-            ))}
-          </div>
-          {!!card.achievementBadges?.length && (
-            <div style={{ display: 'flex', gap: 12 }}>
-              {card.achievementBadges.slice(0, 3).map((badge) => {
-                const src =
-                  badge.status === 'earned' ? badgeImage(badge.key) : null;
-                return src ? (
-                  <img
-                    key={badge.key}
-                    src={src}
-                    width={card.achievementBadges?.length === 1 ? 96 : 64}
-                    height={card.achievementBadges?.length === 1 ? 96 : 64}
-                    alt={badge.name}
-                    style={{ objectFit: 'contain' }}
-                  />
-                ) : null;
-              })}
-            </div>
-          )}
-          {card.badges.length > 0 && (
             <div
               style={{
                 display: 'flex',
-                flexWrap: 'wrap',
-                fontSize: 19,
-                color: '#e6dac0',
+                fontSize: square ? 46 : 48,
+                fontWeight: 800,
+                lineHeight: 1.08,
               }}
             >
-              {card.badges.join(' · ')}
+              {card.title.slice(0, 100)}
             </div>
-          )}
-          {card.date && (
-            <div style={{ display: 'flex', fontSize: 18, color: '#b6bbae' }}>
-              {new Date(card.date).toISOString().slice(0, 10)}
+            <div style={{ display: 'flex', fontSize: 22, color: '#c5c8bd' }}>
+              {card.description.slice(0, 150)}
             </div>
-          )}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {card.stats.slice(0, 6).map((t) => (
+                <div
+                  key={t}
+                  style={{
+                    display: 'flex',
+                    fontSize: 22,
+                    color: accent,
+                    border: '1px solid #46513f',
+                    padding: '8px 12px',
+                  }}
+                >
+                  {t}
+                </div>
+              ))}
+            </div>
+            {!!card.achievementBadges?.length && (
+              <div style={{ display: 'flex', gap: 12 }}>
+                {card.achievementBadges.slice(0, 3).map((badge) => {
+                  const src =
+                    badge.status === 'earned' ? badgeImage(badge.key) : null;
+                  return src ? (
+                    <img
+                      key={badge.key}
+                      src={src}
+                      width={card.achievementBadges?.length === 1 ? 96 : 64}
+                      height={card.achievementBadges?.length === 1 ? 96 : 64}
+                      alt={badge.name}
+                      style={{ objectFit: 'contain' }}
+                    />
+                  ) : null;
+                })}
+              </div>
+            )}
+            {card.badges.length > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  fontSize: 19,
+                  color: '#e6dac0',
+                }}
+              >
+                {card.badges.join(' · ')}
+              </div>
+            )}
+            {card.date && (
+              <div style={{ display: 'flex', fontSize: 18, color: '#b6bbae' }}>
+                {new Date(card.date).toISOString().slice(0, 10)}
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <div
@@ -240,6 +255,9 @@ export function renderShare(
           fontSize: 17,
           color: '#9da695',
           marginTop: 16,
+          background: 'rgba(9, 12, 24, 0.88)',
+          padding: '8px 12px',
+          borderRadius: 8,
         }}
       >
         <span>UGLY LABS / BEAUTIFULLY MALFORMED</span>

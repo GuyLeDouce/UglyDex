@@ -3,6 +3,7 @@ import { shareSchema } from '@/domain/sharing';
 import { shareCard } from '@/server/sharing';
 import { shareLimit, sharePng } from '@/server/share-cache';
 import { currentSession } from '@/server/auth';
+import { resolveShareStyle } from '@/domain/share-styles';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
@@ -29,7 +30,13 @@ export async function GET(request: Request) {
       owner ? session?.collectorId : undefined,
     );
     if (!card) return new Response('Not available', { status: 404, headers });
-    const bytes = await sharePng(card, spec);
+    const bytes = await sharePng(card, {
+      ...spec,
+      template: resolveShareStyle(
+        url.searchParams.has('template') ? spec.template : undefined,
+        card.appearance?.share,
+      ),
+    });
     const fresh = await shareCard(
       spec,
       owner ? session?.collectorId : undefined,
