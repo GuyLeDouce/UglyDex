@@ -22,6 +22,7 @@ import {
 } from '@/server/collectibles';
 import { currentSession } from '@/server/auth';
 import { DisplayArt } from '@/components/display-art';
+import { SquigMarket } from '@/components/opensea';
 export default async function Squig({
   params,
   searchParams,
@@ -116,6 +117,7 @@ export default async function Squig({
             <a href="#ownership">Ownership</a>
             <a href="#passport">Passport</a>
           </nav>
+          <SquigMarket tokenId={s.tokenId} />
         </div>
       </section>
       <section id="traits" className="section-heading">

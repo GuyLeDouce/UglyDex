@@ -53,6 +53,7 @@ for (const key of [
   'DISCORD_CLIENT_SECRET',
   'DISCORD_REDIRECT_URI',
   'ETH_RPC_URL',
+  'OPENSEA_API_KEY',
   'ECOSYSTEM_GUILD_ID',
   'SQUIG_IMAGE_BASE_URL',
   'UGLYBOT_BRIDGE_URL',
@@ -1279,6 +1280,12 @@ try {
     const { achievementBadgeWebTests } =
       await import('../tests/db/achievement-badges');
     await achievementBadgeWebTests(
+      `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
+    const { openSeaWebTests } = await import('../tests/db/opensea-web');
+    await openSeaWebTests(
       `http://127.0.0.1:${webPort}`,
       check,
       process.argv.includes('--browser'),
