@@ -205,6 +205,17 @@ export async function ownershipWebTests(
         { name: 'uglydex_session', value: token, url: base },
       ]);
       const settings = await ownerContext.newPage();
+      // The fixture serves HTTP while its configured public origin is HTTPS,
+      // matching the existing settings browser tests without weakening CSRF checks.
+      await settings.route(base + '/api/settings/profile', async (route) => {
+        const response = await route.fetch({
+          headers: {
+            ...(await route.request().allHeaders()),
+            origin: process.env.PUBLIC_BASE_URL!,
+          },
+        });
+        await route.fulfill({ response });
+      });
       for (const show of [true, false]) {
         await settings.goto(base + '/settings/profile', {
           waitUntil: 'domcontentloaded',
@@ -218,9 +229,15 @@ export async function ownershipWebTests(
           'identity preference persists when settings reload',
         );
         await toggle.setChecked(show);
+        const submitted = settings.waitForResponse(
+          (response) =>
+            response.url() === base + '/api/settings/profile' &&
+            response.request().method() === 'POST',
+        );
         await settings
           .getByRole('button', { name: 'Save profile', exact: true })
           .click();
+        check((await submitted).ok(), 'profile form submission succeeds');
         await settings.getByText('Profile saved.', { exact: true }).waitFor();
         const saved = await db().collector.findUniqueOrThrow({
           where: { id: collector.id },
