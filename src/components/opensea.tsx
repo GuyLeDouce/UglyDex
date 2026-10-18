@@ -64,12 +64,14 @@ export function OpenSeaLink({
   tokenId,
   listing,
   status,
+  complete,
   checkedAt,
   detail = false,
 }: {
   tokenId: number;
   listing?: SquigListing;
   status?: OpenSeaListings['status'];
+  complete?: boolean;
   checkedAt?: string | null;
   detail?: boolean;
 }) {
@@ -87,6 +89,8 @@ export function OpenSeaLink({
           </>
         ) : status === 'unavailable' ? (
           'Listings unavailable'
+        ) : status === 'available' && complete ? (
+          'Unlisted'
         ) : (
           'Check listings on OpenSea'
         )}
@@ -128,6 +132,7 @@ export function SquigMarket({ tokenId }: { tokenId: number }) {
       tokenId={tokenId}
       listing={data?.listings.find((l) => l.tokenId === tokenId)}
       status={data?.status}
+      complete={data?.complete}
       checkedAt={data?.checkedAt}
       detail
     />

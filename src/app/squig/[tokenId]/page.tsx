@@ -124,17 +124,21 @@ export default async function Squig({
         <p className="eyebrow">THE ANATOMY OF UGLY</p>
         <h2>Every little detail.</h2>
         <div className="trait-grid">
-          {s.traits.map((t) => (
-            <Link
-              className="trait"
-              key={t.traitType}
-              href={`/squigs?trait=${encodeURIComponent(t.traitType)}&value=${encodeURIComponent(t.value)}`}
-            >
-              <small>{t.traitType}</small>
-              <strong>{t.value || 'Not recorded'}</strong>
-              <span aria-hidden>↗</span>
-            </Link>
-          ))}
+          {s.traits
+            .filter(
+              (t) => t.value.trim() && t.value.trim().toLowerCase() !== 'none',
+            )
+            .map((t) => (
+              <Link
+                className="trait"
+                key={t.traitType}
+                href={`/squigs?trait=${encodeURIComponent(t.traitType)}&value=${encodeURIComponent(t.value)}`}
+              >
+                <small>{t.traitType}</small>
+                <strong>{t.value}</strong>
+                <span aria-hidden>↗</span>
+              </Link>
+            ))}
         </div>
       </section>
       <div className="profile-grid">

@@ -246,7 +246,7 @@ describe('OpenSea card presentation', () => {
       createElement(OpenSeaLink, { tokenId: 1, status: 'unavailable' }),
     );
     expect(html).toContain('Listings unavailable');
-    expect(html).not.toContain('Not listed');
+    expect(html).not.toContain('Unlisted');
     const listed = renderToStaticMarkup(
       createElement(OpenSeaLink, {
         tokenId: 1,
@@ -261,5 +261,21 @@ describe('OpenSea card presentation', () => {
     expect(listed).toContain('0.0014');
     expect(listed).toContain('Listed on OpenSea');
     expect(listed).toContain('View listing');
+  });
+  it('only calls a token Unlisted after a complete successful lookup', () => {
+    for (const complete of [false, undefined, true]) {
+      const html = renderToStaticMarkup(
+        createElement(OpenSeaLink, {
+          tokenId: 1,
+          status: 'available',
+          complete,
+        }),
+      );
+      expect(html.includes('Unlisted')).toBe(complete === true);
+      expect(html).toContain(squigOpenSeaUrl(1));
+    }
+    expect(
+      renderToStaticMarkup(createElement(OpenSeaLink, { tokenId: 1 })),
+    ).not.toContain('Unlisted');
   });
 });

@@ -28,6 +28,7 @@ export async function openSeaWebTests(
   try {
     const page = await browser.newPage();
     let available = true;
+    let listed = true;
     await page.route('**/api/opensea/listings', (route) =>
       route.fulfill({
         json: available
@@ -35,14 +36,16 @@ export async function openSeaWebTests(
               status: 'available',
               complete: true,
               checkedAt: new Date().toISOString(),
-              listings: [
-                {
-                  tokenId: 4398,
-                  amount: '0.0014',
-                  currency: 'ETH',
-                  expiresAt: new Date(Date.now() + 3600000).toISOString(),
-                },
-              ],
+              listings: listed
+                ? [
+                    {
+                      tokenId: 4398,
+                      amount: '0.0014',
+                      currency: 'ETH',
+                      expiresAt: new Date(Date.now() + 3600000).toISOString(),
+                    },
+                  ]
+                : [],
             }
           : {
               status: 'unavailable',
@@ -53,6 +56,7 @@ export async function openSeaWebTests(
       }),
     );
     for (const width of [1440, 390, 320]) {
+      listed = true;
       await page.setViewportSize({ width, height: 1000 });
       await page.goto(base + '/squigs?q=4398');
       const card = page
@@ -117,6 +121,32 @@ export async function openSeaWebTests(
       await page
         .locator('.specimen')
         .screenshot({ path: `.data/opensea/listed-detail-${width}.png` });
+      const traits = await page
+        .locator('#traits .trait strong')
+        .allTextContents();
+      check(
+        traits.length === 8 &&
+          traits.includes('Beige Elf') &&
+          traits.every(
+            (value) =>
+              value.trim() && !/^(none|not recorded)$/i.test(value.trim()),
+          ),
+        `detail hides absent traits while retaining real traits at ${width}px`,
+      );
+      listed = false;
+      await page.reload();
+      await page.getByText('Unlisted', { exact: true }).waitFor();
+      check(
+        (await page.locator('.opensea-detail .opensea-price').innerText()) ===
+          'Unlisted',
+        `unlisted detail uses the concise label at ${width}px`,
+      );
+      await page.goto(base + '/squigs?q=4398');
+      await card.getByText('Unlisted', { exact: true }).waitFor();
+      check(
+        (await card.locator('.opensea-price').innerText()) === 'Unlisted',
+        `unlisted card uses the concise label at ${width}px`,
+      );
     }
     available = false;
     await page.goto(base + '/squig/4398');
