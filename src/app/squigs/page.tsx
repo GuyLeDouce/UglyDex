@@ -9,6 +9,7 @@ export async function generateMetadata() {
 }
 import { Catalog, type SearchParams } from '@/components/catalog';
 import { currentSession } from '@/server/auth';
+import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 export default async function Squigs({
   searchParams,
@@ -22,6 +23,9 @@ export default async function Squigs({
         <p className="eyebrow">THE COMPLETE FIELD GUIDE</p>
         <h1>4,444 kinds of strange.</h1>
         <p>Meet Squigs Reloaded. Filter the details. Find your kind of ugly.</p>
+        <Link className="button" href="/squigs/listings">
+          Listed on OpenSea ↗
+        </Link>
       </section>
       <Catalog params={await searchParams} viewerId={session?.collectorId} />
     </>

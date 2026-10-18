@@ -1,5 +1,17 @@
 # Integration operating contract
 
+## OpenSea listing display
+
+`OPENSEA_API_KEY` is an optional server-only web-service variable. Configure it separately on UglyDex production and UglyDex-Staging; no worker or database change is needed. Direct links always use the canonical Reloaded Ethereum contract and validated token IDs. Customs artwork shown in a Reloaded card does not change the marketplace asset identity.
+
+`src/server/opensea.ts` reads public best listings for `squigs-reloaded` using the [OpenSea collection endpoint](https://docs.opensea.io/reference/get_best_listings_collection). It validates active Ethereum ERC-721 single-item orders against the canonical contract, token range, quantity and time window. Prices retain exact base-unit precision. Duplicate tokens retain OpenSea's first price-ordered result; currencies are not converted or compared using an invented exchange rate.
+
+Reads are coalesced and cached for 60 seconds per Node web replica, with a 10-second request deadline and a maximum of ten 200-order pages. Truncated results are labeled partial. HTTP 429 respects Retry-After and X-RateLimit-Reset. Errors return unavailable without retaining stale quotes or claiming an NFT is unlisted. The browser refreshes visible views, shares requests across grids, and removes expired listings. `/api/opensea/listings` exposes only token IDs, asking amounts/currencies, expiration and observation times, never credentials or raw orders.
+
+Cards and detail pages link out to OpenSea; `/squigs/listings` browses observed listings with existing Squig cards and pagination. Final price and availability are confirmed on OpenSea. This is a read-only display integration: no fulfillment, wallet signatures, purchase execution, ownership ingestion, achievement awards or persistence changes. Missing keys leave links functional and listing panels unavailable.
+
+Validation: `tests/opensea.test.ts` covers mapping, decimal precision, validation, expiry, bounded pagination, coalescing, caching, backoff and failure states. `tests/db/opensea-web.ts` checks the real endpoint and browser rendering at 1440, 390 and 320 px with controlled listing responses. The disposable database suite explicitly blanks the API key so it cannot consume production API quota.
+
 ## Phase 11 full staging import follow-up
 
 The [full staging report](phase11-full-import-report.md) supersedes the pilot-only

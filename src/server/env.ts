@@ -45,6 +45,7 @@ export const environmentSchema = z
     ECOSYSTEM_GUILD_ID: optional(z.string().regex(/^\d{17,20}$/)),
     ETH_RPC_URL: optional(http),
     ETH_EXPLORER_URL: optional(z.string().url().startsWith('https://')),
+    OPENSEA_API_KEY: optional(z.string().min(1)),
     RPC_CONCURRENCY: z.coerce.number().int().min(1).max(10).default(3),
     RPC_RETRIES: z.coerce.number().int().min(0).max(8).default(4),
     RPC_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(15000),

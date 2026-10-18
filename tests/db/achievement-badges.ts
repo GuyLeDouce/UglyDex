@@ -350,7 +350,9 @@ export async function achievementBadgeWebTests(
           );
         }
         if (name === 'squig-card') {
-          const card = page.locator('.squig-card[href="/squig/4398"]');
+          const card = page
+            .locator('.squig-card')
+            .filter({ has: page.locator('a[href="/squig/4398"]') });
           check(
             (await card.locator('.achievement-badge').count()) === 3 &&
               (await card.innerText()).includes('+4'),
@@ -389,7 +391,8 @@ export async function achievementBadgeWebTests(
           });
         if (width === 1440 && name === 'squig-card')
           await page
-            .locator('.squig-card[href="/squig/4398"]')
+            .locator('.squig-card')
+            .filter({ has: page.locator('a[href="/squig/4398"]') })
             .screenshot({ path: '.data/badges/squig-card-closeup.png' });
         if (width === 1440 && name === 'achievements')
           await page

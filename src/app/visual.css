@@ -947,6 +947,57 @@ button.button:hover,
   color: var(--ugly-ink);
 }
 
+.squig-card-main {
+  display: block;
+  color: inherit;
+}
+
+.squig-card-main:hover {
+  color: inherit;
+}
+
+.opensea-listing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 72px;
+  padding: 12px 16px;
+  border-top: 2px solid var(--ugly-ink);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ugly-ink);
+  font-size: 0.75rem;
+}
+
+.opensea-price {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.opensea-listing a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  text-decoration: underline;
+  font-weight: 800;
+}
+
+.opensea-detail {
+  margin-top: 20px;
+  border: 2px solid var(--ugly-ink);
+  border-radius: 12px;
+  font-size: 1rem;
+}
+
+.opensea-note {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+}
+
 .artwork {
   position: relative;
   aspect-ratio: 1;

@@ -5,6 +5,8 @@ import { Artwork } from './artwork';
 import type { SquigCardData } from '@/server/collections';
 import { squigRarityClass } from '@/domain/squig-rarity';
 import { AchievementStrip } from './achievement-strip';
+import { OpenSeaLink, useOpenSeaListings } from './opensea';
+import type { OpenSeaListings, SquigListing } from '@/domain/opensea';
 const subscribe = (fn: () => void) => {
   window.addEventListener('storage', fn);
   return () => window.removeEventListener('storage', fn);
@@ -21,119 +23,132 @@ const snapshot = () => {
 export function SquigCard({
   item,
   priority = false,
+  listing,
+  marketStatus,
 }: {
   item: SquigCardData;
   priority?: boolean;
+  listing?: SquigListing;
+  marketStatus?: OpenSeaListings['status'];
 }) {
   return (
-    <Link
-      href={`/squig/${item.tokenId}`}
+    <article
       className={`squig-card ${squigRarityClass(item.rarity)} ${item.currentlyOwned === false ? 'previous' : ''}`}
     >
-      <Artwork
-        src={item.image}
-        alt={`Squig #${item.tokenId}`}
-        priority={priority}
-      />
-      <div className="card-body">
-        {item.representation && (
-          <p className="eyebrow">{item.representation}</p>
-        )}
-        <div className="card-title">
-          <h3>
-            Squig <span>#{item.tokenId}</span>
-          </h3>
-          <span className="rarity">{item.rarity ?? 'Unclassified'}</span>
-        </div>
-        <div className="card-numbers">
-          <span>
-            <strong>{item.uglyPoints?.toLocaleString() ?? '—'}</strong> UP
-          </span>
-          <span>Rank {item.mawRank ?? '—'}</span>
-        </div>
-        <div className="tags">
-          {item.og && <span>OG</span>}
-          {item.legendary && <span className="legendary">Legendary</span>}
-          {item.traits
-            .filter((t) => t.value && ['Type', 'Skin'].includes(t.traitType))
-            .map((t) => (
-              <span key={t.traitType}>{t.value}</span>
-            ))}
-        </div>
-        {item.achievements && (
-          <AchievementStrip summary={item.achievements} subject="SQUIG" />
-        )}
-        {item.personalization && (
-          <p className="ownership-label">
-            {item.personalization.owned
-              ? 'Currently Owned'
-              : item.personalization.discovered
-                ? 'Already Discovered'
-                : 'NEW DISCOVERY'}
-            {item.personalization.missingTraits > 0 && (
-              <small>
-                Adds {item.personalization.missingTraits} missing traits
-              </small>
-            )}
-            {item.personalization.advances > 0 && (
-              <small>Advances {item.personalization.advances} sets</small>
-            )}
-          </p>
-        )}
-        {item.currentlyOwned !== undefined && (
-          <p className="ownership-label">
-            {item.currentlyOwned ? 'Currently Owned' : 'Previously Owned'}
-            {item.discoveredAt && (
-              <small>
-                Discovered{' '}
-                {new Date(item.discoveredAt).toLocaleDateString('en-US', {
-                  timeZone: 'UTC',
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })}
-              </small>
-            )}
-          </p>
-        )}
-        {item.history && (
-          <div className="holding-history">
-            <small>
-              {item.history.firstAcquiredIsChain
-                ? 'First acquired'
-                : 'First confirmed holding'}{' '}
-              {new Date(item.history.firstAcquired).toLocaleDateString(
-                'en-US',
-                { timeZone: 'UTC' },
-              )}
-            </small>
-            <small>
-              {item.history.lastAcquiredIsChain
-                ? 'Last acquired'
-                : 'Latest confirmed holding'}{' '}
-              {new Date(item.history.lastAcquired).toLocaleDateString('en-US', {
-                timeZone: 'UTC',
-              })}
-            </small>
-            {item.history.lastLoss && (
-              <small>
-                {item.history.lastLossIsChain
-                  ? 'Last held until'
-                  : 'Evidence valid until'}{' '}
-                {new Date(item.history.lastLoss).toLocaleDateString('en-US', {
-                  timeZone: 'UTC',
-                })}
-              </small>
-            )}
-            <small>
-              {Math.floor(item.history.heldSeconds / 86400)} indexed days ·{' '}
-              {item.history.periods} holding{' '}
-              {item.history.periods === 1 ? 'period' : 'periods'}
-            </small>
+      <Link className="squig-card-main" href={`/squig/${item.tokenId}`}>
+        <Artwork
+          src={item.image}
+          alt={`Squig #${item.tokenId}`}
+          priority={priority}
+        />
+        <div className="card-body">
+          {item.representation && (
+            <p className="eyebrow">{item.representation}</p>
+          )}
+          <div className="card-title">
+            <h3>
+              Squig <span>#{item.tokenId}</span>
+            </h3>
+            <span className="rarity">{item.rarity ?? 'Unclassified'}</span>
           </div>
-        )}
-      </div>
-    </Link>
+          <div className="card-numbers">
+            <span>
+              <strong>{item.uglyPoints?.toLocaleString() ?? '—'}</strong> UP
+            </span>
+            <span>Rank {item.mawRank ?? '—'}</span>
+          </div>
+          <div className="tags">
+            {item.og && <span>OG</span>}
+            {item.legendary && <span className="legendary">Legendary</span>}
+            {item.traits
+              .filter((t) => t.value && ['Type', 'Skin'].includes(t.traitType))
+              .map((t) => (
+                <span key={t.traitType}>{t.value}</span>
+              ))}
+          </div>
+          {item.achievements && (
+            <AchievementStrip summary={item.achievements} subject="SQUIG" />
+          )}
+          {item.personalization && (
+            <p className="ownership-label">
+              {item.personalization.owned
+                ? 'Currently Owned'
+                : item.personalization.discovered
+                  ? 'Already Discovered'
+                  : 'NEW DISCOVERY'}
+              {item.personalization.missingTraits > 0 && (
+                <small>
+                  Adds {item.personalization.missingTraits} missing traits
+                </small>
+              )}
+              {item.personalization.advances > 0 && (
+                <small>Advances {item.personalization.advances} sets</small>
+              )}
+            </p>
+          )}
+          {item.currentlyOwned !== undefined && (
+            <p className="ownership-label">
+              {item.currentlyOwned ? 'Currently Owned' : 'Previously Owned'}
+              {item.discoveredAt && (
+                <small>
+                  Discovered{' '}
+                  {new Date(item.discoveredAt).toLocaleDateString('en-US', {
+                    timeZone: 'UTC',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </small>
+              )}
+            </p>
+          )}
+          {item.history && (
+            <div className="holding-history">
+              <small>
+                {item.history.firstAcquiredIsChain
+                  ? 'First acquired'
+                  : 'First confirmed holding'}{' '}
+                {new Date(item.history.firstAcquired).toLocaleDateString(
+                  'en-US',
+                  { timeZone: 'UTC' },
+                )}
+              </small>
+              <small>
+                {item.history.lastAcquiredIsChain
+                  ? 'Last acquired'
+                  : 'Latest confirmed holding'}{' '}
+                {new Date(item.history.lastAcquired).toLocaleDateString(
+                  'en-US',
+                  {
+                    timeZone: 'UTC',
+                  },
+                )}
+              </small>
+              {item.history.lastLoss && (
+                <small>
+                  {item.history.lastLossIsChain
+                    ? 'Last held until'
+                    : 'Evidence valid until'}{' '}
+                  {new Date(item.history.lastLoss).toLocaleDateString('en-US', {
+                    timeZone: 'UTC',
+                  })}
+                </small>
+              )}
+              <small>
+                {Math.floor(item.history.heldSeconds / 86400)} indexed days ·{' '}
+                {item.history.periods} holding{' '}
+                {item.history.periods === 1 ? 'period' : 'periods'}
+              </small>
+            </div>
+          )}
+        </div>
+      </Link>
+      <OpenSeaLink
+        tokenId={item.tokenId}
+        listing={listing}
+        status={marketStatus}
+      />
+    </article>
   );
 }
 export function CollectionGrid({
@@ -144,6 +159,10 @@ export function CollectionGrid({
   controls?: boolean;
 }) {
   const mode = useSyncExternalStore(subscribe, snapshot, () => 'grid');
+  const market = useOpenSeaListings();
+  const listings = new Map(
+    market?.listings.map((listing) => [listing.tokenId, listing]),
+  );
   const [priorityCount, setPriorityCount] = useState(2);
   useEffect(() => {
     const query = window.matchMedia('(min-width: 561px)');
@@ -183,6 +202,8 @@ export function CollectionGrid({
               key={item.tokenId}
               item={item}
               priority={index < priorityCount}
+              listing={listings.get(item.tokenId)}
+              marketStatus={market?.status}
             />
           ))}
         </div>
