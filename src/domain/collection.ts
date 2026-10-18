@@ -11,6 +11,8 @@ export const filterSchema = z.object({
       'token',
       'points-desc',
       'points-asc',
+      'price-asc',
+      'price-desc',
       'rank',
       'recent',
       'og',

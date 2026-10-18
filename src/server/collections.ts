@@ -13,6 +13,8 @@ import type { Prisma } from '@/generated/prisma/client';
 import { chainKey } from '@/sync/provenance';
 import { squigBadgeSummaries } from './achievement-badges';
 import type { AchievementBadgeSummary } from '@/domain/achievement-badges';
+import { openSeaListings } from './opensea';
+import { isListingSort, sortedListings } from '@/domain/opensea';
 export const catalogScope = { chainId: 1, contractAddress: SQUIGS_CONTRACT };
 export const cardSelect = {
   id: true,
@@ -97,6 +99,7 @@ export async function collectionPage(
   collectorId?: string,
   discovered = false,
   viewerId?: string,
+  readListings: typeof openSeaListings = openSeaListings,
 ) {
   const filters = filterSchema.parse(params),
     addresses = collectorId ? await activeAddresses(collectorId) : [];
@@ -130,7 +133,22 @@ export async function collectionPage(
   const where: Prisma.SquigWhereInput = {
     AND: [catalogScope, scope, collectionWhere(filters), personalizedScope],
   };
-  const total = await db().squig.count({ where });
+  const market = isListingSort(filters.sort) ? await readListings() : null;
+  let listedIds: number[] | undefined;
+  if (market && isListingSort(filters.sort)) {
+    const listings = sortedListings(market.listings, filters.sort);
+    const matching = await db().squig.findMany({
+      where: {
+        AND: [where, { tokenId: { in: listings.map((l) => l.tokenId) } }],
+      },
+      select: { tokenId: true },
+    });
+    const matches = new Set(matching.map((r) => r.tokenId));
+    listedIds = listings
+      .filter((l) => matches.has(l.tokenId))
+      .map((l) => l.tokenId);
+  }
+  const total = listedIds?.length ?? (await db().squig.count({ where }));
   const page = Math.min(
     filters.page,
     Math.max(1, Math.ceil(total / PAGE_SIZE)),
@@ -154,11 +172,30 @@ export async function collectionPage(
     recentIds = rows.map((r) => r.squigId);
   }
   const rows = await db().squig.findMany({
-    where: recentIds ? { id: { in: recentIds } } : where,
+    where: listedIds
+      ? {
+          AND: [
+            where,
+            {
+              tokenId: {
+                in: listedIds.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+              },
+            },
+          ],
+        }
+      : recentIds
+        ? { id: { in: recentIds } }
+        : where,
     select: cardSelect,
     orderBy: collectionOrder(filters.sort),
-    ...(recentIds ? {} : { skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE }),
+    ...(recentIds || listedIds
+      ? {}
+      : { skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE }),
   });
+  if (listedIds) {
+    const positions = new Map(listedIds.map((id, index) => [id, index]));
+    rows.sort((a, b) => positions.get(a.tokenId)! - positions.get(b.tokenId)!);
+  }
   if (recentIds)
     rows.sort((a, b) => recentIds.indexOf(a.id) - recentIds.indexOf(b.id));
   const badgeSummaries = await squigBadgeSummaries(rows.map((r) => r.id));
@@ -305,6 +342,9 @@ export async function collectionPage(
     page,
     pages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
     filters,
+    market: market
+      ? { status: market.status, complete: market.complete }
+      : null,
     traits,
   };
 }

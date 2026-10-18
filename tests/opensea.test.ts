@@ -2,7 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createOpenSeaReader, parseSquigListing } from '../src/server/opensea';
-import { listingAmount, squigOpenSeaUrl } from '../src/domain/opensea';
+import {
+  listingAmount,
+  squigOpenSeaUrl,
+  sortedListings,
+} from '../src/domain/opensea';
 import { SQUIGS_CONTRACT } from '../src/domain/validation';
 import { OpenSeaLink } from '../src/components/opensea';
 import { SquigCard } from '../src/components/collection';
@@ -36,6 +40,48 @@ const response = (listings: unknown[], next?: string) =>
 afterEach(() => vi.unstubAllEnvs());
 
 describe('OpenSea listing projection', () => {
+  it('orders the full listing set before pagination without mutating shared data', () => {
+    const listings = Array.from({ length: 30 }, (_, i) => ({
+      tokenId: i + 1,
+      amount: String(i + 1),
+      currency: 'ETH',
+      expiresAt: '2099-01-01T00:00:00Z',
+    }));
+    expect(
+      sortedListings(listings, 'price-desc')
+        .slice(0, 24)
+        .map((l) => l.tokenId),
+    ).toEqual(Array.from({ length: 24 }, (_, i) => 30 - i));
+    expect(
+      sortedListings(listings, 'price-desc')
+        .slice(24)
+        .map((l) => l.tokenId),
+    ).toEqual([6, 5, 4, 3, 2, 1]);
+    expect(sortedListings(listings, 'price-asc')).toEqual(listings);
+    expect(listings[0].tokenId).toBe(1);
+  });
+  it('preserves OpenSea cross-currency ordering instead of comparing nominal amounts', () => {
+    const listings = [
+      {
+        tokenId: 1,
+        amount: '10',
+        currency: 'USDC',
+        expiresAt: '2099-01-01T00:00:00Z',
+      },
+      {
+        tokenId: 2,
+        amount: '0.1',
+        currency: 'ETH',
+        expiresAt: '2099-01-01T00:00:00Z',
+      },
+    ];
+    expect(sortedListings(listings, 'price-asc').map((l) => l.tokenId)).toEqual(
+      [1, 2],
+    );
+    expect(
+      sortedListings(listings, 'price-desc').map((l) => l.tokenId),
+    ).toEqual([2, 1]);
+  });
   it('uses the canonical contract for every Squig link', () => {
     for (let token = 1; token <= 4444; token++)
       expect(squigOpenSeaUrl(token)).toBe(

@@ -11,6 +11,18 @@ export type SquigListing = {
   currency: string;
   expiresAt: string;
 };
+export type ListingSort = 'price-asc' | 'price-desc';
+export function isListingSort(sort: string): sort is ListingSort {
+  return sort === 'price-asc' || sort === 'price-desc';
+}
+// The collection reader preserves OpenSea's ascending price order across currencies.
+// Reverse the full result set before pagination; never compare raw currency amounts.
+export function sortedListings(
+  listings: readonly SquigListing[],
+  sort: ListingSort,
+) {
+  return sort === 'price-desc' ? [...listings].reverse() : [...listings];
+}
 export type OpenSeaListings = {
   status: 'available' | 'unavailable';
   checkedAt: string | null;
