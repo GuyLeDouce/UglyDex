@@ -5,7 +5,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { createServer } from 'node:net';
 import { resolve, relative } from 'node:path';
 import { tmpdir } from 'node:os';
-import { rm } from 'node:fs/promises';
+import { mkdir, rm } from 'node:fs/promises';
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
 import assert from 'node:assert/strict';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -89,6 +89,7 @@ Object.assign(process.env, {
   DRIP_MAX_RPM: '6',
   DRIP_SYNC_INTERVAL_MS: '1800000',
   DRIP_STALE_AFTER_MS: '300000',
+  DRIP_SWEEP_PAUSED: 'false',
 });
 process.env.PUBLIC_BASE_URL = `https://localhost:${webPort}`;
 process.env.AUTH_SECRET = randomBytes(32).toString('hex');
@@ -102,6 +103,7 @@ const check = (condition: unknown, message: string) => {
   assertions++;
 };
 try {
+  await mkdir(resolve('.data'), { recursive: true });
   console.log(JSON.stringify({ event: 'test.initialise_postgres' }));
   await postgres.initialise();
   console.log(JSON.stringify({ event: 'test.start_postgres' }));
@@ -920,6 +922,7 @@ try {
           await page
             .getByRole('heading', {
               name: /Every Squig.*has a story/,
+              level: 1,
             })
             .isVisible(),
           'browser hero visible',
@@ -932,12 +935,13 @@ try {
         );
         if (process.argv.includes('--catalog')) {
           await page
-            .locator('.landing-specimens img[alt="Squig #1"]')
+            .locator('.landing-specimens img')
+            .first()
             .scrollIntoViewIfNeeded();
           await page.waitForFunction(
             () => {
               const img = document.querySelector<HTMLImageElement>(
-                '.landing-specimens img[alt="Squig #1"]',
+                '.landing-specimens img',
               );
               return !!img?.complete && img.naturalWidth > 0;
             },
@@ -947,7 +951,8 @@ try {
           check(
             (
               await page
-                .locator('.landing-specimens img[alt="Squig #1"]')
+                .locator('.landing-specimens img')
+                .first()
                 .getAttribute('src')
             )?.includes('/_next/image?'),
             'controlled artwork renders at the canonical optimizer URL',

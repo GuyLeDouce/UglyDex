@@ -40,6 +40,9 @@ export async function verifyCharmGate() {
       !!s.alignmentAt &&
       Date.now() - +s.alignmentAt < 86400000 &&
       !!s.lastFullSweep &&
+      !c.DRIP_SWEEP_PAUSED &&
+      s.lastFullSweep >= s.alignmentAt &&
+      Date.now() - +s.lastFullSweep <= c.DRIP_SYNC_INTERVAL_MS + 60000 &&
       !!s.lastSuccessAt &&
       Date.now() - +s.lastSuccessAt < 3600000 &&
       s.monthRequests <= 30000 &&
@@ -55,6 +58,7 @@ export async function verifyCharmGate() {
         resolved,
         balances,
         lastFullSweep: s?.lastFullSweep,
+        sweepPaused: c.DRIP_SWEEP_PAUSED,
         lastSuccessAt: s?.lastSuccessAt,
         monthRequests: s?.monthRequests,
         errorCode: s?.errorCode,

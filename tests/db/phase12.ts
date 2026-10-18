@@ -27,6 +27,19 @@ export async function phase12DatabaseTests(
     DRIP_REALM_POINT_ID: currency,
     CHARM_DIRTY_UGLYBOT_SECRET: 'fixture-hmac-'.repeat(4),
   });
+  // Earlier authenticated browser fixtures enqueue refresh hints in this Realm.
+  // This suite's upstream stubs describe only its own identities. Suspend the
+  // earlier fixture requests, then restore them; do not let test order select
+  // unrelated wallet mappings before the exact-credential scenario below.
+  const earlierRequests = await db().charmRefreshRequest.findMany({
+    where: { realmId: realm, pending: true },
+    select: { collectorId: true },
+  });
+  const earlierIds = earlierRequests.map((request) => request.collectorId);
+  await db().charmRefreshRequest.updateMany({
+    where: { realmId: realm, collectorId: { in: earlierIds } },
+    data: { pending: false },
+  });
   try {
     const c = await db().collector.create({
       data: {
@@ -46,6 +59,16 @@ export async function phase12DatabaseTests(
         alignmentAt: new Date(),
       },
     });
+    process.env.DRIP_SWEEP_PAUSED = 'true';
+    let pausedRequests = 0;
+    globalThis.fetch = async () => {
+      pausedRequests++;
+      throw Error('PAUSED_SWEEP_MUST_NOT_READ');
+    };
+    check(
+      (await syncDripDue()).status === 'SWEEP_PAUSED' && pausedRequests === 0,
+      'permission recovery pause stops automatic sweeps before any external request',
+    );
     await queueCharmRefresh(c.id, true);
     check(
       !(await queueCharmRefresh(c.id, true)),
@@ -87,7 +110,7 @@ export async function phase12DatabaseTests(
     const result = await syncDripDue();
     check(
       result.status === 'SYNCED',
-      'targeted DRIP sync uses exact credential correspondence',
+      `targeted DRIP sync uses exact credential correspondence (${result.status})`,
     );
     check(
       (await charmBalance(c.id, false)).balance === '123456789.125',
@@ -101,6 +124,7 @@ export async function phase12DatabaseTests(
     );
     await syncDripDue();
     check(requests === 1, 'durable request checkpoint prevents restart storm');
+    process.env.DRIP_SWEEP_PAUSED = 'false';
     const linkDiscord = '699999999999999997';
     const linkMember = 'f'.repeat(24);
     const linkCollector = await db().collector.create({
@@ -804,6 +828,10 @@ export async function phase12DatabaseTests(
       'stale balance evidence is not enough to verify CHARM_DRIP',
     );
   } finally {
+    await db().charmRefreshRequest.updateMany({
+      where: { realmId: realm, collectorId: { in: earlierIds } },
+      data: { pending: true },
+    });
     globalThis.fetch = fetcher;
     for (const key of Object.keys(process.env))
       if (!(key in previous)) delete process.env[key];

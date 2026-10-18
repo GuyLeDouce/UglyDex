@@ -44,6 +44,9 @@ const tables = [
   '_prisma_migrations',
 ] as const;
 export async function restoreInventory(client: PoolClient) {
+  // Cursors already require a transaction. Canonicalize timestamptz JSON (notably
+  // the migration ledger) without changing stored values or server configuration.
+  await client.query("SET LOCAL TIME ZONE 'UTC'");
   const result: Record<string, { count: number; sha256: string }> = {};
   for (const table of tables) {
     // Constant identifiers only. Stream sorted row digests rather than holding the database in memory.

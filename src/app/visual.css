@@ -1776,6 +1776,11 @@ pre {
   box-shadow: var(--ugly-shadow-sm);
 }
 
+.personal-showcase .eyebrow,
+.personal-showcase .text-link {
+  color: var(--ugly-green-deep);
+}
+
 .theme-labs {
   background-color: #fff;
   background-image:
