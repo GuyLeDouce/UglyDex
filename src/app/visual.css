@@ -160,10 +160,10 @@ textarea:focus-visible {
   width: fit-content;
   align-items: center;
   padding: 5px;
-  border: 2px solid var(--ugly-ink);
+  border: 0;
   border-radius: 12px;
-  background: var(--ugly-paper);
-  box-shadow: 3px 3px 0 var(--ugly-ink);
+  background: transparent;
+  box-shadow: none;
 }
 
 .brand-mark img {

@@ -30,7 +30,10 @@ export async function CollectorHighlights({
             href={'/collector/' + slug + '/achievements'}
             aria-label="View all Collector achievements"
           >
-            <AchievementStrip summary={p.badgeSummary} subject="COLLECTOR" />
+            <AchievementStrip
+              summary={p.recentBadgeSummary}
+              subject="COLLECTOR"
+            />
           </Link>
         </div>
       )}

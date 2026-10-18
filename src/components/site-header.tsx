@@ -1,7 +1,9 @@
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
 
 const accountLinks = [
+  ['/thread', 'Collector thread'],
   ['/collection', 'Collection'],
   ['/collection/dex', 'Dex'],
   ['/collection/discovered', 'Discovered'],
@@ -44,7 +46,29 @@ export function SiteHeader({
 }) {
   const homeHref = slug ? '/me' : '/connect';
   return (
-    <header className="site-header">
+    <header
+      className="site-header"
+      onClick={(event) => {
+        if (
+          !(event.target instanceof Element) ||
+          !event.target.closest('a, button')
+        )
+          return;
+        event.currentTarget
+          .querySelectorAll<HTMLDetailsElement>('details[open]')
+          .forEach((menu) => {
+            menu.open = false;
+          });
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape') return;
+        const menu = (event.target as Element).closest('details');
+        if (menu) {
+          menu.open = false;
+          menu.querySelector('summary')?.focus();
+        }
+      }}
+    >
       <Link className="brand-mark" href="/" aria-label="UglyDex home">
         <Image
           src="https://i.imgur.com/cFeByAf.png"
@@ -58,6 +82,7 @@ export function SiteHeader({
         <Link href={homeHref}>My UglyDex</Link>
         <Link href="/squigs">Explore</Link>
         <Link href="/editions">Editions</Link>
+        <Link href="/collectors">Top Collectors</Link>
       </nav>
       <div className="header-account">
         {slug ? (
@@ -98,6 +123,14 @@ export function SiteHeader({
           <Link className="mobile-primary-link" href="/editions">
             Editions
           </Link>
+          <Link className="mobile-primary-link" href="/collectors">
+            Top Collectors
+          </Link>
+          {!slug && (
+            <Link className="mobile-primary-link" href="/thread">
+              Collector thread
+            </Link>
+          )}
           {slug && <AccountLinks slug={slug} isPublic={isPublic} />}
           {!slug && (
             <Link className="button primary" href="/connect">

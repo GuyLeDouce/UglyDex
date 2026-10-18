@@ -63,9 +63,15 @@ export function SquigCard({
             {item.og && <span>OG</span>}
             {item.legendary && <span className="legendary">Legendary</span>}
             {item.traits
-              .filter((t) => t.value && ['Type', 'Skin'].includes(t.traitType))
+              .filter(
+                (t) =>
+                  t.value.trim() && t.value.trim().toLowerCase() !== 'none',
+              )
+              .slice(0, 3)
               .map((t) => (
-                <span key={t.traitType}>{t.value}</span>
+                <span key={t.traitType} title={t.traitType}>
+                  {t.value}
+                </span>
               ))}
           </div>
           {item.achievements && (

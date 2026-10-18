@@ -1,23 +1,14 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { openSeaListings } from '@/server/opensea';
-import {
-  OPENSEA_COLLECTION_URL,
-  sortedListings,
-  type ListingSort,
-} from '@/domain/opensea';
+import { OPENSEA_COLLECTION_URL } from '@/domain/opensea';
+import { listedSquigPage, type ListedSort } from '@/server/listed-squigs';
 import { ListingSortOptions } from '@/components/listing-sort-options';
-import { db } from '@/server/db';
-import {
-  cardsWithBadges,
-  cardSelect,
-  catalogScope,
-} from '@/server/collections';
 import { CollectionGrid } from '@/components/collection';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Squigs listed on OpenSea | UglyDex' };
 
-async function Listings({ page, sort }: { page: number; sort: ListingSort }) {
+async function Listings({ page, sort }: { page: number; sort: ListedSort }) {
   const market = await openSeaListings();
   if (market.status === 'unavailable')
     return (
@@ -28,25 +19,13 @@ async function Listings({ page, sort }: { page: number; sort: ListingSort }) {
         </p>
       </section>
     );
-  const pages = Math.max(1, Math.ceil(market.listings.length / 24));
-  page = Math.min(page, pages);
-  const ids = sortedListings(market.listings, sort)
-    .slice((page - 1) * 24, page * 24)
-    .map((l) => l.tokenId);
-  const rows = await db().squig.findMany({
-    where: { ...catalogScope, tokenId: { in: ids } },
-    select: cardSelect,
-  });
-  const cards = await cardsWithBadges(rows);
-  const byToken = new Map(cards.map((c) => [c.tokenId, c]));
-  const items = ids.flatMap((id) => {
-    const card = byToken.get(id);
-    return card ? [card] : [];
-  });
+  const result = await listedSquigPage(market, sort, page);
+  const { items, pages } = result;
+  page = result.page;
   return (
     <>
       <p>
-        {market.listings.length} listed Squigs found
+        {result.total} listed Squigs found
         {!market.complete && ' · Partial results'}. Prices and availability can
         change; confirm on OpenSea.
       </p>
@@ -105,8 +84,13 @@ export default async function ListedSquigs({
 }) {
   const params = await searchParams;
   const value = params.page;
-  const sort: ListingSort =
-    params.sort === 'price-desc' ? 'price-desc' : 'price-asc';
+  const sort: ListedSort =
+    typeof params.sort === 'string' &&
+    ['price-desc', 'points-desc', 'points-asc', 'rank', 'rank-desc'].includes(
+      params.sort,
+    )
+      ? (params.sort as ListedSort)
+      : 'price-asc';
   const page =
     typeof value === 'string' && /^\d{1,4}$/.test(value)
       ? Math.max(1, Number(value))
@@ -137,6 +121,10 @@ export default async function ListedSquigs({
             Sort
             <select name="sort" aria-label="Sort" defaultValue={sort}>
               <ListingSortOptions />
+              <option value="points-desc">UglyPoints: high to low</option>
+              <option value="points-asc">UglyPoints: low to high</option>
+              <option value="rank">Maw Rank: low to high</option>
+              <option value="rank-desc">Maw Rank: high to low</option>
             </select>
           </label>
           <button className="button primary" type="submit">

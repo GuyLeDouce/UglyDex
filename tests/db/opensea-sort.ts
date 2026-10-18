@@ -3,6 +3,7 @@ import { catalogScope, collectionPage } from '../../src/server/collections';
 import { SQUIGS_CONTRACT } from '../../src/domain/validation';
 import catalog from '../../data/squigs.json';
 import { createOpenSeaReader } from '../../src/server/opensea';
+import { listedSquigPage } from '../../src/server/listed-squigs';
 
 export async function openSeaSortTests(check: (v: unknown, m: string) => void) {
   const key = process.env.OPENSEA_API_KEY;
@@ -74,6 +75,43 @@ export async function openSeaSortTests(check: (v: unknown, m: string) => void) {
     );
     const readPage = (params: Record<string, string>) =>
       collectionPage(params, undefined, false, undefined, readListings);
+    for (const [i, token] of tokens.entries()) {
+      await db().squig.updateMany({
+        where: { ...catalogScope, tokenId: token.tokenId },
+        data: {
+          uglyPoints: i === 0 ? null : 1000 - i,
+          mawRank: i === 0 ? null : i,
+        },
+      });
+    }
+    for (const sort of [
+      'points-asc',
+      'points-desc',
+      'rank',
+      'rank-desc',
+    ] as const) {
+      const market = await readListings();
+      const first = await listedSquigPage(market, sort);
+      const second = await listedSquigPage(market, sort, 2);
+      const combined = [...first.items, ...second.items];
+      check(
+        combined.length === 30 &&
+          new Set(combined.map((s) => s.tokenId)).size === 30,
+        `${sort} sorts all listed Squigs across pages`,
+      );
+      const expected = [...tokens.slice(1, 30)];
+      if (sort === 'points-asc' || sort === 'rank-desc') expected.reverse();
+      expected.push(tokens[0]);
+      check(
+        JSON.stringify(combined.map((s) => s.tokenId)) ===
+          JSON.stringify(expected.map((s) => s.tokenId)),
+        `${sort} uses canonical stats with null values last`,
+      );
+      check(
+        !combined.some((s) => s.tokenId === tokens[30].tokenId),
+        `${sort} never adds an unlisted Squig`,
+      );
+    }
     for (const sort of ['price-asc', 'price-desc'] as const) {
       const expected = sort === 'price-asc' ? listed : [...listed].reverse();
       const first = await readPage({ sort });

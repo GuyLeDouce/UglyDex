@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CollectorThread } from '@/components/collector-thread';
 import Image from 'next/image';
 import { randomInt } from 'node:crypto';
 import { db } from '@/server/db';
@@ -106,6 +107,7 @@ export default async function Home() {
           <Link href="/squigs">Explore the index →</Link>
         </div>
       )}
+      <CollectorThread preview />
       <section className="manifesto">
         <div className="manifesto-copy">
           <p className="eyebrow">WELCOME TO THE UGLYDEX</p>

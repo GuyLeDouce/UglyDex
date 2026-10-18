@@ -1,4 +1,5 @@
 import { DexSummary } from '@/components/dex';
+import { CollectorThread } from '@/components/collector-thread';
 import { EcosystemSummary } from '@/components/activity';
 import { Progression } from '@/components/progression';
 import Link from 'next/link';
@@ -64,6 +65,7 @@ export default async function Me() {
       <Link href="/charm">Your $CHARM activity →</Link>
       <DexSummary id={id} />
       <Progression subject="COLLECTOR" id={id} path="/me/achievements" />
+      <CollectorThread preview />
       <EcosystemSummary collectorId={id} path="/me/activity" />
       <nav className="anchor-nav">
         <Link href="/me/activity">Activity</Link>

@@ -91,6 +91,34 @@ export async function ownershipWebTests(
   };
   const hidden = await read();
   check(
+    !hidden.panel.includes('Owned since') && !hidden.panel.includes('Observed'),
+    'observation time is never presented as acquisition time',
+  );
+  await db().walletOwnershipPeriod.create({
+    data: {
+      id: 'ownership-ui:chain-period',
+      squigId: squig.id,
+      walletAddress: wallet,
+      acquiredAt: new Date('2022-03-14T12:00:00Z'),
+      acquisitionEvent: 'ownership-ui:transfer',
+    },
+  });
+  const acquired = await read();
+  check(
+    acquired.panel.includes('3/14/2022') &&
+      acquired.panel.includes('Owned since'),
+    'ownership uses the chain holding period rather than recent discovery',
+  );
+  check(
+    acquired.html.indexOf('id="passport"') >
+      acquired.html.indexOf('id="ecosystem"'),
+    'chain of custody follows ecosystem field notes',
+  );
+  check(
+    acquired.html.includes('Original · Squigs Reloaded · Ugly Labs'),
+    'Squig art uses approved attribution caption',
+  );
+  check(
     hidden.panel.includes(wallet) &&
       !hidden.html.includes(collector.slug) &&
       !hidden.html.includes(collector.displayName!),
@@ -126,6 +154,10 @@ export async function ownershipWebTests(
     data: { dirty: true },
   });
   const dirty = await read();
+  check(
+    !dirty.panel.includes('Owned since'),
+    'unverified or rebuilding history does not expose a stale acquisition date',
+  );
   check(
     dirty.panel.includes(wallet) && !dirty.panel.includes(collector.slug),
     'pending provenance never grants collector attribution but retains the indexed address',

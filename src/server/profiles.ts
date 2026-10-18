@@ -169,6 +169,20 @@ export async function squigProfile(token: string) {
         fromAddress: { not: '0x0000000000000000000000000000000000000000' },
       },
     });
+    // The open chain-derived holding period survives self-transfers. Observation
+    // and discovery timestamps are deliberately never acquisition dates.
+    const holding =
+      current && s.provenance?.complete && !s.provenance.dirty
+        ? await db().walletOwnershipPeriod.findFirst({
+            where: {
+              squigId: s.id,
+              walletAddress: current.walletAddress,
+              lostAt: null,
+            },
+            orderBy: { acquiredAt: 'desc' },
+            select: { acquiredAt: true },
+          })
+        : null;
     return {
       status: 'ready',
       squigId: s.id,
@@ -187,6 +201,7 @@ export async function squigProfile(token: string) {
       discoveredAt: discovery?.everOwned ? discovery.discoveredAt : null,
       transferCount,
       ownershipUpdatedAt: current?.observedAt ?? null,
+      acquiredAt: holding?.acquiredAt ?? null,
     } as const;
   } catch {
     return { status: 'unavailable', tokenId } as const;

@@ -46,6 +46,7 @@ export const profileSchema = z.object({
   showWallets: z.boolean(),
   showDiscord: z.boolean(),
   showCharmBalance: z.boolean().default(false),
+  showCommunityActivity: z.boolean().optional(),
   featuredTokenIds: z
     .array(z.number().int().min(1).max(4444))
     .max(6)

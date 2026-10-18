@@ -1296,6 +1296,12 @@ try {
       check,
       process.argv.includes('--browser'),
     );
+    const { communityTests } = await import('../tests/db/community');
+    await communityTests(
+      `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
   }
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));

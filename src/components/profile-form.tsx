@@ -11,6 +11,7 @@ type Values = {
   showWallets: boolean;
   showDiscord: boolean;
   showCharmBalance: boolean;
+  showCommunityActivity: boolean;
   featuredTokenIds: number[];
 };
 export function ProfileForm({ initial }: { initial: Values }) {
@@ -32,6 +33,7 @@ export function ProfileForm({ initial }: { initial: Values }) {
         showWallets: f.has('showWallets'),
         showDiscord: f.has('showDiscord'),
         showCharmBalance: f.has('showCharmBalance'),
+        showCommunityActivity: f.has('showCommunityActivity'),
         featuredTokenIds: String(f.get('featured') || '')
           .split(',')
           .map((s) => s.trim())
@@ -161,6 +163,20 @@ export function ProfileForm({ initial }: { initial: Values }) {
           />{' '}
           Show my authenticated Discord username
         </label>
+        <label className="check">
+          <input
+            name="showCommunityActivity"
+            type="checkbox"
+            defaultChecked={initial.showCommunityActivity}
+            aria-describedby="community-activity-help"
+          />{' '}
+          Share my achievements and completed sets in the collector thread
+        </label>
+        <p id="community-activity-help" className="hint">
+          Automatically shows earned sharing cards while your profile is public.
+          Turn this off to remove your cards from the thread. Private profiles
+          never appear.
+        </p>
         <p className="hint">
           A public collection can be correlated with public blockchain records,
           even when addresses are hidden here.

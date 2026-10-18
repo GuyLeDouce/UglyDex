@@ -32,6 +32,7 @@ model Collector {
   showWallets  Boolean                @default(false)
   showDiscord  Boolean                @default(false)
   showCharmBalance Boolean             @default(false)
+  showCommunityActivity Boolean        @default(true)
   featuredTokenIds Int[]              @default([])
   featuredAchievementIds String[] @default([])
   selectedTitleId String?

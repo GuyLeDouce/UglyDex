@@ -14,6 +14,7 @@ export const filterSchema = z.object({
       'price-asc',
       'price-desc',
       'rank',
+      'rank-desc',
       'recent',
       'og',
       'legendary',
@@ -79,11 +80,13 @@ export function collectionOrder(
         ? { uglyPoints: { sort: 'asc', nulls: 'last' } }
         : sort === 'rank'
           ? { mawRank: { sort: 'asc', nulls: 'last' } }
-          : sort === 'og'
-            ? { og: { sort: 'desc', nulls: 'last' } }
-            : sort === 'legendary'
-              ? { legendary: { sort: 'desc', nulls: 'last' } }
-              : { tokenId: 'asc' };
+          : sort === 'rank-desc'
+            ? { mawRank: { sort: 'desc', nulls: 'last' } }
+            : sort === 'og'
+              ? { og: { sort: 'desc', nulls: 'last' } }
+              : sort === 'legendary'
+                ? { legendary: { sort: 'desc', nulls: 'last' } }
+                : { tokenId: 'asc' };
   return [first, { tokenId: 'asc' }];
 }
 export const PAGE_SIZE = 24;
