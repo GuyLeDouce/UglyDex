@@ -117,7 +117,6 @@ export async function squigProfile(token: string) {
     let owner: {
       slug: string;
       displayName: string | null;
-      wallet: string | null;
     } | null = null;
     if (
       current &&
@@ -151,7 +150,6 @@ export async function squigProfile(token: string) {
         owner = {
           slug: w.collector.slug,
           displayName: w.collector.displayName,
-          wallet: w.collector.showWallets ? current.walletAddress : null,
         };
     }
     const addresses = session ? await activeAddresses(session.collectorId) : [];
@@ -177,6 +175,8 @@ export async function squigProfile(token: string) {
       digested: s.activities.length > 0,
       squig: cardDTO(s),
       owner,
+      // Public chain data is separate from the opt-in collector attribution.
+      holdingWallet: current?.walletAddress ?? null,
       relationship: session
         ? current && addresses.includes(current.walletAddress)
           ? 'Owned'
