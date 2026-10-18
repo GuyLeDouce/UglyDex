@@ -1,7 +1,12 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { openSeaListings } from '@/server/opensea';
-import { OPENSEA_COLLECTION_URL } from '@/domain/opensea';
+import {
+  OPENSEA_COLLECTION_URL,
+  sortedListings,
+  type ListingSort,
+} from '@/domain/opensea';
+import { ListingSortOptions } from '@/components/listing-sort-options';
 import { db } from '@/server/db';
 import {
   cardsWithBadges,
@@ -12,7 +17,7 @@ import { CollectionGrid } from '@/components/collection';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Squigs listed on OpenSea | UglyDex' };
 
-async function Listings({ page }: { page: number }) {
+async function Listings({ page, sort }: { page: number; sort: ListingSort }) {
   const market = await openSeaListings();
   if (market.status === 'unavailable')
     return (
@@ -25,7 +30,7 @@ async function Listings({ page }: { page: number }) {
     );
   const pages = Math.max(1, Math.ceil(market.listings.length / 24));
   page = Math.min(page, pages);
-  const ids = market.listings
+  const ids = sortedListings(market.listings, sort)
     .slice((page - 1) * 24, page * 24)
     .map((l) => l.tokenId);
   const rows = await db().squig.findMany({
@@ -67,7 +72,10 @@ async function Listings({ page }: { page: number }) {
       )}
       <nav className="pagination" aria-label="Listings pagination">
         {page > 1 ? (
-          <Link className="button" href={`/squigs/listings?page=${page - 1}`}>
+          <Link
+            className="button"
+            href={`/squigs/listings?sort=${sort}&page=${page - 1}`}
+          >
             ← Previous
           </Link>
         ) : (
@@ -77,7 +85,10 @@ async function Listings({ page }: { page: number }) {
           Page {page} of {pages}
         </span>
         {page < pages ? (
-          <Link className="button" href={`/squigs/listings?page=${page + 1}`}>
+          <Link
+            className="button"
+            href={`/squigs/listings?sort=${sort}&page=${page + 1}`}
+          >
             Next →
           </Link>
         ) : (
@@ -92,7 +103,10 @@ export default async function ListedSquigs({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const value = (await searchParams).page;
+  const params = await searchParams;
+  const value = params.page;
+  const sort: ListingSort =
+    params.sort === 'price-desc' ? 'price-desc' : 'price-asc';
   const page =
     typeof value === 'string' && /^\d{1,4}$/.test(value)
       ? Math.max(1, Number(value))
@@ -102,9 +116,7 @@ export default async function ListedSquigs({
       <section className="page-heading">
         <p className="eyebrow">FIND YOUR NEXT SQUIG</p>
         <h1>Listed on OpenSea.</h1>
-        <p>
-          Current public asking prices for Squigs Reloaded, ordered by OpenSea.
-        </p>
+        <p>Current public asking prices for Squigs Reloaded.</p>
         <div className="actions">
           <Link className="button" href="/squigs">
             All Squigs
@@ -119,8 +131,24 @@ export default async function ListedSquigs({
           </a>
         </div>
       </section>
-      <Suspense fallback={<p role="status">Checking OpenSea listings…</p>}>
-        <Listings page={page} />
+      <form className="filters" action="/squigs/listings">
+        <div className="filter-top">
+          <label>
+            Sort
+            <select name="sort" aria-label="Sort" defaultValue={sort}>
+              <ListingSortOptions />
+            </select>
+          </label>
+          <button className="button primary" type="submit">
+            Apply filters
+          </button>
+        </div>
+      </form>
+      <Suspense
+        key={`${sort}:${page}`}
+        fallback={<p role="status">Checking OpenSea listings…</p>}
+      >
+        <Listings page={page} sort={sort} />
       </Suspense>
     </>
   );

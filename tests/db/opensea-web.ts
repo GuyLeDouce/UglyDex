@@ -1,12 +1,14 @@
 import { chromium } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import { squigOpenSeaUrl } from '../../src/domain/opensea';
+import { openSeaSortTests } from './opensea-sort';
 
 export async function openSeaWebTests(
   base: string,
   check: (v: unknown, m: string) => void,
   browserTests: boolean,
 ) {
+  await openSeaSortTests(check);
   const response = await fetch(base + '/api/opensea/listings');
   check(
     response.ok && response.headers.get('cache-control') === 'no-store',
@@ -27,6 +29,35 @@ export async function openSeaWebTests(
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
+    for (const width of [1440, 390, 320]) {
+      await page.setViewportSize({ width, height: 1000 });
+      for (const path of ['/squigs', '/squigs/listings']) {
+        await page.goto(base + path);
+        await page
+          .getByLabel('Sort', { exact: true })
+          .selectOption('price-desc');
+        await page
+          .getByRole('button', { name: 'Apply filters', exact: true })
+          .click();
+        await page.waitForURL(
+          (url) => url.searchParams.get('sort') === 'price-desc',
+        );
+        check(
+          (await page.getByLabel('Sort', { exact: true }).inputValue()) ===
+            'price-desc',
+          `price sort remains selected on ${path} at ${width}px`,
+        );
+        check(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth,
+          ),
+          `price sort controls fit ${path} at ${width}px`,
+        );
+        await page
+          .getByText('Listings are temporarily unavailable.', { exact: true })
+          .waitFor();
+      }
+    }
     let available = true;
     let listed = true;
     await page.route('**/api/opensea/listings', (route) =>

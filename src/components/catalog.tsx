@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { collectionPage } from '@/server/collections';
 import { CollectionGrid } from './collection';
+import { ListingSortOptions } from './listing-sort-options';
 export type SearchParams = Record<string, string | string[] | undefined>;
 export async function Catalog({
   params = {},
@@ -56,10 +57,11 @@ export async function Catalog({
           </label>
           <label>
             Sort
-            <select name="sort" defaultValue={f.sort}>
+            <select name="sort" aria-label="Sort" defaultValue={f.sort}>
               <option value="token">Token ID</option>
               <option value="points-desc">UglyPoints ↓</option>
               <option value="points-asc">UglyPoints ↑</option>
+              <ListingSortOptions />
               <option value="rank">Maw Rank</option>
               {collectorId && !discovered && (
                 <option value="recent">Recently acquired</option>
@@ -140,7 +142,26 @@ export async function Catalog({
           <span>{data.total.toLocaleString()} Squigs</span>
         </div>
       </form>
-      <CollectionGrid items={data.items} />
+      {data.market?.status === 'unavailable' ? (
+        <section className="empty-state">
+          <h2>Listings are temporarily unavailable.</h2>
+          <p>
+            Try again shortly or choose another sort option to browse all
+            matching Squigs.
+          </p>
+        </section>
+      ) : (
+        <>
+          {data.market && (
+            <p className="muted">
+              Showing listed Squigs only
+              {!data.market.complete && ' · Partial results'}. Prices and
+              availability can change.
+            </p>
+          )}
+          <CollectionGrid items={data.items} />
+        </>
+      )}
       <nav className="pagination" aria-label="Pagination">
         {data.page > 1 ? (
           <Link className="button" href={link(data.page - 1)}>
