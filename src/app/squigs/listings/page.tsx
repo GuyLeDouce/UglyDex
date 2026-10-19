@@ -5,10 +5,22 @@ import { OPENSEA_COLLECTION_URL } from '@/domain/opensea';
 import { listedSquigPage, type ListedSort } from '@/server/listed-squigs';
 import { ListingSortOptions } from '@/components/listing-sort-options';
 import { CollectionGrid } from '@/components/collection';
+import { currentSession } from '@/server/auth';
+import type { FieldGuideFilter } from '@/server/card-personalization';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Squigs listed on OpenSea | UglyDex' };
 
-async function Listings({ page, sort }: { page: number; sort: ListedSort }) {
+async function Listings({
+  page,
+  sort,
+  viewerId,
+  dex,
+}: {
+  page: number;
+  sort: ListedSort;
+  viewerId?: string;
+  dex: FieldGuideFilter;
+}) {
   const market = await openSeaListings();
   if (market.status === 'unavailable')
     return (
@@ -19,11 +31,17 @@ async function Listings({ page, sort }: { page: number; sort: ListedSort }) {
         </p>
       </section>
     );
-  const result = await listedSquigPage(market, sort, page);
+  const result = await listedSquigPage(market, sort, page, viewerId, dex);
   const { items, pages } = result;
   page = result.page;
   return (
     <>
+      {result.personalizationPending && (
+        <p role="status">
+          Your Field Guide is updating. Missing traits and set progress will
+          appear when it is ready.
+        </p>
+      )}
       <p>
         {result.total} listed Squigs found
         {!market.complete && ' · Partial results'}. Prices and availability can
@@ -53,7 +71,7 @@ async function Listings({ page, sort }: { page: number; sort: ListedSort }) {
         {page > 1 ? (
           <Link
             className="button"
-            href={`/squigs/listings?sort=${sort}&page=${page - 1}`}
+            href={`/squigs/listings?sort=${sort}&dex=${dex}&page=${page - 1}`}
           >
             ← Previous
           </Link>
@@ -66,7 +84,7 @@ async function Listings({ page, sort }: { page: number; sort: ListedSort }) {
         {page < pages ? (
           <Link
             className="button"
-            href={`/squigs/listings?sort=${sort}&page=${page + 1}`}
+            href={`/squigs/listings?sort=${sort}&dex=${dex}&page=${page + 1}`}
           >
             Next →
           </Link>
@@ -83,6 +101,13 @@ export default async function ListedSquigs({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
+  const session = await currentSession();
+  const dex: FieldGuideFilter =
+    session &&
+    typeof params.dex === 'string' &&
+    ['advances', 'traits', 'undiscovered'].includes(params.dex)
+      ? (params.dex as FieldGuideFilter)
+      : '';
   const value = params.page;
   const sort: ListedSort =
     typeof params.sort === 'string' &&
@@ -117,6 +142,17 @@ export default async function ListedSquigs({
       </section>
       <form className="filters" action="/squigs/listings">
         <div className="filter-top">
+          {session && (
+            <label>
+              My field guide
+              <select name="dex" aria-label="My field guide" defaultValue={dex}>
+                <option value="">All listed Squigs</option>
+                <option value="advances">Advances My UglyDex</option>
+                <option value="traits">Traits I Have Not Discovered</option>
+                <option value="undiscovered">Undiscovered Squigs</option>
+              </select>
+            </label>
+          )}
           <label>
             Sort
             <select name="sort" aria-label="Sort" defaultValue={sort}>
@@ -133,10 +169,15 @@ export default async function ListedSquigs({
         </div>
       </form>
       <Suspense
-        key={`${sort}:${page}`}
+        key={`${sort}:${page}:${dex}`}
         fallback={<p role="status">Checking OpenSea listings…</p>}
       >
-        <Listings page={page} sort={sort} />
+        <Listings
+          page={page}
+          sort={sort}
+          dex={dex}
+          viewerId={session?.collectorId}
+        />
       </Suspense>
     </>
   );

@@ -4,6 +4,7 @@ import { SQUIGS_CONTRACT } from '../../src/domain/validation';
 import catalog from '../../data/squigs.json';
 import { createOpenSeaReader } from '../../src/server/opensea';
 import { listedSquigPage } from '../../src/server/listed-squigs';
+import { COLLECTION_RULESET } from '../../src/domain/dex';
 
 export async function openSeaSortTests(check: (v: unknown, m: string) => void) {
   const key = process.env.OPENSEA_API_KEY;
@@ -158,6 +159,120 @@ export async function openSeaSortTests(check: (v: unknown, m: string) => void) {
         clamped.page === 2 && clamped.items.length === 6,
         `${sort} clamps pagination to listed results`,
       );
+    }
+    const collector = await db().collector.create({
+      data: { slug: 'listing-personalization' },
+    });
+    try {
+      const candidates = Object.fromEntries(
+        tokens.map((t, i) => [
+          t.tokenId,
+          {
+            discovered: i < 10,
+            owned: i < 2,
+            missingTraits: i < 27 ? 2 : 0,
+            sets: i >= 15 ? ['first-specimen'] : [],
+          },
+        ]),
+      );
+      await db().collectionSnapshot.create({
+        data: {
+          collectorId: collector.id,
+          ruleset: COLLECTION_RULESET,
+          discovered: 10,
+          traits: 0,
+          historicalSets: 0,
+          currentSets: 0,
+          overall: 0,
+          discoveredTokenIds: [],
+          currentTokenIds: [],
+          candidates,
+        },
+      });
+      await db().collectionJob.deleteMany({
+        where: { collectorId: collector.id },
+      });
+      const market = await readListings();
+      for (const sort of [
+        'price-asc',
+        'price-desc',
+        'points-asc',
+        'points-desc',
+        'rank',
+        'rank-desc',
+      ] as const) {
+        const all = await listedSquigPage(market, sort, 1, collector.id);
+        check(
+          all.items.every(
+            (c) =>
+              c.personalization?.missingTraits ===
+                candidates[c.tokenId].missingTraits &&
+              c.personalization?.advances === candidates[c.tokenId].sets.length,
+          ),
+          `${sort} cards retain personal missing traits and set progress`,
+        );
+        for (const dex of ['traits', 'advances', 'undiscovered'] as const) {
+          const first = await listedSquigPage(
+            market,
+            sort,
+            1,
+            collector.id,
+            dex,
+          );
+          const second =
+            first.pages > 1
+              ? await listedSquigPage(market, sort, 2, collector.id, dex)
+              : null;
+          const expected = [
+            ...all.items,
+            ...(await listedSquigPage(market, sort, 2, collector.id)).items,
+          ].filter((c) =>
+            dex === 'traits'
+              ? c.personalization!.missingTraits > 0
+              : dex === 'advances'
+                ? c.personalization!.advances > 0
+                : !c.personalization!.discovered,
+          );
+          check(
+            JSON.stringify(
+              [...first.items, ...(second?.items ?? [])].map((c) => c.tokenId),
+            ) === JSON.stringify(expected.map((c) => c.tokenId)) &&
+              first.total === expected.length,
+            `${sort} applies ${dex} before pagination without changing order`,
+          );
+        }
+      }
+      const anonymous = await listedSquigPage(market, 'price-asc');
+      check(
+        anonymous.items.every((c) => !c.personalization),
+        'anonymous listings have no collector personalization',
+      );
+      await db().collectionJob.create({ data: { collectorId: collector.id } });
+      const pending = await listedSquigPage(
+        market,
+        'price-asc',
+        1,
+        collector.id,
+      );
+      const pendingFiltered = await listedSquigPage(
+        market,
+        'price-asc',
+        1,
+        collector.id,
+        'traits',
+      );
+      check(
+        pending.personalizationPending &&
+          pending.items.length === 24 &&
+          pending.items.every((c) => !c.personalization),
+        'pending projection keeps listings but suppresses stale personalization',
+      );
+      check(
+        pendingFiltered.total === 0 && pendingFiltered.personalizationPending,
+        'pending projection never invents matching missing traits',
+      );
+    } finally {
+      await db().collector.delete({ where: { id: collector.id } });
     }
   } finally {
     if (key === undefined) delete process.env.OPENSEA_API_KEY;

@@ -2,6 +2,12 @@ import 'server-only';
 import { db } from './db';
 import { catalogScope, cardSelect, cardsWithBadges } from './collections';
 import { collectionOrder } from '@/domain/collection';
+import { personalizedCandidates } from './dex';
+import {
+  cardPersonalization,
+  matchesFieldGuide,
+  type FieldGuideFilter,
+} from './card-personalization';
 import {
   isListingSort,
   sortedListings,
@@ -15,11 +21,18 @@ export async function listedSquigPage(
   market: OpenSeaListings,
   sort: ListedSort,
   page = 1,
+  viewerId?: string,
+  dex: FieldGuideFilter = '',
 ) {
+  const personal = viewerId ? await personalizedCandidates(viewerId) : null;
   const listed = market.status === 'available' ? market.listings : [];
   const where = {
     ...catalogScope,
-    tokenId: { in: listed.map((l) => l.tokenId) },
+    tokenId: {
+      in: listed
+        .filter((l) => matchesFieldGuide(personal?.[l.tokenId], dex))
+        .map((l) => l.tokenId),
+    },
   };
   // Read lightweight IDs in global order before slicing, including nulls last.
   const candidates = await db().squig.findMany({
@@ -45,9 +58,10 @@ export async function listedSquigPage(
     page,
     pages,
     total: ordered.length,
+    personalizationPending: !!viewerId && !personal,
     items: ids.flatMap((id) => {
       const card = byToken.get(id);
-      return card ? [card] : [];
+      return card ? [{ ...card, ...cardPersonalization(personal?.[id]) }] : [];
     }),
   };
 }

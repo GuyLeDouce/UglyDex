@@ -267,6 +267,24 @@ export async function achievementBadgeWebTests(
       { name: 'uglydex_session', value: token, url: base },
     ]);
     const page = await context.newPage();
+    await page.goto(base + '/squigs/listings?sort=rank&dex=traits', {
+      waitUntil: 'domcontentloaded',
+    });
+    check(
+      (await page.getByLabel('My field guide').inputValue()) === 'traits' &&
+        (await page.getByLabel('Sort', { exact: true }).inputValue()) ===
+          'rank',
+      'signed-in listings retain Field Guide and metric filter selections',
+    );
+    await page.getByLabel('My field guide').selectOption('advances');
+    await page.getByRole('button', { name: 'Apply filters' }).click();
+    await page.waitForURL(/dex=advances/);
+    check(
+      (await page.getByLabel('My field guide').inputValue()) === 'advances' &&
+        (await page.getByLabel('Sort', { exact: true }).inputValue()) ===
+          'rank',
+      'listing Field Guide filter submits without losing metric sort',
+    );
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(e.message));
     const paths = [
@@ -322,6 +340,27 @@ export async function achievementBadgeWebTests(
           (await page.locator('.achievement-badge img').count()) > 0,
           `${name} displays approved artwork at ${width}px`,
         );
+        const hovered = page.locator('.achievement-badge').first();
+        await hovered.hover();
+        await page.getByRole('tooltip').waitFor();
+        check(
+          (await page.getByRole('tooltip').innerText()) ===
+            (await hovered.getAttribute('aria-label')),
+          `${name} hover identifies the badge and status at ${width}px`,
+        );
+        const tooltip = await page.getByRole('tooltip').boundingBox();
+        check(
+          tooltip &&
+            tooltip.x >= 0 &&
+            tooltip.x + tooltip.width <= width &&
+            tooltip.y >= 0,
+          `${name} tooltip stays within the viewport`,
+        );
+        await page.keyboard.press('Escape');
+        check(
+          (await page.getByRole('tooltip').count()) === 0,
+          `${name} tooltip dismisses with Escape`,
+        );
         if (cardCount) {
           const locked = page
             .locator(
@@ -344,8 +383,9 @@ export async function achievementBadgeWebTests(
             .locator('.achievement-grid .achievement-badge[tabindex="0"]')
             .first();
           await focus.focus();
+          await page.getByRole('tooltip').waitFor();
           check(
-            await focus.locator('.achievement-tooltip').isVisible(),
+            await page.getByRole('tooltip').isVisible(),
             `${name} tooltip is keyboard accessible`,
           );
         }
