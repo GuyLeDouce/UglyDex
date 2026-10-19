@@ -15,6 +15,8 @@
   background: var(--ugly-paper);
 }
 .community-card header {
+  height: auto;
+  min-height: 0;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -47,6 +49,7 @@
   background: var(--ugly-lilac);
 }
 .share-card-preview h3 {
+  font-family: var(--font-lilita-one), sans-serif;
   font-size: clamp(1.25rem, 2.5vw, 2rem);
   margin: 16px 0;
 }
@@ -96,6 +99,7 @@
   font-size: 1.3rem;
 }
 .collector-rank-card .avatar-image {
+  min-width: 0;
   width: 64px;
   height: 64px;
 }

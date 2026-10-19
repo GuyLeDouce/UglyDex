@@ -46,6 +46,12 @@ export async function communityTests(
     await db().collectorProgress.create({
       data: { collectorId: c.id, rulesVersion: RULESET, xp: 1000n, level: 4 },
     });
+    // The database queues new collectors automatically. These explicit fixture
+    // projections represent completed evaluations; only `pending` stays queued.
+    await db().collectionJob.deleteMany({ where: { collectorId: c.id } });
+    await db().progressionJob.deleteMany({
+      where: { subjectType: 'COLLECTOR', subjectId: c.id },
+    });
     return c;
   };
   const winner = await create('community-first', 4444);
@@ -241,6 +247,25 @@ export async function communityTests(
           ),
           `${path} fits ${width}px`,
         );
+        if (path === '/collectors') {
+          check(
+            await page.locator('.collector-rank-card').evaluateAll((cards) =>
+              cards.every((card) => {
+                const avatar = card
+                  .querySelector('.avatar-image')!
+                  .getBoundingClientRect();
+                const name = card
+                  .querySelector('.collector-rank-name')!
+                  .getBoundingClientRect();
+                return (
+                  avatar.right <= name.left &&
+                  Math.abs(avatar.width - avatar.height) < 1
+                );
+              }),
+            ),
+            `leaderboard avatars stay circular and clear of names at ${width}px`,
+          );
+        }
         await page.screenshot({
           path: `.data/community/${path.slice(1)}-${width}.png`,
           fullPage: true,
