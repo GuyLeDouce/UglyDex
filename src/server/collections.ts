@@ -1,4 +1,5 @@
 import 'server-only';
+import { rarestTraitsFirst } from './trait-presentation';
 import { db } from './db';
 import { personalizedCandidates } from './dex';
 import { SQUIGS_CONTRACT } from '@/domain/validation';
@@ -42,7 +43,7 @@ export function cardDTO(row: CardRow) {
     rarity: row.rarityTier,
     og: row.og,
     legendary: row.legendary,
-    traits: row.traits,
+    traits: rarestTraitsFirst(row.traits),
   };
 }
 export async function cardsWithBadges(rows: CardRow[]) {

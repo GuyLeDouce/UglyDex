@@ -83,7 +83,7 @@ export default async function Squig({
             priority
           />
           <figcaption className="specimen-caption">
-            Original · canonical Reloaded artwork
+            Original · Squigs Reloaded · Ugly Labs
           </figcaption>
         </figure>
         <div className="specimen-info">
@@ -179,19 +179,16 @@ export default async function Squig({
           ) : !r.digested ? (
             <p>Current ownership has not been indexed.</p>
           ) : null}
-          {r.ownershipUpdatedAt && (
+          {r.acquiredAt && (
             <small>
-              Observed{' '}
-              {r.ownershipUpdatedAt.toLocaleDateString('en-US', {
+              Owned since{' '}
+              {r.acquiredAt.toLocaleDateString('en-US', {
                 timeZone: 'UTC',
               })}
             </small>
           )}
-          {r.discoveredAt && (
-            <p>
-              You discovered this Squig on{' '}
-              {r.discoveredAt.toLocaleDateString('en-US', { timeZone: 'UTC' })}.
-            </p>
+          {r.holdingWallet && !r.acquiredAt && (
+            <p>Acquisition transaction not indexed yet.</p>
           )}
           <p>{r.transferCount} indexed transfers</p>
           <small>
@@ -199,7 +196,6 @@ export default async function Squig({
           </small>
         </section>
       </div>
-      <Passport data={history} tokenId={s.tokenId} />
       {customs.length > 0 && (
         <section id="customs" className="gallery-room">
           <p className="eyebrow">SAME SQUIG. ANOTHER SIDE.</p>
@@ -268,6 +264,7 @@ export default async function Squig({
         path={`/squig/${s.tokenId}`}
         params={await searchParams}
       />
+      <Passport data={history} tokenId={s.tokenId} />
     </>
   );
 }

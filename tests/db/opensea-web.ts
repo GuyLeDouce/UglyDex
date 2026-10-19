@@ -56,6 +56,27 @@ export async function openSeaWebTests(
         await page
           .getByText('Listings are temporarily unavailable.', { exact: true })
           .waitFor();
+        if (path === '/squigs/listings') {
+          for (const sort of [
+            'points-desc',
+            'points-asc',
+            'rank',
+            'rank-desc',
+          ]) {
+            await page.getByLabel('Sort', { exact: true }).selectOption(sort);
+            await page
+              .getByRole('button', { name: 'Apply filters', exact: true })
+              .click();
+            await page.waitForURL(
+              (url) => url.searchParams.get('sort') === sort,
+            );
+            check(
+              (await page.getByLabel('Sort', { exact: true }).inputValue()) ===
+                sort,
+              `${sort} remains selected for listed results at ${width}px`,
+            );
+          }
+        }
       }
     }
     let available = true;

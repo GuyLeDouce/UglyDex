@@ -112,6 +112,7 @@ async function readProjection(
       };
     });
   const unlocked = cards.filter((c) => c.unlocked);
+  const newest = [...unlocked].sort((a, b) => b.at!.localeCompare(a.at!));
   return {
     status: 'ready' as const,
     breakdown: breakdown.flatMap((b) => {
@@ -129,6 +130,12 @@ async function readProjection(
     ...levelInfo(subject, progress.xp),
     cards,
     badgeSummary: earnedBadgeSummary(subject, cards),
+    recentBadgeSummary: {
+      status: 'ready' as const,
+      badges: newest.flatMap((a) =>
+        a.badge.status === 'earned' ? [a.badge] : [],
+      ),
+    },
     count: unlocked.length,
     title:
       unlocked.find((a) => `${RULESET}:${a.key}` === collector?.selectedTitleId)
@@ -139,8 +146,7 @@ async function readProjection(
       )
       .slice(0, 4)
       .map((a) => a.name),
-    recent: [...unlocked]
-      .sort((a, b) => b.at!.localeCompare(a.at!))
+    recent: newest
       .slice(0, 3)
       .map((a) => ({ key: a.key, name: a.name, at: a.at, badge: a.badge })),
     milestones: milestones.map((m) => ({
