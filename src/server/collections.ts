@@ -2,6 +2,7 @@ import 'server-only';
 import { rarestTraitsFirst } from './trait-presentation';
 import { db } from './db';
 import { personalizedCandidates } from './dex';
+import { cardPersonalization, matchesFieldGuide } from './card-personalization';
 import { SQUIGS_CONTRACT } from '@/domain/validation';
 import {
   collectionWhere,
@@ -111,15 +112,8 @@ export async function collectionPage(
           tokenId: {
             in: candidates
               ? Object.entries(candidates)
-                  .filter(
-                    ([, c]) =>
-                      (!filters.set || c.sets.includes(filters.set)) &&
-                      (!filters.dex ||
-                        (filters.dex === 'undiscovered'
-                          ? !c.discovered
-                          : filters.dex === 'traits'
-                            ? c.missingTraits > 0
-                            : c.sets.length > 0)),
+                  .filter(([, c]) =>
+                    matchesFieldGuide(c, filters.dex, filters.set),
                   )
                   .map(([id]) => Number(id))
               : [],
@@ -285,16 +279,7 @@ export async function collectionPage(
     items: rows.map((r): SquigCardData => ({
       ...cardDTO(r),
       achievements: badgeSummaries.get(r.id),
-      ...(candidates?.[r.tokenId]
-        ? {
-            personalization: {
-              discovered: candidates[r.tokenId].discovered,
-              owned: candidates[r.tokenId].owned,
-              missingTraits: candidates[r.tokenId].missingTraits,
-              advances: candidates[r.tokenId].sets.length,
-            },
-          }
-        : {}),
+      ...cardPersonalization(candidates?.[r.tokenId]),
       ...(collectorId
         ? {
             currentlyOwned: ownedIds.has(r.id),

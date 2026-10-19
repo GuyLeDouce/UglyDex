@@ -30,10 +30,7 @@
   color: #596170;
 }
 .achievement-tooltip {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;
   width: max-content;
   max-width: 190px;
   padding: 8px 10px;
@@ -45,12 +42,7 @@
     sans-serif;
   text-align: center;
   pointer-events: none;
-  visibility: hidden;
-  z-index: 5;
-}
-.achievement-badge:hover .achievement-tooltip,
-.achievement-badge:focus-visible .achievement-tooltip {
-  visibility: visible;
+  z-index: 10000;
 }
 .achievement-strip {
   display: inline-flex;
