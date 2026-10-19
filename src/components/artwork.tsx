@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { canonicalArtworkToken, artworkUrl } from '@/domain/artwork-delivery';
 import { resolveAsset } from '@/domain/assets';
 export function Artwork({
@@ -18,6 +18,16 @@ export function Artwork({
   const token = canonicalArtworkToken(src);
   const [failed, setFailed] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<string | null>(null);
+  const [retried, setRetried] = useState<string | null>(null);
+  useEffect(() => {
+    if (!src || !token || failed !== src || retried === src) return;
+    const timer = setTimeout(() => {
+      setRetried(src);
+      setFailed(null);
+      setLoaded(null);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [src, token, failed, retried]);
   return (
     <div className={avatar ? 'avatar-image' : 'artwork'}>
       {src && failed !== src ? (
@@ -28,8 +38,15 @@ export function Artwork({
             </span>
           )}
           <Image
+            key={src + (retried === src ? ':retry' : '')}
             src={src}
-            loader={token ? ({ width }) => artworkUrl(token, width) : undefined}
+            loader={
+              token
+                ? ({ width }) =>
+                    artworkUrl(token, width) +
+                    (retried === src ? '?retry=1' : '')
+                : undefined
+            }
             alt={alt}
             fill
             sizes={
@@ -51,18 +68,6 @@ export function Artwork({
         <div className="art-fallback">
           <span aria-hidden>✳</span>
           <small>{avatar ? 'Collector' : 'Artwork unavailable'}</small>
-          {src && failed === src && (
-            <button
-              type="button"
-              className="button"
-              onClick={() => {
-                setFailed(null);
-                setLoaded(null);
-              }}
-            >
-              Retry image
-            </button>
-          )}
         </div>
       )}
     </div>
