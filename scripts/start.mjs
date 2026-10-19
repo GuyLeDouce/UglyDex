@@ -21,6 +21,26 @@ const child = spawn(
   ],
   { stdio: 'inherit', env: process.env },
 );
+// Opt-in background import; serving and readiness do not wait for 4,444 images.
+const artwork =
+  process.env.ARTWORK_WARM_ON_START === 'true'
+    ? spawn(
+        process.execPath,
+        [
+          'node_modules/tsx/dist/cli.mjs',
+          '--conditions=react-server',
+          'scripts/warm-artwork.ts',
+        ],
+        { stdio: 'inherit', env: process.env },
+      )
+    : null;
+artwork?.on('error', () => console.error('Artwork importer could not start.'));
 for (const signal of ['SIGINT', 'SIGTERM'])
-  process.on(signal, () => child.kill(signal));
-child.on('exit', (code) => process.exit(code ?? 1));
+  process.on(signal, () => {
+    artwork?.kill(signal);
+    child.kill(signal);
+  });
+child.on('exit', (code) => {
+  artwork?.kill('SIGTERM');
+  process.exit(code ?? 1);
+});

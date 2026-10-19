@@ -72,7 +72,9 @@ export async function GET(request: Request) {
         status,
         headers: {
           ...headers,
-          ...(status === 429 ? { 'Retry-After': '60' } : {}),
+          ...(status === 429
+            ? { 'Retry-After': message === 'RENDER_BUSY' ? '2' : '60' }
+            : {}),
         },
       },
     );

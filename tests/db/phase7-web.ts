@@ -319,7 +319,10 @@ export async function phase7WebTests(
               const img =
                 document.querySelector<HTMLImageElement>('.share-preview');
               if (!img) return false;
-              const params = new URL(img.src).searchParams;
+              const params = new URL(
+                img.dataset.source ?? img.src,
+                location.origin,
+              ).searchParams;
               return (
                 params.get('template') === template &&
                 params.get('ratio') === ratio &&
