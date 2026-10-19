@@ -1,8 +1,10 @@
 'use client';
 import Image from 'next/image';
 import { useState } from 'react';
+import { canonicalArtworkToken, artworkUrl } from '@/domain/artwork-delivery';
+import { resolveAsset } from '@/domain/assets';
 export function Artwork({
-  src,
+  src: source,
   alt,
   priority = false,
   avatar = false,
@@ -12,6 +14,8 @@ export function Artwork({
   priority?: boolean;
   avatar?: boolean;
 }) {
+  const src = resolveAsset(source);
+  const token = canonicalArtworkToken(src);
   const [failed, setFailed] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<string | null>(null);
   return (
@@ -25,6 +29,7 @@ export function Artwork({
           )}
           <Image
             src={src}
+            loader={token ? ({ width }) => artworkUrl(token, width) : undefined}
             alt={alt}
             fill
             sizes={
@@ -35,7 +40,9 @@ export function Artwork({
             priority={priority}
             loading={priority ? 'eager' : 'lazy'}
             fetchPriority={priority ? 'high' : 'auto'}
-            unoptimized={!src.startsWith('https://gateway.pinata.cloud/ipfs/')}
+            unoptimized={
+              !token && !src.startsWith('https://gateway.pinata.cloud/ipfs/')
+            }
             onLoad={() => setLoaded(src)}
             onError={() => setFailed(src)}
           />
@@ -44,6 +51,18 @@ export function Artwork({
         <div className="art-fallback">
           <span aria-hidden>✳</span>
           <small>{avatar ? 'Collector' : 'Artwork unavailable'}</small>
+          {src && failed === src && (
+            <button
+              type="button"
+              className="button"
+              onClick={() => {
+                setFailed(null);
+                setLoaded(null);
+              }}
+            >
+              Retry image
+            </button>
+          )}
         </div>
       )}
     </div>

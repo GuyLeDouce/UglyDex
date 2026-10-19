@@ -1,5 +1,8 @@
 import 'server-only';
 import { resolveAsset, squigArtwork } from '@/domain/assets';
+import type { ShareCard } from '@/domain/sharing';
+import { collectibleArtworkData } from './collectible-art';
+import { squigImage } from './artwork-store';
 export function trustedArtwork(token: number) {
   if (!Number.isInteger(token) || token < 1 || token > 4444)
     throw new Error('INVALID_TOKEN');
@@ -53,22 +56,25 @@ export async function loadArtwork(
   }
 }
 const artworkCache = new Map<
-  number,
+  string,
   { value: string | null; expires: number }
 >();
-const inflight = new Map<number, Promise<string | null>>();
+const inflight = new Map<string, Promise<string | null>>();
 let cacheBytes = 0;
-async function cachedArtwork(token: number): Promise<string | null> {
-  const old = artworkCache.get(token);
+async function cachedArtwork(
+  key: string,
+  load: () => Promise<string | null>,
+): Promise<string | null> {
+  const old = artworkCache.get(key);
   if (old && old.expires > Date.now()) return old.value;
-  const running = inflight.get(token);
+  const running = inflight.get(key);
   if (running) return running;
-  const work = loadArtwork(token)
+  const work = load()
     .then((value) => {
-      const previous = artworkCache.get(token);
+      const previous = artworkCache.get(key);
       if (previous) {
         cacheBytes -= previous.value?.length ?? 0;
-        artworkCache.delete(token);
+        artworkCache.delete(key);
       }
       const size = value?.length ?? 0;
       while (artworkCache.size >= 128 || cacheBytes + size > 24_000_000) {
@@ -77,24 +83,45 @@ async function cachedArtwork(token: number): Promise<string | null> {
         cacheBytes -= artworkCache.get(key)?.value?.length ?? 0;
         artworkCache.delete(key);
       }
-      artworkCache.set(token, {
+      artworkCache.set(key, {
         value,
         expires: Date.now() + (value ? 86400000 : 30000),
       });
       cacheBytes += size;
       return value;
     })
-    .finally(() => inflight.delete(token));
-  inflight.set(token, work);
+    .finally(() => inflight.delete(key));
+  inflight.set(key, work);
   return work;
 }
-export async function artworkBatch(tokens: number[]) {
+export async function artworkBatch(
+  tokens: number[],
+  variants: ShareCard['variants'] = {},
+) {
   const result: Record<number, string | null> = {};
-  for (let i = 0; i < tokens.length; i += 4)
-    await Promise.all(
-      tokens.slice(i, i + 4).map(async (n) => {
-        result[n] = await cachedArtwork(n);
-      }),
-    );
+  const pending = [...new Set(tokens)];
+  let next = 0;
+  // Keep four fetches busy without waiting for the slowest image in a batch.
+  await Promise.all(
+    Array.from({ length: Math.min(4, pending.length) }, async () => {
+      while (next < pending.length) {
+        const token = pending[next++],
+          variant = variants[token];
+        // A selected custom replaces the original; do not download both.
+        result[token] = variant
+          ? await cachedArtwork(JSON.stringify(variant), () =>
+              collectibleArtworkData(variant.uri, variant.sha256),
+            )
+          : await cachedArtwork('squig:' + token, async () => {
+              try {
+                const image = await squigImage(token);
+                return `data:${image.mime};base64,${image.bytes.toString('base64')}`;
+              } catch {
+                return null;
+              }
+            });
+      }
+    }),
+  );
   return result;
 }

@@ -372,6 +372,10 @@ export async function phase6WebTests(
           });
         }
       }
+      let imageRequests = 0;
+      page.on('request', (request) => {
+        if (new URL(request.url()).pathname === '/api/share') imageRequests++;
+      });
       await page.goto(base + '/squig/4202');
       await page
         .getByRole('button', { name: 'Share image ↗', exact: true })
@@ -404,6 +408,10 @@ export async function phase6WebTests(
       check(
         (await downloaded).suggestedFilename() === 'uglydex.png',
         'browser PNG download',
+      );
+      check(
+        imageRequests === 1,
+        'preview and download use a single PNG request',
       );
       // A string keeps tsx's function-name helpers out of the browser realm.
       await page.evaluate(`
