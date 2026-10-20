@@ -3293,3 +3293,28 @@ main .personal-showcase {
     font-size: 0.6rem;
   }
 }
+.collection-grid.compact .squig-card {
+  overflow: visible;
+}
+.collection-grid.compact .squig-card:hover,
+.collection-grid.compact .squig-card:focus-within {
+  z-index: 5;
+}
+.collection-grid.compact .artwork {
+  border-radius: 8px 0 0 8px;
+}
+.collection-grid.compact .set-mini-strip {
+  padding: 0 4px;
+  flex: 0 0 auto;
+}
+.collection-grid.compact .set-mini-icons {
+  max-width: 160px;
+}
+.collection-grid.compact .set-mini-tip {
+  left: auto;
+  right: 0;
+  width: 240px;
+}
+.collection-grid.compact .opensea-listing {
+  border-radius: 0 8px 8px 0;
+}

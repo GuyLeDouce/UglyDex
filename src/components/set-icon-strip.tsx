@@ -3,12 +3,20 @@ import { useId, useState } from 'react';
 import Link from 'next/link';
 import type { SetIconData } from '@/domain/set-icons';
 
-export function SetIconStrip({ sets }: { sets: SetIconData[] }) {
+export function SetIconStrip({
+  sets,
+  limit = 4,
+  advances = false,
+}: {
+  sets: SetIconData[];
+  limit?: number;
+  advances?: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const id = useId();
   if (!sets.length) return null;
-  const visible = expanded ? sets : sets.slice(0, 4);
+  const visible = expanded ? sets : sets.slice(0, limit);
   return (
     <div
       className="set-mini-strip"
@@ -50,7 +58,11 @@ export function SetIconStrip({ sets }: { sets: SetIconData[] }) {
                 }}
               >
                 <strong>{set.name}</strong>
-                <span>This Squig can contribute to this set.</span>
+                <span>
+                  {advances
+                    ? 'This Squig advances your progress in this set.'
+                    : 'This Squig can contribute to this set.'}
+                </span>
                 <span>{set.description}</span>
                 <Link href={`/sets/${set.key}`}>View set →</Link>
                 <button
@@ -65,7 +77,7 @@ export function SetIconStrip({ sets }: { sets: SetIconData[] }) {
             )}
           </span>
         ))}
-        {sets.length > 4 && (
+        {sets.length > limit && (
           <button
             type="button"
             className="set-mini-more"
@@ -74,14 +86,14 @@ export function SetIconStrip({ sets }: { sets: SetIconData[] }) {
             aria-label={
               expanded
                 ? 'Show fewer set icons'
-                : `Show ${sets.length - 4} more matching sets`
+                : `Show ${sets.length - limit} more matching sets`
             }
             onClick={() => {
               setExpanded(!expanded);
               setActive(null);
             }}
           >
-            {expanded ? '−' : `+${sets.length - 4}`}
+            {expanded ? '−' : `+${sets.length - limit}`}
           </button>
         )}
       </div>

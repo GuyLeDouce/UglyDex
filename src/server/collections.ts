@@ -62,6 +62,7 @@ export type SquigCardData = ReturnType<typeof cardDTO> & {
     owned: boolean;
     missingTraits: number;
     advances: number;
+    sets?: import('@/domain/set-icons').SetIconData[];
   };
   currentlyOwned?: boolean;
   discoveredAt?: string;
