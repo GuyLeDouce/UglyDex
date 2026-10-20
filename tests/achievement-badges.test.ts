@@ -214,7 +214,6 @@ describe('viewer-safe badge presentation', () => {
           og: false,
           legendary: false,
           traits: [],
-          sets: [],
           achievements: {
             status: 'ready',
             badges: [earned('squig-mint-1'), earned('collector-discoveries-1')],

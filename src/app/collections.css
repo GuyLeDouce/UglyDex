@@ -68,7 +68,7 @@
   gap: 24px;
   margin: 20px 0 32px;
 }
-.collection-grid.compact {
+.collection-grid.grid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
@@ -161,19 +161,19 @@
   color: #edc787;
   border-color: #6f542f;
 }
-.compact .card-body {
+.grid .card-body {
   padding: 12px;
 }
-.compact .card-title h3 {
+.grid .card-title h3 {
   font-size: 17px;
 }
-.compact .tags {
+.grid .tags {
   display: none;
 }
-.compact .card-numbers {
+.grid .card-numbers {
   font-size: 11px;
 }
-.compact .card-numbers strong {
+.grid .card-numbers strong {
   font-size: 14px;
 }
 .previous .artwork {
@@ -673,7 +673,7 @@ footer {
   .collection-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .collection-grid.compact {
+  .collection-grid.grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .hero-asterisk {
@@ -737,11 +737,11 @@ footer {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  .collection-grid.compact {
+  .collection-grid.grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
-  .compact .card-numbers {
+  .grid .card-numbers {
     flex-wrap: wrap;
   }
   .stats-strip {

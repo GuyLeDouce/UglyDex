@@ -898,7 +898,7 @@ button.button:hover,
   margin: 22px 0 34px;
 }
 
-.collection-grid.compact {
+.collection-grid.grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
@@ -1038,7 +1038,7 @@ button.button:hover,
   display: none;
 }
 
-.collection-grid.compact .squig-card .holding-history {
+.collection-grid.grid .squig-card .holding-history {
   display: grid;
 }
 
@@ -1124,15 +1124,15 @@ button.button:hover,
   border-top: 1px dashed #424754;
 }
 
-.compact .card-body {
+.grid .card-body {
   padding: 11px;
 }
 
-.compact .card-title h3 {
+.grid .card-title h3 {
   font-size: 0.95rem;
 }
 
-.compact .tags {
+.grid .tags {
   display: none;
 }
 
@@ -1897,7 +1897,7 @@ footer {
 }
 
 @media (min-width: 1500px) {
-  .collection-grid:not(.compact) {
+  .collection-grid:not(.grid) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
@@ -1918,7 +1918,7 @@ footer {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .collection-grid.compact {
+  .collection-grid.grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
@@ -1978,7 +1978,7 @@ footer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .collection-grid.compact {
+  .collection-grid.grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -2073,7 +2073,7 @@ footer {
     gap: 12px;
   }
 
-  .collection-grid.compact {
+  .collection-grid.grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 9px;
   }
@@ -3166,4 +3166,130 @@ main .personal-showcase {
   position: absolute;
   right: 1px;
   top: 1px;
+}
+
+.specimen-sets {
+  margin-top: 18px;
+}
+.specimen-sets .set-mini-strip {
+  padding: 0;
+  max-width: 420px;
+}
+.specimen-sets .set-mini-tip {
+  bottom: calc(100% + 2px);
+}
+
+/* Compact means one slim specimen per row, at every viewport width. */
+.collection-grid.compact {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.collection-grid.compact .squig-card {
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: 2px 2px 0 var(--ugly-ink);
+}
+.collection-grid.compact .squig-card:hover {
+  transform: none;
+}
+.collection-grid.compact .squig-card-main {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+.collection-grid.compact .artwork {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border: 0;
+  border-right: 1px solid var(--ugly-ink);
+}
+.collection-grid.compact .artwork img {
+  padding: 2px;
+}
+.collection-grid.compact .card-body {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: 20px;
+  padding: 8px 12px;
+}
+.collection-grid.compact .card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.collection-grid.compact .card-title h3 {
+  font-size: 0.9rem;
+  margin: 0;
+  white-space: nowrap;
+}
+.collection-grid.compact .card-numbers {
+  display: flex;
+  gap: 14px;
+  margin: 0;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+.collection-grid.compact .card-numbers strong {
+  font-size: 0.8rem;
+}
+.collection-grid.compact .tags,
+.collection-grid.compact .card-body > :not(.card-title):not(.card-numbers) {
+  display: none;
+}
+.collection-grid.compact .opensea-listing {
+  flex: 0 0 auto;
+  min-height: 56px;
+  max-width: 35%;
+  padding: 6px 12px;
+  border-top: 0;
+  border-left: 1px solid var(--ugly-ink);
+  gap: 8px;
+  font-size: 0.7rem;
+}
+.collection-grid.compact .opensea-listing a {
+  min-height: 28px;
+}
+.collection-grid.compact .opensea-note {
+  display: none;
+}
+@media (max-width: 640px) {
+  .collection-grid.compact .artwork {
+    width: 42px;
+    height: 48px;
+    flex-basis: 42px;
+  }
+  .collection-grid.compact .card-body {
+    gap: 8px;
+    padding: 6px;
+  }
+  .collection-grid.compact .card-title {
+    gap: 5px;
+  }
+  .collection-grid.compact .card-title h3 {
+    font-size: 0.75rem;
+  }
+  .collection-grid.compact .rarity {
+    display: none;
+  }
+  .collection-grid.compact .card-numbers {
+    gap: 6px;
+    font-size: 0.65rem;
+  }
+  .collection-grid.compact .card-numbers strong {
+    font-size: 0.7rem;
+  }
+  .collection-grid.compact .card-numbers > span:last-child {
+    display: none;
+  }
+  .collection-grid.compact .opensea-listing {
+    min-height: 48px;
+    padding: 5px 6px;
+    font-size: 0.6rem;
+  }
 }

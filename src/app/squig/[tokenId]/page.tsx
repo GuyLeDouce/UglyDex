@@ -1,3 +1,6 @@
+import { SetIconStrip } from '@/components/set-icon-strip';
+import { matchingSetIcons } from '@/domain/set-icons';
+import { collectionSets } from '@/domain/dex-catalog';
 import { ShareControls } from '@/components/share-controls';
 import { absoluteUrl, shareMetadata } from '@/server/sharing';
 export async function generateMetadata({
@@ -117,6 +120,23 @@ export default async function Squig({
             <a href="#ownership">Ownership</a>
             <a href="#passport">Passport</a>
           </nav>
+          <div className="specimen-sets">
+            <p className="eyebrow">Potential collector sets</p>
+            <SetIconStrip
+              sets={matchingSetIcons(
+                {
+                  tokenId: s.tokenId,
+                  og: s.og ?? false,
+                  legendary: s.legendary ?? false,
+                  rarityTier: s.rarity ?? '',
+                  traits: Object.fromEntries(
+                    s.traits.map((t) => [t.traitType, t.value]),
+                  ),
+                },
+                collectionSets,
+              )}
+            />
+          </div>
           <SquigMarket tokenId={s.tokenId} />
         </div>
       </section>
