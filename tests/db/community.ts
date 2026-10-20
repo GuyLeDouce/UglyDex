@@ -1,5 +1,9 @@
 import { db } from '../../src/server/db';
-import { collectorThread, topCollectors } from '../../src/server/community';
+import {
+  collectorThread,
+  topCollectors,
+  uglyUsers,
+} from '../../src/server/community';
 import { dexView } from '../../src/server/dex';
 import { progressionView } from '../../src/server/progression';
 import { achievements, RULESET } from '../../src/domain/progression';
@@ -60,6 +64,39 @@ export async function communityTests(
   const privateC = await create('community-private', 4444, false);
   const pending = await create('community-pending', 4444);
   await db().collectionJob.create({ data: { collectorId: pending.id } });
+  for (const [index, c] of [winner, pending, privateC].entries()) {
+    await db().externalIdentity.create({
+      data: {
+        collectorId: c.id,
+        provider: 'DISCORD',
+        externalId: `uglyusers-fixture-${index}`,
+        authenticatedAt: new Date(),
+      },
+    });
+  }
+  const users = (await uglyUsers()).users;
+  check(
+    users.some((u) => u.slug === winner.slug),
+    'UglyUsers includes authenticated public profiles',
+  );
+  check(
+    users.some((u) => u.slug === pending.slug),
+    'UglyUsers does not wait for Field Guide jobs',
+  );
+  check(
+    !users.some((u) => u.slug === privateC.slug),
+    'UglyUsers excludes private profiles',
+  );
+  check(
+    !users.some((u) => u.slug === lower.slug),
+    'UglyUsers excludes imported collectors who never connected',
+  );
+  check(
+    users.every(
+      (u) => Object.keys(u).sort().join(',') === 'avatar,displayName,slug',
+    ),
+    'UglyUsers exposes only public display fields',
+  );
   const ranked = await topCollectors();
   const first = ranked.collectors.find((c) => c.slug === winner.slug)!;
   const second = ranked.collectors.find((c) => c.slug === tied.slug)!;

@@ -1,5 +1,6 @@
 import 'server-only';
 import { db } from './db';
+import { isTransactionConflict } from './transaction-conflict';
 import { Prisma } from '@/generated/prisma/client';
 import { hash } from '@/domain/events';
 import type { DerivedReadClient } from './derived-verification';
@@ -443,6 +444,17 @@ export async function rebuildSubject(subject: Subject, id: string) {
     );
     return counts;
   } catch (cause) {
+    if (isTransactionConflict(cause)) {
+      await db().syncRun.update({
+        where: { id: run.id },
+        data: {
+          status: 'INTERRUPTED',
+          errorCode: 'TRANSACTION_CONFLICT',
+          finishedAt: new Date(),
+        },
+      });
+      throw cause;
+    }
     await db().syncRun.update({
       where: { id: run.id },
       data: {
@@ -474,17 +486,19 @@ export async function processProgression(limit = 50, shouldStop = () => false) {
     take: limit,
   });
   let failed = 0,
-    processed = 0;
+    processed = 0,
+    deferred = 0;
   for (const j of jobs) {
     if (shouldStop()) break;
     try {
       await rebuildSubject(j.subjectType as Subject, j.subjectId);
       processed++;
-    } catch {
-      failed++;
+    } catch (error) {
+      if (isTransactionConflict(error)) deferred++;
+      else failed++;
     }
   }
-  return { processed, failed };
+  return { processed, failed, deferred };
 }
 // Durable enqueue cursor; restart resumes. Evaluation uses the same targeted queue.
 export async function queueReplay(restart = false) {
