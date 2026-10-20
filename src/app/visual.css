@@ -390,7 +390,7 @@ main#main:has(.landing-world) {
 
 .landing-world .eyebrow,
 .site-header .eyebrow {
-  color: var(--ugly-green);
+  color: var(--surface-accent, var(--ugly-green));
 }
 
 h1,
@@ -1829,7 +1829,7 @@ pre {
 
 .personal-showcase .eyebrow,
 .personal-showcase .text-link {
-  color: var(--ugly-green-deep);
+  color: var(--surface-accent);
 }
 
 .theme-labs {
@@ -3054,7 +3054,6 @@ main
     .completion,
     .squig-card,
     .achievement,
-    .personal-showcase,
     .specimen,
     .connect-panel,
     .community-card,
@@ -3085,4 +3084,13 @@ main .settings-form > label,
 main .review-form label,
 main :is(.wallet-line, .address, code, pre) {
   color: var(--surface-muted);
+}
+
+main .personal-showcase {
+  padding-inline: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
 }
