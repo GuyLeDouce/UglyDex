@@ -160,9 +160,10 @@
 .share-preview-identity .share-preview-badges {
   justify-content: flex-end;
 }
-.share-preview-identity .achievement-badge {
-  width: clamp(104px, 17vw, 160px) !important;
-  height: clamp(104px, 17vw, 160px) !important;
+.share-preview-identity .achievement-badge,
+.share-preview-identity .set-completion-badge {
+  width: clamp(112px, 20vw, 190px) !important;
+  height: clamp(112px, 20vw, 190px) !important;
 }
 .share-card-preview .tags .thread-rarity--common {
   background: #e3e5e8;

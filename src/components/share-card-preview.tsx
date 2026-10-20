@@ -1,6 +1,7 @@
 import type { ShareCard } from '@/domain/sharing';
 import { AchievementBadge } from './achievement-badge';
 import { Artwork } from './artwork';
+import { SetCompletionBadge } from './set-completion-badge';
 
 // Accessible HTML for the existing sharing DTO. The thread never generates a PNG
 // per card view; opening a card retains the existing image download renderer.
@@ -8,10 +9,12 @@ export function ShareCardPreview({
   card,
   avatar,
   name,
+  kind,
 }: {
   card: ShareCard;
   avatar: string | null;
   name: string;
+  kind: 'achievement' | 'set';
 }) {
   const rarity = card.stats
     .find((stat) =>
@@ -27,6 +30,7 @@ export function ShareCardPreview({
       <div className="share-preview-identity">
         <Artwork src={avatar} alt={`${name}'s profile picture`} avatar />
         <div className="share-preview-badges">
+          {kind === 'set' && <SetCompletionBadge name={card.title} />}
           {card.achievementBadges?.map((badge) => (
             <AchievementBadge
               key={badge.key}
