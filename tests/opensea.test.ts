@@ -279,6 +279,7 @@ describe('OpenSea card presentation', () => {
           og: false,
           legendary: false,
           traits: [],
+          sets: [],
         },
       }),
     );

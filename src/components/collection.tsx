@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { SetIconStrip } from './set-icon-strip';
 import { Artwork } from './artwork';
 import type { SquigCardData } from '@/server/collections';
 import { squigRarityClass } from '@/domain/squig-rarity';
@@ -151,6 +152,7 @@ export function SquigCard({
           )}
         </div>
       </Link>
+      {item.sets?.length > 0 && <SetIconStrip sets={item.sets} />}
       <OpenSeaLink
         tokenId={item.tokenId}
         listing={listing}

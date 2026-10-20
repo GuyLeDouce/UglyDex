@@ -31,6 +31,7 @@ function cardClass(rarity?: string | null) {
     og: false,
     legendary: false,
     traits: [],
+    sets: [],
   } as SquigCardData;
   const html = renderToStaticMarkup(
     createElement(SquigCard, { item, priority: false }),

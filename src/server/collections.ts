@@ -1,4 +1,6 @@
 import 'server-only';
+import { collectionSets } from '@/domain/dex-catalog';
+import { matchingSetIcons } from '@/domain/set-icons';
 import { rarestTraitsFirst } from './trait-presentation';
 import { db } from './db';
 import { personalizedCandidates } from './dex';
@@ -45,6 +47,18 @@ export function cardDTO(row: CardRow) {
     og: row.og,
     legendary: row.legendary,
     traits: rarestTraitsFirst(row.traits),
+    sets: matchingSetIcons(
+      {
+        tokenId: row.tokenId,
+        og: row.og ?? false,
+        legendary: row.legendary ?? false,
+        rarityTier: row.rarityTier ?? '',
+        traits: Object.fromEntries(
+          row.traits.map((t) => [t.traitType, t.value]),
+        ),
+      },
+      collectionSets,
+    ),
   };
 }
 export async function cardsWithBadges(rows: CardRow[]) {
