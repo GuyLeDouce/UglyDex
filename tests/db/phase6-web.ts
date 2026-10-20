@@ -7,6 +7,7 @@ import { randomBytes, createHash } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
 import { RULESET } from '../../src/domain/progression';
 import { COLLECTION_RULESET } from '../../src/domain/dex';
+import { stubArtwork } from './artwork-fixture';
 export async function phase6WebTests(
   base: string,
   check: (v: unknown, m: string) => void,
@@ -286,6 +287,7 @@ export async function phase6WebTests(
         });
         await route.fulfill({ response });
       });
+      await stubArtwork(page);
       const errors: string[] = [];
       page.on('pageerror', (e) => errors.push(e.message));
       for (const path of [

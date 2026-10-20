@@ -3,6 +3,7 @@ import { mkdir, readFile } from 'node:fs/promises';
 import sharp from 'sharp';
 import { db } from '../../src/server/db';
 import { authHash } from '../../src/server/auth';
+import { stubArtwork } from './artwork-fixture';
 export async function phase7WebTests(
   base: string,
   check: (v: unknown, m: string) => void,
@@ -246,6 +247,7 @@ export async function phase7WebTests(
         });
         await route.fulfill({ response });
       });
+      await stubArtwork(page);
       for (const width of [390, 360, 768]) {
         await page.setViewportSize({ width, height: 844 });
         for (const path of [

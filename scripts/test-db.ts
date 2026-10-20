@@ -846,7 +846,7 @@ try {
         const page = await browser.newPage({
           viewport: { width: 1440, height: 1000 },
         });
-        // Browser delivery/fallback is deterministic. Actual gateway/optimizer fetch
+        // Browser delivery/fallback is deterministic. Actual gateway/storage fetch
         // availability belongs to the deployed launch checks, not this local suite.
         const sharp = (await import('sharp')).default;
         const controlledArtwork = await sharp({
@@ -856,7 +856,9 @@ try {
           .toBuffer();
         let artworkUnavailable = false;
         await page.route(
-          (url) => url.pathname === '/_next/image',
+          (url) =>
+            url.pathname === '/_next/image' ||
+            url.pathname.startsWith('/api/artwork/squigs/'),
           (route) =>
             route.fulfill(
               artworkUnavailable
@@ -917,6 +919,13 @@ try {
         // Simulate that configured origin only for this owned test server's APIs;
         // separate HTTP tests above prove foreign-origin rejection.
         await page.route(`${base}/api/**`, async (route) => {
+          // Let the artwork fixture above handle images without a gateway request.
+          if (
+            new URL(route.request().url()).pathname.startsWith(
+              '/api/artwork/squigs/',
+            )
+          )
+            return route.fallback();
           const response = await route.fetch({
             headers: { ...(await route.request().allHeaders()), origin },
           });
@@ -960,8 +969,8 @@ try {
                 .locator('.landing-specimens img')
                 .first()
                 .getAttribute('src')
-            )?.includes('/_next/image?'),
-            'controlled artwork renders at the canonical optimizer URL',
+            )?.includes('/api/artwork/squigs/'),
+            'controlled artwork renders at the same-origin artwork URL',
           );
           artworkUnavailable = true;
           await page.reload();
