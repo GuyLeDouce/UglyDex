@@ -6,6 +6,35 @@ import { RULESET } from '@/domain/progression';
 import { shareCard } from './sharing';
 
 export const COMMUNITY_PAGE_SIZE = 6;
+export async function uglyUsers(page = 1) {
+  const where: Prisma.CollectorWhereInput = {
+    isPublic: true,
+    mergedIntoCollectorId: null,
+    OR: [
+      { identities: { some: { authenticatedAt: { not: null } } } },
+      { wallets: { some: { source: 'SIWE', status: 'ACTIVE' } } },
+    ],
+  };
+  return db().$transaction(
+    async (tx) => {
+      const total = await tx.collector.count({ where });
+      const pages = Math.max(1, Math.ceil(total / 24));
+      page = Math.min(
+        Math.max(Number.isSafeInteger(page) ? page : 1, 1),
+        pages,
+      );
+      const users = await tx.collector.findMany({
+        where,
+        select: { slug: true, displayName: true, avatar: true },
+        orderBy: { slug: 'asc' },
+        take: 24,
+        skip: (page - 1) * 24,
+      });
+      return { users, page, pages };
+    },
+    { isolationLevel: 'RepeatableRead' },
+  );
+}
 export async function communityVisible(slug: string) {
   return !!(await db().collector.findFirst({
     where: {

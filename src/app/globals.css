@@ -611,3 +611,35 @@ footer {
   overflow-wrap: anywhere;
   color: var(--ink);
 }
+/* Public connected-user directory, independent of Field Guide refreshes. */
+.ugly-users {
+  margin-block: 2rem;
+  scroll-margin-top: 6rem;
+}
+.ugly-users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+.ugly-users-grid a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  text-align: center;
+  height: 100%;
+}
+.ugly-users-grid .avatar-image {
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  flex: 0 0 80px;
+}
+.ugly-users-grid span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}

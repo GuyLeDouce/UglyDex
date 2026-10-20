@@ -1,5 +1,6 @@
 import 'server-only';
 import { db } from './db';
+import { isTransactionConflict } from './transaction-conflict';
 import { Prisma } from '@/generated/prisma/client';
 import { hash } from '@/domain/events';
 import type { DerivedReadClient } from './derived-verification';
@@ -547,6 +548,18 @@ export async function rebuildCollection(id: string) {
       { isolationLevel: 'RepeatableRead', timeout: 60000 },
     );
   } catch (cause) {
+    if (isTransactionConflict(cause)) {
+      await db().syncRun.update({
+        where: { id: run.id },
+        data: {
+          status: 'INTERRUPTED',
+          errorCode: 'TRANSACTION_CONFLICT',
+          finishedAt: new Date(),
+        },
+      });
+      // The rolled-back transaction leaves the newest queued generation intact.
+      throw cause;
+    }
     await db().syncRun.update({
       where: { id: run.id },
       data: {
@@ -573,17 +586,19 @@ export async function processCollections(limit = 25, stop = () => false) {
     take: limit,
   });
   let processed = 0,
-    failed = 0;
+    failed = 0,
+    deferred = 0;
   for (const j of jobs) {
     if (stop()) break;
     try {
       await rebuildCollection(j.collectorId);
       processed++;
-    } catch {
-      failed++;
+    } catch (error) {
+      if (isTransactionConflict(error)) deferred++;
+      else failed++;
     }
   }
-  return { processed, failed };
+  return { processed, failed, deferred };
 }
 export async function queueCollections(restart = false) {
   await db().$transaction(

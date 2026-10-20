@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { CollectorThread } from '@/components/collector-thread';
+import { UglyUsers } from '@/components/ugly-users';
 import Image from 'next/image';
 import { randomInt } from 'node:crypto';
 import { db } from '@/server/db';
@@ -13,7 +14,16 @@ import { CollectionGrid } from '@/components/collection';
 import { Connect } from '@/components/connect';
 import { Artwork } from '@/components/artwork';
 export const dynamic = 'force-dynamic';
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { usersPage } = await searchParams;
+  const page =
+    typeof usersPage === 'string' && /^\d{1,6}$/.test(usersPage)
+      ? Number(usersPage)
+      : 1;
   let sample: SquigCardData[] = [];
   try {
     const where = { ...catalogScope, imageUrl: { not: null } };
@@ -108,6 +118,7 @@ export default async function Home() {
         </div>
       )}
       <CollectorThread preview />
+      <UglyUsers page={page} />
       <section className="manifesto">
         <div className="manifesto-copy">
           <p className="eyebrow">WELCOME TO THE UGLYDEX</p>
