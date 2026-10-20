@@ -144,3 +144,38 @@
     grid-column: 2 / -1;
   }
 }
+
+.share-preview-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-block: 14px 22px;
+}
+.share-preview-identity .avatar-image {
+  width: clamp(72px, 12vw, 112px);
+  height: clamp(72px, 12vw, 112px);
+  flex: 0 0 auto;
+}
+.share-preview-identity .share-preview-badges {
+  justify-content: flex-end;
+}
+.share-preview-identity .achievement-badge {
+  width: clamp(104px, 17vw, 160px) !important;
+  height: clamp(104px, 17vw, 160px) !important;
+}
+.share-card-preview .tags .thread-rarity--common {
+  background: #e3e5e8;
+}
+.share-card-preview .tags .thread-rarity--uncommon {
+  background: #bceccc;
+}
+.share-card-preview .tags .thread-rarity--rare {
+  background: #b8d9ff;
+}
+.share-card-preview .tags .thread-rarity--epic {
+  background: #ddc3ff;
+}
+.share-card-preview .tags .thread-rarity--legendary {
+  background: var(--ugly-yellow);
+}

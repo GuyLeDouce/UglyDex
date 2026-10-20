@@ -332,11 +332,11 @@ main#main {
   min-height: calc(100vh - 230px);
   margin: 18px auto 74px;
   padding: clamp(24px, 4vw, 58px);
-  border: var(--ugly-border);
-  border-radius: 28px;
-  background: var(--ugly-paper);
-  box-shadow: var(--ugly-shadow-lg);
-  color: var(--ugly-ink);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ugly-paper);
 }
 
 main#main:has(.landing-world) {
@@ -397,7 +397,7 @@ h1,
 h2,
 h3,
 h4 {
-  color: var(--ugly-ink);
+  color: inherit;
   line-height: 1.08;
 }
 
@@ -1948,8 +1948,8 @@ footer {
     width: calc(100% - 34px);
     margin: 14px auto 52px;
     padding: 26px;
-    border-radius: 24px;
-    box-shadow: 7px 7px 0 var(--ugly-ink);
+    border-radius: 0;
+    box-shadow: none;
   }
 
   main#main:has(.landing-world) {
@@ -2019,9 +2019,9 @@ footer {
     width: calc(100% - 22px);
     margin: 10px auto 38px;
     padding: 18px 14px;
-    border-width: 2px;
-    border-radius: 19px;
-    box-shadow: 5px 5px 0 var(--ugly-ink);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   main#main:has(.landing-world) {
@@ -2157,9 +2157,9 @@ footer {
     grid-template-columns: minmax(0, 1fr);
     gap: 18px;
     padding: 12px;
-    border-width: 2px;
-    border-radius: 19px;
-    box-shadow: 5px 5px 0 var(--ugly-ink);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .specimen-info h1 {
@@ -3025,4 +3025,64 @@ main#main:has(.connect-layout) {
     gap: 6px;
     padding: 10px 12px;
   }
+}
+
+/* Pages float on the night background; each light surface owns its contrast. */
+main#main {
+  --surface-muted: #c3cbe0;
+  --surface-accent: var(--ugly-green);
+}
+main
+  :is(
+    .empty-state,
+    .refresh-bar,
+    .provenance-summary > div,
+    .charm-dashboard .profile-grid > div,
+    .progression-summary > div:last-child,
+    .main-board,
+    .panel,
+    .filters,
+    .dex-score,
+    .set-tile,
+    .trait,
+    .featured-exhibition,
+    .gallery-section,
+    .share-panel,
+    .share-preview,
+    .gallery-cover,
+    .gallery-heading,
+    .completion,
+    .squig-card,
+    .achievement,
+    .personal-showcase,
+    .specimen,
+    .connect-panel,
+    .community-card,
+    .collector-rank-card,
+    .showcase-completion,
+    .table-scroll,
+    .stats-strip > div,
+    .stats > div,
+    .settings-form fieldset,
+    .trophy-grid > a,
+    .ecosystem-tile,
+    .achievement-mini
+  ) {
+  --surface-muted: #535b69;
+  --surface-accent: var(--ugly-green-deep);
+  color: var(--ugly-ink);
+}
+main :is(.eyebrow, .text-link) {
+  color: var(--surface-accent);
+}
+main :is(.muted, .hint, .fine-print, small),
+main .page-heading > p:not(.eyebrow),
+main .page-heading .bio,
+main .pagination > span,
+main .exhibition figcaption,
+main .exhibition figcaption p,
+main .settings-form > label,
+main .review-form label,
+main :is(.wallet-line, .address, code, pre) {
+  color: var(--surface-muted);
 }
