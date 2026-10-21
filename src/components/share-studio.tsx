@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { ShareControls } from './share-controls';
 import { shareQuery, type ShareSpec } from '@/domain/sharing';
-const COLLECTOR_BADGE_LIMIT = 12;
+const COLLECTOR_BADGE_LIMIT = 8;
 export function ShareStudio({
   slug,
   isPublic,
@@ -31,7 +31,7 @@ export function ShareStudio({
     [count, setCount] = useState<4 | 9 | 16>(4),
     [seed, setSeed] = useState('ugly');
   const [selectedSets, setSelectedSets] = useState<string[]>(
-    sets.slice(0, 6).map((s) => s.key),
+    sets.slice(0, 9).map((s) => s.key),
   );
   const spec = {
     template,
@@ -104,9 +104,9 @@ export function ShareStudio({
       )}
       {kind === 'collector' && (
         <fieldset>
-          <legend>Completed sets · {selectedSets.length}/6 selected</legend>
+          <legend>Completed sets · {selectedSets.length}/9 selected</legend>
           <p>
-            Choose up to six completed-set icons. Favourite Squigs come from
+            Choose up to nine completed-set icons. Favourite Squigs come from
             your profile (up to six).
           </p>
           {sets.map((s) => (
@@ -115,7 +115,7 @@ export function ShareStudio({
                 type="checkbox"
                 checked={selectedSets.includes(s.key)}
                 disabled={
-                  !selectedSets.includes(s.key) && selectedSets.length >= 6
+                  !selectedSets.includes(s.key) && selectedSets.length >= 9
                 }
                 onChange={(e) =>
                   setSelectedSets(

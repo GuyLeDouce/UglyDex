@@ -22,9 +22,16 @@ it('limits set selection and supports explicitly empty selections', () => {
     shareSchema.safeParse({
       kind: 'collector',
       entity: 'ugly-friend',
-      sets: 'a,b,c,d,e,f,g',
+      sets: 'a,b,c,d,e,f,g,h,i,j',
     }).success,
   ).toBe(false);
+  expect(
+    shareSchema.safeParse({
+      kind: 'collector',
+      entity: 'ugly-friend',
+      sets: 'a,b,c,d,e,f,g,h,i',
+    }).success,
+  ).toBe(true);
   expect(
     shareSchema.safeParse({
       kind: 'collector',
@@ -44,7 +51,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
     tokens: [1, 2, 3, 4, 5, 6],
     path: '/collector/guy',
     indexable: true,
-    achievementBadges: Array.from({ length: 12 }, (_, i) => ({
+    achievementBadges: Array.from({ length: 8 }, (_, i) => ({
       key: [
         'collector-discoveries-1',
         'collector-discoveries-5',
@@ -71,7 +78,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
       completion: 43.2,
       squigs: 24,
       discovered: 137,
-      sets: Array.from({ length: 6 }, (_, i) => ({
+      sets: Array.from({ length: 9 }, (_, i) => ({
         key: String(i),
         name: [
           'First Specimen',

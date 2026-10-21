@@ -21,7 +21,7 @@ export function renderCollectorShare(
     center = square ? 440 : 540;
   const badges = (card.achievementBadges ?? [])
     .filter((b) => b.status === 'earned')
-    .slice(0, 12);
+    .slice(0, 8);
   const title = card.title.slice(0, 60);
   return new ImageResponse(
     <div
@@ -86,7 +86,7 @@ export function renderCollectorShare(
           <div style={{ display: 'flex', fontSize: 18, marginBottom: 18 }}>
             ACHIEVEMENTS
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {badges.map((b) => {
               const file = achievementBadgeFile(b.key);
               return (
@@ -96,15 +96,15 @@ export function renderCollectorShare(
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    width: (side - 48) / 3,
-                    marginBottom: 8,
+                    width: (side - 36) / 2,
+                    marginBottom: 0,
                   }}
                 >
                   {file && (
                     <img
                       src={png(file)}
-                      width={square ? 56 : 52}
-                      height={square ? 56 : 52}
+                      width={square ? 80 : 64}
+                      height={square ? 80 : 64}
                       alt={b.name}
                       style={{ objectFit: 'contain' }}
                     />
@@ -278,7 +278,7 @@ export function renderCollectorShare(
               COMPLETED SETS
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {layout.sets.slice(0, 6).map((s) => (
+              {layout.sets.slice(0, 9).map((s) => (
                 <div
                   key={s.key}
                   style={{

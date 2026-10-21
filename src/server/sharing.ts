@@ -215,7 +215,7 @@ export async function shareCard(
     const badgeKeys = q.achievements?.split(',').filter(Boolean);
     if (
       badgeKeys &&
-      (badgeKeys.length > 12 ||
+      (badgeKeys.length > 8 ||
         badgeKeys.some((key) => !available.some((a) => a.key === key)))
     )
       return null;
@@ -233,7 +233,7 @@ export async function shareCard(
       ? setKeys.map((key) => completed.find((s) => s.key === key)!)
       : [...completed]
           .sort((a, b) => Number(b.featured) - Number(a.featured))
-          .slice(0, 6);
+          .slice(0, 9);
     card.achievementBadges = chosen.flatMap((a) =>
       a.badge.status === 'earned' ? [a.badge] : [],
     );

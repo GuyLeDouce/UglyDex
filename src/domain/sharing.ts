@@ -43,7 +43,7 @@ export function galleryAccess(
     (profilePublic && (visibility === 'PUBLIC' || visibility === 'UNLISTED'))
   );
 }
-export const MAX_SHARE_ACHIEVEMENTS = 12;
+export const MAX_SHARE_ACHIEVEMENTS = 8;
 export const shareSchema = z
   .object({
     kind: z
@@ -78,7 +78,7 @@ export const shareSchema = z
       .regex(/^$|^[a-zA-Z0-9_-]+(,[a-zA-Z0-9_-]+)*$/)
       .refine(
         (v) =>
-          v.split(',').length <= 6 &&
+          v.split(',').length <= 9 &&
           new Set(v.split(',')).size === v.split(',').length,
       )
       .optional(),
@@ -90,7 +90,7 @@ export const shareSchema = z
         (value) =>
           value.split(',').length <= MAX_SHARE_ACHIEVEMENTS &&
           new Set(value.split(',')).size === value.split(',').length,
-        'Choose up to 12 unique achievements',
+        'Choose up to 8 unique achievements',
       )
       .optional(),
     ratio: z.enum(['landscape', 'square']).default('landscape'),
