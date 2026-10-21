@@ -22,7 +22,7 @@ it('limits set selection and supports explicitly empty selections', () => {
     shareSchema.safeParse({
       kind: 'collector',
       entity: 'ugly-friend',
-      sets: 'a,b,c,d,e,f,g',
+      sets: 'a,b,c,d,e,f,g,h,i,j,k,l,m',
     }).success,
   ).toBe(false);
   expect(
@@ -44,7 +44,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
     tokens: [1, 2, 3, 4, 5, 6],
     path: '/collector/guy',
     indexable: true,
-    achievementBadges: Array.from({ length: 6 }, (_, i) => ({
+    achievementBadges: Array.from({ length: 12 }, (_, i) => ({
       key: [
         'collector-discoveries-1',
         'collector-discoveries-5',
@@ -52,7 +52,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
         'collector-discoveries-20',
         'collector-discoveries-25',
         'collector-discoveries-50',
-      ][i],
+      ][i % 6],
       name: [
         'First Ugly',
         'Getting Ugly',
@@ -60,7 +60,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
         'Deep in the Dex',
         'Field Researcher',
         'Ugly Archivist',
-      ][i],
+      ][i % 6],
       subject: 'COLLECTOR',
       url: '',
       status: 'earned',
@@ -71,7 +71,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
       completion: 43.2,
       squigs: 24,
       discovered: 137,
-      sets: Array.from({ length: 6 }, (_, i) => ({
+      sets: Array.from({ length: 12 }, (_, i) => ({
         key: String(i),
         name: [
           'First Specimen',
@@ -80,7 +80,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
           'Deep Archive',
           'Living Library',
           'Purple People Eater',
-        ][i],
+        ][i % 6],
         icon: '/icons/sets/first-specimen.png',
       })),
     },

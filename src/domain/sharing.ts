@@ -74,11 +74,11 @@ export const shareSchema = z
       .optional(),
     sets: z
       .string()
-      .max(600)
+      .max(1200)
       .regex(/^$|^[a-zA-Z0-9_-]+(,[a-zA-Z0-9_-]+)*$/)
       .refine(
         (v) =>
-          v.split(',').length <= 6 &&
+          v.split(',').length <= 12 &&
           new Set(v.split(',')).size === v.split(',').length,
       )
       .optional(),
