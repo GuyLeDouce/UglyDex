@@ -81,14 +81,23 @@ export async function CollectorThread({
                     c.name
                   )}
                 </strong>
-                <Link href={c.path} title={c.title}>
-                  {c.kind === 'achievement'
-                    ? 'Earned '
-                    : c.kind === 'set'
-                      ? 'Completed '
-                      : ''}
-                  {c.title}
-                </Link>
+                {c.kind === 'transfer' && c.recipient ? (
+                  <Link
+                    href={c.recipient.path}
+                    title={`Transferred to ${c.recipient.name}`}
+                  >
+                    Transferred to {c.recipient.name}
+                  </Link>
+                ) : (
+                  <Link href={c.path} title={c.title}>
+                    {c.kind === 'achievement'
+                      ? 'Earned '
+                      : c.kind === 'set'
+                        ? 'Completed '
+                        : ''}
+                    {c.title}
+                  </Link>
+                )}
               </span>
               <time dateTime={c.at} title={new Date(c.at).toUTCString()}>
                 {new Date(c.at).toLocaleString('en-US', {
