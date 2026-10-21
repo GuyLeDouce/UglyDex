@@ -55,7 +55,7 @@ export async function collectorThread(page = 1) {
       slug: string;
       displayName: string | null;
       avatar: string | null;
-      kind: 'achievement' | 'set' | 'transfer';
+      kind: 'achievement' | 'set' | 'transfer' | 'milestone';
       tokenId: number | null;
       imageUrl: string | null;
       toAddress: string | null;
@@ -79,6 +79,18 @@ export async function collectorThread(page = 1) {
       JOIN "CollectionSnapshot" p ON p."collectorId"=s."collectorId" AND p.ruleset=${COLLECTION_RULESET}
       WHERE s."currentlyComplete" AND s."completedAt" IS NOT NULL
         AND NOT EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=s."collectorId")
+      UNION ALL
+      SELECT m."subjectId" AS "collectorId", 'milestone' AS kind, 'level:' || m.level::text AS key, m."reachedAt" AS at, NULL::integer AS "tokenId"
+      FROM "ProgressionMilestone" m
+      JOIN "CollectorProgress" p ON p."collectorId"=m."subjectId" AND p."rulesVersion"=${RULESET}
+      WHERE m.ruleset=${RULESET} AND m."subjectType"='COLLECTOR'
+        AND NOT EXISTS (SELECT 1 FROM "ProgressionJob" j WHERE j."subjectType"='COLLECTOR' AND j."subjectId"=m."subjectId")
+      UNION ALL
+      SELECT m."collectorId", 'milestone' AS kind, m.key, m."reachedAt" AS at, NULL::integer AS "tokenId"
+      FROM "CollectionMilestone" m
+      JOIN "CollectionSnapshot" p ON p."collectorId"=m."collectorId" AND p.ruleset=${COLLECTION_RULESET}
+      WHERE m.ruleset=${COLLECTION_RULESET} AND m."revokedAt" IS NULL AND m.key LIKE 'completion:%'
+        AND NOT EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=m."collectorId")
       UNION ALL
       SELECT NULL::uuid AS "collectorId", 'transfer' AS kind, t.id AS key, t."eventAt" AS at, t."tokenId"
       FROM "NftTransfer" t
@@ -148,9 +160,13 @@ export async function collectorThread(page = 1) {
           path: `/squig/${row.tokenId}#ownership`,
           card: null,
         };
-      const key = row.key.slice(
-        (row.kind === 'achievement' ? RULESET : COLLECTION_RULESET).length + 1,
-      );
+      const key =
+        row.kind === 'milestone'
+          ? row.key
+          : row.key.slice(
+              (row.kind === 'achievement' ? RULESET : COLLECTION_RULESET)
+                .length + 1,
+            );
       const spec = { kind: row.kind, entity: row.slug, key };
       const card = await shareCard(spec);
       if (!card || !(await communityVisible(row.slug))) return null;

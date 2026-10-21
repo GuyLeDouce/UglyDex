@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- ImageResponse requires native image primitives. */
 import 'server-only';
+import { renderCollectorShare } from './collector-share-render';
 import { ImageResponse } from 'next/og';
 import type { ShareCard, ShareSpec } from '@/domain/sharing';
 import { accentColors } from '@/domain/cosmetics';
@@ -24,6 +25,7 @@ export function renderShare(
   spec: Pick<ShareSpec, 'ratio' | 'template'>,
   art: Record<number, string | null>,
 ) {
+  if (card.collectorLayout) return renderCollectorShare(card, spec, art);
   const text = (value: string) =>
     value
       .normalize('NFKD')
@@ -85,10 +87,11 @@ export function renderShare(
             >
               <img
                 src={
+                  badgeImage(item.key) ??
                   'data:image/png;base64,' +
-                  readFileSync(
-                    join(process.cwd(), 'public', item.icon),
-                  ).toString('base64')
+                    readFileSync(
+                      join(process.cwd(), 'public', item.icon),
+                    ).toString('base64')
                 }
                 width={48}
                 height={48}

@@ -1,6 +1,7 @@
 import 'server-only';
 import { createHash } from 'node:crypto';
 import { db } from './db';
+import { shareAvatar } from './share-avatar';
 import { artworkBatch } from './share-art';
 import { renderShareSafe } from './share-render';
 import type { ShareCard, ShareSpec } from '@/domain/sharing';
@@ -75,7 +76,13 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
       try {
         await shareLimit('renders', 30);
         // Only server-projected, verified assets; never request-supplied URLs.
-        const art = await artworkBatch(card.tokens, card.variants);
+        const [art, avatar] = await Promise.all([
+          artworkBatch(card.tokens, card.variants),
+          card.collectorLayout
+            ? shareAvatar(card.collectorLayout.avatar)
+            : Promise.resolve(null),
+        ]);
+        if (avatar) art[0] = avatar;
         failed = Object.values(art).filter((v) => !v).length;
         const rendered = await renderShareSafe(card, spec, art),
           bytes = rendered.bytes;

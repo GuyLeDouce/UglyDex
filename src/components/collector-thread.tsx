@@ -37,9 +37,9 @@ export async function CollectorThread({
         <Link href="/settings/profile">Sharing settings →</Link>
       </div>
       <p>
-        Achievements, completed sets, and confirmed Squig transfers. Updates
-        every 30 seconds while this page is visible; transfers appear after
-        indexing.
+        Achievements, completed sets, milestones, and confirmed Squig transfers.
+        Updates every 30 seconds while this page is visible; transfers appear
+        after indexing.
       </p>
       <div className="community-cards">
         {result.cards.map((c) => (
@@ -94,7 +94,9 @@ export async function CollectorThread({
                       ? 'Earned '
                       : c.kind === 'set'
                         ? 'Completed '
-                        : ''}
+                        : c.kind === 'milestone'
+                          ? 'Reached '
+                          : ''}
                     {c.title}
                   </Link>
                 )}

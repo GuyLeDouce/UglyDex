@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { shareSchema, suggestedCopy } from '@/domain/sharing';
 import { shareCard, shareMetadata, absoluteUrl } from '@/server/sharing';
@@ -41,23 +40,7 @@ export default async function Page({ searchParams }: Props) {
         <div className="share-achievement-badges">
           {c.achievementBadges?.map((badge) => (
             <figure key={badge.key}>
-              {c.achievementIcons?.find((i) => i.key === badge.key) ? (
-                <Image
-                  src={
-                    c.achievementIcons.find((i) => i.key === badge.key)!.icon
-                  }
-                  width={48}
-                  height={48}
-                  alt={badge.name}
-                  unoptimized
-                />
-              ) : (
-                <AchievementBadge
-                  badge={badge}
-                  size={q.data.kind === 'achievement' ? 'showcase' : 'large'}
-                  showTooltip
-                />
-              )}
+              <AchievementBadge badge={badge} size="large" showTooltip />
               <figcaption>{badge.name}</figcaption>
             </figure>
           ))}

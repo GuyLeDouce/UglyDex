@@ -52,7 +52,7 @@ export default async function Page() {
         sets={
           d?.status === 'ready'
             ? d.cards
-                .filter((s) => s.complete)
+                .filter((s) => s.complete && s.revealed)
                 .map((s) => ({ key: s.key, name: s.name }))
             : []
         }

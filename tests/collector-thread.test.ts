@@ -101,3 +101,32 @@ it('includes a consenting recipient and requests all privacy gates for wallet ma
   mocks.wallets.mockResolvedValue([]);
   expect((await collectorThread()).cards[0]).toMatchObject({ recipient: null });
 });
+
+it('automatically creates shareable milestone entries with the original milestone key', async () => {
+  mocks.query.mockResolvedValue([
+    {
+      kind: 'milestone',
+      key: 'level:10',
+      slug: 'ugly-friend',
+      displayName: 'Friend',
+      avatar: null,
+      at: new Date('2026-01-01'),
+    },
+  ]);
+  mocks.visible.mockResolvedValue({ id: 'public' });
+  mocks.share.mockResolvedValue({
+    title: 'Level 10',
+    path: '/share?kind=milestone&entity=ugly-friend&key=level%3A10',
+  });
+  const result = await collectorThread();
+  expect(mocks.share).toHaveBeenCalledWith({
+    kind: 'milestone',
+    entity: 'ugly-friend',
+    key: 'level:10',
+  });
+  expect(result.cards[0]).toMatchObject({
+    kind: 'milestone',
+    title: 'Level 10',
+    key: 'level:10',
+  });
+});
