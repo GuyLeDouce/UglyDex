@@ -101,6 +101,14 @@ describe('durable artwork mirror', () => {
       'storage unavailable',
     );
   });
+  it('serves fetched artwork even when canceled storage has partial configuration', async () => {
+    vi.stubEnv('ARTWORK_S3_SECRET_ACCESS_KEY', '');
+    const { squigImage } = await import('../src/server/artwork-store');
+    expect((await squigImage(1)).bytes).toEqual(png);
+    await expect(squigImage(1, 'original', true)).rejects.toThrow(
+      'INCOMPLETE_ARTWORK_STORAGE',
+    );
+  });
   it('checks a completion marker without fetching the collection again', async () => {
     objects.set(`squigs/${SQUIG_ART_CID}/v1/complete.json`, {
       bytes: Buffer.from('{}'),
