@@ -57,11 +57,15 @@ export async function collectorThread(page = 1) {
       avatar: string | null;
       kind: 'achievement' | 'set' | 'transfer';
       tokenId: number | null;
+      imageUrl: string | null;
+      toAddress: string | null;
+      chainId: number | null;
       key: string;
       at: Date;
     }[]
   >(Prisma.sql`
-    SELECT c.slug, c."displayName", c.avatar, e.kind, e.key, e.at, e."tokenId" FROM (
+    SELECT c.slug, c."displayName", c.avatar, e.kind, e.key, e.at, e."tokenId",
+      art."imageUrl", transfer."toAddress", transfer."chainId" FROM (
       SELECT a."collectorId", 'achievement' AS kind, d.id AS key, a."awardedAt" AS at, NULL::integer AS "tokenId"
       FROM "CollectorAchievement" a
       JOIN "AchievementDefinition" d ON d.id=a."achievementId" AND d.ruleset=${RULESET} AND d."subjectType"='COLLECTOR'
@@ -82,21 +86,65 @@ export async function collectorThread(page = 1) {
         AND t."fromAddress" <> '0x0000000000000000000000000000000000000000'
         AND t."toAddress" <> '0x0000000000000000000000000000000000000000'
     ) e LEFT JOIN "Collector" c ON c.id=e."collectorId"
+    LEFT JOIN "NftTransfer" transfer ON e.kind='transfer' AND transfer.id=e.key
+    LEFT JOIN "Squig" art ON art.id=transfer."squigId"
     WHERE e.kind = 'transfer' OR (c."isPublic" AND c."showCommunityActivity" AND c."mergedIntoCollectorId" IS NULL)
     ORDER BY e.at DESC, c.slug ASC, e.kind ASC, e.key ASC
     LIMIT ${COMMUNITY_PAGE_SIZE + 1} OFFSET ${(page - 1) * COMMUNITY_PAGE_SIZE}
   `);
+  const recipients = rows
+    .slice(0, COMMUNITY_PAGE_SIZE)
+    .filter(
+      (row) => row.kind === 'transfer' && row.toAddress && row.chainId !== null,
+    );
+  // Naming a recipient links a public wallet to a profile, so require wallet
+  // sharing as well as public-profile and community-activity consent.
+  const wallets = recipients.length
+    ? await db().collectorWallet.findMany({
+        where: {
+          OR: recipients.map((row) => ({
+            chainId: row.chainId!,
+            walletAddress: row.toAddress!,
+          })),
+          status: 'ACTIVE',
+          revokedAt: null,
+          collector: {
+            isPublic: true,
+            showWallets: true,
+            showCommunityActivity: true,
+            mergedIntoCollectorId: null,
+          },
+        },
+        select: {
+          chainId: true,
+          walletAddress: true,
+          collector: { select: { slug: true, displayName: true } },
+        },
+      })
+    : [];
+  const owners = new Map(
+    wallets.map((w) => [
+      `${w.chainId}:${w.walletAddress.toLowerCase()}`,
+      {
+        name: w.collector.displayName || w.collector.slug,
+        path: `/collector/${w.collector.slug}`,
+      },
+    ]),
+  );
   const cards = await Promise.all(
     rows.slice(0, COMMUNITY_PAGE_SIZE).map(async (row) => {
       if (row.kind === 'transfer')
         return {
           slug: '',
           name: `Squig #${row.tokenId}`,
-          avatar: null,
+          avatar: row.imageUrl,
           kind: row.kind,
           key: row.key,
           at: row.at.toISOString(),
           title: 'Transferred between wallets',
+          recipient:
+            owners.get(`${row.chainId}:${row.toAddress?.toLowerCase()}`) ??
+            null,
           path: `/squig/${row.tokenId}#ownership`,
           card: null,
         };

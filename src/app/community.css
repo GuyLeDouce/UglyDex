@@ -250,3 +250,15 @@
     max-width: 68px;
   }
 }
+
+.thread-squig {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+}
+.thread-squig .artwork {
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
+  overflow: hidden;
+}

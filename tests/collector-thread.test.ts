@@ -1,12 +1,14 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   query: vi.fn(),
+  wallets: vi.fn(),
   visible: vi.fn(),
   share: vi.fn(),
 }));
 vi.mock('../src/server/db', () => ({
   db: () => ({
     $queryRaw: mocks.query,
+    collectorWallet: { findMany: mocks.wallets },
     collector: { findFirst: mocks.visible },
   }),
 }));
@@ -19,6 +21,7 @@ it('renders indexed transfers without resolving or exposing collector identities
   mocks.query.mockResolvedValue(
     Array.from({ length: COMMUNITY_PAGE_SIZE + 1 }, (_, i) => ({
       kind: 'transfer',
+      imageUrl: '/fixture-squig.png',
       key: `tx:${i}`,
       tokenId: i + 1,
       at: new Date('2026-01-01'),
@@ -32,7 +35,7 @@ it('renders indexed transfers without resolving or exposing collector identities
     name: 'Squig #1',
     path: '/squig/1#ownership',
     slug: '',
-    avatar: null,
+    avatar: '/fixture-squig.png',
   });
   expect(mocks.share).not.toHaveBeenCalled();
   expect(mocks.visible).not.toHaveBeenCalled();
@@ -58,4 +61,43 @@ it('uses the supplied set and relevant activity artwork', () => {
     '/icons/status/recorded-victory.png',
   );
   expect(threadIcon('transfer', 'tx')).toBe('/icons/status/provenance.png');
+});
+
+it('includes a consenting recipient and requests all privacy gates for wallet matching', async () => {
+  mocks.query.mockResolvedValue([
+    {
+      kind: 'transfer',
+      key: 'tx',
+      tokenId: 1,
+      at: new Date(),
+      chainId: 1,
+      toAddress: '0xabc',
+    },
+  ]);
+  mocks.wallets.mockResolvedValue([
+    {
+      chainId: 1,
+      walletAddress: '0xabc',
+      collector: { slug: 'owner', displayName: 'New Owner' },
+    },
+  ]);
+  expect((await collectorThread()).cards[0]).toMatchObject({
+    recipient: { name: 'New Owner', path: '/collector/owner' },
+  });
+  expect(mocks.wallets).toHaveBeenCalledWith(
+    expect.objectContaining({
+      where: expect.objectContaining({
+        status: 'ACTIVE',
+        revokedAt: null,
+        collector: {
+          isPublic: true,
+          showWallets: true,
+          showCommunityActivity: true,
+          mergedIntoCollectorId: null,
+        },
+      }),
+    }),
+  );
+  mocks.wallets.mockResolvedValue([]);
+  expect((await collectorThread()).cards[0]).toMatchObject({ recipient: null });
 });
