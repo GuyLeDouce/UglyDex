@@ -209,7 +209,13 @@ export async function squigImage(
         mime: 'image/webp',
       };
     }
-    if (artworkStorageConfigured()) {
+    let canPersist = false;
+    try {
+      canPersist = artworkStorageConfigured();
+    } catch (error) {
+      if (requireStorage) throw error;
+    }
+    if (canPersist) {
       try {
         await writeStored(key, asset);
         asset.persisted = true;

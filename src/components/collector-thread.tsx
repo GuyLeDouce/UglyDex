@@ -54,7 +54,7 @@ export async function CollectorThread({
                   className="thread-squig"
                   aria-label={`View ${c.name}`}
                 >
-                  <Artwork src={c.avatar} alt={c.name} />
+                  <Artwork src={c.avatar} alt={c.name} sizes="42px" />
                 </Link>
               ) : (
                 <>

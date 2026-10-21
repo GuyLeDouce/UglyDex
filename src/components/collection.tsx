@@ -46,6 +46,11 @@ export function SquigCard({
           src={item.image}
           alt={`Squig #${item.tokenId}`}
           priority={priority}
+          sizes={
+            compact
+              ? '56px'
+              : '(max-width: 640px) 45vw, (max-width: 1000px) 30vw, 22vw'
+          }
         />
         <div className="card-body">
           {item.representation && (
