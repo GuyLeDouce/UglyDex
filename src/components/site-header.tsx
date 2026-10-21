@@ -11,7 +11,6 @@ const accountLinks = [
   ['/me/achievements', 'Achievements'],
   ['/charm', '$CHARM'],
   ['/me/creations', 'Creations'],
-  ['/settings/galleries', 'My galleries'],
   ['/settings/sharing', 'Share studio'],
   ['/settings/wallets', 'Wallets'],
   ['/settings/profile', 'Profile settings'],

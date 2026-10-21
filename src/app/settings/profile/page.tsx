@@ -11,7 +11,6 @@ export default async function Settings() {
         <p className="eyebrow">MAKE IT YOURS</p>
         <h1>Your public face.</h1>
         <div className="actions">
-          <Link href="/settings/galleries">Galleries →</Link>
           <Link href="/settings/sharing">Share studio →</Link>
           <Link href="/settings/wallets">Wallet settings →</Link>
           {c.isPublic && (
