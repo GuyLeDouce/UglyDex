@@ -119,6 +119,7 @@ export type ShareCard = {
     level: number | null;
     completion: number | null;
     squigs: number;
+    discovered: number | null;
     sets: { key: string; name: string; icon: string }[];
   };
   achievementIcons?: { key: string; name: string; icon: string }[];
