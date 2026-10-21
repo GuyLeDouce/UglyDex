@@ -43,6 +43,7 @@ export function galleryAccess(
     (profilePublic && (visibility === 'PUBLIC' || visibility === 'UNLISTED'))
   );
 }
+export const MAX_SHARE_ACHIEVEMENTS = 12;
 export const shareSchema = z
   .object({
     kind: z
@@ -71,6 +72,17 @@ export const shareSchema = z
       .string()
       .regex(/^[a-zA-Z0-9:_-]{1,100}$/)
       .optional(),
+    achievements: z
+      .string()
+      .max(1200)
+      .regex(/^[a-zA-Z0-9_-]+(,[a-zA-Z0-9_-]+)*$/)
+      .refine(
+        (value) =>
+          value.split(',').length <= MAX_SHARE_ACHIEVEMENTS &&
+          new Set(value.split(',')).size === value.split(',').length,
+        'Choose up to 12 unique achievements',
+      )
+      .optional(),
     ratio: z.enum(['landscape', 'square']).default('landscape'),
     template: z.enum(['clean', 'ugly', 'stats']).default('clean'),
     preset: z
@@ -92,6 +104,7 @@ export const shareSchema = z
   .strict();
 export type ShareSpec = z.infer<typeof shareSchema>;
 export type ShareCard = {
+  achievementIcons?: { key: string; name: string; icon: string }[];
   achievementBadges?: import('./achievement-badges').VisibleAchievementBadge[];
   appearance?: { accent: string; share: 'clean' | 'ugly' | 'stats' };
   variants?: Record<number, { uri: string; sha256: string }>;

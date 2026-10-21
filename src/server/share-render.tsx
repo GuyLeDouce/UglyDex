@@ -5,6 +5,7 @@ import type { ShareCard, ShareSpec } from '@/domain/sharing';
 import { accentColors } from '@/domain/cosmetics';
 import { readFileSync } from 'node:fs';
 import { achievementBadgeFile } from './achievement-badge-assets';
+import { join } from 'node:path';
 import { shareBackground } from './share-backgrounds';
 const badgeImages = new Map<string, string>();
 function badgeImage(key: string) {
@@ -37,6 +38,75 @@ export function renderShare(
     stats: card.stats.map(text),
     badges: card.badges.map(text),
   };
+  if (card.achievementIcons?.length) {
+    const square = spec.ratio === 'square';
+    const icons = card.achievementIcons.slice(0, 12);
+    return new ImageResponse(
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+          height: '100%',
+          padding: 48,
+          background: spec.template === 'ugly' ? '#243d29' : '#171e28',
+          color: '#f8efd9',
+          fontFamily: 'sans-serif',
+        }}
+      >
+        <div style={{ display: 'flex', fontSize: 20, color: '#b9df9c' }}>
+          UGLYDEX · {card.eyebrow.slice(0, 60)}
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            fontSize: 40,
+            marginTop: 16,
+            marginBottom: 24,
+          }}
+        >
+          {card.title.slice(0, 70)}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+          {icons.map((item) => (
+            <div
+              key={item.key}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                width: square ? 316 : 356,
+                height: square ? 158 : 88,
+                padding: 12,
+                gap: 12,
+                borderRadius: 12,
+                background: '#f8efd9',
+                color: '#171e28',
+              }}
+            >
+              <img
+                src={
+                  'data:image/png;base64,' +
+                  readFileSync(
+                    join(process.cwd(), 'public', item.icon),
+                  ).toString('base64')
+                }
+                width={48}
+                height={48}
+                alt=""
+              />
+              <div style={{ display: 'flex', fontSize: 20 }}>
+                {text(item.name)}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', marginTop: 'auto', fontSize: 18 }}>
+          Earned milestones · uglydex
+        </div>
+      </div>,
+      { width: square ? 1080 : 1200, height: square ? 1080 : 630 },
+    );
+  }
   const square = spec.ratio === 'square',
     width = square ? 1080 : 1200,
     height = square ? 1080 : 630,
