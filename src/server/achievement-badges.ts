@@ -120,3 +120,22 @@ export async function squigBadgeSummaries(ids: string[]) {
     { isolationLevel: 'RepeatableRead', timeout: 15000 },
   );
 }
+
+// One highest earned threshold per art family, in stable catalog family order.
+// Callers supply only viewer-visible earned achievements.
+export function highestFamilyBadges<T extends { key: string }>(
+  earned: T[],
+  limit = 12,
+): T[] {
+  const byKey = new Map(earned.map((a) => [a.key, a]));
+  const families = new Map<string, { value: T; threshold: number }>();
+  for (const definition of achievements) {
+    const value = byKey.get(definition.key);
+    if (!value) continue;
+    const family = `${definition.subject}:${definition.metric}`;
+    const previous = families.get(family);
+    if (!previous || definition.threshold > previous.threshold)
+      families.set(family, { value, threshold: definition.threshold });
+  }
+  return [...families.values()].slice(0, limit).map((a) => a.value);
+}

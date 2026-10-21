@@ -1,4 +1,5 @@
 import 'server-only';
+import { highestFamilyBadges } from './achievement-badges';
 import { setIcons } from '@/domain/set-icons';
 import { threadIcon } from '@/domain/thread-icons';
 import { resolveShareStyle } from '@/domain/share-styles';
@@ -214,13 +215,13 @@ export async function shareCard(
     const badgeKeys = q.achievements?.split(',').filter(Boolean);
     if (
       badgeKeys &&
-      (badgeKeys.length > 6 ||
+      (badgeKeys.length > 12 ||
         badgeKeys.some((key) => !available.some((a) => a.key === key)))
     )
       return null;
     const chosen = badgeKeys
       ? badgeKeys.map((key) => available.find((a) => a.key === key)!)
-      : available.slice(0, 6);
+      : highestFamilyBadges(available);
     const completed =
       d?.status === 'ready'
         ? d.cards.filter((s) => s.complete && s.revealed)

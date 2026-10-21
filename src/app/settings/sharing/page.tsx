@@ -1,3 +1,4 @@
+import { highestFamilyBadges } from '@/server/achievement-badges';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
 import { progressionView } from '@/server/progression';
@@ -42,6 +43,15 @@ export default async function Page() {
         slug={c.slug}
         isPublic={c.isPublic}
         base={absoluteUrl('/').slice(0, -1)}
+        defaultAchievements={
+          p?.status === 'ready'
+            ? highestFamilyBadges(
+                p.cards.filter(
+                  (a) => a.unlocked && a.badge.status === 'earned',
+                ),
+              ).map((a) => a.key)
+            : []
+        }
         achievements={
           p?.status === 'ready'
             ? p.cards

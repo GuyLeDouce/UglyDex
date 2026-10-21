@@ -21,7 +21,7 @@ export function renderCollectorShare(
     center = square ? 440 : 540;
   const badges = (card.achievementBadges ?? [])
     .filter((b) => b.status === 'earned')
-    .slice(0, 6);
+    .slice(0, 12);
   const title = card.title.slice(0, 60);
   return new ImageResponse(
     <div
@@ -103,8 +103,8 @@ export function renderCollectorShare(
                   {file && (
                     <img
                       src={png(file)}
-                      width={square ? 56 : 64}
-                      height={square ? 56 : 64}
+                      width={square ? 56 : 52}
+                      height={square ? 56 : 52}
                       alt={b.name}
                       style={{ objectFit: 'contain' }}
                     />
@@ -277,7 +277,7 @@ export function renderCollectorShare(
             <div style={{ display: 'flex', fontSize: 18, marginBottom: 16 }}>
               COMPLETED SETS
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {layout.sets.slice(0, 6).map((s) => (
                 <div
                   key={s.key}
@@ -286,7 +286,7 @@ export function renderCollectorShare(
                     flexDirection: 'column',
                     alignItems: 'center',
                     width: (side - 48) / 3,
-                    marginBottom: 6,
+                    marginBottom: square ? 6 : 0,
                   }}
                 >
                   <img
@@ -298,9 +298,10 @@ export function renderCollectorShare(
                   <div
                     style={{
                       display: 'flex',
-                      fontSize: 12,
+                      fontSize: square ? 12 : 10,
+                      lineHeight: 1,
                       textAlign: 'center',
-                      height: 30,
+                      height: 32,
                       overflow: 'hidden',
                     }}
                   >

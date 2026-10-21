@@ -2,18 +2,20 @@
 import { useState } from 'react';
 import { ShareControls } from './share-controls';
 import { shareQuery, type ShareSpec } from '@/domain/sharing';
-const COLLECTOR_BADGE_LIMIT = 6;
+const COLLECTOR_BADGE_LIMIT = 12;
 export function ShareStudio({
   slug,
   isPublic,
   base,
   achievements,
+  defaultAchievements,
   sets,
   template,
 }: {
   slug: string;
   isPublic: boolean;
   base: string;
+  defaultAchievements: string[];
   achievements: { key: string; name: string }[];
   sets: { key: string; name: string }[];
   galleries: { slug: string; name: string; visibility: string }[];
@@ -23,9 +25,7 @@ export function ShareStudio({
   const [kind, setKind] = useState<ShareSpec['kind']>('collector'),
     [privatePreview, setPrivatePreview] = useState(false),
     [key, setKey] = useState(''),
-    [selected, setSelected] = useState<string[]>(
-      achievements.slice(0, 6).map((a) => a.key),
-    ),
+    [selected, setSelected] = useState<string[]>(defaultAchievements),
     [tokens, setTokens] = useState(''),
     [preset, setPreset] = useState<ShareSpec['preset']>('featured'),
     [count, setCount] = useState<4 | 9 | 16>(4),
@@ -72,15 +72,9 @@ export function ShareStudio({
           <p>Choose up to {COLLECTOR_BADGE_LIMIT} achievements per card.</p>
           <button
             type="button"
-            onClick={() =>
-              setSelected(
-                achievements.slice(0, COLLECTOR_BADGE_LIMIT).map((a) => a.key),
-              )
-            }
+            onClick={() => setSelected(defaultAchievements)}
           >
-            {achievements.length <= COLLECTOR_BADGE_LIMIT
-              ? 'Select all'
-              : 'Select first 6'}
+            Use highest badge from each family
           </button>
           <button type="button" onClick={() => setSelected([])}>
             Clear selection
