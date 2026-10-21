@@ -48,21 +48,31 @@ export async function CollectorThread({
             key={`${c.slug}:${c.kind}:${c.key}`}
           >
             <div className="thread-row">
-              {c.kind !== 'transfer' && (
-                <Artwork
-                  src={c.avatar}
-                  alt={`${c.name}'s profile picture`}
-                  avatar
-                />
+              {c.kind === 'transfer' ? (
+                <Link
+                  href={c.path}
+                  className="thread-squig"
+                  aria-label={`View ${c.name}`}
+                >
+                  <Artwork src={c.avatar} alt={c.name} />
+                </Link>
+              ) : (
+                <>
+                  <Artwork
+                    src={c.avatar}
+                    alt={`${c.name}'s profile picture`}
+                    avatar
+                  />
+                  <Image
+                    src={threadIcon(c.kind, c.key)}
+                    width={28}
+                    height={28}
+                    alt=""
+                    unoptimized
+                    title={c.title}
+                  />
+                </>
               )}
-              <Image
-                src={threadIcon(c.kind, c.key)}
-                width={28}
-                height={28}
-                alt=""
-                unoptimized
-                title={c.title}
-              />
               <span className="thread-copy">
                 <strong>
                   {c.slug ? (
@@ -90,6 +100,16 @@ export async function CollectorThread({
                 })}{' '}
                 UTC
               </time>
+              {c.kind === 'transfer' && (
+                <Image
+                  src={threadIcon(c.kind, c.key)}
+                  width={28}
+                  height={28}
+                  alt="Transfer"
+                  unoptimized
+                  title="Squig transfer"
+                />
+              )}
             </div>
           </article>
         ))}

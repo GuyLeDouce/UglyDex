@@ -19,6 +19,7 @@ it('renders indexed transfers without resolving or exposing collector identities
   mocks.query.mockResolvedValue(
     Array.from({ length: COMMUNITY_PAGE_SIZE + 1 }, (_, i) => ({
       kind: 'transfer',
+      imageUrl: '/fixture-squig.png',
       key: `tx:${i}`,
       tokenId: i + 1,
       at: new Date('2026-01-01'),
@@ -32,7 +33,7 @@ it('renders indexed transfers without resolving or exposing collector identities
     name: 'Squig #1',
     path: '/squig/1#ownership',
     slug: '',
-    avatar: null,
+    avatar: '/fixture-squig.png',
   });
   expect(mocks.share).not.toHaveBeenCalled();
   expect(mocks.visible).not.toHaveBeenCalled();

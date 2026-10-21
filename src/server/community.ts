@@ -57,11 +57,14 @@ export async function collectorThread(page = 1) {
       avatar: string | null;
       kind: 'achievement' | 'set' | 'transfer';
       tokenId: number | null;
+      imageUrl: string | null;
       key: string;
       at: Date;
     }[]
   >(Prisma.sql`
-    SELECT c.slug, c."displayName", c.avatar, e.kind, e.key, e.at, e."tokenId" FROM (
+    SELECT c.slug, c."displayName", c.avatar, e.kind, e.key, e.at, e."tokenId",
+      (SELECT s."imageUrl" FROM "NftTransfer" t JOIN "Squig" s ON s.id=t."squigId"
+       WHERE e.kind='transfer' AND t.id=e.key) AS "imageUrl" FROM (
       SELECT a."collectorId", 'achievement' AS kind, d.id AS key, a."awardedAt" AS at, NULL::integer AS "tokenId"
       FROM "CollectorAchievement" a
       JOIN "AchievementDefinition" d ON d.id=a."achievementId" AND d.ruleset=${RULESET} AND d."subjectType"='COLLECTOR'
@@ -92,7 +95,7 @@ export async function collectorThread(page = 1) {
         return {
           slug: '',
           name: `Squig #${row.tokenId}`,
-          avatar: null,
+          avatar: row.imageUrl,
           kind: row.kind,
           key: row.key,
           at: row.at.toISOString(),
