@@ -1,19 +1,14 @@
 'use client';
 import { useState } from 'react';
 import { ShareControls } from './share-controls';
-import {
-  MAX_SHARE_ACHIEVEMENTS,
-  shareQuery,
-  type ShareSpec,
-} from '@/domain/sharing';
+import { shareQuery, type ShareSpec } from '@/domain/sharing';
+const COLLECTOR_BADGE_LIMIT = 6;
 export function ShareStudio({
   slug,
   isPublic,
   base,
   achievements,
   sets,
-  galleries,
-  milestones,
   template,
 }: {
   slug: string;
@@ -28,29 +23,22 @@ export function ShareStudio({
   const [kind, setKind] = useState<ShareSpec['kind']>('collector'),
     [privatePreview, setPrivatePreview] = useState(false),
     [key, setKey] = useState(''),
-    [selected, setSelected] = useState<string[]>([]),
+    [selected, setSelected] = useState<string[]>(
+      achievements.slice(0, 6).map((a) => a.key),
+    ),
     [tokens, setTokens] = useState(''),
     [preset, setPreset] = useState<ShareSpec['preset']>('featured'),
     [count, setCount] = useState<4 | 9 | 16>(4),
     [seed, setSeed] = useState('ugly');
-  const choices =
-    kind === 'achievement'
-      ? achievements
-      : kind === 'set'
-        ? sets
-        : kind === 'gallery'
-          ? galleries.map((g) => ({ key: g.slug, name: g.name }))
-          : kind === 'milestone'
-            ? milestones.map((m) => ({ key: m, name: m }))
-            : [];
+  const [selectedSets, setSelectedSets] = useState<string[]>(
+    sets.slice(0, 6).map((s) => s.key),
+  );
   const spec = {
     template,
     entity: slug,
     kind,
-    ...(kind === 'achievement'
-      ? selected.length
-        ? { achievements: selected.join(',') }
-        : {}
+    ...(kind === 'collector'
+      ? { achievements: selected.join(','), sets: selectedSets.join(',') }
       : key
         ? { key }
         : {}),
@@ -70,52 +58,29 @@ export function ShareStudio({
             setKey('');
           }}
         >
-          {[
-            'collector',
-            'completion',
-            'trophy',
-            'collage',
-            'achievement',
-            'set',
-            'gallery',
-            'discovery',
-            'milestone',
-          ].map((k) => (
+          {['collector', 'collage'].map((k) => (
             <option key={k}>{k}</option>
           ))}
         </select>
       </label>
-      {kind !== 'achievement' && choices.length > 0 && (
-        <label>
-          Choose an earned item
-          <select value={key} onChange={(e) => setKey(e.target.value)}>
-            <option value="">Select…</option>
-            {choices.map((c) => (
-              <option key={c.key} value={c.key}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-      {kind === 'achievement' && (
+      {kind === 'collector' && (
         <fieldset>
           <legend>
-            Earned achievements · {selected.length}/{MAX_SHARE_ACHIEVEMENTS}{' '}
+            Earned achievements · {selected.length}/{COLLECTOR_BADGE_LIMIT}{' '}
             selected
           </legend>
-          <p>Choose up to {MAX_SHARE_ACHIEVEMENTS} achievements per card.</p>
+          <p>Choose up to {COLLECTOR_BADGE_LIMIT} achievements per card.</p>
           <button
             type="button"
             onClick={() =>
               setSelected(
-                achievements.slice(0, MAX_SHARE_ACHIEVEMENTS).map((a) => a.key),
+                achievements.slice(0, COLLECTOR_BADGE_LIMIT).map((a) => a.key),
               )
             }
           >
-            {achievements.length <= MAX_SHARE_ACHIEVEMENTS
+            {achievements.length <= COLLECTOR_BADGE_LIMIT
               ? 'Select all'
-              : 'Select first 12'}
+              : 'Select first 6'}
           </button>
           <button type="button" onClick={() => setSelected([])}>
             Clear selection
@@ -127,7 +92,7 @@ export function ShareStudio({
                 checked={selected.includes(a.key)}
                 disabled={
                   !selected.includes(a.key) &&
-                  selected.length >= MAX_SHARE_ACHIEVEMENTS
+                  selected.length >= COLLECTOR_BADGE_LIMIT
                 }
                 onChange={(e) =>
                   setSelected(
@@ -143,20 +108,33 @@ export function ShareStudio({
           {!achievements.length && <p>No earned achievements available yet.</p>}
         </fieldset>
       )}
-      {kind === 'discovery' && (
-        <label>
-          Discovered Squig token
-          <input
-            type="number"
-            min={1}
-            max={4444}
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-          />
-          <small>
-            Requires confirmed discovery and public wallet-attribution consent.
-          </small>
-        </label>
+      {kind === 'collector' && (
+        <fieldset>
+          <legend>Completed sets · {selectedSets.length}/6 selected</legend>
+          <p>
+            Choose up to six completed-set icons. Favourite Squigs come from
+            your profile (up to six).
+          </p>
+          {sets.map((s) => (
+            <label className="check" key={s.key}>
+              <input
+                type="checkbox"
+                checked={selectedSets.includes(s.key)}
+                disabled={
+                  !selectedSets.includes(s.key) && selectedSets.length >= 6
+                }
+                onChange={(e) =>
+                  setSelectedSets(
+                    e.target.checked
+                      ? [...selectedSets, s.key]
+                      : selectedSets.filter((k) => k !== s.key),
+                  )
+                }
+              />
+              {s.name}
+            </label>
+          ))}
+        </fieldset>
       )}
       {kind === 'collage' && (
         <>
@@ -222,12 +200,7 @@ export function ShareStudio({
           spec={spec}
           url={base + '/share?' + shareQuery(spec)}
           copy="Still ugly. Still hunting."
-          owner={
-            privatePreview ||
-            !isPublic ||
-            (kind === 'gallery' &&
-              galleries.find((g) => g.slug === key)?.visibility === 'PRIVATE')
-          }
+          owner={privatePreview || !isPublic}
         />
       )}
     </section>

@@ -1,4 +1,5 @@
 import 'server-only';
+import { setIcons } from '@/domain/set-icons';
 import { threadIcon } from '@/domain/thread-icons';
 import { resolveShareStyle } from '@/domain/share-styles';
 import type { Metadata } from 'next';
@@ -124,6 +125,7 @@ export async function shareCard(
       id: true,
       slug: true,
       displayName: true,
+      avatar: true,
       isPublic: true,
       collectionVisibility: true,
       featuredTokenIds: true,
@@ -204,7 +206,57 @@ export async function shareCard(
           ]
         : [],
   };
-  if (q.kind === 'completion') {
+  if (q.kind === 'collector') {
+    const available =
+      p?.status === 'ready'
+        ? p.cards.filter((a) => a.unlocked && a.badge.status === 'earned')
+        : [];
+    const badgeKeys = q.achievements?.split(',').filter(Boolean);
+    if (
+      badgeKeys &&
+      (badgeKeys.length > 6 ||
+        badgeKeys.some((key) => !available.some((a) => a.key === key)))
+    )
+      return null;
+    const chosen = badgeKeys
+      ? badgeKeys.map((key) => available.find((a) => a.key === key)!)
+      : available.slice(0, 6);
+    const completed =
+      d?.status === 'ready'
+        ? d.cards.filter((s) => s.complete && s.revealed)
+        : [];
+    const setKeys = q.sets?.split(',').filter(Boolean);
+    if (setKeys?.some((key) => !completed.some((s) => s.key === key)))
+      return null;
+    const chosenSets = setKeys
+      ? setKeys.map((key) => completed.find((s) => s.key === key)!)
+      : [...completed]
+          .sort((a, b) => Number(b.featured) - Number(a.featured))
+          .slice(0, 6);
+    card.achievementBadges = chosen.flatMap((a) =>
+      a.badge.status === 'earned' ? [a.badge] : [],
+    );
+    card.collectorLayout = {
+      avatar: c.avatar,
+      level: p?.status === 'ready' ? p.level : null,
+      completion: d?.status === 'ready' ? d.score.overall : null,
+      squigs: owned.current.length,
+      sets: chosenSets.map((s) => ({
+        key: s.key,
+        name: s.name,
+        icon: setIcons[s.key] ?? '/icons/status/completes-set.png',
+      })),
+    };
+    card.tokens = featured.slice(0, 6);
+    card.path =
+      '/share?' +
+      shareQuery({
+        kind: 'collector',
+        entity: c.slug,
+        achievements: q.achievements,
+        sets: q.sets,
+      });
+  } else if (q.kind === 'completion') {
     if (d?.status !== 'ready') return null;
     card = {
       ...card,
@@ -424,7 +476,7 @@ export async function shareCard(
         },
       },
     });
-    if (!m) return null;
+    if (!m || p.level < level) return null;
     card = {
       ...card,
       title: 'Level ' + level,

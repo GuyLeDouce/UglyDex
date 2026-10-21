@@ -72,10 +72,20 @@ export const shareSchema = z
       .string()
       .regex(/^[a-zA-Z0-9:_-]{1,100}$/)
       .optional(),
+    sets: z
+      .string()
+      .max(600)
+      .regex(/^$|^[a-zA-Z0-9_-]+(,[a-zA-Z0-9_-]+)*$/)
+      .refine(
+        (v) =>
+          v.split(',').length <= 6 &&
+          new Set(v.split(',')).size === v.split(',').length,
+      )
+      .optional(),
     achievements: z
       .string()
       .max(1200)
-      .regex(/^[a-zA-Z0-9_-]+(,[a-zA-Z0-9_-]+)*$/)
+      .regex(/^$|^[a-zA-Z0-9_-]+(,[a-zA-Z0-9_-]+)*$/)
       .refine(
         (value) =>
           value.split(',').length <= MAX_SHARE_ACHIEVEMENTS &&
@@ -104,6 +114,13 @@ export const shareSchema = z
   .strict();
 export type ShareSpec = z.infer<typeof shareSchema>;
 export type ShareCard = {
+  collectorLayout?: {
+    avatar: string | null;
+    level: number | null;
+    completion: number | null;
+    squigs: number;
+    sets: { key: string; name: string; icon: string }[];
+  };
   achievementIcons?: { key: string; name: string; icon: string }[];
   achievementBadges?: import('./achievement-badges').VisibleAchievementBadge[];
   appearance?: { accent: string; share: 'clean' | 'ugly' | 'stats' };
