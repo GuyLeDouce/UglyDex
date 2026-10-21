@@ -36,7 +36,7 @@ export function cardPersonalization(candidate: Candidates[string] | undefined) {
             .map((set) => ({
               key: set.key,
               name: set.name,
-              icon: setIcons[set.key] ?? '🔎',
+              icon: setIcons[set.key] ?? '/icons/sets/first-specimen.png',
               description: set.description,
             })),
         },

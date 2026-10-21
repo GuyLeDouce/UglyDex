@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { StatusIconStrip } from './status-icon-strip';
 import { SetIconStrip } from './set-icon-strip';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Artwork } from './artwork';
@@ -154,6 +155,9 @@ export function SquigCard({
           )}
         </div>
       </Link>
+      {!!item.statusIcons?.length && (
+        <StatusIconStrip icons={item.statusIcons} limit={compact ? 1 : 4} />
+      )}
       {!!item.personalization?.sets?.length && (
         <SetIconStrip
           sets={item.personalization.sets}

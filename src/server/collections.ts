@@ -1,4 +1,5 @@
 import 'server-only';
+import { personalIconSummaries } from './status-icons';
 import { rarestTraitsFirst } from './trait-presentation';
 import { db } from './db';
 import { personalizedCandidates } from './dex';
@@ -55,6 +56,7 @@ export async function cardsWithBadges(rows: CardRow[]) {
   }));
 }
 export type SquigCardData = ReturnType<typeof cardDTO> & {
+  statusIcons?: import('@/domain/status-icons').StatusIconData[];
   achievements?: AchievementBadgeSummary;
   representation?: string;
   personalization?: {
@@ -276,10 +278,15 @@ export async function collectionPage(
         where: { chainId_number: { chainId: 1, number: cursor.blockNumber } },
       })
     : null;
+  const statusIcons = await personalIconSummaries(
+    viewerId,
+    rows.map((r) => r.tokenId),
+  );
   return {
     items: rows.map((r): SquigCardData => ({
       ...cardDTO(r),
       achievements: badgeSummaries.get(r.id),
+      statusIcons: statusIcons.get(r.tokenId),
       ...cardPersonalization(candidates?.[r.tokenId]),
       ...(collectorId
         ? {

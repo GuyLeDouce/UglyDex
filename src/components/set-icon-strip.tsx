@@ -1,6 +1,7 @@
 'use client';
 import { useId, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { SetIconData } from '@/domain/set-icons';
 
 export function SetIconStrip({
@@ -46,7 +47,7 @@ export function SetIconStrip({
               }}
               onClick={() => setActive(set.key)}
             >
-              <span aria-hidden="true">{set.icon}</span>
+              <Image src={set.icon} alt="" width={20} height={20} unoptimized />
             </button>
             {active === set.key && (
               <span

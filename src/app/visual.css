@@ -3318,3 +3318,32 @@ main .personal-showcase {
 .collection-grid.compact .opensea-listing {
   border-radius: 0 8px 8px 0;
 }
+.set-mini-button img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
+.collection-grid.compact .status-mini-strip {
+  max-width: 65px;
+}
+.specimen-sets .set-mini-button,
+.specimen-sets .set-mini-more {
+  color: inherit;
+}
+@media (max-width: 640px) {
+  .collection-grid.compact .card-numbers {
+    display: none;
+  }
+  .collection-grid.compact .set-mini-strip {
+    padding-inline: 1px;
+  }
+  .collection-grid.compact .set-mini-button,
+  .collection-grid.compact .set-mini-more {
+    min-width: 24px;
+    padding: 2px;
+  }
+  .collection-grid.compact .opensea-price {
+    display: none;
+  }
+}
