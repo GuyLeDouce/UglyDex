@@ -215,7 +215,7 @@ export async function shareCard(
     const badgeKeys = q.achievements?.split(',').filter(Boolean);
     if (
       badgeKeys &&
-      (badgeKeys.length > 12 ||
+      (badgeKeys.length > 8 ||
         badgeKeys.some((key) => !available.some((a) => a.key === key)))
     )
       return null;

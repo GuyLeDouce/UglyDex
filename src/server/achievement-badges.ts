@@ -125,7 +125,7 @@ export async function squigBadgeSummaries(ids: string[]) {
 // Callers supply only viewer-visible earned achievements.
 export function highestFamilyBadges<T extends { key: string }>(
   earned: T[],
-  limit = 12,
+  limit = 8,
 ): T[] {
   const byKey = new Map(earned.map((a) => [a.key, a]));
   const families = new Map<string, { value: T; threshold: number }>();

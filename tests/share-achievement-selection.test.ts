@@ -2,9 +2,9 @@ import { expect, it } from 'vitest';
 import sharp from 'sharp';
 import { shareSchema, shareQuery, type ShareCard } from '../src/domain/sharing';
 import { renderShare } from '../src/server/share-render';
-it('round trips a selection and rejects duplicates and more than twelve', () => {
+it('round trips a selection and rejects duplicates and more than eight', () => {
   const achievements = Array.from(
-    { length: 12 },
+    { length: 8 },
     (_, i) => `collector-wins-${i + 1}`,
   ).join(',');
   const spec = { kind: 'achievement', entity: 'ugly-friend', achievements };
@@ -23,7 +23,7 @@ it('round trips a selection and rejects duplicates and more than twelve', () => 
     shareSchema.safeParse({ ...spec, achievements: 'same,same' }).success,
   ).toBe(false);
 });
-it('renders all twelve icons at both supported card sizes', async () => {
+it('renders all eight icons at both supported card sizes', async () => {
   const card: ShareCard = {
     title: 'Collector achievements',
     eyebrow: 'UNLOCKED BY COLLECTOR',
@@ -33,7 +33,7 @@ it('renders all twelve icons at both supported card sizes', async () => {
     tokens: [],
     path: '/share',
     indexable: true,
-    achievementIcons: Array.from({ length: 12 }, (_, i) => ({
+    achievementIcons: Array.from({ length: 8 }, (_, i) => ({
       key: String(i),
       name: 'Walking Encyclopedia',
       icon: '/icons/status/new-discovery.png',

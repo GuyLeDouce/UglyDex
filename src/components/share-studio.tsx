@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { ShareControls } from './share-controls';
 import { shareQuery, type ShareSpec } from '@/domain/sharing';
-const COLLECTOR_BADGE_LIMIT = 12;
+const COLLECTOR_BADGE_LIMIT = 8;
 export function ShareStudio({
   slug,
   isPublic,

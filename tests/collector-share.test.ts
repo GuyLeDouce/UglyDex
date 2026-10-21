@@ -51,7 +51,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
     tokens: [1, 2, 3, 4, 5, 6],
     path: '/collector/guy',
     indexable: true,
-    achievementBadges: Array.from({ length: 12 }, (_, i) => ({
+    achievementBadges: Array.from({ length: 8 }, (_, i) => ({
       key: [
         'collector-discoveries-1',
         'collector-discoveries-5',
