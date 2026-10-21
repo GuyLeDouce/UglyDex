@@ -1,5 +1,8 @@
 import Link from 'next/link';
-import { ShareCardPreview } from './share-card-preview';
+import Image from 'next/image';
+import { Artwork } from './artwork';
+import { threadIcon } from '@/domain/thread-icons';
+import { ThreadRefresh } from './thread-refresh';
 import { collectorThread } from '@/server/community';
 
 export async function CollectorThread({
@@ -25,6 +28,7 @@ export async function CollectorThread({
       className="collector-thread"
       aria-labelledby="collector-thread-title"
     >
+      {page === 1 && <ThreadRefresh />}
       <div className="section-heading inline">
         <div>
           <p className="eyebrow">EARNED IN THE WILD</p>
@@ -32,35 +36,61 @@ export async function CollectorThread({
         </div>
         <Link href="/settings/profile">Sharing settings →</Link>
       </div>
-      <p>Fresh achievements and completed sets from public collectors.</p>
+      <p>
+        Achievements, completed sets, and confirmed Squig transfers. Updates
+        every 30 seconds while this page is visible; transfers appear after
+        indexing.
+      </p>
       <div className="community-cards">
         {result.cards.map((c) => (
           <article
             className="community-card"
             key={`${c.slug}:${c.kind}:${c.key}`}
           >
-            <header>
-              <Link href={'/collector/' + c.slug}>{c.name}</Link>
-              <time dateTime={c.at}>
-                {new Date(c.at).toLocaleDateString('en-US', {
+            <div className="thread-row">
+              {c.kind !== 'transfer' && (
+                <Artwork
+                  src={c.avatar}
+                  alt={`${c.name}'s profile picture`}
+                  avatar
+                />
+              )}
+              <Image
+                src={threadIcon(c.kind, c.key)}
+                width={28}
+                height={28}
+                alt=""
+                unoptimized
+                title={c.title}
+              />
+              <span className="thread-copy">
+                <strong>
+                  {c.slug ? (
+                    <Link href={`/collector/${c.slug}`}>{c.name}</Link>
+                  ) : (
+                    c.name
+                  )}
+                </strong>
+                <Link href={c.path} title={c.title}>
+                  {c.kind === 'achievement'
+                    ? 'Earned '
+                    : c.kind === 'set'
+                      ? 'Completed '
+                      : ''}
+                  {c.title}
+                </Link>
+              </span>
+              <time dateTime={c.at} title={new Date(c.at).toUTCString()}>
+                {new Date(c.at).toLocaleString('en-US', {
                   timeZone: 'UTC',
                   month: 'short',
                   day: 'numeric',
-                  year: 'numeric',
-                })}
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}{' '}
+                UTC
               </time>
-            </header>
-            <Link
-              href={c.path}
-              aria-label={`${c.name} ${c.kind === 'achievement' ? 'earned' : 'completed'} ${c.title}`}
-            >
-              <ShareCardPreview
-                card={c.card}
-                avatar={c.avatar}
-                name={c.name}
-                kind={c.kind}
-              />
-            </Link>
+            </div>
           </article>
         ))}
       </div>
@@ -68,8 +98,9 @@ export async function CollectorThread({
         <div className="empty-state">
           <h3>The next milestone could be yours.</h3>
           <p>
-            Earned achievements and completed sets appear here automatically
-            when collectors share their activity.
+            Achievements, completed sets, and indexed transfers appear here
+            automatically. Public collector milestones respect their sharing
+            settings.
           </p>
         </div>
       )}

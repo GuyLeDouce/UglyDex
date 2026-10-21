@@ -180,3 +180,73 @@
 .share-card-preview .tags .thread-rarity--legendary {
   background: var(--ugly-yellow);
 }
+
+/* Compact thread rows share the scale of Explore's compact list. */
+.collector-thread .community-cards {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin-block: 16px;
+}
+.collector-thread .community-card {
+  border-radius: 10px;
+}
+.collector-thread .thread-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  min-height: 64px;
+  color: var(--ugly-ink);
+}
+.thread-row .avatar-image {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+}
+.thread-row > img {
+  flex: 0 0 28px;
+}
+.thread-copy {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.thread-copy strong,
+.thread-copy > a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.thread-copy strong {
+  flex-shrink: 0;
+  max-width: 35%;
+}
+.thread-copy > a {
+  font-size: 0.85rem;
+}
+.thread-row time {
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+.thread-row:hover {
+  background: var(--ugly-lilac);
+}
+@media (max-width: 640px) {
+  .collector-thread .thread-row {
+    gap: 7px;
+    padding: 6px 8px;
+  }
+  .thread-copy {
+    display: grid;
+    gap: 2px;
+  }
+  .thread-copy strong {
+    max-width: 100%;
+    font-size: 0.85rem;
+  }
+  .thread-row time {
+    max-width: 68px;
+  }
+}
