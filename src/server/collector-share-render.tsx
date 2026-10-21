@@ -278,7 +278,7 @@ export function renderCollectorShare(
               COMPLETED SETS
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {layout.sets.slice(0, 12).map((s) => (
+              {layout.sets.slice(0, 6).map((s) => (
                 <div
                   key={s.key}
                   style={{
@@ -291,8 +291,8 @@ export function renderCollectorShare(
                 >
                   <img
                     src={png(join(process.cwd(), 'public', s.icon))}
-                    width={square ? 48 : 24}
-                    height={square ? 48 : 24}
+                    width={48}
+                    height={48}
                     alt={s.name}
                   />
                   <div

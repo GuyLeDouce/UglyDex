@@ -233,7 +233,7 @@ export async function shareCard(
       ? setKeys.map((key) => completed.find((s) => s.key === key)!)
       : [...completed]
           .sort((a, b) => Number(b.featured) - Number(a.featured))
-          .slice(0, 12);
+          .slice(0, 6);
     card.achievementBadges = chosen.flatMap((a) =>
       a.badge.status === 'earned' ? [a.badge] : [],
     );

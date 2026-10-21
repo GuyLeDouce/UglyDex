@@ -22,7 +22,7 @@ it('limits set selection and supports explicitly empty selections', () => {
     shareSchema.safeParse({
       kind: 'collector',
       entity: 'ugly-friend',
-      sets: 'a,b,c,d,e,f,g,h,i,j,k,l,m',
+      sets: 'a,b,c,d,e,f,g',
     }).success,
   ).toBe(false);
   expect(
@@ -71,7 +71,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
       completion: 43.2,
       squigs: 24,
       discovered: 137,
-      sets: Array.from({ length: 12 }, (_, i) => ({
+      sets: Array.from({ length: 6 }, (_, i) => ({
         key: String(i),
         name: [
           'First Specimen',

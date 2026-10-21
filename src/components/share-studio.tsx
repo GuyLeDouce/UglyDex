@@ -31,7 +31,7 @@ export function ShareStudio({
     [count, setCount] = useState<4 | 9 | 16>(4),
     [seed, setSeed] = useState('ugly');
   const [selectedSets, setSelectedSets] = useState<string[]>(
-    sets.slice(0, 12).map((s) => s.key),
+    sets.slice(0, 6).map((s) => s.key),
   );
   const spec = {
     template,
@@ -104,9 +104,9 @@ export function ShareStudio({
       )}
       {kind === 'collector' && (
         <fieldset>
-          <legend>Completed sets · {selectedSets.length}/12 selected</legend>
+          <legend>Completed sets · {selectedSets.length}/6 selected</legend>
           <p>
-            Choose up to twelve completed-set icons. Favourite Squigs come from
+            Choose up to six completed-set icons. Favourite Squigs come from
             your profile (up to six).
           </p>
           {sets.map((s) => (
@@ -115,7 +115,7 @@ export function ShareStudio({
                 type="checkbox"
                 checked={selectedSets.includes(s.key)}
                 disabled={
-                  !selectedSets.includes(s.key) && selectedSets.length >= 12
+                  !selectedSets.includes(s.key) && selectedSets.length >= 6
                 }
                 onChange={(e) =>
                   setSelectedSets(
