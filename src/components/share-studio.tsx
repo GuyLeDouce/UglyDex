@@ -1,7 +1,11 @@
 'use client';
 import { useState } from 'react';
 import { ShareControls } from './share-controls';
-import { shareQuery, type ShareSpec } from '@/domain/sharing';
+import {
+  MAX_SHARE_ACHIEVEMENTS,
+  shareQuery,
+  type ShareSpec,
+} from '@/domain/sharing';
 export function ShareStudio({
   slug,
   isPublic,
@@ -24,6 +28,7 @@ export function ShareStudio({
   const [kind, setKind] = useState<ShareSpec['kind']>('collector'),
     [privatePreview, setPrivatePreview] = useState(false),
     [key, setKey] = useState(''),
+    [selected, setSelected] = useState<string[]>([]),
     [tokens, setTokens] = useState(''),
     [preset, setPreset] = useState<ShareSpec['preset']>('featured'),
     [count, setCount] = useState<4 | 9 | 16>(4),
@@ -42,7 +47,13 @@ export function ShareStudio({
     template,
     entity: slug,
     kind,
-    ...(key ? { key } : {}),
+    ...(kind === 'achievement'
+      ? selected.length
+        ? { achievements: selected.join(',') }
+        : {}
+      : key
+        ? { key }
+        : {}),
     ...(kind === 'collage'
       ? { preset, count, seed, ...(tokens ? { tokens } : {}) }
       : {}),
@@ -74,7 +85,7 @@ export function ShareStudio({
           ))}
         </select>
       </label>
-      {choices.length > 0 && (
+      {kind !== 'achievement' && choices.length > 0 && (
         <label>
           Choose an earned item
           <select value={key} onChange={(e) => setKey(e.target.value)}>
@@ -86,6 +97,51 @@ export function ShareStudio({
             ))}
           </select>
         </label>
+      )}
+      {kind === 'achievement' && (
+        <fieldset>
+          <legend>
+            Earned achievements · {selected.length}/{MAX_SHARE_ACHIEVEMENTS}{' '}
+            selected
+          </legend>
+          <p>Choose up to {MAX_SHARE_ACHIEVEMENTS} achievements per card.</p>
+          <button
+            type="button"
+            onClick={() =>
+              setSelected(
+                achievements.slice(0, MAX_SHARE_ACHIEVEMENTS).map((a) => a.key),
+              )
+            }
+          >
+            {achievements.length <= MAX_SHARE_ACHIEVEMENTS
+              ? 'Select all'
+              : 'Select first 12'}
+          </button>
+          <button type="button" onClick={() => setSelected([])}>
+            Clear selection
+          </button>
+          {achievements.map((a) => (
+            <label className="check" key={a.key}>
+              <input
+                type="checkbox"
+                checked={selected.includes(a.key)}
+                disabled={
+                  !selected.includes(a.key) &&
+                  selected.length >= MAX_SHARE_ACHIEVEMENTS
+                }
+                onChange={(e) =>
+                  setSelected(
+                    e.target.checked
+                      ? [...selected, a.key]
+                      : selected.filter((k) => k !== a.key),
+                  )
+                }
+              />
+              {a.name}
+            </label>
+          ))}
+          {!achievements.length && <p>No earned achievements available yet.</p>}
+        </fieldset>
       )}
       {kind === 'discovery' && (
         <label>
@@ -160,18 +216,20 @@ export function ShareStudio({
           Owner preview — include my collection even when hidden publicly
         </label>
       )}
-      <ShareControls
-        key={JSON.stringify(spec) + privatePreview}
-        spec={spec}
-        url={base + '/share?' + shareQuery(spec)}
-        copy="Still ugly. Still hunting."
-        owner={
-          privatePreview ||
-          !isPublic ||
-          (kind === 'gallery' &&
-            galleries.find((g) => g.slug === key)?.visibility === 'PRIVATE')
-        }
-      />
+      {(kind !== 'achievement' || selected.length > 0) && (
+        <ShareControls
+          key={JSON.stringify(spec) + privatePreview}
+          spec={spec}
+          url={base + '/share?' + shareQuery(spec)}
+          copy="Still ugly. Still hunting."
+          owner={
+            privatePreview ||
+            !isPublic ||
+            (kind === 'gallery' &&
+              galleries.find((g) => g.slug === key)?.visibility === 'PRIVATE')
+          }
+        />
+      )}
     </section>
   );
 }

@@ -1,4 +1,5 @@
 import 'server-only';
+import { threadIcon } from '@/domain/thread-icons';
 import { resolveShareStyle } from '@/domain/share-styles';
 import type { Metadata } from 'next';
 import { db } from './db';
@@ -231,22 +232,50 @@ export async function shareCard(
       path: '/share?' + shareQuery({ kind: q.kind, entity: c.slug }),
     };
   } else if (q.kind === 'achievement') {
-    const a =
-      p?.status === 'ready'
-        ? p.cards.find((a) => a.key === q.key && a.unlocked)
-        : null;
-    if (!a) return null;
+    if (p?.status !== 'ready') return null;
+    const keys = q.achievements?.split(',') ?? (q.key ? [q.key] : []);
+    if (!keys.length) return null;
+    const selected = keys.map((key) =>
+      p.cards.find(
+        (a) => a.key === key && a.unlocked && a.badge.status === 'earned',
+      ),
+    );
+    if (selected.some((a) => !a)) return null;
+    const earned = selected.filter((a) => !!a);
+    const a = earned[0];
     card = {
       ...card,
-      title: a.name,
-      achievementBadges: a.badge.status === 'earned' ? [a.badge] : [],
+      title: earned.length === 1 ? a.name : `${name}’s achievements`,
+      achievementBadges: earned.flatMap((a) =>
+        a.badge.status === 'earned' ? [a.badge] : [],
+      ),
+      achievementIcons: earned.map((a) => ({
+        key: a.key,
+        name: a.name,
+        icon: threadIcon('achievement', a.key),
+      })),
       eyebrow: 'UNLOCKED BY ' + name,
-      description: a.description,
-      date: a.at ?? undefined,
-      stats: [a.tier + ' achievement'],
+      description:
+        earned.length === 1
+          ? a.description
+          : `${earned.length} earned milestones. Real history.`,
+      date: earned.length === 1 ? (a.at ?? undefined) : undefined,
+      stats: [
+        earned.length === 1
+          ? a.tier + ' achievement'
+          : `${earned.length} achievements`,
+      ],
+      tokens: [],
       badges: [],
       path:
-        '/share?' + shareQuery({ kind: q.kind, entity: c.slug, key: q.key }),
+        '/share?' +
+        shareQuery({
+          kind: q.kind,
+          entity: c.slug,
+          ...(q.achievements
+            ? { achievements: q.achievements }
+            : { key: q.key }),
+        }),
     };
   } else if (q.kind === 'set') {
     const s =
