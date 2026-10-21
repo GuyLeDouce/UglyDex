@@ -241,6 +241,7 @@ export async function shareCard(
       level: p?.status === 'ready' ? p.level : null,
       completion: d?.status === 'ready' ? d.score.overall : null,
       squigs: owned.current.length,
+      discovered: d?.status === 'ready' ? d.discovered : null,
       sets: chosenSets.map((s) => ({
         key: s.key,
         name: s.name,

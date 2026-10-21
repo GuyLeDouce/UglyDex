@@ -256,10 +256,12 @@ export function renderCollectorShare(
             </div>
             <div style={{ display: 'flex', fontSize: 38 }}>
               {layout.completion === null ? '—' : layout.completion.toFixed(1)}%
-              UD
             </div>
             <div style={{ display: 'flex', fontSize: 18 }}>
               {layout.squigs} Squigs held
+            </div>
+            <div style={{ display: 'flex', fontSize: 18 }}>
+              {layout.discovered ?? '—'} Squigs discovered
             </div>
           </div>
           <div

@@ -70,6 +70,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
       level: 18,
       completion: 43.2,
       squigs: 24,
+      discovered: 137,
       sets: Array.from({ length: 6 }, (_, i) => ({
         key: String(i),
         name: [
