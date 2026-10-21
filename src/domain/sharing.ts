@@ -78,7 +78,7 @@ export const shareSchema = z
       .regex(/^$|^[a-zA-Z0-9_-]+(,[a-zA-Z0-9_-]+)*$/)
       .refine(
         (v) =>
-          v.split(',').length <= 6 &&
+          v.split(',').length <= 9 &&
           new Set(v.split(',')).size === v.split(',').length,
       )
       .optional(),

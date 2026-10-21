@@ -278,7 +278,7 @@ export function renderCollectorShare(
               COMPLETED SETS
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {layout.sets.slice(0, 6).map((s) => (
+              {layout.sets.slice(0, 9).map((s) => (
                 <div
                   key={s.key}
                   style={{
