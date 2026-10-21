@@ -192,3 +192,61 @@ export async function creationPage(
       })),
   };
 }
+
+// Same public/attribution checks as the activity feed; never infer history from art.
+export async function squigHistoryIcons(squigId: string) {
+  const base = await predicate({ squigId, public: true });
+  const rows = await db().$queryRaw<
+    {
+      duel: boolean;
+      victory: boolean;
+      bounty: boolean;
+      maw: boolean;
+      digested: boolean;
+    }[]
+  >(Prisma.sql`
+    SELECT COALESCE(bool_or(a."eventType" IN ('DUEL_ENTERED','DUEL_COMPLETED')),false) duel,
+    COALESCE(bool_or((a."eventType"='DUEL_COMPLETED' AND a.metadata->>'outcome'='WIN') OR a."eventType"='BOUNTY_WON' OR (a."eventType"='SURVIVAL_PLAYED' AND a.metadata->>'placement'='1')),false) victory,
+    COALESCE(bool_or(a."eventType" IN ('BOUNTY_ENTRY','BOUNTY_ACCEPTED','BOUNTY_WON')),false) bounty,
+    COALESCE(bool_or(a."eventType" IN ('MAW_FED','MAW_REGURGITATED','MAW_SWALLOWED','MAW_DIGESTED')),false) maw,
+    COALESCE(bool_or(a."eventType"='MAW_DIGESTED' AND a.metadata->>'confirmation'='source_verified_burn'),false) digested
+    FROM "CollectorActivity" a WHERE ${base}`);
+  const r = rows[0];
+  const icons: import('@/domain/status-icons').StatusIconData[] = [];
+  if (r?.duel)
+    icons.push({
+      key: 'duel-history',
+      name: 'Duel history',
+      description: 'This Squig has public recorded duel participation.',
+      href: '#ecosystem',
+    });
+  if (r?.victory)
+    icons.push({
+      key: 'recorded-victory',
+      name: 'Recorded victory',
+      description: 'This Squig has a public recorded win.',
+      href: '#ecosystem',
+    });
+  if (r?.bounty)
+    icons.push({
+      key: 'bounty-history',
+      name: 'Bounty history',
+      description: 'This Squig has public recorded bounty participation.',
+      href: '#ecosystem',
+    });
+  if (r?.maw)
+    icons.push({
+      key: 'maw-history',
+      name: 'Maw history',
+      description: 'This Squig has a public recorded interaction with the Maw.',
+      href: '#ecosystem',
+    });
+  if (r?.digested)
+    icons.push({
+      key: 'digested',
+      name: 'Digested',
+      description: 'This Squig has a source-verified digestion record.',
+      href: '#ownership',
+    });
+  return icons;
+}

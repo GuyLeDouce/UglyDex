@@ -1,5 +1,7 @@
 'use client';
 import Link from 'next/link';
+import { StatusIconStrip } from './status-icon-strip';
+import { SetIconStrip } from './set-icon-strip';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Artwork } from './artwork';
 import type { SquigCardData } from '@/server/collections';
@@ -23,12 +25,14 @@ const snapshot = () => {
 export function SquigCard({
   item,
   priority = false,
+  compact = false,
   listing,
   marketStatus,
   marketComplete,
 }: {
   item: SquigCardData;
   priority?: boolean;
+  compact?: boolean;
   listing?: SquigListing;
   marketStatus?: OpenSeaListings['status'];
   marketComplete?: boolean;
@@ -151,6 +155,16 @@ export function SquigCard({
           )}
         </div>
       </Link>
+      {!!item.statusIcons?.length && (
+        <StatusIconStrip icons={item.statusIcons} limit={compact ? 1 : 4} />
+      )}
+      {!!item.personalization?.sets?.length && (
+        <SetIconStrip
+          sets={item.personalization.sets}
+          limit={compact ? 1 : 4}
+          advances
+        />
+      )}
       <OpenSeaLink
         tokenId={item.tokenId}
         listing={listing}
@@ -210,6 +224,7 @@ export function CollectionGrid({
             <SquigCard
               key={item.tokenId}
               item={item}
+              compact={controls && mode === 'compact'}
               priority={index < priorityCount}
               listing={listings.get(item.tokenId)}
               marketStatus={market?.status}

@@ -54,12 +54,13 @@ export async function collectorThread(page = 1) {
     {
       slug: string;
       displayName: string | null;
+      avatar: string | null;
       kind: 'achievement' | 'set';
       key: string;
       at: Date;
     }[]
   >(Prisma.sql`
-    SELECT c.slug, c."displayName", e.kind, e.key, e.at FROM (
+    SELECT c.slug, c."displayName", c.avatar, e.kind, e.key, e.at FROM (
       SELECT a."collectorId", 'achievement' AS kind, d.id AS key, a."awardedAt" AS at
       FROM "CollectorAchievement" a
       JOIN "AchievementDefinition" d ON d.id=a."achievementId" AND d.ruleset=${RULESET} AND d."subjectType"='COLLECTOR'
@@ -89,6 +90,7 @@ export async function collectorThread(page = 1) {
       return {
         slug: row.slug,
         name: row.displayName || row.slug,
+        avatar: row.avatar,
         kind: row.kind,
         key,
         at: row.at.toISOString(),

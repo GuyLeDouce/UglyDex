@@ -1,0 +1,332 @@
+[
+  {
+    "key": "first-specimen",
+    "name": "First Specimen",
+    "path": "/icons/sets/first-specimen.png"
+  },
+  {
+    "key": "field-notes",
+    "name": "Field Notes",
+    "path": "/icons/sets/field-notes.png"
+  },
+  {
+    "key": "strange-company",
+    "name": "Strange Company",
+    "path": "/icons/sets/strange-company.png"
+  },
+  {
+    "key": "deep-archive",
+    "name": "Deep Archive",
+    "path": "/icons/sets/deep-archive.png"
+  },
+  {
+    "key": "living-library",
+    "name": "Living Library",
+    "path": "/icons/sets/living-library.png"
+  },
+  {
+    "key": "og-curious",
+    "name": "OG Curious",
+    "path": "/icons/sets/og-curious.png"
+  },
+  {
+    "key": "og-problem",
+    "name": "OG Problem",
+    "path": "/icons/sets/og-problem.png"
+  },
+  {
+    "key": "original-archive",
+    "name": "Original Archive",
+    "path": "/icons/sets/original-archive.png"
+  },
+  {
+    "key": "legendary-encounter",
+    "name": "Legendary Encounter",
+    "path": "/icons/sets/legendary-encounter.png"
+  },
+  {
+    "key": "legend-lore",
+    "name": "Legend Lore",
+    "path": "/icons/sets/legend-lore.png"
+  },
+  {
+    "key": "purple-people",
+    "name": "Purple People Eater",
+    "path": "/icons/sets/purple-people.png"
+  },
+  {
+    "key": "elf-research",
+    "name": "Elf Research",
+    "path": "/icons/sets/elf-research.png"
+  },
+  {
+    "key": "amphibian-atlas",
+    "name": "Amphibian Atlas",
+    "path": "/icons/sets/amphibian-atlas.png"
+  },
+  {
+    "key": "machine-learning",
+    "name": "Machine Learning",
+    "path": "/icons/sets/machine-learning.png"
+  },
+  {
+    "key": "afterlife",
+    "name": "Afterlife Studies",
+    "path": "/icons/sets/afterlife.png"
+  },
+  {
+    "key": "crystal-clear",
+    "name": "Crystal Clear",
+    "path": "/icons/sets/crystal-clear.png"
+  },
+  {
+    "key": "suit-yourself",
+    "name": "Suit Yourself",
+    "path": "/icons/sets/suit-yourself.png"
+  },
+  {
+    "key": "space-program",
+    "name": "Ugly Space Program",
+    "path": "/icons/sets/space-program.png"
+  },
+  {
+    "key": "splash-notes",
+    "name": "Splash Notes",
+    "path": "/icons/sets/splash-notes.png"
+  },
+  {
+    "key": "portal-tour",
+    "name": "Portal Tour",
+    "path": "/icons/sets/portal-tour.png"
+  },
+  {
+    "key": "eyes-wide",
+    "name": "Eyes Wide Ugly",
+    "path": "/icons/sets/eyes-wide.png"
+  },
+  {
+    "key": "many-faces",
+    "name": "Many Faces",
+    "path": "/icons/sets/many-faces.png"
+  },
+  {
+    "key": "wardrobe-malfunction",
+    "name": "Wardrobe Malfunction",
+    "path": "/icons/sets/wardrobe-malfunction.png"
+  },
+  {
+    "key": "hat-lab",
+    "name": "Hat Laboratory",
+    "path": "/icons/sets/hat-lab.png"
+  },
+  {
+    "key": "species-survey",
+    "name": "Species Survey",
+    "path": "/icons/sets/species-survey.png"
+  },
+  {
+    "key": "skin-deep",
+    "name": "Skin Deep",
+    "path": "/icons/sets/skin-deep.png"
+  },
+  {
+    "key": "background-check",
+    "name": "Background Check",
+    "path": "/icons/sets/background-check.png"
+  },
+  {
+    "key": "special-interest",
+    "name": "Special Interest",
+    "path": "/icons/sets/special-interest.png"
+  },
+  {
+    "key": "triple-vision",
+    "name": "Triple Vision",
+    "path": "/icons/sets/triple-vision.png"
+  },
+  {
+    "key": "laser-lab",
+    "name": "Laser Laboratory",
+    "path": "/icons/sets/laser-lab.png"
+  },
+  {
+    "key": "pet-project",
+    "name": "Pet Project",
+    "path": "/icons/sets/pet-project.png"
+  },
+  {
+    "key": "mood-board",
+    "name": "Mood Board",
+    "path": "/icons/sets/mood-board.png"
+  },
+  {
+    "key": "rainy-day",
+    "name": "Rainy Day Research",
+    "path": "/icons/sets/rainy-day.png"
+  },
+  {
+    "key": "gold-standard",
+    "name": "Gold Standard",
+    "path": "/icons/sets/gold-standard.png"
+  },
+  {
+    "key": "eyes-master",
+    "name": "Eye Encyclopedia",
+    "path": "/icons/sets/eyes-master.png"
+  },
+  {
+    "key": "body-master",
+    "name": "Wardrobe Archive",
+    "path": "/icons/sets/body-master.png"
+  },
+  {
+    "key": "head-master",
+    "name": "Head Office",
+    "path": "/icons/sets/head-master.png"
+  },
+  {
+    "key": "static-signal",
+    "name": "Static Signal \u2014 hidden",
+    "path": "/icons/sets/static-signal.png"
+  },
+  {
+    "key": "late-night",
+    "name": "Late Night Television \u2014 hidden",
+    "path": "/icons/sets/late-night.png"
+  },
+  {
+    "key": "room-for-one",
+    "name": "Room for One",
+    "path": "/icons/sets/room-for-one.png"
+  },
+  {
+    "key": "crowded-lab",
+    "name": "Crowded Laboratory",
+    "path": "/icons/sets/crowded-lab.png"
+  },
+  {
+    "key": "hoarder-rack",
+    "name": "Hoarder Rack",
+    "path": "/icons/sets/hoarder-rack.png"
+  },
+  {
+    "key": "specimen-wing",
+    "name": "Specimen Wing",
+    "path": "/icons/sets/specimen-wing.png"
+  },
+  {
+    "key": "ugly-rainbow",
+    "name": "Ugly Rainbow",
+    "path": "/icons/sets/ugly-rainbow.png"
+  },
+  {
+    "key": "suit-rack",
+    "name": "Suit Rack",
+    "path": "/icons/sets/suit-rack.png"
+  },
+  {
+    "key": "three-eyed-army",
+    "name": "Three-Eyed Army",
+    "path": "/icons/sets/three-eyed-army.png"
+  },
+  {
+    "key": "old-guard",
+    "name": "Old Guard",
+    "path": "/icons/sets/old-guard.png"
+  },
+  {
+    "key": "legend-in-residence",
+    "name": "Legend in Residence",
+    "path": "/icons/sets/legend-in-residence.png"
+  },
+  {
+    "key": "five-species",
+    "name": "Five Species, One Home",
+    "path": "/icons/sets/five-species.png"
+  },
+  {
+    "key": "purple-wardrobe",
+    "name": "Purple Wardrobe",
+    "path": "/icons/sets/purple-wardrobe.png"
+  },
+  {
+    "key": "colour-clash",
+    "name": "Colour Clash",
+    "path": "/icons/sets/colour-clash.png"
+  },
+  {
+    "key": "quiet-room",
+    "name": "The Quiet Room \u2014 hidden",
+    "path": "/icons/sets/quiet-room.png"
+  },
+  {
+    "key": "new-discovery",
+    "name": "New discovery",
+    "path": "/icons/status/new-discovery.png"
+  },
+  {
+    "key": "missing-trait",
+    "name": "Missing trait",
+    "path": "/icons/status/missing-trait.png"
+  },
+  {
+    "key": "advances-set",
+    "name": "Advances a set",
+    "path": "/icons/status/advances-set.png"
+  },
+  {
+    "key": "completes-set",
+    "name": "Completes a set",
+    "path": "/icons/status/completes-set.png"
+  },
+  {
+    "key": "featured-set",
+    "name": "Featured set match",
+    "path": "/icons/status/featured-set.png"
+  },
+  {
+    "key": "currently-owned",
+    "name": "Currently owned",
+    "path": "/icons/status/currently-owned.png"
+  },
+  {
+    "key": "previously-owned",
+    "name": "Previously owned",
+    "path": "/icons/status/previously-owned.png"
+  },
+  {
+    "key": "duel-history",
+    "name": "Duel history",
+    "path": "/icons/status/duel-history.png"
+  },
+  {
+    "key": "recorded-victory",
+    "name": "Recorded victory",
+    "path": "/icons/status/recorded-victory.png"
+  },
+  {
+    "key": "bounty-history",
+    "name": "Bounty history",
+    "path": "/icons/status/bounty-history.png"
+  },
+  {
+    "key": "maw-history",
+    "name": "Maw history",
+    "path": "/icons/status/maw-history.png"
+  },
+  {
+    "key": "digested",
+    "name": "Digested",
+    "path": "/icons/status/digested.png"
+  },
+  {
+    "key": "provenance",
+    "name": "Provenance",
+    "path": "/icons/status/provenance.png"
+  },
+  {
+    "key": "custom-artwork",
+    "name": "Custom artwork",
+    "path": "/icons/status/custom-artwork.png"
+  }
+]

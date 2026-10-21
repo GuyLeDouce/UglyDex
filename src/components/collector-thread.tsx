@@ -54,7 +54,12 @@ export async function CollectorThread({
               href={c.path}
               aria-label={`${c.name} ${c.kind === 'achievement' ? 'earned' : 'completed'} ${c.title}`}
             >
-              <ShareCardPreview card={c.card} />
+              <ShareCardPreview
+                card={c.card}
+                avatar={c.avatar}
+                name={c.name}
+                kind={c.kind}
+              />
             </Link>
           </article>
         ))}

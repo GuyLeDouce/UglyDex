@@ -1,4 +1,6 @@
 import 'server-only';
+import { collectionSets } from '@/domain/dex-catalog';
+import { setIcons } from '@/domain/set-icons';
 import type { Candidates } from './dex-engine';
 
 export type FieldGuideFilter = '' | 'advances' | 'traits' | 'undiscovered';
@@ -29,6 +31,14 @@ export function cardPersonalization(candidate: Candidates[string] | undefined) {
           owned: candidate.owned,
           missingTraits: candidate.missingTraits,
           advances: candidate.sets.length,
+          sets: collectionSets
+            .filter((set) => !set.hidden && candidate.sets.includes(set.key))
+            .map((set) => ({
+              key: set.key,
+              name: set.name,
+              icon: setIcons[set.key] ?? '/icons/sets/first-specimen.png',
+              description: set.description,
+            })),
         },
       }
     : {};

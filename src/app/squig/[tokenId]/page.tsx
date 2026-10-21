@@ -1,3 +1,9 @@
+import { StatusIconStrip } from '@/components/status-icon-strip';
+import { personalIconSummaries } from '@/server/status-icons';
+import { squigHistoryIcons } from '@/server/activity';
+import { SetIconStrip } from '@/components/set-icon-strip';
+import { matchingSetIcons } from '@/domain/set-icons';
+import { collectionSets } from '@/domain/dex-catalog';
 import { ShareControls } from '@/components/share-controls';
 import { absoluteUrl, shareMetadata } from '@/server/sharing';
 export async function generateMetadata({
@@ -48,6 +54,30 @@ export default async function Squig({
   const history = await passport(r.squigId, await searchParams);
   const customs = await publicCustoms(s.tokenId),
     session = await currentSession();
+  const [personalIcons, recordedIcons] = await Promise.all([
+    personalIconSummaries(session?.collectorId, [s.tokenId]),
+    squigHistoryIcons(r.squigId),
+  ]);
+  const statusIcons = [
+    ...(personalIcons.get(s.tokenId) ?? []),
+    ...recordedIcons,
+    {
+      key: 'provenance',
+      name: 'Provenance',
+      description: 'Explore indexed ownership and transfer history.',
+      href: '#passport',
+    },
+    ...(customs.length
+      ? [
+          {
+            key: 'custom-artwork',
+            name: 'Custom artwork',
+            description: 'Verified custom artwork is available for this Squig.',
+            href: '#customs',
+          },
+        ]
+      : []),
+  ];
   const owned = session
     ? await ownedSquig(session.collectorId, s.tokenId)
     : null;
@@ -117,6 +147,27 @@ export default async function Squig({
             <a href="#ownership">Ownership</a>
             <a href="#passport">Passport</a>
           </nav>
+          <div className="specimen-sets">
+            <p className="eyebrow">Status & history</p>
+            <StatusIconStrip icons={statusIcons} limit={8} />
+          </div>
+          <div className="specimen-sets">
+            <p className="eyebrow">Potential collector sets</p>
+            <SetIconStrip
+              sets={matchingSetIcons(
+                {
+                  tokenId: s.tokenId,
+                  og: s.og ?? false,
+                  legendary: s.legendary ?? false,
+                  rarityTier: s.rarity ?? '',
+                  traits: Object.fromEntries(
+                    s.traits.map((t) => [t.traitType, t.value]),
+                  ),
+                },
+                collectionSets,
+              )}
+            />
+          </div>
           <SquigMarket tokenId={s.tokenId} />
         </div>
       </section>
