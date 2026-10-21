@@ -200,7 +200,7 @@ export async function communityTests(
     'thread withholds private and pending collector details',
   );
   check(
-    !own[0].card.tokens.length,
+    own[0].kind !== 'transfer' && !own[0].card.tokens.length,
     'sharing card privacy withholds set token evidence when wallets are hidden',
   );
   await db().collectorAchievement.update({
