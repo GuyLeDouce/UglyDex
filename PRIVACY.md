@@ -1,10 +1,10 @@
 # UglyDex Privacy Policy
 
-**Effective:** [PUBLICATION DATE]  
-**Operator:** [FULL LEGAL NAME], operating as Ugly Labs / UglyDex  
-**Contact:** [PRIVACY EMAIL]  
-**Address:** [BUSINESS ADDRESS]  
-**Website:** [OFFICIAL URL]
+**Effective:** September 23, 2026  
+**Operator:** © 2025 Squigs Reloaded, operating as Ugly Labs / UglyDex  
+**Contact:** UglyLabs@gmail.com  
+**Address:** 119 Pioneer Rd, Redbridge, ON P0H 2A0  
+**Website:** https://Squigs.io
 
 ## 1. Scope
 This Policy describes how the operator (“we”) processes personal information through UglyDex and related Ugly Labs features (“Services”). UglyDex records Squigs collectible provenance, ownership, community participation and achievements. Independent services including OpenSea, Discord, wallets and public blockchain networks have their own policies. We are accountable for information under our control.
@@ -42,7 +42,7 @@ Imported blockchain information and derived achievement records may be incomplet
 Some service providers may process data outside Canada, where different legal access rules apply. We provide notices and safeguards required for applicable international transfers, including EU/UK protections when relevant. Actual providers, locations and transfer mechanisms must be confirmed.
 
 ## 12. Your rights
-Depending on applicable law, you may request access, correction, deletion, restriction, portability, objection or withdrawal of consent. Contact [PRIVACY EMAIL]. We may verify identity or wallet control without seeking private keys. We respond within applicable deadlines and explain lawful exceptions. Canadian individuals may complain to the Office of the Privacy Commissioner of Canada or relevant provincial regulator; EU/UK individuals may complain to their supervisory authority.
+Depending on applicable law, you may request access, correction, deletion, restriction, portability, objection or withdrawal of consent. Contact UglyLabs@gmail.com. We may verify identity or wallet control without seeking private keys. We respond within applicable deadlines and explain lawful exceptions. Canadian individuals may complain to the Office of the Privacy Commissioner of Canada or relevant provincial regulator; EU/UK individuals may complain to their supervisory authority.
 
 ## 13. Minors
 Authenticated participation is intended for adults 18 or older, or the higher applicable age of majority. We do not knowingly solicit children to register. Contact us about suspected improper collection. Public read-only pages may remain accessible.
@@ -51,4 +51,4 @@ Authenticated participation is intended for adults 18 or older, or the higher ap
 Marketing messages, if any, comply with applicable requirements including CASL and unsubscribe rights. OpenSea, Discord, wallets and blockchains independently control their services and policies, subject to any legal responsibility we retain.
 
 ## 15. Changes and contact
-We may update this Policy with an updated date and any legally required notice or consent. Contact [FULL LEGAL NAME], [PRIVACY EMAIL], [BUSINESS ADDRESS]. Nothing here limits non-waivable privacy rights.
+We may update this Policy with an updated date and any legally required notice or consent. Contact © 2025 Squigs Reloaded, UglyLabs@gmail.com, 119 Pioneer Rd, Redbridge, ON P0H 2A0. Nothing here limits non-waivable privacy rights.
