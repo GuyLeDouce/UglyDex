@@ -124,3 +124,7 @@ Versioned trait discovery, 52 curated historical/current sets, explained complet
 ## Galleries and sharing
 
 Phase 6 adds opt-in galleries, ordered showcases, public collection visibility, earned trophy cards and downloadable social PNGs. Start at `/settings/galleries` or `/settings/sharing`. Public share resources use the same privacy gates as profiles. Apply native migration `202609280008_sharing` with `npm run db:migrate`; no new secrets or worker are needed. See [sharing architecture](docs/sharing.md) and [Phase 6 report](docs/phase6-report.md).
+
+## Legal policies
+
+Draft [Privacy Policy](PRIVACY.md) and [Terms of Service](TERMS.md) are rendered at `/privacy` and `/terms`. Complete the [publication checklist](docs/legal-publication.md) before production publication or Discord Portal submission.

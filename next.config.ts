@@ -1,6 +1,10 @@
 import type { NextConfig } from 'next';
 const config: NextConfig = {
   poweredByHeader: false,
+  outputFileTracingIncludes: {
+    '/privacy': ['./PRIVACY.md'],
+    '/terms': ['./TERMS.md'],
+  },
   images: {
     // Protected badge routes must never pass through the shared image cache.
     localPatterns: [
