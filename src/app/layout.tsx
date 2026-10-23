@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import './legal.css';
 import { Lilita_One, Montserrat } from 'next/font/google';
 import './globals.css';
 import './collections.css';
@@ -56,6 +58,11 @@ export default async function RootLayout({
         <footer>
           <span>UGLY LABS · BEAUTIFULLY MALFORMED</span>
           <span>One ecosystem. Every strange little story.</span>
+          <nav aria-label="Legal">
+            <Link href="/privacy">Privacy Policy</Link>
+            {' · '}
+            <Link href="/terms">Terms of Service</Link>
+          </nav>
         </footer>
       </body>
     </html>

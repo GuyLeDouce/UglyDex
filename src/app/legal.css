@@ -1,0 +1,35 @@
+.legal-policy {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 48px 24px 72px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.legal-policy h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.15;
+  margin: 32px 0;
+}
+.legal-policy h2 {
+  font-size: 1.35rem;
+  line-height: 1.4;
+  margin: 32px 0 12px;
+}
+.legal-policy p {
+  margin: 0 0 20px;
+  white-space: pre-line;
+}
+.legal-policy a,
+footer nav a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.legal-draft {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+}
+footer {
+  flex-wrap: wrap;
+  gap: 16px;
+}
