@@ -1,10 +1,10 @@
 # UglyDex Terms of Service
 
-**Effective:** [PUBLICATION DATE]  
-**Operator:** [FULL LEGAL NAME], operating as Ugly Labs / UglyDex  
-**Contact:** [LEGAL EMAIL]  
-**Address:** [BUSINESS ADDRESS]  
-**Website:** [OFFICIAL URL]
+**Effective:** September 23, 2026  
+**Operator:** © 2025 Squigs Reloaded, operating as Ugly Labs / UglyDex  
+**Contact:** UglyLabs@gmail.com  
+**Address:** 119 Pioneer Rd, Redbridge, ON P0H 2A0  
+**Website:** https://Squigs.io
 
 ## 1. Agreement and eligibility
 These Terms govern UglyDex and associated Ugly Labs websites, applications, collectible records, profiles and achievements (“Services”). By affirmatively accepting these Terms where requested, or otherwise forming a legally enforceable agreement, you agree to them. Interactive participation is intended for adults 18 or older or the higher local age of majority. You must have legal capacity and comply with applicable law. Read-only public pages may be accessible without registration.
@@ -55,18 +55,18 @@ To the extent permitted by law, we exclude liability for indirect and consequent
 To the extent legally permitted, users indemnify the operator for reasonable third-party claims directly caused by their unlawful conduct, material breach or infringement, but not to the extent caused by our negligence, misconduct or breach of law. We will provide reasonable notice and opportunity to participate in defence.
 
 ## 17. Privacy and complaints
-Our separate Privacy Policy explains information processing; acceptance of these Terms is not blanket privacy consent. Contact [LEGAL EMAIL] for legal, security, copyright, moderation or record-accuracy complaints. We will review legitimate concerns and follow applicable copyright and other mandatory procedures.
+Our separate Privacy Policy explains information processing; acceptance of these Terms is not blanket privacy consent. Contact UglyLabs@gmail.com for legal, security, copyright, moderation or record-accuracy complaints. We will review legitimate concerns and follow applicable copyright and other mandatory procedures.
 
 ## 18. Law and disputes
-Ontario law and applicable Canadian federal law govern, subject to mandatory protections elsewhere. Ontario courts have jurisdiction subject to non-waivable consumer rights. Informal resolution through [LEGAL EMAIL] is encouraged but not required. No mandatory arbitration or class-action waiver is imposed where prohibited.
+Ontario law and applicable Canadian federal law govern, subject to mandatory protections elsewhere. Ontario courts have jurisdiction subject to non-waivable consumer rights. Informal resolution through UglyLabs@gmail.com is encouraged but not required. No mandatory arbitration or class-action waiver is imposed where prohibited.
 
 ## 19. General provisions
 We may revise Terms with notice and consent where legally required. Continued use signifies acceptance only where enforceable. Invalid provisions are severable where possible; non-enforcement is not waiver. Lawful business transfers are subject to required notice and consent. Supplemental feature rules may apply. Required language versions, including French where applicable, will be provided. Provisions naturally intended to survive termination do so only to the extent enforceable.
 
 ## 20. Contact
-[FULL LEGAL NAME], operating as Ugly Labs / UglyDex  
-[LEGAL EMAIL]  
-[BUSINESS ADDRESS]  
-[OFFICIAL URL]
+© 2025 Squigs Reloaded, operating as Ugly Labs / UglyDex  
+UglyLabs@gmail.com  
+119 Pioneer Rd, Redbridge, ON P0H 2A0  
+https://Squigs.io
 
 Nothing in these Terms waives statutory rights that cannot lawfully be waived.
