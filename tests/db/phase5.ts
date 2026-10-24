@@ -304,8 +304,8 @@ export async function phase5DatabaseTests(
   await rebuildCollection(c.id);
   view = await dexView(c.id);
   check(
-    view?.status === 'ready' && view.discovered === 0,
-    'dirty provenance blocks discovery',
+    view?.status === 'ready' && view.discovered === 1,
+    'transfer reconstruction does not erase recorded lifetime discovery',
   );
   await db().squigProvenance.update({
     where: { squigId: squig.id },

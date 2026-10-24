@@ -37,7 +37,7 @@ const token = (
 const set = (key: string) => collectionSets.find((s) => s.key === key)!;
 describe('versioned collection catalog', () => {
   it('pins a separate collection version', () =>
-    expect(COLLECTION_RULESET).toBe('uglydex-collection-v2'));
+    expect(COLLECTION_RULESET).toBe('uglydex-collection-v3'));
   it('has 345 canonical values in eight categories', () => {
     expect(traitCatalog).toHaveLength(345);
     expect(new Set(traitCatalog.map((t) => t.type)).size).toBe(8);
