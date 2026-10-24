@@ -1,6 +1,7 @@
 import { currentSession, requireOrigin, rateLimit } from '@/server/auth';
 import { seedCollections, rebuildCollection } from '@/server/dex-engine';
 import { assertDeploymentBinding } from '@/server/deployment';
+import { seedProgression, rebuildSubject } from '@/server/progression-engine';
 import { appEnvironment } from '@/domain/deployment';
 export async function POST(request: Request) {
   try {
@@ -18,7 +19,9 @@ export async function POST(request: Request) {
     await assertDeploymentBinding();
     await rateLimit('field-guide-recalculate', session.collectorId, 2);
     await seedCollections();
+    await seedProgression();
     const counts = await rebuildCollection(session.collectorId);
+    await rebuildSubject('COLLECTOR', session.collectorId);
     return Response.json(
       { status: 'COMPLETE', counts },
       { headers: { 'Cache-Control': 'no-store' } },

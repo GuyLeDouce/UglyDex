@@ -1,5 +1,6 @@
 import 'server-only';
 import { db } from './db';
+import { collectionDiscoveries } from './dex-engine';
 import { isTransactionConflict } from './transaction-conflict';
 import { Prisma } from '@/generated/prisma/client';
 import { hash } from '@/domain/events';
@@ -133,46 +134,24 @@ export async function progressionFacts(
   }
   let provenance = false;
   if (subject === 'COLLECTOR') {
-    const discoveries = await tx.squigDiscovery.findMany({
-      where: {
-        collectorId: id,
-        everOwned: true,
-        attributionStatus: 'CONFIRMED',
-        squig: { provenance: { dirty: false, complete: true } },
-      },
-      include: { squig: true },
+    const discoveries = await collectionDiscoveries(tx, id);
+    const tokens = await tx.squig.findMany({
+      where: { id: { in: discoveries.map((d) => d.squigId) } },
+      select: { id: true, tokenId: true, og: true, legendary: true },
     });
-    const periods = await tx.collectorOwnershipPeriod.findMany({
-      where: {
-        collectorId: id,
-        id: {
-          in: discoveries.flatMap((d) =>
-            d.firstOwnershipPeriod ? [d.firstOwnershipPeriod] : [],
-          ),
-        },
-      },
-      select: { id: true, squigId: true, acquiredAt: true },
-    });
-    const validPeriods = new Map(periods.map((p) => [p.id, p]));
+    const byId = new Map(tokens.map((s) => [s.id, s]));
     for (const d of discoveries) {
-      const period = d.firstOwnershipPeriod
-        ? validPeriods.get(d.firstOwnershipPeriod)
-        : undefined;
-      if (
-        !period ||
-        period.squigId !== d.squigId ||
-        period.acquiredAt.getTime() !== d.discoveredAt.getTime()
-      )
-        continue;
+      const token = byId.get(d.squigId);
+      if (!token) continue;
       deduped.push({
         key: `discovery:${d.squigId}`,
         at: d.discoveredAt.toISOString(),
         type: 'DISCOVERY',
-        tokenId: d.squig.tokenId,
+        tokenId: token.tokenId,
         category: 'SQUIGS',
         metadata: {
-          og: d.squig.og,
-          legendary: d.squig.legendary,
+          og: token.og,
+          legendary: token.legendary,
           period: d.firstOwnershipPeriod,
         },
       });
@@ -480,8 +459,13 @@ export async function rebuildSubject(subject: Subject, id: string) {
     throw new Error('PROGRESSION_EVALUATION_FAILED', { cause });
   }
 }
-export async function processProgression(limit = 50, shouldStop = () => false) {
+export async function processProgression(
+  limit = 50,
+  shouldStop = () => false,
+  subject?: Subject,
+) {
   const jobs = await db().progressionJob.findMany({
+    where: subject ? { subjectType: subject } : {},
     orderBy: { queuedAt: 'asc' },
     take: limit,
   });

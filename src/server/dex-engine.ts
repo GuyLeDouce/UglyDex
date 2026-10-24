@@ -694,8 +694,10 @@ export async function queueCollections(restart = false, replayId = R) {
         orderBy: { id: 'asc' },
         take: 200,
       });
-      for (const c of rows)
+      for (const c of rows) {
         await tx.$executeRaw`SELECT collections_enqueue(${c.id}::uuid)`;
+        await tx.$executeRaw`SELECT progression_enqueue('COLLECTOR',${c.id}::uuid)`;
+      }
       await tx.collectionReplay.update({
         where: { id: replayId },
         data: {
