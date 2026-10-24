@@ -1,0 +1,47 @@
+.container {
+  width: 100%;
+  max-width: 36rem;
+}
+.progressPanel {
+  margin-top: 1rem;
+}
+.track {
+  height: 0.8rem;
+  overflow: hidden;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+}
+.indicator {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: #00df80;
+  animation: travel 1.6s ease-in-out infinite alternate;
+}
+.elapsed {
+  margin: 0.5rem 0 0;
+  font-variant-numeric: tabular-nums;
+}
+@keyframes travel {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(150%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .indicator {
+    animation: none;
+    width: 100%;
+    background: repeating-linear-gradient(
+      135deg,
+      #00df80,
+      #00df80 0.6rem,
+      transparent 0.6rem,
+      transparent 1.2rem
+    );
+  }
+}

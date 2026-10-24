@@ -1,11 +1,24 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useId, useState } from 'react';
+import styles from './recalculate-field-guide.module.css';
 import { useRouter } from 'next/navigation';
 export function RecalculateFieldGuide() {
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState('');
+  const [seconds, setSeconds] = useState(0);
+  const statusId = useId();
   const router = useRouter();
+  useEffect(() => {
+    if (!busy) return;
+    const started = Date.now();
+    const timer = window.setInterval(() => {
+      setSeconds(Math.floor((Date.now() - started) / 1000));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [busy]);
   async function rebuild() {
+    setMessage('');
+    setSeconds(0);
     setBusy(true);
     try {
       const response = await fetch('/api/collection/recalculate', {
@@ -14,7 +27,7 @@ export function RecalculateFieldGuide() {
       const result = await response.json();
       if (!response.ok) throw Error(result.error);
       setMessage(
-        `Recalculated: ${result.counts.discovered} verified discoveries, ${result.counts.traits} traits.`,
+        `Recalculated: ${result.counts.discovered} discoveries, ${result.counts.traits} traits.`,
       );
       router.refresh();
     } catch (e) {
@@ -24,11 +37,31 @@ export function RecalculateFieldGuide() {
     }
   }
   return (
-    <div>
+    <div className={styles.container}>
       <button className="button" disabled={busy} onClick={rebuild}>
         {busy ? 'Recalculating…' : 'Recalculate my Field Guide'}
       </button>
-      <p role="status">{message}</p>
+      {busy && (
+        <div className={styles.progressPanel}>
+          <div
+            className={styles.track}
+            role="progressbar"
+            aria-label="Recalculating Field Guide"
+            aria-describedby={statusId}
+          >
+            <span className={styles.indicator} />
+          </div>
+          <p className={styles.elapsed} aria-hidden="true">
+            {seconds >= 30 ? 'Still working' : 'Recalculating'} · {seconds}s
+            elapsed
+          </p>
+        </div>
+      )}
+      <p id={statusId} role="status" aria-atomic="true">
+        {busy
+          ? 'Updating your discoveries, traits and sets. Please keep this page open.'
+          : message}
+      </p>
     </div>
   );
 }
