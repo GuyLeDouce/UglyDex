@@ -115,8 +115,17 @@ export async function currentCollectionHoldings(
       GREATEST(o."observedAt", w."verifiedAt") AS "discoveredAt", o."sourceKey"
     FROM "SquigOwnership" o
     JOIN "Squig" s ON s.id=o."squigId" AND s."chainId"=1 AND s."contractAddress"=${SQUIGS_CONTRACT}
-    JOIN "CollectorWallet" w ON w."walletAddress"=o."walletAddress" AND w."chainId"=1
-      AND w.status='ACTIVE' AND w."revokedAt" IS NULL
+    JOIN (
+      SELECT "walletAddress", "collectorId", "verifiedAt" FROM "CollectorWallet"
+      WHERE "chainId"=1 AND status='ACTIVE' AND "revokedAt" IS NULL
+      UNION ALL
+      SELECT d."walletAddress", d."collectorId", d."discoveredAt" AS "verifiedAt"
+      FROM "DiscoveredWallet" d
+      WHERE d."chainId"=1 AND NOT EXISTS (
+        SELECT 1 FROM "CollectorWallet" credential
+        WHERE credential."chainId"=1 AND credential."walletAddress"=d."walletAddress"
+      )
+    ) w ON w."walletAddress"=o."walletAddress"
     WHERE w."collectorId"=${id}::uuid AND o."isCurrent"
     AND NOT EXISTS(SELECT 1 FROM "CollectorActivity" a WHERE a."squigId"=o."squigId" AND a."sourceType"='maw' AND a."eventType"='MAW_DIGESTED' AND a."recordStatus"='ACTIVE')
     ORDER BY o."squigId", o."observedAt", o."sourceKey"`;
@@ -669,13 +678,13 @@ export async function processCollections(limit = 25, stop = () => false) {
   }
   return { processed, failed, deferred };
 }
-export async function queueCollections(restart = false) {
+export async function queueCollections(restart = false, replayId = R) {
   await db().$transaction(
     async (tx) => {
-      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`replay:${R}`},0))`;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`replay:${replayId}`},0))`;
       const p = await tx.collectionReplay.upsert({
-        where: { id: R },
-        create: { id: R },
+        where: { id: replayId },
+        create: { id: replayId },
         update: restart ? { cursor: null, completedAt: null } : {},
       });
       if (p.completedAt) return;
@@ -688,7 +697,7 @@ export async function queueCollections(restart = false) {
       for (const c of rows)
         await tx.$executeRaw`SELECT collections_enqueue(${c.id}::uuid)`;
       await tx.collectionReplay.update({
-        where: { id: R },
+        where: { id: replayId },
         data: {
           cursor: rows.at(-1)?.id ?? p.cursor,
           completedAt: rows.length < 200 ? new Date() : null,
@@ -697,6 +706,7 @@ export async function queueCollections(restart = false) {
     },
     { timeout: 30000 },
   );
-  return (await db().collectionReplay.findUniqueOrThrow({ where: { id: R } }))
-    .completedAt;
+  return (
+    await db().collectionReplay.findUniqueOrThrow({ where: { id: replayId } })
+  ).completedAt;
 }

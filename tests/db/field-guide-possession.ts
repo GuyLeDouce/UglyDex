@@ -3,6 +3,7 @@ import {
   collectionEvidence,
   rebuildCollection,
   seedCollections,
+  queueCollections,
 } from '../../src/server/dex-engine';
 import { collectionSummary } from '../../src/server/collections';
 import { dexView } from '../../src/server/dex';
@@ -214,6 +215,71 @@ export async function fieldGuidePossessionTests(
   );
   await db().squigOwnership.updateMany({
     where: { walletAddress: wallet },
+    data: { isCurrent: false },
+  });
+  const unclaimed = await db().collector.create({
+    data: { slug: 'startup-unclaimed' },
+  });
+  const publicWallet = '0x' + 'dc'.repeat(20);
+  await db().discoveredWallet.create({
+    data: {
+      collectorId: unclaimed.id,
+      chainId: 1,
+      walletAddress: publicWallet,
+    },
+  });
+  await db().squigOwnership.create({
+    data: {
+      squigId: ids[0],
+      walletAddress: publicWallet,
+      source: 'ownerOf',
+      sourceKey: 'startup-unclaimed-current',
+      blockNumber: 100n,
+      blockHash: 'fixture',
+      observedAt: new Date(),
+      isCurrent: true,
+    },
+  });
+  await rebuildCollection(unclaimed.id);
+  check(
+    (await collectionEvidence(db(), unclaimed.id)).historical.length === 1,
+    'unclaimed discovered wallet gets a Field Guide from current ownership',
+  );
+  check(
+    (await db().collectorWallet.count({
+      where: { collectorId: unclaimed.id },
+    })) === 0,
+    'startup never fabricates a credential for a discovered wallet',
+  );
+  const replayId = 'test-startup-deployment';
+  while (!(await queueCollections(false, replayId))) {}
+  check(
+    !!(await db().collectionJob.findUnique({
+      where: { collectorId: unclaimed.id },
+    })),
+    'startup queue includes unclaimed profiles',
+  );
+  check(
+    !!(await db().collectionJob.findUnique({ where: { collectorId: c.id } })),
+    'startup queue includes former holders',
+  );
+  await db().collectionJob.delete({ where: { collectorId: unclaimed.id } });
+  await queueCollections(false, replayId);
+  check(
+    !(await db().collectionJob.findUnique({
+      where: { collectorId: unclaimed.id },
+    })),
+    'same deployment restart does not requeue completed profiles',
+  );
+  while (!(await queueCollections(false, 'test-next-deployment'))) {}
+  check(
+    !!(await db().collectionJob.findUnique({
+      where: { collectorId: unclaimed.id },
+    })),
+    'next deployment queues profiles again',
+  );
+  await db().squigOwnership.updateMany({
+    where: { sourceKey: 'startup-unclaimed-current' },
     data: { isCurrent: false },
   });
 }
