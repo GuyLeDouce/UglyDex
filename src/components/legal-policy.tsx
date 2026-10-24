@@ -24,11 +24,6 @@ export async function LegalPolicy({
   const source = await readFile(path.join(process.cwd(), file), 'utf8');
   return (
     <article className="legal-policy">
-      <aside className="legal-draft" role="note">
-        Draft for review — not yet effective. Operator details and publication
-        checks remain outstanding. These drafts do not establish legal
-        compliance or Discord verification.
-      </aside>
       {source
         .trim()
         .split(/\r?\n\s*\r?\n/)
