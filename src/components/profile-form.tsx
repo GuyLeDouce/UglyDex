@@ -1,12 +1,14 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { hasCollectorUsername } from '@/domain/profile';
 type Values = {
   slug: string;
   displayName: string;
   bio: string;
   avatar: string;
   collectionVisibility: 'FULL' | 'FEATURED_ONLY' | 'HIDDEN';
+  showUsername: boolean;
   isPublic: boolean;
   showWallets: boolean;
   showDiscord: boolean;
@@ -29,6 +31,7 @@ export function ProfileForm({ initial }: { initial: Values }) {
         bio: f.get('bio'),
         avatar: f.get('avatar'),
         collectionVisibility: f.get('collectionVisibility'),
+        showUsername: f.has('showUsername'),
         isPublic: f.has('isPublic'),
         showWallets: f.has('showWallets'),
         showDiscord: f.has('showDiscord'),
@@ -65,20 +68,32 @@ export function ProfileForm({ initial }: { initial: Values }) {
         Show my current $CHARM balance on my public profile
       </label>
       <label>
-        Username
+        Username (optional for one wallet)
         <input
           name="slug"
-          required
           minLength={3}
           maxLength={48}
           pattern="[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*"
-          defaultValue={initial.slug}
+          defaultValue={hasCollectorUsername(initial.slug) ? initial.slug : ''}
         />
         <small>
           3–48 letters, numbers, or hyphens. Your history stays with you when
           this changes.
         </small>
       </label>
+      <label className="check">
+        <input
+          type="checkbox"
+          name="showUsername"
+          defaultChecked={initial.showUsername}
+        />{' '}
+        Use my username as my public name
+      </label>
+      <p className="hint">
+        A username is required before linking a second wallet. By default, your
+        public name is your shortened primary wallet address when wallet sharing
+        is enabled. Blockchain addresses remain public on Squig records.
+      </p>
       <label>
         Display name
         <input

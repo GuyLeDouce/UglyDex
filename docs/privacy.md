@@ -1,5 +1,13 @@
 # Public presentation privacy
 
+## Unified collector discovery update
+
+See [automatic collector discovery](collector-discovery.md) for the current
+additive identity model, claim boundary, public holder defaults and rollout.
+The historical phase notes below describe prior releases. Newly discovered
+holder shells are public; existing claimed-profile privacy remains unchanged.
+Discord and DRIP IDs remain private in every public projection.
+
 Phase 7's public Custom and Edition DTOs exclude approval references, admin actor IDs, audit snapshots and ownership wallet addresses. Draft/retired records are omitted; public Custom status is rechecked after rendering. Public Edition ownership requires a public profile, FULL collection visibility, active verified wallets, current catalog revision and recent read-only evidence. Missing/stale evidence means unavailable. Community submissions are not official Customs.
 
 Public appearance contains only enumerated theme/accent/frame/gallery/share selections; entitlement evidence stays internal. A private profile never becomes public by selecting a theme. Operational dashboards and mutation/export APIs require existing admin authorization. Readiness error payloads contain no schema or secret details. Admin-only catalog exports omit Collector holdings and audit actor IDs. Share artwork now accepts server-projected verified IPFS URI/hash pairs as well as canonical token artwork, never client-supplied URLs.

@@ -27,6 +27,7 @@ export async function achievementBadgeWebTests(
   const c = await db().collector.create({
     data: {
       slug: 'badge-review',
+      showUsername: true,
       displayName: 'Badge Review Collector',
       isPublic: true,
     },

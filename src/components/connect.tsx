@@ -59,9 +59,12 @@ export function Connect({ initialMessage = '' }: { initialMessage?: string }) {
       router.refresh();
     } catch (error) {
       setMessage(
-        error instanceof Error && error.message === 'IDENTITY_REVIEW_REQUIRED'
-          ? 'This credential belongs to a different Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.'
-          : 'Wallet connection could not be completed. Check your wallet and try again.',
+        error instanceof Error && error.message === 'USERNAME_REQUIRED'
+          ? 'Choose a username in Profile & privacy settings before linking a second wallet.'
+          : error instanceof Error &&
+              error.message === 'IDENTITY_REVIEW_REQUIRED'
+            ? 'This credential belongs to a different Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.'
+            : 'Wallet connection could not be completed. Check your wallet and try again.',
       );
     } finally {
       setBusy(false);

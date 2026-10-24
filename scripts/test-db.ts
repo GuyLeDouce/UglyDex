@@ -284,6 +284,16 @@ try {
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
+  const identityStart = assertions;
+  const { collectorIdentityTests } =
+    await import('../tests/db/collector-identity');
+  await collectorIdentityTests(check);
+  console.log(
+    JSON.stringify({
+      event: 'test.identity_database_passed',
+      assertions: assertions - identityStart,
+    }),
+  );
   console.log(JSON.stringify({ event: 'test.start_web' }));
   if (process.argv.includes('--web')) {
     const base = `http://127.0.0.1:${webPort}`;
@@ -510,6 +520,11 @@ try {
         400,
       'signature cannot replay',
     );
+    await db().collector.update({
+      where: { slug: profile.slug },
+      data: { slug: 'http-prelink-username' },
+    });
+    profile.slug = 'http-prelink-username';
     const other = privateKeyToAccount(`0x${randomBytes(32).toString('hex')}`);
     const otherNonce = await post(
       '/api/auth/wallet/nonce',
@@ -623,6 +638,7 @@ try {
     const settings = {
       slug: 'http-collector',
       displayName: 'The Strange Collector',
+      showUsername: true,
       bio: 'Test collection fixture.',
       avatar: '',
       isPublic: true,
@@ -1237,6 +1253,18 @@ try {
         await browser.close();
       }
     }
+  }
+  if (process.argv.includes('--web')) {
+    const identityStart = assertions;
+    const { collectorIdentityWebTests } =
+      await import('../tests/db/collector-identity-web');
+    await collectorIdentityWebTests(`http://127.0.0.1:${webPort}`, check);
+    console.log(
+      JSON.stringify({
+        event: 'test.identity_http_passed',
+        assertions: assertions - identityStart,
+      }),
+    );
   }
   if (process.argv.includes('--web')) {
     const { phase6WebTests } = await import('../tests/db/phase6-web');

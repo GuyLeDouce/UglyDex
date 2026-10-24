@@ -240,6 +240,7 @@ export async function phase7DatabaseTests(
   const c = await db().collector.create({
       data: {
         slug: 'phase7-collector',
+        showUsername: true,
         displayName: 'The Alternate Cabinet',
         isPublic: true,
         featuredTokenIds: [4307],

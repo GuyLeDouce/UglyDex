@@ -16,6 +16,7 @@ export async function ownershipWebTests(
   const collector = await db().collector.create({
     data: {
       slug: 'ownership-review',
+      showUsername: true,
       displayName: 'Ownership Privacy Fixture',
       isPublic: true,
       showWallets: false,

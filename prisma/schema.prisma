@@ -25,6 +25,9 @@ enum ReconciliationStatus {
 model Collector {
   id           String                 @id @default(uuid()) @db.Uuid
   slug         String                 @unique
+  claimedAt DateTime?
+  showUsername Boolean @default(false)
+  discoveredWallets DiscoveredWallet[]
   displayName  String?
   bio          String?
   avatar       String?
@@ -61,6 +64,17 @@ model Collector {
   mergedIntoCollectorId String? @db.Uuid
   mergeSurvivorRequests CollectorMergeRequest[] @relation("MergeSurvivor")
   mergeAbsorbedRequests CollectorMergeRequest[] @relation("MergeAbsorbed")
+}
+
+// Public chain observation only. NEVER accepted as authentication evidence.
+model DiscoveredWallet {
+  chainId Int
+  walletAddress String @db.VarChar(42)
+  collectorId String @db.Uuid
+  collector Collector @relation(fields: [collectorId], references: [id])
+  discoveredAt DateTime @default(now())
+  @@id([chainId, walletAddress])
+  @@index([collectorId])
 }
 
 model ExternalIdentity {

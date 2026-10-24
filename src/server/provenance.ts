@@ -1,3 +1,4 @@
+import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { zeroAddress } from 'viem';
 import { db } from './db';
@@ -110,8 +111,7 @@ export async function passport(
       include: {
         collector: {
           select: {
-            slug: true,
-            displayName: true,
+            ...publicNameSelect,
             isPublic: true,
             showWallets: true,
           },
@@ -137,14 +137,15 @@ export async function passport(
     include: {
       collector: {
         select: {
-          slug: true,
-          displayName: true,
+          ...publicNameSelect,
           isPublic: true,
           showWallets: true,
         },
       },
     },
   });
+  for (const row of [...periods, ...evidence])
+    row.collector.displayName = publicCollectorName(row.collector);
   const indexedAt = cursor
     ? await db().chainBlock.findUnique({
         where: { chainId_number: { chainId: 1, number: cursor.blockNumber } },

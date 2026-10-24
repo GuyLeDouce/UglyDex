@@ -26,6 +26,7 @@ export async function phase2DatabaseTests(
     const collector = await db().collector.create({
         data: {
           slug: 'history-alice',
+          showUsername: true,
           displayName: 'History Alice',
           isPublic: true,
           showWallets: true,

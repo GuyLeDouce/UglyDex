@@ -85,7 +85,9 @@
     "launch:handoff": "tsx --conditions=react-server scripts/launch.ts handoff",
     "launch:explain": "tsx --conditions=react-server scripts/launch.ts explain",
     "launch:spot": "tsx --conditions=react-server scripts/launch.ts spot",
-    "artwork:warm": "tsx --conditions=react-server scripts/warm-artwork.ts"
+    "artwork:warm": "tsx --conditions=react-server scripts/warm-artwork.ts",
+    "collectors:discover": "tsx --conditions=react-server scripts/collector-discovery.ts",
+    "test:identity": "tsx --conditions=react-server scripts/test-collector-identity.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1153.0",

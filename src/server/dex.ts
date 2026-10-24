@@ -1,3 +1,4 @@
+import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { db } from './db';
 import {
@@ -240,10 +241,17 @@ export async function saveFeaturedSets(id: string, input: unknown) {
   );
 }
 export async function publicSetCollector(slug: string) {
-  return db().collector.findFirst({
-    where: { slug: slug.toLowerCase(), isPublic: true },
-    select: { id: true, slug: true, displayName: true },
+  const c = await db().collector.findFirst({
+    where: {
+      slug: slug.toLowerCase(),
+      isPublic: true,
+      mergedIntoCollectorId: null,
+    },
+    select: { id: true, ...publicNameSelect },
   });
+  return c
+    ? { id: c.id, slug: c.slug, displayName: publicCollectorName(c) }
+    : null;
 }
 export async function completionCount(key: string) {
   // Only opt-in public collectors with settled projections enter this public count.

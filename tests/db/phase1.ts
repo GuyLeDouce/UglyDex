@@ -132,6 +132,7 @@ export async function phase1DatabaseTests(
   );
   const base = {
     slug: 'Phase1-Alice',
+    showUsername: true,
     displayName: 'Alice',
     bio: 'Real collection',
     avatar: '',

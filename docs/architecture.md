@@ -1,5 +1,13 @@
 # Architecture
 
+## Unified collector discovery update
+
+See [automatic collector discovery](collector-discovery.md) for the current
+additive identity model, claim boundary, public holder defaults and rollout.
+The historical phase notes below describe prior releases. Newly discovered
+holder shells are public; existing claimed-profile privacy remains unchanged.
+Discord and DRIP IDs remain private in every public projection.
+
 ## Phase 8 operational boundary
 
 DeploymentIdentity binds APP_ENV to a non-secret database fingerprint. Six additive models in `202609300010_phase8` add isolated Edition contract/event/balance/checkpoint state and hourly OperationalMetric counters. Edition indexing never reuses Reloaded cursors or completion rules. CLI action intent, reviewed pilots and explicit stage gates protect expensive operations. Existing public projections, fixed image gateway and read-only external adapters remain authoritative. See production-rollout.md and reliability.md.

@@ -24,7 +24,12 @@ export async function communityTests(
   ).length;
   const create = async (slug: string, discovered: number, isPublic = true) => {
     const c = await db().collector.create({
-      data: { slug, displayName: slug + ' Collector', isPublic },
+      data: {
+        slug,
+        displayName: slug + ' Collector',
+        showUsername: true,
+        isPublic,
+      },
     });
     const overall = completion(
       discovered,
@@ -93,7 +98,8 @@ export async function communityTests(
   );
   check(
     users.every(
-      (u) => Object.keys(u).sort().join(',') === 'avatar,displayName,slug',
+      (u) =>
+        Object.keys(u).sort().join(',') === 'avatar,displayName,slug,unclaimed',
     ),
     'UglyUsers exposes only public display fields',
   );

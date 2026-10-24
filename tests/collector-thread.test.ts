@@ -3,20 +3,24 @@ const mocks = vi.hoisted(() => ({
   query: vi.fn(),
   wallets: vi.fn(),
   visible: vi.fn(),
+  names: vi.fn(),
   share: vi.fn(),
 }));
 vi.mock('../src/server/db', () => ({
   db: () => ({
     $queryRaw: mocks.query,
     collectorWallet: { findMany: mocks.wallets },
-    collector: { findFirst: mocks.visible },
+    collector: { findFirst: mocks.visible, findMany: mocks.names },
   }),
 }));
 vi.mock('../src/server/sharing', () => ({ shareCard: mocks.share }));
 import { collectorThread, COMMUNITY_PAGE_SIZE } from '../src/server/community';
 import { threadIcon } from '../src/domain/thread-icons';
 import { RULESET } from '../src/domain/progression';
-beforeEach(() => vi.resetAllMocks());
+beforeEach(() => {
+  vi.resetAllMocks();
+  mocks.names.mockResolvedValue([]);
+});
 it('renders indexed transfers without resolving or exposing collector identities', async () => {
   mocks.query.mockResolvedValue(
     Array.from({ length: COMMUNITY_PAGE_SIZE + 1 }, (_, i) => ({
@@ -78,7 +82,15 @@ it('includes a consenting recipient and requests all privacy gates for wallet ma
     {
       chainId: 1,
       walletAddress: '0xabc',
-      collector: { slug: 'owner', displayName: 'New Owner' },
+      collector: {
+        slug: 'owner',
+        displayName: 'New Owner',
+        showUsername: true,
+        showWallets: true,
+        claimedAt: new Date(),
+        wallets: [],
+        discoveredWallets: [],
+      },
     },
   ]);
   expect((await collectorThread()).cards[0]).toMatchObject({

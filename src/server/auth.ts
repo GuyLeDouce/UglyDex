@@ -9,6 +9,8 @@ import { cookies } from 'next/headers';
 import { verifyMessage, type Hex } from 'viem';
 import { createSiweMessage } from 'viem/siwe';
 import { db } from './db';
+import { hasCollectorUsername } from '@/domain/profile';
+import { adoptDiscoveredWallet } from './collector-discovery';
 import { readEnv } from './env';
 import { normalizeWallet, walletDisplay } from '@/domain/validation';
 import { reconcileIdentity } from '@/domain/identity';
@@ -92,7 +94,7 @@ export async function walletChallenge(address: string) {
     issuedAt: now,
     expirationTime: expiresAt,
     statement: session
-      ? 'Link this wallet to your UglyDex collector.'
+      ? 'Link this wallet to your UglyDex collector. If wallet sharing is enabled, this wallet will be publicly associated with your collector profile. This does not authorize a transaction.'
       : 'Sign in to UglyDex. This does not authorize a transaction.',
   });
   await db().authChallenge.create({
@@ -195,6 +197,21 @@ export async function verifyWallet(signature: Hex) {
         chainId_walletAddress: { chainId: 1, walletAddress: challenge.subject },
       },
     });
+    const discovered = await tx.discoveredWallet.findUnique({
+      where: {
+        chainId_walletAddress: { chainId: 1, walletAddress: challenge.subject },
+      },
+      include: { collector: true },
+    });
+    const discoveryCollectorId =
+      !wallet &&
+      discovered &&
+      !discovered.collector.claimedAt &&
+      !discovered.collector.mergedIntoCollectorId
+        ? discovered.collectorId
+        : undefined;
+    if (!wallet && discovered?.collector.claimedAt)
+      throw new Error('IDENTITY_REVIEW_REQUIRED');
     const decision = reconcileIdentity({
       sessionCollectorId: session?.collectorId,
       credentialCollectorId: wallet?.collectorId,
@@ -253,6 +270,7 @@ export async function verifyWallet(signature: Hex) {
     }
     const collectorId =
       decision.collectorId ??
+      discoveryCollectorId ??
       (
         await tx.collector.create({
           data: { slug: `collector-${randomUUID()}` },
@@ -266,6 +284,31 @@ export async function verifyWallet(signature: Hex) {
       }))
     )
       throw new Error('INVALID_CHALLENGE');
+    const collector = await tx.collector.findUniqueOrThrow({
+      where: { id: collectorId },
+    });
+    if (collector.mergedIntoCollectorId)
+      throw new Error('IDENTITY_REVIEW_REQUIRED');
+    const walletCount = await tx.collectorWallet.count({
+      where: { collectorId, status: 'ACTIVE' },
+    });
+    if (!wallet && walletCount > 0 && !hasCollectorUsername(collector.slug))
+      throw new Error('USERNAME_REQUIRED');
+    await adoptDiscoveredWallet(tx, challenge.subject, collectorId);
+    if (!collector.claimedAt) {
+      await tx.collector.update({
+        where: { id: collectorId },
+        data: { claimedAt: new Date() },
+      });
+      await tx.operationalAudit.create({
+        data: {
+          actor: `collector:${collectorId}`,
+          action: 'COLLECTOR_CLAIMED',
+          subject: collectorId,
+          detail: { method: 'SIWE' },
+        },
+      });
+    }
     const hasPrimary = await tx.collectorWallet.count({
       where: { collectorId, status: 'ACTIVE', isPrimary: true, chainId: 1 },
     });
@@ -431,6 +474,10 @@ export async function authenticateDiscord(
     await tx.externalIdentity.update({
       where: { id: record.id },
       data: { username, authenticatedAt: new Date() },
+    });
+    await tx.collector.updateMany({
+      where: { id: record.collectorId, claimedAt: null },
+      data: { claimedAt: new Date() },
     });
     return record.collectorId;
   });

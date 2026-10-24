@@ -1,3 +1,4 @@
+import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { highestFamilyBadges } from './achievement-badges';
 import { setIcons } from '@/domain/set-icons';
@@ -124,17 +125,15 @@ export async function shareCard(
     where: { slug: q.entity },
     select: {
       id: true,
-      slug: true,
-      displayName: true,
+      ...publicNameSelect,
       avatar: true,
       isPublic: true,
       collectionVisibility: true,
       featuredTokenIds: true,
-      showWallets: true,
     },
   });
   if (!c || (!c.isPublic && c.id !== viewerId)) return null;
-  const name = c.displayName || c.slug,
+  const name = publicCollectorName(c),
     base = '/collector/' + c.slug;
   if (q.kind === 'gallery') {
     if (!q.key) return null;

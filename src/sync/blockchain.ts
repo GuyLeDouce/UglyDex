@@ -1,5 +1,6 @@
 import 'server-only';
 import { zeroAddress } from 'viem';
+import { discoverHolder } from '@/server/collector-discovery';
 import { db } from '@/server/db';
 
 import { SQUIGS_CONTRACT } from '@/domain/validation';
@@ -90,6 +91,7 @@ export async function observe(
       data: { acquiredAt: input.time },
     });
   }
+  if (isLatest) await discoverHolder(tx, input.wallet);
   const authoritative = await tx.squigProvenance.findUnique({
     where: { squigId: squig.id },
   });

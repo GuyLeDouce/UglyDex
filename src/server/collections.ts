@@ -87,6 +87,21 @@ export async function activeAddresses(collectorId: string) {
     })
   ).map((w) => w.walletAddress);
 }
+export async function collectionAddresses(collectorId: string) {
+  const verified = await activeAddresses(collectorId);
+  if (verified.length) return verified;
+  const holder = await db().collector.findFirst({
+    where: {
+      id: collectorId,
+      claimedAt: null,
+      mergedIntoCollectorId: null,
+      wallets: { none: {} },
+      identities: { none: {} },
+    },
+    select: { discoveredWallets: { select: { walletAddress: true } } },
+  });
+  return holder?.discoveredWallets.map((w) => w.walletAddress) ?? [];
+}
 export function ownedScope(addresses: string[]): Prisma.SquigWhereInput {
   return {
     ownerships: { some: { isCurrent: true, walletAddress: { in: addresses } } },
@@ -107,7 +122,7 @@ export async function collectionPage(
   readListings: typeof openSeaListings = openSeaListings,
 ) {
   const filters = filterSchema.parse(params),
-    addresses = collectorId ? await activeAddresses(collectorId) : [];
+    addresses = collectorId ? await collectionAddresses(collectorId) : [];
   const candidates = viewerId ? await personalizedCandidates(viewerId) : null;
   const personalizedScope: Prisma.SquigWhereInput =
     filters.dex || filters.set
@@ -343,7 +358,7 @@ export async function collectionPage(
   };
 }
 export async function collectionSummary(collectorId: string) {
-  const addresses = await activeAddresses(collectorId),
+  const addresses = await collectionAddresses(collectorId),
     where = { AND: [catalogScope, ownedScope(addresses)] };
   const [stats, og, legendary, discovered, rarities, top, traits] =
     await Promise.all([

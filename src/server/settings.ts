@@ -1,6 +1,6 @@
 import 'server-only';
 import { db } from './db';
-import { profileSchema } from '@/domain/profile';
+import { profileSchema, hasCollectorUsername } from '@/domain/profile';
 import { catalogScope, ownedScope, activeAddresses } from './collections';
 import { markWalletDirty } from '@/sync/provenance';
 export async function saveProfile(collectorId: string, input: unknown) {
@@ -19,10 +19,25 @@ export async function saveProfile(collectorId: string, input: unknown) {
     })) !== data.featuredTokenIds.length
   )
     throw new Error('FEATURED_NOT_OWNED');
-  return db().collector.update({
-    where: { id: collectorId },
-    data: { ...data, avatar: data.avatar || null },
-    select: { slug: true },
+  return db().$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${collectorId}, 0))`;
+    const current = await tx.collector.findUniqueOrThrow({
+      where: { id: collectorId },
+    });
+    const slug = data.slug || current.slug;
+    if (
+      (data.showUsername ||
+        (await tx.collectorWallet.count({
+          where: { collectorId, status: 'ACTIVE' },
+        })) > 1) &&
+      !hasCollectorUsername(slug)
+    )
+      throw new Error('USERNAME_REQUIRED');
+    return tx.collector.update({
+      where: { id: collectorId },
+      data: { ...data, slug, avatar: data.avatar || null },
+      select: { slug: true },
+    });
   });
 }
 export async function manageWallet(

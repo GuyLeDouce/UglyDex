@@ -1,5 +1,13 @@
 # Collector identity and reconciliation
 
+## Unified collector discovery update
+
+See [automatic collector discovery](collector-discovery.md) for the current
+additive identity model, claim boundary, public holder defaults and rollout.
+The historical phase notes below describe prior releases. Newly discovered
+holder shells are public; existing claimed-profile privacy remains unchanged.
+Discord and DRIP IDs remain private in every public projection.
+
 ## Phase 11 staging evidence preload
 
 The [full source import report](phase11-full-import-report.md) records 377 imported

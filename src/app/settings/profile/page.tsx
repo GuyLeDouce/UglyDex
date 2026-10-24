@@ -22,6 +22,7 @@ export default async function Settings() {
       <ProfileForm
         initial={{
           slug: c.slug,
+          showUsername: c.showUsername,
           displayName: c.displayName ?? '',
           bio: c.bio ?? '',
           avatar: c.avatar ?? '',
