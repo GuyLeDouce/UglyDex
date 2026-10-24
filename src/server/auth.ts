@@ -94,7 +94,7 @@ export async function walletChallenge(address: string) {
     issuedAt: now,
     expirationTime: expiresAt,
     statement: session
-      ? 'Link this wallet to your UglyDex collector.'
+      ? 'Link this wallet to your UglyDex collector. If wallet sharing is enabled, this wallet will be publicly associated with your collector profile. This does not authorize a transaction.'
       : 'Sign in to UglyDex. This does not authorize a transaction.',
   });
   await db().authChallenge.create({
@@ -287,6 +287,8 @@ export async function verifyWallet(signature: Hex) {
     const collector = await tx.collector.findUniqueOrThrow({
       where: { id: collectorId },
     });
+    if (collector.mergedIntoCollectorId)
+      throw new Error('IDENTITY_REVIEW_REQUIRED');
     const walletCount = await tx.collectorWallet.count({
       where: { collectorId, status: 'ACTIVE' },
     });

@@ -8,7 +8,7 @@ UPDATE "Collector" SET "showUsername"=true WHERE "displayName" IS NOT NULL AND "
 CREATE TABLE "DiscoveredWallet" (
  "chainId" INTEGER NOT NULL,
  "walletAddress" VARCHAR(42) NOT NULL,
- "collectorId" UUID NOT NULL REFERENCES "Collector"("id"),
+ "collectorId" UUID NOT NULL REFERENCES "Collector"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
  "discoveredAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
  PRIMARY KEY ("chainId", "walletAddress"),
  CHECK ("chainId"=1 AND "walletAddress" ~ '^0x[0-9a-f]{40}$')

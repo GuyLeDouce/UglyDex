@@ -74,7 +74,10 @@ export default async function Wallets() {
         <h2>Link another identity</h2>
         <p>
           Select a different account in your wallet, then sign a new
-          verification message.
+          verification message. If wallet sharing is enabled in Profile &
+          privacy, each linked wallet will be publicly associated with your
+          collector profile. Disable wallet sharing before linking if you want
+          that association kept private.
         </p>
         <Connect />
       </section>
