@@ -20,16 +20,10 @@ export function Stats({
           </div>
         ))}
       </div>
-      {s.unresolvedDiscoveries > 0 && (
-        <p role="status">
-          {s.unresolvedDiscoveries} additional ownership records need
-          verification before they count toward completion.
-        </p>
-      )}
       <p className="muted">
-        Discoveries count verified possession observations and confirmed
-        ownership history. Earlier unverified wallet activity is not attributed
-        to your identity.
+        Discovered counts unique Squigs currently or previously owned across
+        your linked wallets. Sales, rebuying and transfers between your wallets
+        never count a Squig twice.
       </p>
     </>
   );

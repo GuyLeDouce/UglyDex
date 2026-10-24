@@ -601,7 +601,7 @@ export async function phase7DatabaseTests(
     'revoked achievement loses entitlement',
   );
   const set = await db().collectionSetDefinition.findFirstOrThrow({
-    where: { ruleset: 'uglydex-collection-v2', enabled: true },
+    where: { ruleset: 'uglydex-collection-v3', enabled: true },
   });
   await db().collectorSetProgress.create({
     data: {

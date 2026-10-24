@@ -106,19 +106,6 @@ export async function collectionAddresses(collectorId: string) {
 export function ownedScope(addresses: string[]): Prisma.SquigWhereInput {
   return {
     ownerships: { some: { isCurrent: true, walletAddress: { in: addresses } } },
-    OR: [
-      { provenance: { is: null } },
-      { provenance: { is: { dirty: false } } },
-      {
-        ownerships: {
-          some: {
-            isCurrent: true,
-            source: 'ownerOf',
-            walletAddress: { in: addresses },
-          },
-        },
-      },
-    ],
     activities: {
       none: {
         sourceType: 'maw',

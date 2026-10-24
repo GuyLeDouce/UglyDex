@@ -83,6 +83,19 @@ export async function fieldGuidePossessionTests(
       },
     });
   }
+  // Existing attributed history must not be re-filtered by full provenance joins.
+  await db().squigDiscovery.updateMany({
+    where: { collectorId: c.id, squigId: ids[1] },
+    data: { attributionStatus: 'CONFIRMED', firstOwnershipPeriod: null },
+  });
+  // A current holding is a discovery even before its discovery row is materialized.
+  await db().squigDiscovery.deleteMany({
+    where: { collectorId: c.id, squigId: ids[0] },
+  });
+  check(
+    (await collectionSummary(c.id)).discovered === 315,
+    'current union fills missing discovery without duplicate counting',
+  );
   await seedCollections();
   await rebuildCollection(c.id);
   const summary = await collectionSummary(c.id),
@@ -103,13 +116,68 @@ export async function fieldGuidePossessionTests(
     view?.status === 'ready' && view.currentSets > 0 && view.traits > 0,
     'possession contributes current sets and discovery traits',
   );
+  await db().squigOwnership.updateMany({
+    where: { squigId: ids[0], walletAddress: wallet },
+    data: { isCurrent: false },
+  });
+  check(
+    (await collectionSummary(c.id)).discovered === 315,
+    'sale retains the discovery materialized from current possession',
+  );
+  const linked = '0x' + 'ca'.repeat(20);
+  await db().collectorWallet.create({
+    data: {
+      collectorId: c.id,
+      chainId: 1,
+      walletAddress: linked,
+      verifiedAt: at,
+      source: 'SIWE',
+    },
+  });
+  await db().squigOwnership.create({
+    data: {
+      squigId: ids[0],
+      walletAddress: linked,
+      source: 'ownerOf',
+      sourceKey: 'possession-rebuy',
+      blockNumber: 100n,
+      blockHash: 'fixture',
+      observedAt: at,
+      isCurrent: true,
+    },
+  });
+  check(
+    (await collectionSummary(c.id)).discovered === 315,
+    'rebuy into another linked wallet does not duplicate discovery',
+  );
+  await db().squigOwnership.updateMany({
+    where: { walletAddress: linked },
+    data: { isCurrent: false },
+  });
+  // Old wallet observations with no collector attribution are not silently imported.
+  await db().squigOwnership.create({
+    data: {
+      squigId: ids[0],
+      walletAddress: linked,
+      source: 'ownerOf',
+      sourceKey: 'unattributed-past',
+      blockNumber: 1n,
+      blockHash: 'fixture',
+      observedAt: new Date('2020-01-01'),
+      isCurrent: false,
+    },
+  });
+  check(
+    (await collectionSummary(c.id)).discovered === 315,
+    'linking does not manufacture additional historical identities',
+  );
   await db().collectorWallet.update({
     where: { id: credential.id },
     data: { verifiedAt: new Date('2026-03-01') },
   });
   check(
-    (await collectionEvidence(db(), c.id)).historical.length === 0,
-    'a later signature does not claim earlier observed history',
+    (await collectionEvidence(db(), c.id)).historical.length === 315,
+    'credential changes do not erase already attributed collector history',
   );
   await db().collectorWallet.update({
     where: { id: credential.id },
@@ -124,12 +192,17 @@ export async function fieldGuidePossessionTests(
     revoked.historical.length === 315 && revoked.current.length === 0,
     'unlink retains valid historical possession but removes current holdings',
   );
+  // Canonical rewind invalidates the attributed discovery when removing its source.
+  await db().squigDiscovery.updateMany({
+    where: { collectorId: c.id, squigId: ids[0] },
+    data: { everOwned: false, attributionStatus: 'INVALIDATED' },
+  });
   await db().squigOwnership.deleteMany({
     where: { sourceKey: `possession:${ids[0]}` },
   });
   check(
     (await collectionEvidence(db(), c.id)).historical.length === 314,
-    'deleted observation evidence cannot continue qualifying',
+    'canonical retraction removes historical discovery',
   );
   await db().squigDiscovery.updateMany({
     where: { collectorId: c.id, squigId: ids[1] },
