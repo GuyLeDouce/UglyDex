@@ -1,11 +1,5 @@
 # UglyDex Terms of Service
 
-**Effective:** September 23, 2026  
-**Operator:** © 2025 Squigs Reloaded, operating as Ugly Labs / UglyDex  
-**Contact:** UglyLabs@gmail.com  
-**Address:** 119 Pioneer Rd, Redbridge, ON P0H 2A0  
-**Website:** https://Squigs.io
-
 ## 1. Agreement and eligibility
 These Terms govern UglyDex and associated Ugly Labs websites, applications, collectible records, profiles and achievements (“Services”). By affirmatively accepting these Terms where requested, or otherwise forming a legally enforceable agreement, you agree to them. Interactive participation is intended for adults 18 or older or the higher local age of majority. You must have legal capacity and comply with applicable law. Read-only public pages may be accessible without registration.
 
