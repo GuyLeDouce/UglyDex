@@ -19,6 +19,7 @@ export async function phase6DatabaseTests(
   const c = await db().collector.create({
       data: {
         slug: 'sharing-test',
+        showUsername: true,
         displayName: 'The Ugly Exhibition',
         isPublic: true,
         featuredTokenIds: [4201, 4202, 4203, 4204],
