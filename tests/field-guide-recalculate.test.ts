@@ -7,6 +7,7 @@ const m = vi.hoisted(() => ({
   env: vi.fn(),
   seed: vi.fn(),
   rebuild: vi.fn(),
+  progression: vi.fn(),
 }));
 vi.mock('../src/server/auth', () => ({
   currentSession: m.session,
@@ -20,6 +21,10 @@ vi.mock('../src/domain/deployment', () => ({ appEnvironment: m.env }));
 vi.mock('../src/server/dex-engine', () => ({
   seedCollections: m.seed,
   rebuildCollection: m.rebuild,
+}));
+vi.mock('../src/server/progression-engine', () => ({
+  seedProgression: vi.fn(),
+  rebuildSubject: m.progression,
 }));
 import { POST } from '../src/app/api/collection/recalculate/route';
 const request = () =>
@@ -36,6 +41,10 @@ beforeEach(() => {
 it('recalculates only the authenticated collector, never a supplied ID', async () => {
   expect((await POST(request())).status).toBe(200);
   expect(m.rebuild).toHaveBeenCalledWith('signed-in-collector');
+  expect(m.progression).toHaveBeenCalledWith(
+    'COLLECTOR',
+    'signed-in-collector',
+  );
 });
 it('rejects unauthenticated requests', async () => {
   m.session.mockResolvedValue(null);
@@ -63,4 +72,10 @@ it('respects request throttling', async () => {
   m.rate.mockRejectedValue(Error());
   expect((await POST(request())).status).toBe(400);
   expect(m.rebuild).not.toHaveBeenCalled();
+});
+
+it('reports failure if achievements fail after Field Guide completes', async () => {
+  m.progression.mockRejectedValue(Error('retry'));
+  expect((await POST(request())).status).toBe(400);
+  expect(m.rebuild).toHaveBeenCalledOnce();
 });
