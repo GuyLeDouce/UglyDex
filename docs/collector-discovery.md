@@ -109,3 +109,31 @@ source correction and historical-attribution coverage.
 Local typecheck, lint and production build passed during implementation. Full
 validation results and environment blockers are recorded in the pull request.
 Staging and production were not modified.
+
+## Staging repair without a Railway console
+
+An authenticated admin can open `/admin/collectors` (also linked from
+`/admin/collections`). It reports current holder addresses, discovery mapping
+coverage, and public/private profile counts. A healthy web readiness response
+alone does not establish holder coverage.
+
+Preview the next 50 addresses, review the counts, then confirm and apply that
+batch. The cursor advances only after a successful apply; copy it to resume in a
+later session. Continue until the UI reports the pass complete. Repeating an
+interrupted batch or restarting from the beginning is safe. Existing private
+collectors stay private; conflicts are counted rather than overwriting links.
+Check `/collectors/directory` after applying. The Field Guide leaderboard remains
+restricted to public, fully evaluated profiles; it is not the holder directory.
+
+The HTTP repair requires existing authenticated admin access, same-origin POST,
+APP_ENV=staging, and a matching registered database fingerprint. Explicit UI
+confirmation substitutes for CLI operational intent, but never bypasses database
+binding. Each apply request is audited and rate limited. Production execution is
+rejected, including for admins. No new migrations or environment variables are
+required. If database binding is missing/mismatched, the repair fails closed and
+an operator must correct the environment through the existing registration flow.
+
+The broad profile statistic is labeled “Recorded ownership history,” distinct
+from confirmed Field Guide discoveries. No historical evidence is discarded and
+no eligibility rules are relaxed. This repair does not refresh DRIP balances or
+prove the health of external-source workers.

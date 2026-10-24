@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 import { adminActor } from '@/server/admin';
@@ -70,6 +71,9 @@ export default async function Page({
       <section className="page-heading">
         <p className="eyebrow">INTERNAL · COLLECTION EVIDENCE</p>
         <h1>Collection diagnostics.</h1>
+        <Link href="/admin/collectors">
+          Check and repair holder discovery →
+        </Link>
         <p>
           {R} · {ruleset ? 'Seeded' : 'Not seeded'} · {traitCatalog.length}{' '}
           canonical values · {collectionSets.length} sets
