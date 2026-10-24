@@ -126,7 +126,7 @@ export async function collectionDiscoveries(tx: DerivedReadClient, id: string) {
     where: {
       collectorId: id,
       everOwned: true,
-      attributionStatus: { not: 'INVALIDATED' },
+      attributionStatus: { in: ['OBSERVED', 'CONFIRMED'] },
       squig: { chainId: 1, contractAddress: SQUIGS_CONTRACT },
     },
     select: {
