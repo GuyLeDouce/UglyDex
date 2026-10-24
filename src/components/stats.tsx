@@ -10,7 +10,7 @@ export function Stats({
         {[
           [s.owned, 'Squigs owned'],
           [s.uglyPoints, 'UglyPoints'],
-          [s.discovered, 'Recorded ownership history'],
+          [s.discovered, 'Discovered'],
           [s.og, 'OG Squigs'],
           [s.legendary, 'Legendary'],
         ].map(([v, label]) => (
@@ -20,10 +20,16 @@ export function Stats({
           </div>
         ))}
       </div>
+      {s.unresolvedDiscoveries > 0 && (
+        <p role="status">
+          {s.unresolvedDiscoveries} additional ownership records need
+          verification before they count toward completion.
+        </p>
+      )}
       <p className="muted">
-        Recorded ownership history includes observations that may not qualify
-        for Field Guide discoveries. Field Guide completion requires confirmed
-        ownership periods and complete blockchain provenance.
+        Discoveries count verified possession observations and confirmed
+        ownership history. Earlier unverified wallet activity is not attributed
+        to your identity.
       </p>
     </>
   );

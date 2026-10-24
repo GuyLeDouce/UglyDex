@@ -1,3 +1,4 @@
+import { collectionDiscoveries } from './dex-engine';
 import 'server-only';
 import { personalIconSummaries } from './status-icons';
 import { rarestTraitsFirst } from './trait-presentation';
@@ -105,6 +106,19 @@ export async function collectionAddresses(collectorId: string) {
 export function ownedScope(addresses: string[]): Prisma.SquigWhereInput {
   return {
     ownerships: { some: { isCurrent: true, walletAddress: { in: addresses } } },
+    OR: [
+      { provenance: { is: null } },
+      { provenance: { is: { dirty: false } } },
+      {
+        ownerships: {
+          some: {
+            isCurrent: true,
+            source: 'ownerOf',
+            walletAddress: { in: addresses },
+          },
+        },
+      },
+    ],
     activities: {
       none: {
         sourceType: 'maw',
@@ -121,6 +135,9 @@ export async function collectionPage(
   viewerId?: string,
   readListings: typeof openSeaListings = openSeaListings,
 ) {
+  const eligible = collectorId
+    ? await collectionDiscoveries(db(), collectorId)
+    : [];
   const filters = filterSchema.parse(params),
     addresses = collectorId ? await collectionAddresses(collectorId) : [];
   const candidates = viewerId ? await personalizedCandidates(viewerId) : null;
@@ -140,7 +157,7 @@ export async function collectionPage(
       : {};
   const scope: Prisma.SquigWhereInput = collectorId
     ? discovered
-      ? { discoveries: { some: { collectorId, everOwned: true } } }
+      ? { id: { in: eligible.map((d) => d.squigId) } }
       : ownedScope(addresses)
     : {};
   const where: Prisma.SquigWhereInput = {
@@ -232,16 +249,7 @@ export async function collectionPage(
           select: { squigId: true },
         })
       : [],
-    collectorId
-      ? db().squigDiscovery.findMany({
-          where: {
-            collectorId,
-            squigId: { in: rows.map((r) => r.id) },
-            everOwned: true,
-          },
-          select: { squigId: true, discoveredAt: true },
-        })
-      : [],
+    eligible.filter((d) => rows.some((r) => r.id === d.squigId)),
     db().squigTrait.groupBy({
       by: ['traitType', 'value'],
       where: { squig: { AND: [catalogScope, scope] } },
@@ -360,7 +368,7 @@ export async function collectionPage(
 export async function collectionSummary(collectorId: string) {
   const addresses = await collectionAddresses(collectorId),
     where = { AND: [catalogScope, ownedScope(addresses)] };
-  const [stats, og, legendary, discovered, rarities, top, traits] =
+  const [stats, og, legendary, discovered, rarities, top, traits, recorded] =
     await Promise.all([
       db().squig.aggregate({
         where,
@@ -369,9 +377,7 @@ export async function collectionSummary(collectorId: string) {
       }),
       db().squig.count({ where: { ...where, og: true } }),
       db().squig.count({ where: { ...where, legendary: true } }),
-      db().squigDiscovery.count({
-        where: { collectorId, everOwned: true, squig: catalogScope },
-      }),
+      collectionDiscoveries(db(), collectorId).then((rows) => rows.length),
       db().squig.groupBy({
         by: ['rarityTier'],
         where,
@@ -391,6 +397,9 @@ export async function collectionSummary(collectorId: string) {
         orderBy: { _count: { value: 'desc' } },
         take: 5,
       }),
+      db().squigDiscovery.count({
+        where: { collectorId, everOwned: true, squig: catalogScope },
+      }),
     ]);
   return {
     owned: stats._count._all,
@@ -401,6 +410,7 @@ export async function collectionSummary(collectorId: string) {
     og: stats._count.og === stats._count._all ? og : null,
     legendary: stats._count.legendary === stats._count._all ? legendary : null,
     discovered,
+    unresolvedDiscoveries: Math.max(0, recorded - discovered),
     rarities: rarities.map((r) => ({
       name: r.rarityTier ?? 'Unclassified',
       count: r._count._all,

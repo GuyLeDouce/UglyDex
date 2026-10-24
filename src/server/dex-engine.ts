@@ -100,6 +100,37 @@ export async function seedCollections() {
     { timeout: 30000 },
   );
 }
+/** A verified point observation proves possession, not a complete transfer period.
+ * Reorg rewind invalidates observed discoveries and deletes their source rows.
+ * Never accept a bare everOwned flag or retroactively attribute a pre-proof wallet.
+ */
+export async function collectionDiscoveries(tx: DerivedReadClient, id: string) {
+  return tx.$queryRaw<
+    { squigId: string; discoveredAt: Date; firstOwnershipPeriod: string }[]
+  >`
+    SELECT d."squigId", d."discoveredAt",
+      COALESCE(d."firstOwnershipPeriod", 'observation:' || d."sourceKey") AS "firstOwnershipPeriod"
+    FROM "SquigDiscovery" d
+    JOIN "Squig" s ON s.id=d."squigId" AND s."chainId"=1 AND s."contractAddress"=${SQUIGS_CONTRACT}
+    WHERE d."collectorId"=${id}::uuid AND d."everOwned" AND (
+      (d."attributionStatus"='CONFIRMED' AND EXISTS (
+        SELECT 1 FROM "SquigProvenance" p
+        JOIN "CollectorOwnershipPeriod" h ON h."squigId"=p."squigId"
+        WHERE p."squigId"=d."squigId" AND NOT p.dirty AND p.complete
+        AND h.id=d."firstOwnershipPeriod" AND h."collectorId"=d."collectorId"
+        AND h."acquiredAt"=d."discoveredAt"
+      )) OR
+      (d."attributionStatus"='OBSERVED' AND EXISTS (
+        SELECT 1 FROM "SquigOwnership" o
+        JOIN "CollectorWallet" w ON w."collectorId"=d."collectorId" AND w."chainId"=1
+          AND (w."walletAddress"=o."walletAddress" OR (o.source='transfer' AND w."walletAddress"=o."fromWallet"))
+        WHERE o."sourceKey"=d."sourceKey" AND o."squigId"=d."squigId"
+        AND o.source IN ('ownerOf','transfer') AND w.source IN ('SIWE','SIGNATURE')
+        AND w."verifiedAt"<=d."discoveredAt"
+        AND (w."revokedAt" IS NULL OR w."revokedAt">d."discoveredAt")
+      ))
+    )`;
+}
 export async function collectionEvidence(tx: DerivedReadClient, id: string) {
   const rows = await tx.squig.findMany({
     where: { chainId: 1, contractAddress: SQUIGS_CONTRACT },
@@ -120,13 +151,7 @@ export async function collectionEvidence(tx: DerivedReadClient, id: string) {
     traits: Object.fromEntries(s.traits.map((t) => [t.traitType, t.value])),
   }));
   const byId = new Map(rows.map((r, i) => [r.id, tokens[i]]));
-  const discoveries = await tx.$queryRaw<
-    { squigId: string; discoveredAt: Date; firstOwnershipPeriod: string }[]
-  >`
-    SELECT d."squigId",d."discoveredAt",d."firstOwnershipPeriod" FROM "SquigDiscovery" d
-    JOIN "SquigProvenance" p ON p."squigId"=d."squigId" AND NOT p.dirty AND p.complete
-    JOIN "CollectorOwnershipPeriod" h ON h.id=d."firstOwnershipPeriod" AND h."collectorId"=d."collectorId" AND h."squigId"=d."squigId" AND h."acquiredAt"=d."discoveredAt"
-    WHERE d."collectorId"=${id}::uuid AND d."everOwned" AND d."attributionStatus"='CONFIRMED'`;
+  const discoveries = await collectionDiscoveries(tx, id);
   const historical = discoveries.flatMap((d) => {
     const token = byId.get(d.squigId);
     return token
@@ -143,7 +168,7 @@ export async function collectionEvidence(tx: DerivedReadClient, id: string) {
     SELECT DISTINCT o."squigId" FROM "SquigOwnership" o
     JOIN "CollectorWallet" w ON w."walletAddress"=o."walletAddress" AND w."chainId"=1 AND w.status='ACTIVE' AND w."revokedAt" IS NULL
     WHERE w."collectorId"=${id}::uuid AND o."isCurrent"
-    AND NOT EXISTS(SELECT 1 FROM "SquigProvenance" p WHERE p."squigId"=o."squigId" AND p.dirty)
+    AND (o.source='ownerOf' OR NOT EXISTS(SELECT 1 FROM "SquigProvenance" p WHERE p."squigId"=o."squigId" AND p.dirty))
     AND NOT EXISTS(SELECT 1 FROM "CollectorActivity" a WHERE a."squigId"=o."squigId" AND a."sourceType"='maw' AND a."eventType"='MAW_DIGESTED' AND a."recordStatus"='ACTIVE')`;
   const current = owned.flatMap((o) =>
     byId.has(o.squigId) ? [byId.get(o.squigId)!] : [],
