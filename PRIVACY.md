@@ -1,11 +1,5 @@
 # UglyDex Privacy Policy
 
-**Effective:** September 23, 2026  
-**Operator:** © 2025 Squigs Reloaded, operating as Ugly Labs / UglyDex  
-**Contact:** UglyLabs@gmail.com  
-**Address:** 119 Pioneer Rd, Redbridge, ON P0H 2A0  
-**Website:** https://Squigs.io
-
 ## 1. Scope
 This Policy describes how the operator (“we”) processes personal information through UglyDex and related Ugly Labs features (“Services”). UglyDex records Squigs collectible provenance, ownership, community participation and achievements. Independent services including OpenSea, Discord, wallets and public blockchain networks have their own policies. We are accountable for information under our control.
 
