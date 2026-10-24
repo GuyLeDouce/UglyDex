@@ -21,10 +21,12 @@ export function CollectorMergeConfirm({ requestId }: { requestId: string }) {
       router.refresh();
     } catch (error) {
       setMessage(
-        error instanceof Error &&
-          error.message === 'MERGE_CHARM_IDENTITY_CONFLICT'
-          ? 'These accounts have separate DRIP identities that need review before they can be merged.'
-          : 'This merge request expired or could not be completed. Prove both accounts again to create a new request.',
+        error instanceof Error && error.message === 'USERNAME_REQUIRED'
+          ? 'Choose a username in Profile & privacy settings before merging multiple wallets, then return to confirm this request.'
+          : error instanceof Error &&
+              error.message === 'MERGE_CHARM_IDENTITY_CONFLICT'
+            ? 'These accounts have separate DRIP identities that need review before they can be merged.'
+            : 'This merge request expired or could not be completed. Prove both accounts again to create a new request.',
       );
     } finally {
       setBusy(false);
@@ -35,6 +37,7 @@ export function CollectorMergeConfirm({ requestId }: { requestId: string }) {
       <button className="button primary" disabled={busy} onClick={confirm}>
         {busy ? 'Merging accounts…' : 'Confirm account merge'}
       </button>
+      <a href="/settings/profile">Profile & privacy settings</a>
       <p role="status" className="hint">
         {message}
       </p>
