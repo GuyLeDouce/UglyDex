@@ -1,5 +1,5 @@
 // Collection semantics are independent of XP. Changes require a ruleset version.
-export const COLLECTION_RULESET = 'uglydex-collection-v1';
+export const COLLECTION_RULESET = 'uglydex-collection-v2';
 export const TRAIT_TYPES = [
   'Background',
   'Skin',

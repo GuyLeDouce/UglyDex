@@ -64,6 +64,9 @@ try {
   const { collectorIdentityTests } =
     await import('../tests/db/collector-identity');
   await collectorIdentityTests(check);
+  const { fieldGuidePossessionTests } =
+    await import('../tests/db/field-guide-possession');
+  await fieldGuidePossessionTests(check);
   console.log(
     JSON.stringify({ event: 'identity.database_passed', assertions }),
   );

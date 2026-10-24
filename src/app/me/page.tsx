@@ -1,3 +1,5 @@
+import { RecalculateFieldGuide } from '@/components/recalculate-field-guide';
+import { appEnvironment } from '@/domain/deployment';
 import { DexSummary } from '@/components/dex';
 import { CollectorThread } from '@/components/collector-thread';
 import { EcosystemSummary } from '@/components/activity';
@@ -64,6 +66,7 @@ export default async function Me() {
       {promptDripLink ? <CharmDripLink /> : <CharmBalanceCard value={charm} />}
       <Link href="/charm">Your $CHARM activity →</Link>
       <DexSummary id={id} />
+      {appEnvironment() === 'staging' && <RecalculateFieldGuide />}
       <Progression subject="COLLECTOR" id={id} path="/me/achievements" />
       <CollectorThread preview />
       <EcosystemSummary collectorId={id} path="/me/activity" />

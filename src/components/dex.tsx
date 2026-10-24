@@ -27,7 +27,7 @@ export function DexScore({ view }: { view: DexView }) {
   return (
     <section className="dex-score">
       <div>
-        <p className="eyebrow">UGLYDEX COMPLETION · V1</p>
+        <p className="eyebrow">UGLYDEX COMPLETION · V2</p>
         <h2>
           {view.score.overall.toFixed(1)}
           <span>%</span>

@@ -96,7 +96,7 @@ export async function observe(
     where: { squigId: squig.id },
   });
   for (const address of new Set(
-    authoritative
+    authoritative && input.source !== 'ownerOf'
       ? []
       : [
           input.wallet,
@@ -136,6 +136,7 @@ export async function observe(
         where: {
           collectorId: wallet.collectorId,
           squigId: squig.id,
+          attributionStatus: 'OBSERVED',
           discoveredAt: { gt: input.time },
         },
         data: {
