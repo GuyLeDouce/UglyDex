@@ -510,6 +510,11 @@ try {
         400,
       'signature cannot replay',
     );
+    await db().collector.update({
+      where: { slug: profile.slug },
+      data: { slug: 'http-prelink-username' },
+    });
+    profile.slug = 'http-prelink-username';
     const other = privateKeyToAccount(`0x${randomBytes(32).toString('hex')}`);
     const otherNonce = await post(
       '/api/auth/wallet/nonce',
@@ -623,6 +628,7 @@ try {
     const settings = {
       slug: 'http-collector',
       displayName: 'The Strange Collector',
+      showUsername: true,
       bio: 'Test collection fixture.',
       avatar: '',
       isPublic: true,
@@ -1316,6 +1322,14 @@ try {
       check,
       process.argv.includes('--browser'),
     );
+  }
+  const { collectorIdentityTests } =
+    await import('../tests/db/collector-identity');
+  await collectorIdentityTests(check);
+  if (process.argv.includes('--web')) {
+    const { collectorIdentityWebTests } =
+      await import('../tests/db/collector-identity-web');
+    await collectorIdentityWebTests(`http://127.0.0.1:${webPort}`, check);
   }
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));

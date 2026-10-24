@@ -1,3 +1,4 @@
+import { discoverHolder } from '@/server/collector-discovery';
 import 'server-only';
 import { createHash } from 'node:crypto';
 import { db } from '@/server/db';
@@ -343,6 +344,10 @@ export async function deriveToken(squigId: string) {
             acquiredAt: result.periods.find((p) => !p.lostAt)?.acquiredAt,
           },
         });
+      const currentHolder = await tx.squigOwnership.findFirst({
+        where: { squigId, isCurrent: true },
+      });
+      if (currentHolder) await discoverHolder(tx, currentHolder.walletAddress);
       return {
         tokenId: facts[0]?.tokenId,
         issues: result.issues,

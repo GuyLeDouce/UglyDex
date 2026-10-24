@@ -2,7 +2,13 @@ import Link from 'next/link';
 import { uglyUsers } from '@/server/community';
 import { Artwork } from './artwork';
 
-export async function UglyUsers({ page = 1 }: { page?: number }) {
+export async function UglyUsers({
+  page = 1,
+  path = '/',
+}: {
+  page?: number;
+  path?: string;
+}) {
   let result;
   try {
     result = await uglyUsers(page);
@@ -29,6 +35,7 @@ export async function UglyUsers({ page = 1 }: { page?: number }) {
             <Link href={'/collector/' + user.slug}>
               <Artwork src={user.avatar} alt="" avatar />
               <span>{user.displayName || user.slug}</span>
+              {user.unclaimed && <small>Unclaimed holder</small>}
             </Link>
           </li>
         ))}
@@ -39,7 +46,7 @@ export async function UglyUsers({ page = 1 }: { page?: number }) {
       {result.pages > 1 && (
         <nav className="pagination" aria-label="UglyUsers pages">
           {result.page > 1 ? (
-            <Link href={`/?usersPage=${result.page - 1}#uglyusers`}>
+            <Link href={`${path}?usersPage=${result.page - 1}#uglyusers`}>
               ← Previous
             </Link>
           ) : (
@@ -49,7 +56,7 @@ export async function UglyUsers({ page = 1 }: { page?: number }) {
             Page {result.page} of {result.pages}
           </span>
           {result.page < result.pages ? (
-            <Link href={`/?usersPage=${result.page + 1}#uglyusers`}>
+            <Link href={`${path}?usersPage=${result.page + 1}#uglyusers`}>
               Next →
             </Link>
           ) : (

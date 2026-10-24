@@ -1,5 +1,6 @@
 import 'server-only';
 import { db } from './db';
+import { hasCollectorUsername } from '@/domain/profile';
 import { markWalletDirty } from '@/sync/provenance';
 
 export async function confirmCollectorMerge(
@@ -33,6 +34,37 @@ export async function confirmCollectorMerge(
       if (!survivor || !absorbed || absorbed.mergedIntoCollectorId)
         throw new Error('MERGE_REQUEST_EXPIRED');
 
+      const activeWalletCount = await tx.collectorWallet.count({
+        where: {
+          collectorId: { in: [survivor.id, absorbed.id] },
+          status: 'ACTIVE',
+        },
+      });
+      if (activeWalletCount > 1 && !hasCollectorUsername(survivor.slug))
+        throw new Error('USERNAME_REQUIRED');
+      // Clear incoming primaries before moving credentials to satisfy the unique index.
+      const primaryChains = (
+        await tx.collectorWallet.findMany({
+          where: {
+            collectorId: survivor.id,
+            status: 'ACTIVE',
+            isPrimary: true,
+          },
+          select: { chainId: true },
+        })
+      ).map((w) => w.chainId);
+      await tx.collectorWallet.updateMany({
+        where: {
+          collectorId: absorbed.id,
+          chainId: { in: primaryChains },
+          isPrimary: true,
+        },
+        data: { isPrimary: false },
+      });
+      await tx.discoveredWallet.updateMany({
+        where: { collectorId: absorbed.id },
+        data: { collectorId: survivor.id },
+      });
       const [survivorDrip, absorbedDrip] = await Promise.all([
         tx.dripIdentity.findMany({
           where: { collectorId: survivor.id },

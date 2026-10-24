@@ -93,7 +93,8 @@ export async function communityTests(
   );
   check(
     users.every(
-      (u) => Object.keys(u).sort().join(',') === 'avatar,displayName,slug',
+      (u) =>
+        Object.keys(u).sort().join(',') === 'avatar,displayName,slug,unclaimed',
     ),
     'UglyUsers exposes only public display fields',
   );

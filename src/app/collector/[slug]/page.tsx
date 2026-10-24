@@ -75,8 +75,42 @@ export default async function Collector({
             <p key={d}>Discord · {d}</p>
           ))}
         </div>
-        <span className="badge">UGLYDEX COLLECTOR</span>
+        <span className="badge">
+          {p.unclaimed ? 'UNCLAIMED HOLDER' : 'UGLYDEX COLLECTOR'}
+        </span>
       </section>
+      {p.unclaimed && (
+        <section className="panel">
+          <h2>Your wallet. Your history.</h2>
+          <p>
+            This public holder record comes from indexed blockchain ownership.
+            No owner has claimed it. Wallet history is not proof of who
+            controlled it in the past.
+          </p>
+          <Link className="button" href="/connect">
+            Verify your wallet to claim this profile
+          </Link>
+          <p>{r.summary.owned} Squigs currently held.</p>
+        </section>
+      )}
+      {r.chainHistory.length > 0 && (
+        <section className="panel">
+          <h2>Verified blockchain history</h2>
+          <p>
+            Latest indexed wallet holding periods. These describe the address,
+            not the historical identity of its owner.
+          </p>
+          <ul>
+            {r.chainHistory.map((h, i) => (
+              <li key={i}>
+                <Link href={`/squig/${h.tokenId}`}>Squig #{h.tokenId}</Link> ·{' '}
+                {h.acquiredAt.slice(0, 10)} →{' '}
+                {h.lostAt?.slice(0, 10) ?? 'Currently held'}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <ShareControls
         spec={{ kind: 'collector', entity: p.slug, template: style.share }}
         url={absoluteUrl('/collector/' + p.slug)}

@@ -1,3 +1,4 @@
+import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { squigBadgeSummaries } from './achievement-badges';
 import { db } from './db';
@@ -151,7 +152,7 @@ export async function galleryView(
     where: { slug: gallerySlug, collector: { slug } },
     include: {
       collector: {
-        select: { id: true, slug: true, displayName: true, isPublic: true },
+        select: { id: true, ...publicNameSelect, isPublic: true },
       },
       items: {
         orderBy: { sortOrder: 'asc' },
@@ -219,7 +220,7 @@ export async function galleryView(
       : null,
     collector: {
       slug: g.collector.slug,
-      name: g.collector.displayName || g.collector.slug,
+      name: publicCollectorName(g.collector),
     },
     items,
     publicAvailable: g.collector.isPublic && g.visibility !== 'PRIVATE',

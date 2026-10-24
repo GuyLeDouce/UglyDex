@@ -1,5 +1,7 @@
+import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { db } from './db';
+import { publicIdentity } from '@/domain/profile';
 import { Prisma } from '@/generated/prisma/client';
 import { COLLECTION_RULESET } from '@/domain/dex';
 import { RULESET } from '@/domain/progression';
@@ -13,6 +15,7 @@ export async function uglyUsers(page = 1) {
     OR: [
       { identities: { some: { authenticatedAt: { not: null } } } },
       { wallets: { some: { source: 'SIWE', status: 'ACTIVE' } } },
+      { discoveredWallets: { some: {} } },
     ],
   };
   return db().$transaction(
@@ -25,12 +28,28 @@ export async function uglyUsers(page = 1) {
       );
       const users = await tx.collector.findMany({
         where,
-        select: { slug: true, displayName: true, avatar: true },
+        include: {
+          wallets: { where: { status: 'ACTIVE', revokedAt: null } },
+          identities: { where: { authenticatedAt: { not: null } } },
+          discoveredWallets: true,
+        },
         orderBy: { slug: 'asc' },
         take: 24,
         skip: (page - 1) * 24,
       });
-      return { users, page, pages };
+      return {
+        users: users.map((c) => {
+          const p = publicIdentity(c);
+          return {
+            slug: p.slug,
+            displayName: p.displayName,
+            avatar: p.avatar,
+            unclaimed: p.unclaimed,
+          };
+        }),
+        page,
+        pages,
+      };
     },
     { isolationLevel: 'RepeatableRead' },
   );
@@ -130,7 +149,7 @@ export async function collectorThread(page = 1) {
         select: {
           chainId: true,
           walletAddress: true,
-          collector: { select: { slug: true, displayName: true } },
+          collector: { select: publicNameSelect },
         },
       })
     : [];
@@ -138,10 +157,18 @@ export async function collectorThread(page = 1) {
     wallets.map((w) => [
       `${w.chainId}:${w.walletAddress.toLowerCase()}`,
       {
-        name: w.collector.displayName || w.collector.slug,
+        name: publicCollectorName(w.collector),
         path: `/collector/${w.collector.slug}`,
       },
     ]),
+  );
+  const names = new Map(
+    (
+      await db().collector.findMany({
+        where: { slug: { in: rows.map((r) => r.slug).filter(Boolean) } },
+        select: publicNameSelect,
+      })
+    ).map((c) => [c.slug, publicCollectorName(c)]),
   );
   const cards = await Promise.all(
     rows.slice(0, COMMUNITY_PAGE_SIZE).map(async (row) => {
@@ -172,7 +199,7 @@ export async function collectorThread(page = 1) {
       if (!card || !(await communityVisible(row.slug))) return null;
       return {
         slug: row.slug,
-        name: row.displayName || row.slug,
+        name: names.get(row.slug) || 'Collector',
         avatar: row.avatar,
         kind: row.kind,
         key,
@@ -212,11 +239,23 @@ export async function topCollectors(page = 1) {
       >(Prisma.sql`SELECT c.slug, c."displayName", c.avatar, s.overall, s.discovered,
       DENSE_RANK() OVER (ORDER BY s.overall DESC) AS rank ${eligibility}
       ORDER BY s.overall DESC, c.slug ASC LIMIT 24 OFFSET ${(page - 1) * 24}`);
+      const names = new Map(
+        (
+          await tx.collector.findMany({
+            where: { slug: { in: rows.map((r) => r.slug) } },
+            select: publicNameSelect,
+          })
+        ).map((c) => [c.slug, publicCollectorName(c)]),
+      );
       return {
         page,
         pages,
         total: Number(count),
-        collectors: rows.map((c) => ({ ...c, rank: Number(c.rank) })),
+        collectors: rows.map((c) => ({
+          ...c,
+          displayName: names.get(c.slug) || 'Collector',
+          rank: Number(c.rank),
+        })),
       };
     },
     { isolationLevel: 'RepeatableRead' },

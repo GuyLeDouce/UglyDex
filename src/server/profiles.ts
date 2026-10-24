@@ -1,3 +1,4 @@
+import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { db } from './db';
 import { currentSession } from './auth';
@@ -22,11 +23,13 @@ export async function collectorProfile(slug: string) {
     const c = await db().collector.findFirst({
       where: { slug: { equals: slug, mode: 'insensitive' } },
       include: {
+        discoveredWallets: true,
         wallets: { where: { status: 'ACTIVE', revokedAt: null } },
         identities: { where: { authenticatedAt: { not: null } } },
       },
     });
-    if (!c?.isPublic) return { status: 'missing' } as const;
+    if (!c?.isPublic || c.mergedIntoCollectorId)
+      return { status: 'missing' } as const;
     const [summary, featured] = await Promise.all([
       collectionSummary(c.id),
       db().squig.findMany({
@@ -45,6 +48,27 @@ export async function collectorProfile(slug: string) {
         select: cardSelect,
       }),
     ]);
+    const identity = publicIdentity(c);
+    const chainHistory = identity.unclaimed
+      ? await db().walletOwnershipPeriod.findMany({
+          where: {
+            walletAddress: { in: identity.wallets },
+            squig: {
+              chainId: 1,
+              contractAddress: SQUIGS_CONTRACT,
+              provenance: { is: { complete: true, dirty: false } },
+            },
+          },
+          select: {
+            walletAddress: true,
+            acquiredAt: true,
+            lostAt: true,
+            squig: { select: { tokenId: true } },
+          },
+          orderBy: [{ acquiredAt: 'desc' }, { id: 'asc' }],
+          take: 24,
+        })
+      : [];
     const charm = c.showCharmBalance
       ? publicCharm(true, await charmBalance(c.id, false))
       : null;
@@ -52,7 +76,13 @@ export async function collectorProfile(slug: string) {
     return {
       status: 'ready',
       collectorId: c.id,
-      profile: publicIdentity(c),
+      profile: identity,
+      chainHistory: chainHistory.map((p) => ({
+        walletAddress: p.walletAddress,
+        tokenId: p.squig.tokenId,
+        acquiredAt: p.acquiredAt.toISOString(),
+        lostAt: p.lostAt?.toISOString() ?? null,
+      })),
       ...(charm ? { charm } : {}),
       collectionVisibility: c.collectionVisibility,
       summary,
@@ -129,7 +159,9 @@ export async function squigProfile(token: string) {
             walletAddress: current.walletAddress,
           },
         },
-        include: { collector: true },
+        include: {
+          collector: { select: { ...publicNameSelect, isPublic: true } },
+        },
       });
       const evidence = await db().historicalIdentityAttribution.findMany({
         where: {
@@ -149,7 +181,7 @@ export async function squigProfile(token: string) {
       if (w?.status === 'ACTIVE' && publicAttribution(w.collector, valid))
         owner = {
           slug: w.collector.slug,
-          displayName: w.collector.displayName,
+          displayName: publicCollectorName(w.collector),
         };
     }
     const addresses = session ? await activeAddresses(session.collectorId) : [];

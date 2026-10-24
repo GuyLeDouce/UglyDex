@@ -68,5 +68,10 @@
     "source": "fe2191cd053e9747ea9afc3a5b7423497e390c8baa7aecfa156d6eedd7514f29",
     "production": "fe2191cd053e9747ea9afc3a5b7423497e390c8baa7aecfa156d6eedd7514f29",
     "staging": "fe2191cd053e9747ea9afc3a5b7423497e390c8baa7aecfa156d6eedd7514f29"
+  },
+  "202610240001_collector_discovery": {
+    "source": "033431c6ec0f038e99cde75a949ad829ad5af1e08987a41589a7abac465c0286",
+    "production": "033431c6ec0f038e99cde75a949ad829ad5af1e08987a41589a7abac465c0286",
+    "staging": "033431c6ec0f038e99cde75a949ad829ad5af1e08987a41589a7abac465c0286"
   }
 }

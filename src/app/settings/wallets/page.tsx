@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
+import { CharmDripLink } from '@/components/charm-drip-link';
 import { Connect } from '@/components/connect';
 import { WalletActions } from '@/components/wallet-actions';
 export default async function Wallets() {
@@ -9,6 +10,16 @@ export default async function Wallets() {
       where: { collectorId: id },
       orderBy: [{ isPrimary: 'desc' }, { firstSeenAt: 'asc' }],
     });
+  const [discord, drip] = await Promise.all([
+    db().externalIdentity.count({
+      where: {
+        collectorId: id,
+        provider: 'DISCORD',
+        authenticatedAt: { not: null },
+      },
+    }),
+    db().dripIdentity.count({ where: { collectorId: id } }),
+  ]);
   return (
     <>
       <section className="page-heading">
@@ -47,6 +58,18 @@ export default async function Wallets() {
           </section>
         ))}
       </div>
+      <section className="panel">
+        <h2>Account connections</h2>
+        <p>
+          Discord: {discord ? 'Connected' : 'Not connected'} · DRIP:{' '}
+          {drip ? 'Connected' : 'Not connected'}
+        </p>
+        <p>
+          Discord and DRIP identifiers are private. Discord authorization is
+          independent of UglyBot verification.
+        </p>
+      </section>
+      <CharmDripLink />
       <section className="panel">
         <h2>Link another identity</h2>
         <p>

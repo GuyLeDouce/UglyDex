@@ -20,6 +20,9 @@ export default async function TopCollectors({
     return (
       <section className="empty-state">
         <h1>Top Collectors</h1>
+        <Link href="/collectors/directory">
+          Browse all collectors and unclaimed holders →
+        </Link>
         <p>The leaderboard is temporarily unavailable.</p>
       </section>
     );
@@ -29,6 +32,9 @@ export default async function TopCollectors({
       <section className="page-heading">
         <p className="eyebrow">THE FIELD GUIDE</p>
         <h1>Top Collectors</h1>
+        <Link href="/collectors/directory">
+          Browse all collectors and unclaimed holders →
+        </Link>
         <p>Ranked by overall Field Guide completion. Every discovery counts.</p>
         <small>
           Public profiles with an up-to-date Field Guide · Equal completion
