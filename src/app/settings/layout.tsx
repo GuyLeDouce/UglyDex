@@ -7,7 +7,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <nav className="anchor-nav" aria-label="Settings">
         <Link href="/settings/profile">Profile & privacy</Link>
         <Link href="/settings/appearance">Appearance</Link>
-        <Link href="/settings/galleries">Galleries</Link>
         <Link href="/settings/sharing">Sharing</Link>
       </nav>
       {children}
