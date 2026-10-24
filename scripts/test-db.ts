@@ -284,6 +284,16 @@ try {
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
+  const identityStart = assertions;
+  const { collectorIdentityTests } =
+    await import('../tests/db/collector-identity');
+  await collectorIdentityTests(check);
+  console.log(
+    JSON.stringify({
+      event: 'test.identity_database_passed',
+      assertions: assertions - identityStart,
+    }),
+  );
   console.log(JSON.stringify({ event: 'test.start_web' }));
   if (process.argv.includes('--web')) {
     const base = `http://127.0.0.1:${webPort}`;
@@ -1245,6 +1255,18 @@ try {
     }
   }
   if (process.argv.includes('--web')) {
+    const identityStart = assertions;
+    const { collectorIdentityWebTests } =
+      await import('../tests/db/collector-identity-web');
+    await collectorIdentityWebTests(`http://127.0.0.1:${webPort}`, check);
+    console.log(
+      JSON.stringify({
+        event: 'test.identity_http_passed',
+        assertions: assertions - identityStart,
+      }),
+    );
+  }
+  if (process.argv.includes('--web')) {
     const { phase6WebTests } = await import('../tests/db/phase6-web');
     await phase6WebTests(
       `http://127.0.0.1:${webPort}`,
@@ -1322,14 +1344,6 @@ try {
       check,
       process.argv.includes('--browser'),
     );
-  }
-  const { collectorIdentityTests } =
-    await import('../tests/db/collector-identity');
-  await collectorIdentityTests(check);
-  if (process.argv.includes('--web')) {
-    const { collectorIdentityWebTests } =
-      await import('../tests/db/collector-identity-web');
-    await collectorIdentityWebTests(`http://127.0.0.1:${webPort}`, check);
   }
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));

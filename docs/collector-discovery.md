@@ -64,7 +64,10 @@ Discovery itself never reads private bot mappings.
    non-production environment. Deploy web and ownership workers together after
    migration readiness passes. No production migration was run for this change.
 3. Preview one bounded batch: `npm run collectors:discover` (dry-run default).
-4. On an approved non-production database: `npm run collectors:discover -- --apply`.
+4. On an approved non-production database, use the existing deployment binding
+   and operational intent gates. Staging requires
+   `OPS_CONFIRM=staging:collector-discovery` and the reviewed
+   `OPS_DATABASE_FINGERPRINT`. Then run: `npm run collectors:discover -- --apply`.
 5. Pass the returned cursor to the next invocation:
    `npm run collectors:discover -- --apply --after=0x...`.
    Repeat until `complete=true`. Output contains scanned/created/existing/conflict
@@ -72,7 +75,8 @@ Discovery itself never reads private bot mappings.
 6. Repeat a dry run from the beginning to reconcile earlier addresses. Newly
    indexed holders are discovered automatically by normal ownership workers.
 
-The CLI refuses `--apply` when APP_ENV=production. A production run needs a
+The CLI refuses `--apply` when APP_ENV=production or the database is registered
+as production, and validates the existing operational intent/deployment binding. A production run needs a
 separately reviewed operational change after explicit approval; do not bypass
 this guard by changing APP_ENV. No new API keys or credentials are introduced.
 

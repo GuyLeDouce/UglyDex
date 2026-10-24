@@ -237,6 +237,12 @@ export async function phase7WebTests(
       ]);
       const page = await context.newPage();
       const errors: string[] = [];
+      const shareResponses: { query: string; status: number }[] = [];
+      page.on('response', (response) => {
+        const url = new URL(response.url());
+        if (url.pathname === '/api/share')
+          shareResponses.push({ query: url.search, status: response.status() });
+      });
       page.on('pageerror', (e) => errors.push(e.message));
       await page.route(base + '/api/**', async (route) => {
         const response = await route.fetch({
@@ -316,24 +322,37 @@ export async function phase7WebTests(
         await page.getByLabel('Style').selectOption(template);
         for (const ratio of ['landscape', 'square']) {
           await page.getByLabel('Shape').selectOption(ratio);
-          await page.waitForFunction(
-            ({ template, ratio }) => {
-              const img =
-                document.querySelector<HTMLImageElement>('.share-preview');
-              if (!img) return false;
-              const params = new URL(
-                img.dataset.source ?? img.src,
-                location.origin,
-              ).searchParams;
-              return (
-                params.get('template') === template &&
-                params.get('ratio') === ratio &&
-                img.complete &&
-                img.naturalWidth > 0
-              );
-            },
-            { template, ratio },
-          );
+          try {
+            await page.waitForFunction(
+              ({ template, ratio }) => {
+                const img =
+                  document.querySelector<HTMLImageElement>('.share-preview');
+                if (!img) return false;
+                const params = new URL(
+                  img.dataset.source ?? img.src,
+                  location.origin,
+                ).searchParams;
+                return (
+                  params.get('template') === template &&
+                  params.get('ratio') === ratio &&
+                  img.complete &&
+                  img.naturalWidth > 0
+                );
+              },
+              { template, ratio },
+            );
+          } catch (error) {
+            console.error(
+              JSON.stringify({
+                event: 'test.share_preview_failed',
+                template,
+                ratio,
+                shareResponses,
+                messages: await page.getByRole('status').allTextContents(),
+              }),
+            );
+            throw error;
+          }
           const [download] = await Promise.all([
             page.waitForEvent('download'),
             page
