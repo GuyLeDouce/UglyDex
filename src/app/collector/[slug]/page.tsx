@@ -1,7 +1,6 @@
 import { ShareControls } from '@/components/share-controls';
 import { absoluteUrl } from '@/server/sharing';
 import {
-  GalleryShowcase,
   TrophyCase,
   CollectorHighlights,
   CollectorActivityPreview,
@@ -132,7 +131,6 @@ export default async function Collector({
           <EditionGrid items={editions} />
         </section>
       )}
-      <GalleryShowcase id={r.collectorId} slug={p.slug} />
       <CollectorActivityPreview id={r.collectorId} slug={p.slug} />
       {r.collectionVisibility === 'FULL' && (
         <Link className="button" href={'/collector/' + p.slug + '/collection'}>

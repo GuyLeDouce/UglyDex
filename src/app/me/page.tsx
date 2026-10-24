@@ -48,7 +48,6 @@ export default async function Me() {
   return (
     <div className="collector-dashboard">
       <nav className="anchor-nav">
-        <Link href="/settings/galleries">My galleries</Link>
         <Link href="/settings/sharing">Share studio</Link>
       </nav>
       <section className="page-heading profile-heading">
