@@ -25,7 +25,9 @@ imported activity, or external identity can be silently absorbed by that path.
 Claimed conflicts retain the existing dual-proof explicit merge workflow.
 Merges move discovery mappings, clear conflicting primary flags, preserve source
 records and queue existing progression/collection engines. Original source keys
-are unchanged. The absorbed identity remains a non-public tombstone.
+are unchanged. The absorbed identity remains a non-public tombstone. As before, explicit merges
+reset publication preferences to private; the owner reviews and re-enables them
+afterward to avoid disclosing newly combined identities without consent.
 
 A chosen unique slug is the username. Generated `holder-<uuid>` and
 `collector-<uuid>` routes are not chosen usernames. A second active wallet or
@@ -82,8 +84,11 @@ this guard by changing APP_ENV. No new API keys or credentials are introduced.
 
 ## Rollback and recovery
 
-Stop the affected worker/deployment, restore the previous application revision,
-and leave the additive table/columns in place. Do not delete discovery mappings,
+Stop the affected worker/deployment and prepare a compatibility rollback build:
+restore the prior feature behavior while retaining the additive schema, migration
+files and checksum manifest. An unchanged old binary fails the existing readiness
+gate on an unknown applied migration; do not delete migration bookkeeping to
+bypass it. Leave the additive table/columns in place. Do not delete discovery mappings,
 ownership evidence, or successfully claimed identities. Existing authentication
 still uses CollectorWallet, so the discovery table never grants access to an old
 version. A pre-change binary will not implement claim reuse; keep claiming and
