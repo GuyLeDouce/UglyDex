@@ -8,6 +8,9 @@ const mocks = vi.hoisted(() => ({
   progression: vi.fn(),
   progressionCount: vi.fn(),
 }));
+vi.mock('node:timers/promises', () => ({
+  setTimeout: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock('../src/server/deployment', () => ({
   assertDeploymentBinding: mocks.binding,
 }));
@@ -31,14 +34,20 @@ import {
   startupReplayId,
 } from '../src/server/collection-startup';
 beforeEach(() => {
-  vi.resetAllMocks();
+  vi.clearAllMocks();
+  mocks.binding.mockReset();
+  mocks.queue.mockReset();
+  mocks.process.mockReset();
+  mocks.count.mockReset();
+  mocks.progressionCount.mockReset();
+  mocks.progression.mockReset();
   mocks.queue.mockResolvedValue(new Date());
   mocks.process.mockResolvedValue({ processed: 1, failed: 0, deferred: 0 });
   mocks.count.mockResolvedValue(0);
   mocks.progressionCount.mockResolvedValue(0);
   mocks.progression.mockResolvedValue({ processed: 1, failed: 0, deferred: 0 });
 });
-it('uses a stable per-deployment checkpoint shared by replicas', () => {
+it('shares stable deployment checkpoints but revisits new deployments', () => {
   expect(startupReplayId({ RAILWAY_DEPLOYMENT_ID: 'a' })).toBe(
     startupReplayId({ RAILWAY_DEPLOYMENT_ID: 'a' }),
   );
@@ -46,17 +55,12 @@ it('uses a stable per-deployment checkpoint shared by replicas', () => {
     startupReplayId({ RAILWAY_DEPLOYMENT_ID: 'b' }),
   );
 });
-it('queues every page and drains remaining work in small batches', async () => {
+it('continues enqueueing beyond failed batches and applies per-job budgets', async () => {
   mocks.queue.mockResolvedValueOnce(null);
-  mocks.count.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+  mocks.process.mockResolvedValueOnce({ processed: 9, failed: 1, deferred: 0 });
   await recalculateOnStartup(new AbortController().signal);
-  expect(mocks.queue).toHaveBeenCalledTimes(3);
-  expect(mocks.process).toHaveBeenCalledTimes(3);
-  expect(mocks.process).toHaveBeenCalledWith(10, expect.any(Function));
-  expect(mocks.queue).toHaveBeenCalledWith(
-    false,
-    expect.stringContaining('startup:'),
-  );
+  expect(mocks.queue).toHaveBeenCalledTimes(2);
+  expect(mocks.process).toHaveBeenCalledWith(10, expect.any(Function), 3);
 });
 it('refuses mutation when the database binding is wrong', async () => {
   mocks.binding.mockRejectedValue(new Error('binding'));
@@ -64,13 +68,12 @@ it('refuses mutation when the database binding is wrong', async () => {
     recalculateOnStartup(new AbortController().signal),
   ).rejects.toThrow('binding');
   expect(mocks.seed).not.toHaveBeenCalled();
-  expect(mocks.queue).not.toHaveBeenCalled();
 });
-it('leaves failures for bounded retries instead of reporting completion', async () => {
-  mocks.process.mockResolvedValue({ processed: 0, failed: 1, deferred: 0 });
+it('does not report completion while exhausted failures remain', async () => {
+  mocks.count.mockResolvedValueOnce(0).mockResolvedValueOnce(2);
   await expect(
     recalculateOnStartup(new AbortController().signal),
-  ).rejects.toThrow('COLLECTION_STARTUP_RETRY');
+  ).rejects.toThrow('COLLECTION_STARTUP_BLOCKED');
 });
 it('stops before enqueue on shutdown', async () => {
   const controller = new AbortController();
@@ -78,20 +81,29 @@ it('stops before enqueue on shutdown', async () => {
   await recalculateOnStartup(controller.signal);
   expect(mocks.queue).not.toHaveBeenCalled();
 });
-
-it('waits for collector achievement jobs after collection jobs drain', async () => {
-  mocks.progressionCount.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+it('drains remaining collector achievements', async () => {
+  mocks.progressionCount.mockResolvedValueOnce(1).mockResolvedValueOnce(1);
   await recalculateOnStartup(new AbortController().signal);
   expect(mocks.progression).toHaveBeenCalledTimes(2);
   expect(mocks.progression).toHaveBeenCalledWith(
     10,
     expect.any(Function),
     'COLLECTOR',
+    3,
   );
 });
-it('retries achievement failures instead of reporting completion', async () => {
-  mocks.progression.mockResolvedValue({ processed: 0, failed: 1, deferred: 0 });
+it('retries temporary contention without aborting the pass', async () => {
+  mocks.process.mockResolvedValueOnce({ processed: 0, failed: 0, deferred: 1 });
+  mocks.count.mockResolvedValueOnce(1).mockResolvedValueOnce(1);
+  await recalculateOnStartup(new AbortController().signal);
+  expect(mocks.process).toHaveBeenCalledTimes(2);
+});
+it('bounds repeated contention with no forward progress', async () => {
+  mocks.process.mockResolvedValue({ processed: 0, failed: 0, deferred: 1 });
+  mocks.progression.mockResolvedValue({ processed: 0, failed: 0, deferred: 0 });
+  mocks.count.mockResolvedValue(1);
   await expect(
     recalculateOnStartup(new AbortController().signal),
-  ).rejects.toThrow('COLLECTION_STARTUP_RETRY');
+  ).rejects.toThrow('COLLECTION_STARTUP_STALLED');
+  expect(mocks.process).toHaveBeenCalledTimes(5);
 });

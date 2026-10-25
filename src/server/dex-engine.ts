@@ -1,3 +1,4 @@
+import { recalculationErrorCode } from './recalculation-error';
 import 'server-only';
 import { db } from './db';
 import { isTransactionConflict } from './transaction-conflict';
@@ -307,6 +308,10 @@ export async function rebuildCollection(id: string) {
         });
         if (!(await tx.collectionRuleset.findUnique({ where: { id: R } })))
           throw new Error('COLLECTIONS_NOT_SEEDED');
+        // Prevent incoming evidence from rewriting the queue row halfway through
+        // a repeatable-read evaluation and forcing its final delete to roll back.
+        await tx.$queryRaw`SELECT "collectorId" FROM "CollectionJob"
+          WHERE "collectorId"=${id}::uuid FOR UPDATE`;
         await retainCurrentDiscoveries(tx, id);
         const job = await tx.collectionJob.findUnique({
           where: { collectorId: id },
@@ -642,15 +647,19 @@ export async function rebuildCollection(id: string) {
       where: { id: run.id },
       data: {
         status: 'FAILED',
-        errorCode: 'COLLECTION_EVALUATION_FAILED',
+        errorCode: recalculationErrorCode(cause),
         finishedAt: new Date(),
       },
     });
     await db().collectionJob.upsert({
       where: { collectorId: id },
-      create: { collectorId: id, errorCode: 'EVALUATION_FAILED', attempts: 1 },
+      create: {
+        collectorId: id,
+        errorCode: recalculationErrorCode(cause),
+        attempts: 1,
+      },
       update: {
-        errorCode: 'EVALUATION_FAILED',
+        errorCode: recalculationErrorCode(cause),
         attempts: { increment: 1 },
         queuedAt: new Date(),
       },
@@ -658,8 +667,16 @@ export async function rebuildCollection(id: string) {
     throw new Error('COLLECTION_EVALUATION_FAILED', { cause });
   }
 }
-export async function processCollections(limit = 25, stop = () => false) {
+export async function processCollections(
+  limit = 25,
+  stop = () => false,
+  maxAttempts?: number,
+) {
   const jobs = await db().collectionJob.findMany({
+    where:
+      maxAttempts === undefined
+        ? {}
+        : { OR: [{ errorCode: null }, { attempts: { lt: maxAttempts } }] },
     orderBy: { queuedAt: 'asc' },
     take: limit,
   });
@@ -698,6 +715,16 @@ export async function queueCollections(restart = false, replayId = R) {
         await tx.$executeRaw`SELECT collections_enqueue(${c.id}::uuid)`;
         await tx.$executeRaw`SELECT progression_enqueue('COLLECTOR',${c.id}::uuid)`;
       }
+      // A fresh replay gets a fresh per-job retry budget; resume does not reset it.
+      const collectorIds = rows.map((c) => c.id);
+      await tx.collectionJob.updateMany({
+        where: { collectorId: { in: collectorIds } },
+        data: { attempts: 0 },
+      });
+      await tx.progressionJob.updateMany({
+        where: { subjectType: 'COLLECTOR', subjectId: { in: collectorIds } },
+        data: { attempts: 0 },
+      });
       await tx.collectionReplay.update({
         where: { id: replayId },
         data: {

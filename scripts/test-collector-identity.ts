@@ -67,6 +67,9 @@ try {
   const { fieldGuidePossessionTests } =
     await import('../tests/db/field-guide-possession');
   await fieldGuidePossessionTests(check);
+  const { progressionQueueRaceTests } =
+    await import('../tests/db/progression-queue-race');
+  await progressionQueueRaceTests(check);
   console.log(
     JSON.stringify({ event: 'identity.database_passed', assertions }),
   );

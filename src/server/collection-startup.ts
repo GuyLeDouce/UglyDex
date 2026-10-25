@@ -1,3 +1,4 @@
+import { setTimeout as delay } from 'node:timers/promises';
 import 'server-only';
 import { createHash } from 'node:crypto';
 import { COLLECTION_RULESET } from '@/domain/dex';
@@ -27,16 +28,23 @@ export async function recalculateOnStartup(signal: AbortSignal) {
   await seedCollections();
   await seedProgression();
   const replayId = startupReplayId();
-  let queued = false;
+  let queued = false,
+    stalled = 0;
+  const maxAttempts = 3;
   do {
     if (signal.aborted) return;
     queued = !!(await queueCollections(false, replayId));
     // Small batches yield between transactions; interrupted jobs remain durable.
-    const counts = await processCollections(10, () => signal.aborted);
+    const counts = await processCollections(
+      10,
+      () => signal.aborted,
+      maxAttempts,
+    );
     const progression = await processProgression(
       10,
       () => signal.aborted,
       'COLLECTOR',
+      maxAttempts,
     );
     console.log(
       JSON.stringify({
@@ -47,19 +55,59 @@ export async function recalculateOnStartup(signal: AbortSignal) {
         progression,
       }),
     );
-    if (
-      counts.failed ||
-      counts.deferred ||
-      progression.failed ||
-      progression.deferred
-    )
-      throw new Error('COLLECTION_STARTUP_RETRY');
-  } while (
-    !queued ||
-    (await db().collectionJob.count()) > 0 ||
-    (await db().progressionJob.count({ where: { subjectType: 'COLLECTOR' } })) >
-      0
-  );
+    if (signal.aborted) return;
+    const [
+      pendingCollections,
+      pendingProgression,
+      allCollections,
+      allProgression,
+    ] = await Promise.all([
+      db().collectionJob.count({
+        where: { OR: [{ errorCode: null }, { attempts: { lt: maxAttempts } }] },
+      }),
+      db().progressionJob.count({
+        where: {
+          subjectType: 'COLLECTOR',
+          OR: [{ errorCode: null }, { attempts: { lt: maxAttempts } }],
+        },
+      }),
+      db().collectionJob.count(),
+      db().progressionJob.count({ where: { subjectType: 'COLLECTOR' } }),
+    ]);
+    if (queued && !pendingCollections && !pendingProgression) {
+      if (allCollections || allProgression) {
+        console.error(
+          JSON.stringify({
+            event: 'collections.startup_blocked',
+            replayId,
+            collections: allCollections,
+            progression: allProgression,
+            code: 'COLLECTION_STARTUP_BLOCKED',
+          }),
+        );
+        throw new Error('COLLECTION_STARTUP_BLOCKED');
+      }
+      break;
+    }
+    // One troublesome profile must not abort the healthy queue. Conflicts are
+    // retried separately with backoff, rather than spending the global budget.
+    const conflicts = counts.deferred + progression.deferred;
+    stalled =
+      queued &&
+      !counts.processed &&
+      !progression.processed &&
+      !counts.failed &&
+      !progression.failed
+        ? stalled + 1
+        : 0;
+    if (stalled >= 5) throw new Error('COLLECTION_STARTUP_STALLED');
+    if (conflicts || counts.failed || progression.failed) {
+      await delay(Math.min(10000, 1000 * 2 ** stalled), undefined, {
+        signal,
+      }).catch(() => {});
+    }
+  } while (!signal.aborted);
+  if (signal.aborted) return;
   console.log(
     JSON.stringify({ event: 'collections.startup_complete', replayId }),
   );
