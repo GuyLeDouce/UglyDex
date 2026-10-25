@@ -56,6 +56,10 @@ export const profileSchema = z.object({
 export function hasCollectorUsername(slug: string) {
   return !!slug && !/^(collector|holder)-[0-9a-f-]{36}$/i.test(slug);
 }
+export function collectorHandle(slug: string, unclaimed = false) {
+  if (unclaimed) return 'Unverified Squig Holder';
+  return hasCollectorUsername(slug) ? `@${slug}` : 'Squig Holder';
+}
 export function shortWallet(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }

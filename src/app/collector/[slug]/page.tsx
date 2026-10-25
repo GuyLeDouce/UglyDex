@@ -1,3 +1,4 @@
+import { collectorHandle } from '@/domain/profile';
 import { ShareControls } from '@/components/share-controls';
 import { absoluteUrl } from '@/server/sharing';
 import {
@@ -57,7 +58,7 @@ export default async function Collector({
         <div>
           <p className="eyebrow">COLLECTOR FIELD RECORD</p>
           <h1>{p.displayName || p.slug}</h1>
-          <p>@{p.slug}</p>
+          <p>{collectorHandle(p.slug, p.unclaimed)}</p>
           <p className="bio">{p.bio}</p>
           {r.charm?.balance !== null && r.charm?.balance !== undefined && (
             <p>
