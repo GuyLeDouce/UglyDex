@@ -258,7 +258,7 @@ export function renderCollectorShare(
               {layout.completion === null ? '—' : layout.completion.toFixed(1)}%
             </div>
             <div style={{ display: 'flex', fontSize: 18 }}>
-              {layout.squigs} Squigs held
+              {layout.squigs} Squigs owned
             </div>
             <div style={{ display: 'flex', fontSize: 18 }}>
               {layout.discovered ?? '—'} Squigs discovered

@@ -15,7 +15,7 @@ import {
   type ShareSpec,
   type ShareCard,
 } from '@/domain/sharing';
-import { catalogScope } from './collections';
+import { catalogScope, currentCollectionScope } from './collections';
 import { eligibleGalleryTokens, galleryView } from './galleries';
 import { progressionView } from './progression';
 import { dexView } from './dex';
@@ -239,7 +239,9 @@ export async function shareCard(
       avatar: c.avatar,
       level: p?.status === 'ready' ? p.level : null,
       completion: d?.status === 'ready' ? d.score.overall : null,
-      squigs: owned.current.length,
+      squigs: await db().squig.count({
+        where: await currentCollectionScope(c.id),
+      }),
       discovered: d?.status === 'ready' ? d.discovered : null,
       sets: chosenSets.map((s) => ({
         key: s.key,

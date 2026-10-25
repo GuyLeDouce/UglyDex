@@ -352,9 +352,15 @@ export async function collectionPage(
     traits,
   };
 }
+export async function currentCollectionScope(
+  collectorId: string,
+): Promise<Prisma.SquigWhereInput> {
+  return {
+    AND: [catalogScope, ownedScope(await collectionAddresses(collectorId))],
+  };
+}
 export async function collectionSummary(collectorId: string) {
-  const addresses = await collectionAddresses(collectorId),
-    where = { AND: [catalogScope, ownedScope(addresses)] };
+  const where = await currentCollectionScope(collectorId);
   const [stats, og, legendary, discovered, rarities, top, traits, recorded] =
     await Promise.all([
       db().squig.aggregate({
