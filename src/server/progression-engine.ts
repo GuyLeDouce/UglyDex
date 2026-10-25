@@ -225,6 +225,10 @@ export async function rebuildSubject(subject: Subject, id: string) {
             errorCode: 'REPLACED_BY_RESUMED_EVALUATION',
           },
         });
+        // Pin this outbox generation before the long evidence/award evaluation.
+        // Concurrent enqueue waits until commit, then retains a fresh generation.
+        await tx.$queryRaw`SELECT "subjectId" FROM "ProgressionJob"
+          WHERE "subjectType"=${subject} AND "subjectId"=${id}::uuid FOR UPDATE`;
         const job = await tx.progressionJob.findUnique({
           where: {
             subjectType_subjectId: { subjectType: subject, subjectId: id },
