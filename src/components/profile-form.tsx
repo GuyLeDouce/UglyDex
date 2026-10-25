@@ -121,13 +121,16 @@ export function ProfileForm({ initial }: { initial: Values }) {
         />
       </label>
       <label>
-        Featured Squigs
+        Favorite Squigs
         <input
           name="featured"
           defaultValue={initial.featuredTokenIds.join(', ')}
           placeholder="12, 75, 821"
         />
-        <small>Up to six currently owned token IDs, separated by commas.</small>
+        <small>
+          Up to six currently owned token IDs, separated by commas. You can also
+          select hearts in your collection.
+        </small>
       </label>
       <fieldset>
         <legend>Public profile privacy</legend>

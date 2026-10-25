@@ -1,3 +1,4 @@
+import { favoriteTokenIds } from '@/server/favorites';
 import { collectorHandle } from '@/domain/profile';
 import { RecalculateFieldGuide } from '@/components/recalculate-field-guide';
 import { appEnvironment } from '@/domain/deployment';
@@ -80,7 +81,12 @@ export default async function Me() {
         <h2>Your standouts.</h2>
         <Link href="/collection">View collection →</Link>
       </div>
-      <CollectionGrid items={s.top} controls={false} />
+      <CollectionGrid
+        items={s.top}
+        controls={false}
+        favorites={await favoriteTokenIds(id)}
+        editableFavorites
+      />
       <section className="passport">
         <p className="eyebrow">YOUR COLLECTION THROUGH TIME</p>
         <h2>Field history.</h2>

@@ -1,5 +1,7 @@
 'use client';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import favoriteStyles from './favorite-heart.module.css';
 import { StatusIconStrip } from './status-icon-strip';
 import { SetIconStrip } from './set-icon-strip';
 import { useEffect, useState, useSyncExternalStore } from 'react';
@@ -29,6 +31,9 @@ export function SquigCard({
   listing,
   marketStatus,
   marketComplete,
+  favorite,
+  onFavorite,
+  savingFavorite = false,
 }: {
   item: SquigCardData;
   priority?: boolean;
@@ -36,11 +41,35 @@ export function SquigCard({
   listing?: SquigListing;
   marketStatus?: OpenSeaListings['status'];
   marketComplete?: boolean;
+  favorite?: boolean;
+  onFavorite?: () => void;
+  savingFavorite?: boolean;
 }) {
   return (
     <article
-      className={`squig-card ${squigRarityClass(item.rarity)} ${item.currentlyOwned === false ? 'previous' : ''}`}
+      className={`${favoriteStyles.card} squig-card ${squigRarityClass(item.rarity)} ${item.currentlyOwned === false ? 'previous' : ''}`}
     >
+      {onFavorite ? (
+        <button
+          type="button"
+          className={favoriteStyles.heart}
+          aria-pressed={!!favorite}
+          aria-label={`${favorite ? 'Remove' : 'Add'} Squig #${item.tokenId} ${favorite ? 'from' : 'to'} favorites`}
+          title={favorite ? 'Remove favorite' : 'Add favorite'}
+          disabled={savingFavorite}
+          onClick={onFavorite}
+        >
+          <span aria-hidden="true">{favorite ? '♥' : '♡'}</span>
+        </button>
+      ) : favorite ? (
+        <span
+          className={favoriteStyles.heart}
+          role="img"
+          aria-label="Favorite Squig"
+        >
+          ♥
+        </span>
+      ) : null}
       <Link className="squig-card-main" href={`/squig/${item.tokenId}`}>
         <Artwork
           src={item.image}
@@ -182,10 +211,63 @@ export function SquigCard({
 export function CollectionGrid({
   items,
   controls = true,
+  favorites: initialFavorites = [],
+  editableFavorites = false,
 }: {
   items: SquigCardData[];
   controls?: boolean;
+  favorites?: number[];
+  editableFavorites?: boolean;
 }) {
+  const router = useRouter();
+  const [favorites, setFavorites] = useState(initialFavorites);
+  const [saving, setSaving] = useState(false);
+  const [favoriteMessage, setFavoriteMessage] = useState('');
+  const favoriteKey = initialFavorites.join(',');
+  const [previousFavoriteKey, setPreviousFavoriteKey] = useState(favoriteKey);
+  if (previousFavoriteKey !== favoriteKey) {
+    setPreviousFavoriteKey(favoriteKey);
+    setFavorites(initialFavorites);
+  }
+  useEffect(() => {
+    if (!editableFavorites) return;
+    const update = (event: Event) =>
+      setFavorites((event as CustomEvent<number[]>).detail);
+    window.addEventListener('uglydex-favorites', update);
+    return () => window.removeEventListener('uglydex-favorites', update);
+  }, [editableFavorites]);
+  async function toggleFavorite(tokenId: number) {
+    if (saving) return;
+    setSaving(true);
+    setFavoriteMessage('Saving favorite…');
+    try {
+      const response = await fetch('/api/settings/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tokenId,
+          favorite: !favorites.includes(tokenId),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.error || 'Could not save favorite.');
+      setFavorites(result.favorites);
+      window.dispatchEvent(
+        new CustomEvent('uglydex-favorites', { detail: result.favorites }),
+      );
+      setFavoriteMessage(`${result.favorites.length} of 6 favorites selected.`);
+      router.refresh();
+    } catch (error) {
+      setFavoriteMessage(
+        error instanceof Error
+          ? error.message
+          : 'Could not save favorite. Please try again.',
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
   const mode = useSyncExternalStore(subscribe, snapshot, () => 'grid');
   const market = useOpenSeaListings();
   const listings = new Map(
@@ -207,6 +289,12 @@ export function CollectionGrid({
   }
   return (
     <>
+      {editableFavorites && (
+        <p className={favoriteStyles.status} role="status">
+          {favoriteMessage ||
+            `♥ ${favorites.length} of 6 favorites · Select a heart to feature a Squig.`}
+        </p>
+      )}
       {controls && (
         <div className="view-controls" aria-label="Collection display">
           <button
@@ -229,6 +317,13 @@ export function CollectionGrid({
             <SquigCard
               key={item.tokenId}
               item={item}
+              favorite={favorites.includes(item.tokenId)}
+              onFavorite={
+                editableFavorites && item.currentlyOwned !== false
+                  ? () => toggleFavorite(item.tokenId)
+                  : undefined
+              }
+              savingFavorite={saving}
               compact={controls && mode === 'compact'}
               priority={index < priorityCount}
               listing={listings.get(item.tokenId)}

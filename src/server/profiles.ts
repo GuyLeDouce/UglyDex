@@ -42,7 +42,6 @@ export async function collectorProfile(slug: string) {
                 .map((w) => w.walletAddress),
             ),
             { tokenId: { in: c.featuredTokenIds } },
-            { NOT: { provenance: { is: { dirty: true } } } },
           ],
         },
         select: cardSelect,

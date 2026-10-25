@@ -30,6 +30,17 @@ export default async function Page({
   return (
     <>
       <h1>{r.profile.displayName || slug}’s collection</h1>
+      {r.featured.length > 0 && (
+        <section aria-label="Favorite Squigs">
+          <p className="eyebrow">PERSONALLY SELECTED</p>
+          <h2>Favorite Squigs</h2>
+          <CollectionGrid
+            items={r.featured}
+            controls={false}
+            favorites={r.featured.map((s) => s.tokenId)}
+          />
+        </section>
+      )}
       {r.collectionVisibility === 'FULL' ? (
         <Catalog
           collectorId={r.collectorId}
@@ -39,7 +50,6 @@ export default async function Page({
       ) : r.collectionVisibility === 'FEATURED_ONLY' ? (
         <>
           <p>A personally selected showcase.</p>
-          <CollectionGrid items={r.featured} />
         </>
       ) : (
         <p>This collector keeps their collection private.</p>
