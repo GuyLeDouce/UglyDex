@@ -142,3 +142,32 @@ it('automatically creates shareable milestone entries with the original mileston
     key: 'level:10',
   });
 });
+
+it('keeps the main thread global and filters personal feeds before pagination', async () => {
+  mocks.query.mockResolvedValue([]);
+  await collectorThread();
+  const globalQuery = mocks.query.mock.calls[0][0];
+  expect(globalQuery.sql).not.toContain('owner.slug =');
+
+  await collectorThread(2, 'specific-collector');
+  const scopedQuery = mocks.query.mock.calls[1][0];
+  expect(scopedQuery.values).toContain('specific-collector');
+  expect(scopedQuery.sql).toContain('AND (c.slug =');
+  expect(scopedQuery.sql).toContain(
+    'owner."showCommunityActivity" AND owner."showWallets"',
+  );
+  expect(scopedQuery.sql).toContain('w."revokedAt" IS NULL');
+  expect(scopedQuery.sql).toContain(
+    'transfer."fromAddress", transfer."toAddress"',
+  );
+  expect(scopedQuery.sql.indexOf('AND (c.slug =')).toBeLessThan(
+    scopedQuery.sql.indexOf('LIMIT'),
+  );
+  expect(scopedQuery.values.at(-1)).toBe(COMMUNITY_PAGE_SIZE);
+});
+
+it('does not treat an empty collector scope as the global feed', async () => {
+  mocks.query.mockResolvedValue([]);
+  await collectorThread(1, '');
+  expect(mocks.query.mock.calls[0][0].sql).toContain('AND (c.slug =');
+});
