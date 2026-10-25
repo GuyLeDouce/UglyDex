@@ -1,3 +1,4 @@
+import { favoriteTokenIds } from '@/server/favorites';
 import { DexNav } from '@/components/dex';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
@@ -13,9 +14,10 @@ export default async function CollectionPage({
   searchParams: Promise<SearchParams>;
 }) {
   const id = await requireCollector();
-  const [summary, status] = await Promise.all([
+  const [summary, status, favorites] = await Promise.all([
     collectionSummary(id),
     refreshStatus(),
+    favoriteTokenIds(id),
   ]);
   return (
     <>
@@ -36,6 +38,7 @@ export default async function CollectionPage({
         params={await searchParams}
         collectorId={id}
         path="/collection"
+        editableFavorites
       />
       <section className="section-heading">
         <p className="eyebrow">COLLECTION NOTES</p>
@@ -73,7 +76,12 @@ export default async function CollectionPage({
       {summary.top.length > 0 && (
         <>
           <h2>Highest UglyPoints</h2>
-          <CollectionGrid items={summary.top} controls={false} />
+          <CollectionGrid
+            items={summary.top}
+            controls={false}
+            favorites={favorites}
+            editableFavorites
+          />
         </>
       )}
     </>

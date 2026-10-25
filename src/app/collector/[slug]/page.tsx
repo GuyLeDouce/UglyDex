@@ -122,7 +122,11 @@ export default async function Collector({
         <section className="featured-exhibition">
           <p className="eyebrow">PERSONALLY SELECTED</p>
           <h2>The favourite freaks.</h2>
-          <CollectionGrid items={r.featured} controls={false} />
+          <CollectionGrid
+            items={r.featured}
+            controls={false}
+            favorites={r.featured.map((s) => s.tokenId)}
+          />
         </section>
       )}
       <TrophyCase id={r.collectorId} slug={p.slug} />

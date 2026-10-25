@@ -1,3 +1,4 @@
+import { favoriteTokenIds } from './favorites';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { highestFamilyBadges } from './achievement-badges';
@@ -172,9 +173,7 @@ export async function shareCard(
   ]);
   const owned = await eligibleGalleryTokens(c.id, 'CURRENT_COLLECTION');
   const permitTokens = c.id === viewerId || c.collectionVisibility !== 'HIDDEN';
-  const featured = permitTokens
-    ? c.featuredTokenIds.filter((n) => owned.current.includes(n))
-    : [];
+  const featured = permitTokens ? await favoriteTokenIds(c.id) : [];
   let card: ShareCard = {
     ...generic,
     title: name,
@@ -186,7 +185,7 @@ export async function shareCard(
       p?.status === 'ready' && ['collector', 'trophy'].includes(q.kind)
         ? p.badgeSummary.badges.slice(0, 3)
         : [],
-    tokens: featured.slice(0, 4),
+    tokens: featured.slice(0, 6),
     stats: [
       ...(p?.status === 'ready' ? ['Level ' + p.level] : []),
       ...(d?.status === 'ready'

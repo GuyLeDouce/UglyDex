@@ -1,3 +1,6 @@
+import { setFavorite, favoriteTokenIds } from '../../src/server/favorites';
+import { collectorProfile } from '../../src/server/profiles';
+import { shareCard } from '../../src/server/sharing';
 import {
   progressionFacts,
   seedProgression,
@@ -123,6 +126,71 @@ export async function fieldGuidePossessionTests(
     view?.status === 'ready' && view.currentSets > 0 && view.traits > 0,
     'possession contributes current sets and discovery traits',
   );
+  await db().collector.update({
+    where: { id: c.id },
+    data: { isPublic: true, collectionVisibility: 'FULL' },
+  });
+  const selected = canonicalTokens.slice(0, 7).map((s) => s.tokenId);
+  for (const tokenId of selected.slice(0, 5))
+    await setFavorite(c.id, { tokenId, favorite: true });
+  const concurrent = await Promise.allSettled(
+    selected
+      .slice(5)
+      .map((tokenId) => setFavorite(c.id, { tokenId, favorite: true })),
+  );
+  check(
+    concurrent.filter((r) => r.status === 'fulfilled').length === 1,
+    'concurrent favorites cannot exceed six',
+  );
+  const favorites = await favoriteTokenIds(c.id);
+  check(favorites.length === 6, 'six currently owned favorites retained');
+  await setFavorite(c.id, { tokenId: favorites[0], favorite: true });
+  check(
+    (await favoriteTokenIds(c.id)).length === 6,
+    'repeated favorite selection is idempotent',
+  );
+  let notOwned = false;
+  try {
+    await setFavorite(c.id, {
+      tokenId: canonicalTokens[300].tokenId,
+      favorite: true,
+    });
+  } catch {
+    notOwned = true;
+  }
+  check(
+    notOwned,
+    'previously owned Squigs cannot be added as current favorites',
+  );
+  const publicProfile = await collectorProfile(c.slug);
+  check(
+    publicProfile.status === 'ready' && publicProfile.featured.length === 6,
+    'public favorites include current holdings with incomplete provenance',
+  );
+  const publicCard = await shareCard({ kind: 'collector', entity: c.slug });
+  check(
+    publicCard?.tokens.length === 6 &&
+      publicCard.tokens.every((id) => favorites.includes(id)),
+    'collector share card uses all six favorites',
+  );
+  await db().collector.update({
+    where: { id: c.id },
+    data: { collectionVisibility: 'HIDDEN' },
+  });
+  const hiddenProfile = await collectorProfile(c.slug);
+  check(
+    hiddenProfile.status === 'ready' && hiddenProfile.featured.length === 0,
+    'hidden collection does not expose favorites',
+  );
+  check(
+    (await shareCard({ kind: 'collector', entity: c.slug }))?.tokens.length ===
+      0,
+    'public share card respects hidden collection',
+  );
+  await db().collector.update({
+    where: { id: c.id },
+    data: { collectionVisibility: 'FULL' },
+  });
   await db().squigOwnership.updateMany({
     where: { squigId: ids[0], walletAddress: wallet },
     data: { isCurrent: false },
@@ -130,6 +198,15 @@ export async function fieldGuidePossessionTests(
   check(
     (await collectionSummary(c.id)).discovered === 315,
     'sale retains the discovery materialized from current possession',
+  );
+  check(
+    !(await favoriteTokenIds(c.id)).includes(selected[0]),
+    'sold Squig is removed from visible favorites',
+  );
+  await setFavorite(c.id, { tokenId: selected[0], favorite: false });
+  check(
+    (await favoriteTokenIds(c.id)).length === 5,
+    'a sold favorite can be safely removed',
   );
   const linked = '0x' + 'ca'.repeat(20);
   await db().collectorWallet.create({

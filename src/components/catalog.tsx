@@ -1,3 +1,4 @@
+import { favoriteTokenIds } from '@/server/favorites';
 import Link from 'next/link';
 import { collectionPage } from '@/server/collections';
 import { CollectionGrid } from './collection';
@@ -9,15 +10,19 @@ export async function Catalog({
   viewerId,
   discovered = false,
   path = '/squigs',
+  editableFavorites = false,
 }: {
   params?: SearchParams;
   collectorId?: string;
   viewerId?: string;
   discovered?: boolean;
   path?: string;
+  editableFavorites?: boolean;
 }) {
   const data = await collectionPage(params, collectorId, discovered, viewerId),
     f = data.filters;
+  const favorites =
+    editableFavorites && collectorId ? await favoriteTokenIds(collectorId) : [];
   const link = (page: number) => {
     const q = new URLSearchParams();
     for (const [k, v] of Object.entries(params))
@@ -159,7 +164,11 @@ export async function Catalog({
               availability can change.
             </p>
           )}
-          <CollectionGrid items={data.items} />
+          <CollectionGrid
+            items={data.items}
+            favorites={favorites}
+            editableFavorites={editableFavorites}
+          />
         </>
       )}
       <nav className="pagination" aria-label="Pagination">
