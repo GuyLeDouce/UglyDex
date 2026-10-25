@@ -169,6 +169,11 @@ export async function fieldGuidePossessionTests(
   );
   const publicCard = await shareCard({ kind: 'collector', entity: c.slug });
   check(
+    publicCard?.collectorLayout?.squigs === summary.owned &&
+      summary.owned === 274,
+    'share card and Squigs Owned count identical current holdings despite incomplete provenance',
+  );
+  check(
     publicCard?.tokens.length === 6 &&
       publicCard.tokens.every((id) => favorites.includes(id)),
     'collector share card uses all six favorites',
@@ -207,6 +212,11 @@ export async function fieldGuidePossessionTests(
   check(
     (await favoriteTokenIds(c.id)).length === 5,
     'a sold favorite can be safely removed',
+  );
+  check(
+    (await shareCard({ kind: 'collector', entity: c.slug }))?.collectorLayout
+      ?.squigs === (await collectionSummary(c.id)).owned,
+    'share owned count follows sales',
   );
   const linked = '0x' + 'ca'.repeat(20);
   await db().collectorWallet.create({
