@@ -70,6 +70,9 @@ try {
   const { progressionQueueRaceTests } =
     await import('../tests/db/progression-queue-race');
   await progressionQueueRaceTests(check);
+  const { squigMintRecoveryTests } =
+    await import('../tests/db/squig-mint-recovery');
+  await squigMintRecoveryTests(check);
   console.log(
     JSON.stringify({ event: 'identity.database_passed', assertions }),
   );

@@ -24,6 +24,7 @@ try {
       if (
         attempt === 5 ||
         code === 'COLLECTION_STARTUP_BLOCKED' ||
+        code === 'SQUIG_STARTUP_BLOCKED' ||
         code === 'DEPLOYMENT_IDENTITY_MISMATCH' ||
         code === 'RULESET_VERSION_BUMP_REQUIRED'
       ) {

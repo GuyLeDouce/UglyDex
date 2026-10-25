@@ -8,6 +8,9 @@ const mocks = vi.hoisted(() => ({
   progression: vi.fn(),
   progressionCount: vi.fn(),
 }));
+vi.mock('../src/server/squig-startup', () => ({
+  recalculateSquigsOnStartup: vi.fn(),
+}));
 vi.mock('node:timers/promises', () => ({
   setTimeout: vi.fn().mockResolvedValue(undefined),
 }));
