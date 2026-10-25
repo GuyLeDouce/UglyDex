@@ -178,6 +178,19 @@ export async function fieldGuidePossessionTests(
       publicCard.tokens.every((id) => favorites.includes(id)),
     'collector share card uses all six favorites',
   );
+  const squareCard = await shareCard({
+    kind: 'collector',
+    entity: c.slug,
+    ratio: 'square',
+  });
+  check(
+    squareCard?.tokens.length === 12 &&
+      new Set(squareCard.tokens).size === 12 &&
+      squareCard.tokens
+        .slice(0, 6)
+        .every((id, index) => id === favorites[index]),
+    'square share fills twelve unique slots with six favorites first',
+  );
   await db().collector.update({
     where: { id: c.id },
     data: { collectionVisibility: 'HIDDEN' },
@@ -207,6 +220,12 @@ export async function fieldGuidePossessionTests(
   check(
     !(await favoriteTokenIds(c.id)).includes(selected[0]),
     'sold Squig is removed from visible favorites',
+  );
+  const afterSaleCard = await shareCard({ kind: 'collector', entity: c.slug });
+  check(
+    afterSaleCard?.tokens.length === 6 &&
+      !afterSaleCard.tokens.includes(selected[0]),
+    'share fills a sold favorite slot from remaining current holdings',
   );
   await setFavorite(c.id, { tokenId: selected[0], favorite: false });
   check(

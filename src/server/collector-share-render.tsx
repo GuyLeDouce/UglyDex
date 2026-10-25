@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- ImageResponse primitives. */
 import 'server-only';
+import { shareCapacity } from '@/domain/share-capacity';
 import { ImageResponse } from 'next/og';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -14,6 +15,7 @@ export function renderCollectorShare(
   art: Record<number, string | null>,
 ) {
   const layout = card.collectorLayout!;
+  const capacity = shareCapacity(spec.ratio);
   const square = spec.ratio === 'square',
     width = square ? 1080 : 1200,
     height = square ? 1080 : 630;
@@ -21,7 +23,7 @@ export function renderCollectorShare(
     center = square ? 440 : 540;
   const badges = (card.achievementBadges ?? [])
     .filter((b) => b.status === 'earned')
-    .slice(0, 8);
+    .slice(0, capacity.achievements);
   const title = card.title.slice(0, 60);
   return new ImageResponse(
     <div
@@ -103,8 +105,8 @@ export function renderCollectorShare(
                   {file && (
                     <img
                       src={png(file)}
-                      width={square ? 80 : 64}
-                      height={square ? 80 : 64}
+                      width={square ? 80 : 60}
+                      height={square ? 80 : 60}
                       alt={b.name}
                       style={{ objectFit: 'contain' }}
                     />
@@ -178,7 +180,7 @@ export function renderCollectorShare(
             }}
           >
             <div style={{ display: 'flex', fontSize: 18, marginBottom: 12 }}>
-              FAVOURITE SQUIGS
+              FAVOURITES & TOP SQUIGS
             </div>
             <div
               style={{
@@ -188,7 +190,7 @@ export function renderCollectorShare(
                 justifyContent: 'center',
               }}
             >
-              {card.tokens.slice(0, 6).map((n) => (
+              {card.tokens.slice(0, capacity.squigs).map((n) => (
                 <div
                   key={n}
                   style={{
@@ -228,7 +230,7 @@ export function renderCollectorShare(
             </div>
             {!card.tokens.length && (
               <div style={{ display: 'flex', fontSize: 16 }}>
-                No public favourites selected.
+                No public Squigs to display.
               </div>
             )}
           </div>
@@ -278,7 +280,7 @@ export function renderCollectorShare(
               COMPLETED SETS
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {layout.sets.slice(0, 9).map((s) => (
+              {layout.sets.slice(0, capacity.sets).map((s) => (
                 <div
                   key={s.key}
                   style={{

@@ -1,7 +1,12 @@
 import { favoriteTokenIds } from './favorites';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
-import { highestFamilyBadges } from './achievement-badges';
+import { shareCapacity } from '@/domain/share-capacity';
+import {
+  rankedShareAchievements,
+  rankedShareSets,
+  favoriteFirst,
+} from './share-selection';
 import { setIcons } from '@/domain/set-icons';
 import { threadIcon } from '@/domain/thread-icons';
 import { resolveShareStyle } from '@/domain/share-styles';
@@ -206,6 +211,7 @@ export async function shareCard(
         : [],
   };
   if (q.kind === 'collector') {
+    const capacity = shareCapacity(q.ratio);
     const available =
       p?.status === 'ready'
         ? p.cards.filter((a) => a.unlocked && a.badge.status === 'earned')
@@ -219,7 +225,7 @@ export async function shareCard(
       return null;
     const chosen = badgeKeys
       ? badgeKeys.map((key) => available.find((a) => a.key === key)!)
-      : highestFamilyBadges(available);
+      : rankedShareAchievements(available, capacity.achievements);
     const completed =
       d?.status === 'ready'
         ? d.cards.filter((s) => s.complete && s.revealed)
@@ -229,9 +235,7 @@ export async function shareCard(
       return null;
     const chosenSets = setKeys
       ? setKeys.map((key) => completed.find((s) => s.key === key)!)
-      : [...completed]
-          .sort((a, b) => Number(b.featured) - Number(a.featured))
-          .slice(0, 9);
+      : rankedShareSets(completed, capacity.sets);
     card.achievementBadges = chosen.flatMap((a) =>
       a.badge.status === 'earned' ? [a.badge] : [],
     );
@@ -249,7 +253,23 @@ export async function shareCard(
         icon: setIcons[s.key] ?? '/icons/status/completes-set.png',
       })),
     };
-    card.tokens = featured.slice(0, 6);
+    const ranked = permitTokens
+      ? await db().squig.findMany({
+          where: await currentCollectionScope(c.id),
+          orderBy: [
+            { mawRank: { sort: 'asc', nulls: 'last' } },
+            { uglyPoints: { sort: 'desc', nulls: 'last' } },
+            { tokenId: 'asc' },
+          ],
+          select: { tokenId: true },
+          take: capacity.squigs,
+        })
+      : [];
+    card.tokens = favoriteFirst(
+      featured,
+      ranked.map((s) => s.tokenId),
+      capacity.squigs,
+    );
     card.path =
       '/share?' +
       shareQuery({
