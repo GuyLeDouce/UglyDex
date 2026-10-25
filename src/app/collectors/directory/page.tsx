@@ -23,7 +23,7 @@ export default async function Directory({
         </p>
         <Link href="/collectors">Field Guide leaderboard →</Link>
       </section>
-      <UglyUsers page={page} path="/collectors/directory" />
+      <UglyUsers page={page} path="/collectors/directory" includeDiscovered />
     </>
   );
 }

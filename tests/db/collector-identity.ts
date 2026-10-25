@@ -11,7 +11,7 @@ import {
   collectionSummary,
 } from '../../src/server/collections';
 import { collectorProfile } from '../../src/server/profiles';
-import { uglyUsers } from '../../src/server/community';
+import { uglyUsers, collectorDirectory } from '../../src/server/community';
 import { saveProfile } from '../../src/server/settings';
 export async function collectorIdentityTests(
   check: (value: unknown, message: string) => void,
@@ -67,11 +67,33 @@ export async function collectorIdentityTests(
     profile.status === 'ready' && profile.profile.unclaimed,
     'unclaimed public projection available',
   );
-  const directory = await uglyUsers(1);
+  const directory = await collectorDirectory(1);
   check(
-    directory.pages > 0,
+    directory.users.some((u) => u.slug === first.collector.slug),
     'public directory includes discovery records without progression',
   );
+  check(
+    !(await uglyUsers()).users.some((u) => u.slug === first.collector.slug),
+    'automatic holder discovery does not create an UglyUser',
+  );
+  await db().collectorWallet.create({
+    data: {
+      collectorId: first.collectorId,
+      walletAddress: a,
+      chainId: 1,
+      source: 'SIWE',
+      verifiedAt: new Date(),
+      status: 'REVOKED',
+      revokedAt: new Date(),
+    },
+  });
+  check(
+    (await uglyUsers()).users.some((u) => u.slug === first.collector.slug),
+    'previous SIWE user remains an UglyUser after unlinking',
+  );
+  await db().collectorWallet.deleteMany({
+    where: { collectorId: first.collectorId },
+  });
   const before = await db().discoveredWallet.count();
   await backfillHolders({ dryRun: true, limit: 500 });
   check(

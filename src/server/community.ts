@@ -9,14 +9,25 @@ import { shareCard } from './sharing';
 
 export const COMMUNITY_PAGE_SIZE = 12;
 export async function uglyUsers(page = 1) {
+  return collectorListing(page, false);
+}
+export async function collectorDirectory(page = 1) {
+  return collectorListing(page, true);
+}
+async function collectorListing(page: number, includeDiscovered: boolean) {
+  // Discovery and imported verification are not evidence of a visit to UglyDex.
+  // Keep past SIWE sign-ins eligible even after a wallet has been unlinked.
+  const signedIn: Prisma.CollectorWhereInput[] = [
+    { identities: { some: { authenticatedAt: { not: null } } } },
+    { wallets: { some: { source: 'SIWE' } } },
+    { sessions: { some: {} } },
+  ];
   const where: Prisma.CollectorWhereInput = {
     isPublic: true,
     mergedIntoCollectorId: null,
-    OR: [
-      { identities: { some: { authenticatedAt: { not: null } } } },
-      { wallets: { some: { source: 'SIWE', status: 'ACTIVE' } } },
-      { discoveredWallets: { some: {} } },
-    ],
+    OR: includeDiscovered
+      ? [...signedIn, { discoveredWallets: { some: {} } }]
+      : signedIn,
   };
   return db().$transaction(
     async (tx) => {

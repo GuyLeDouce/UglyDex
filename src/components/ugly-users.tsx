@@ -1,21 +1,26 @@
 import Link from 'next/link';
-import { uglyUsers } from '@/server/community';
+import { uglyUsers, collectorDirectory } from '@/server/community';
 import { Artwork } from './artwork';
 
 export async function UglyUsers({
   page = 1,
   path = '/',
+  includeDiscovered = false,
 }: {
   page?: number;
   path?: string;
+  includeDiscovered?: boolean;
 }) {
+  const title = includeDiscovered ? 'Collectors' : 'UglyUsers';
   let result;
   try {
-    result = await uglyUsers(page);
+    result = await (includeDiscovered
+      ? collectorDirectory(page)
+      : uglyUsers(page));
   } catch {
     return (
       <section id="uglyusers" className="panel">
-        <h2>UglyUsers</h2>
+        <h2>{title}</h2>
         <p>Users are temporarily unavailable.</p>
       </section>
     );
@@ -27,7 +32,7 @@ export async function UglyUsers({
       aria-labelledby="ugly-users-title"
     >
       <div className="section-heading">
-        <h2 id="ugly-users-title">UglyUsers</h2>
+        <h2 id="ugly-users-title">{title}</h2>
       </div>
       <ul className="ugly-users-grid">
         {result.users.map((user) => (
@@ -44,7 +49,7 @@ export async function UglyUsers({
         <p>Make your profile public to join the UglyUsers.</p>
       )}
       {result.pages > 1 && (
-        <nav className="pagination" aria-label="UglyUsers pages">
+        <nav className="pagination" aria-label={`${title} pages`}>
           {result.page > 1 ? (
             <Link href={`${path}?usersPage=${result.page - 1}#uglyusers`}>
               ← Previous
