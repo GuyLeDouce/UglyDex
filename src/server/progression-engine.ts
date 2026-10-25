@@ -1,3 +1,4 @@
+import { recalculationErrorCode } from './recalculation-error';
 import 'server-only';
 import { db } from './db';
 import { collectionDiscoveries } from './dex-engine';
@@ -438,7 +439,7 @@ export async function rebuildSubject(subject: Subject, id: string) {
       where: { id: run.id },
       data: {
         status: 'FAILED',
-        errorCode: 'PROGRESSION_EVALUATION_FAILED',
+        errorCode: recalculationErrorCode(cause),
         finishedAt: new Date(),
       },
     });
@@ -447,12 +448,12 @@ export async function rebuildSubject(subject: Subject, id: string) {
       create: {
         subjectType: subject,
         subjectId: id,
-        errorCode: 'EVALUATION_FAILED',
+        errorCode: recalculationErrorCode(cause),
         attempts: 1,
       },
       update: {
         attempts: { increment: 1 },
-        errorCode: 'EVALUATION_FAILED',
+        errorCode: recalculationErrorCode(cause),
         queuedAt: new Date(),
       },
     });
@@ -463,9 +464,15 @@ export async function processProgression(
   limit = 50,
   shouldStop = () => false,
   subject?: Subject,
+  maxAttempts?: number,
 ) {
   const jobs = await db().progressionJob.findMany({
-    where: subject ? { subjectType: subject } : {},
+    where: {
+      ...(subject ? { subjectType: subject } : {}),
+      ...(maxAttempts === undefined
+        ? {}
+        : { OR: [{ errorCode: null }, { attempts: { lt: maxAttempts } }] }),
+    },
     orderBy: { queuedAt: 'asc' },
     take: limit,
   });

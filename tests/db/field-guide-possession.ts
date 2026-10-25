@@ -400,7 +400,29 @@ export async function fieldGuidePossessionTests(
     })),
     'same deployment restart does not requeue completed profiles',
   );
+  await db().collectionJob.update({
+    where: { collectorId: c.id },
+    data: { attempts: 9, errorCode: 'P2028' },
+  });
+  await queueCollections(false, replayId);
+  check(
+    (
+      await db().collectionJob.findUniqueOrThrow({
+        where: { collectorId: c.id },
+      })
+    ).attempts === 9,
+    'resume preserves failed-job budget',
+  );
   while (!(await queueCollections(false, 'test-next-deployment'))) {}
+  check(
+    (
+      await db().collectionJob.findUniqueOrThrow({
+        where: { collectorId: c.id },
+      })
+    ).attempts === 0,
+    'new deployment renews failed-job retry budget',
+  );
+
   check(
     !!(await db().collectionJob.findUnique({
       where: { collectorId: unclaimed.id },

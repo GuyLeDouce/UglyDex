@@ -1,3 +1,4 @@
+import { recalculationErrorCode } from '../src/server/recalculation-error';
 import 'dotenv/config';
 import { setTimeout as delay } from 'node:timers/promises';
 import { recalculateOnStartup } from '../src/server/collection-startup';
@@ -10,15 +11,22 @@ try {
     try {
       await recalculateOnStartup(stop.signal);
       break;
-    } catch {
+    } catch (error) {
+      if (stop.signal.aborted) break;
+      const code = recalculationErrorCode(error);
       console.error(
         JSON.stringify({
           event: 'collections.startup_retry',
           attempt,
-          code: 'CHECK_COLLECTION_DIAGNOSTICS',
+          code,
         }),
       );
-      if (attempt === 5) {
+      if (
+        attempt === 5 ||
+        code === 'COLLECTION_STARTUP_BLOCKED' ||
+        code === 'DEPLOYMENT_IDENTITY_MISMATCH' ||
+        code === 'RULESET_VERSION_BUMP_REQUIRED'
+      ) {
         process.exitCode = 1;
         break;
       }

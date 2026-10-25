@@ -1,3 +1,4 @@
+import { RULESET as PROGRESSION_RULESET } from '@/domain/progression';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
@@ -40,7 +41,10 @@ export default async function Page({
           set: { ruleset: R, mode: 'CURRENT_HOLDING' },
         },
       }),
-      db().collectionJob.findMany({ orderBy: { queuedAt: 'asc' }, take: 25 }),
+      db().collectionJob.findMany({
+        orderBy: [{ attempts: 'desc' }, { queuedAt: 'asc' }],
+        take: 25,
+      }),
       db().syncRun.findMany({
         where: { source: `collections:${R}` },
         orderBy: { startedAt: 'desc' },
@@ -48,6 +52,36 @@ export default async function Page({
       }),
       db().collectionReplay.findUnique({ where: { id: R } }),
     ]);
+  const [
+    startupReplays,
+    achievementJobs,
+    achievementRuns,
+    collectionFailures,
+    achievementFailures,
+  ] = await Promise.all([
+    db().collectionReplay.findMany({
+      where: { id: { startsWith: 'startup:' } },
+      orderBy: { updatedAt: 'desc' },
+      take: 5,
+    }),
+    db().progressionJob.findMany({
+      where: { subjectType: 'COLLECTOR' },
+      orderBy: { queuedAt: 'asc' },
+      take: 25,
+    }),
+    db().syncRun.findMany({
+      where: {
+        source: `progression:${PROGRESSION_RULESET}`,
+        status: { in: ['FAILED', 'INTERRUPTED'] },
+      },
+      orderBy: { startedAt: 'desc' },
+      take: 20,
+    }),
+    db().collectionJob.count({ where: { errorCode: { not: null } } }),
+    db().progressionJob.count({
+      where: { subjectType: 'COLLECTOR', errorCode: { not: null } },
+    }),
+  ]);
   const view = id.success ? await dexView(id.data) : null;
   const evidence = id.success
     ? await db().collectorSetProgress.findMany({
@@ -122,6 +156,21 @@ export default async function Page({
           <pre>{JSON.stringify(e, null, 2)}</pre>
         </details>
       ))}
+      <h2>Deployment recalculation</h2>
+      <p>
+        {collectionFailures} failed collection jobs · {achievementFailures}{' '}
+        failed collector achievement jobs.
+      </p>
+      <p>
+        Checkpoints track enqueueing, not completed evaluations. Persistent
+        failures remain queued; healthy profiles continue. Safe error codes
+        identify configuration, timeout, contention or evidence problems.
+      </p>
+      <pre className="panel">{JSON.stringify(startupReplays, null, 2)}</pre>
+      <h2>Pending / failed collector achievements</h2>
+      <pre className="panel">{JSON.stringify(achievementJobs, null, 2)}</pre>
+      <h2>Recent achievement failures / interruptions</h2>
+      <pre className="panel">{JSON.stringify(achievementRuns, null, 2)}</pre>
       <h2>Pending / failed evaluations</h2>
       <pre className="panel">{JSON.stringify(jobs, null, 2)}</pre>
       <h2>Recent runs</h2>
