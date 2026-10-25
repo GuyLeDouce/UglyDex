@@ -1,3 +1,9 @@
+import {
+  progressionFacts,
+  seedProgression,
+  rebuildSubject,
+} from '../../src/server/progression-engine';
+import { evaluate } from '../../src/domain/progression';
 import { db } from '../../src/server/db';
 import {
   collectionEvidence,
@@ -193,6 +199,36 @@ export async function fieldGuidePossessionTests(
     revoked.historical.length === 315 && revoked.current.length === 0,
     'unlink retains valid historical possession but removes current holdings',
   );
+  const evidence = await progressionFacts(db(), 'COLLECTOR', c.id);
+  check(
+    evidence.facts.filter((f) => f.type === 'DISCOVERY').length === 315,
+    'achievement discoveries match lifetime Field Guide total after sale and unlink',
+  );
+  const awards = evaluate('COLLECTOR', evidence.facts, evidence.gates).awards;
+  check(
+    awards.find((a) => a.definition.name === 'Walking Encyclopedia')?.unlocked,
+    '315 discoveries unlock the 250 discovery achievement',
+  );
+  check(
+    !awards.find((a) => a.definition.name === 'The Living Dex')?.unlocked,
+    '315 discoveries do not unlock the 500 discovery achievement',
+  );
+  await seedProgression();
+  await rebuildSubject('COLLECTOR', c.id);
+  const xp = (
+    await db().collectorProgress.findUniqueOrThrow({
+      where: { collectorId: c.id },
+    })
+  ).xp;
+  await rebuildSubject('COLLECTOR', c.id);
+  check(
+    (
+      await db().collectorProgress.findUniqueOrThrow({
+        where: { collectorId: c.id },
+      })
+    ).xp === xp,
+    'repeated achievement recalculation never duplicates discovery XP',
+  );
   // Canonical rewind invalidates the attributed discovery when removing its source.
   await db().squigDiscovery.updateMany({
     where: { collectorId: c.id, squigId: ids[0] },
@@ -217,6 +253,12 @@ export async function fieldGuidePossessionTests(
     where: { walletAddress: wallet },
     data: { isCurrent: false },
   });
+  check(
+    (await progressionFacts(db(), 'COLLECTOR', c.id)).facts.filter(
+      (f) => f.type === 'DISCOVERY',
+    ).length === 313,
+    'achievement discovery evidence follows explicit retractions',
+  );
   const unclaimed = await db().collector.create({
     data: { slug: 'startup-unclaimed' },
   });

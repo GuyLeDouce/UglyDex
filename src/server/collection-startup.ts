@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { COLLECTION_RULESET } from '@/domain/dex';
 import { assertDeploymentBinding } from './deployment';
 import { db } from './db';
+import { seedProgression, processProgression } from './progression-engine';
 import {
   seedCollections,
   queueCollections,
@@ -24,6 +25,7 @@ export function startupReplayId(
 export async function recalculateOnStartup(signal: AbortSignal) {
   await assertDeploymentBinding();
   await seedCollections();
+  await seedProgression();
   const replayId = startupReplayId();
   let queued = false;
   do {
@@ -31,17 +33,33 @@ export async function recalculateOnStartup(signal: AbortSignal) {
     queued = !!(await queueCollections(false, replayId));
     // Small batches yield between transactions; interrupted jobs remain durable.
     const counts = await processCollections(10, () => signal.aborted);
+    const progression = await processProgression(
+      10,
+      () => signal.aborted,
+      'COLLECTOR',
+    );
     console.log(
       JSON.stringify({
         event: 'collections.startup_batch',
         replayId,
         queued,
         ...counts,
+        progression,
       }),
     );
-    if (counts.failed || counts.deferred)
+    if (
+      counts.failed ||
+      counts.deferred ||
+      progression.failed ||
+      progression.deferred
+    )
       throw new Error('COLLECTION_STARTUP_RETRY');
-  } while (!queued || (await db().collectionJob.count()) > 0);
+  } while (
+    !queued ||
+    (await db().collectionJob.count()) > 0 ||
+    (await db().progressionJob.count({ where: { subjectType: 'COLLECTOR' } })) >
+      0
+  );
   console.log(
     JSON.stringify({ event: 'collections.startup_complete', replayId }),
   );

@@ -366,8 +366,8 @@ export async function phase4DatabaseTests(
       await db().collectorProgress.findUniqueOrThrow({
         where: { collectorId: c.id },
       })
-    ).xp === 0n,
-    'dirty provenance gates discoveries',
+    ).xp === 100n,
+    'unfinished transfer reconstruction preserves recorded discovery XP',
   );
   await db().squigProvenance.update({
     where: { squigId: s.id },

@@ -5,17 +5,26 @@ const mocks = vi.hoisted(() => ({
   queue: vi.fn(),
   process: vi.fn(),
   count: vi.fn(),
+  progression: vi.fn(),
+  progressionCount: vi.fn(),
 }));
 vi.mock('../src/server/deployment', () => ({
   assertDeploymentBinding: mocks.binding,
 }));
 vi.mock('../src/server/db', () => ({
-  db: () => ({ collectionJob: { count: mocks.count } }),
+  db: () => ({
+    collectionJob: { count: mocks.count },
+    progressionJob: { count: mocks.progressionCount },
+  }),
 }));
 vi.mock('../src/server/dex-engine', () => ({
   seedCollections: mocks.seed,
   queueCollections: mocks.queue,
   processCollections: mocks.process,
+}));
+vi.mock('../src/server/progression-engine', () => ({
+  seedProgression: vi.fn(),
+  processProgression: mocks.progression,
 }));
 import {
   recalculateOnStartup,
@@ -26,6 +35,8 @@ beforeEach(() => {
   mocks.queue.mockResolvedValue(new Date());
   mocks.process.mockResolvedValue({ processed: 1, failed: 0, deferred: 0 });
   mocks.count.mockResolvedValue(0);
+  mocks.progressionCount.mockResolvedValue(0);
+  mocks.progression.mockResolvedValue({ processed: 1, failed: 0, deferred: 0 });
 });
 it('uses a stable per-deployment checkpoint shared by replicas', () => {
   expect(startupReplayId({ RAILWAY_DEPLOYMENT_ID: 'a' })).toBe(
@@ -66,4 +77,21 @@ it('stops before enqueue on shutdown', async () => {
   controller.abort();
   await recalculateOnStartup(controller.signal);
   expect(mocks.queue).not.toHaveBeenCalled();
+});
+
+it('waits for collector achievement jobs after collection jobs drain', async () => {
+  mocks.progressionCount.mockResolvedValueOnce(1).mockResolvedValueOnce(0);
+  await recalculateOnStartup(new AbortController().signal);
+  expect(mocks.progression).toHaveBeenCalledTimes(2);
+  expect(mocks.progression).toHaveBeenCalledWith(
+    10,
+    expect.any(Function),
+    'COLLECTOR',
+  );
+});
+it('retries achievement failures instead of reporting completion', async () => {
+  mocks.progression.mockResolvedValue({ processed: 0, failed: 1, deferred: 0 });
+  await expect(
+    recalculateOnStartup(new AbortController().signal),
+  ).rejects.toThrow('COLLECTION_STARTUP_RETRY');
 });
