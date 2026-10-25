@@ -1,3 +1,4 @@
+import { collectorHandle } from '@/domain/profile';
 import { shareMetadata, absoluteUrl } from '@/server/sharing';
 export async function generateMetadata({
   params,
@@ -25,7 +26,9 @@ export default async function Page({
   return (
     <>
       <section className="page-heading">
-        <p className="eyebrow">@{c.slug} · COLLECTION FIELD GUIDE</p>
+        <p className="eyebrow">
+          {collectorHandle(c.slug, c.unclaimed)} · COLLECTION FIELD GUIDE
+        </p>
         <h1>{c.displayName ?? c.slug}&apos;s strange pursuits.</h1>
       </section>
       <DexScore view={view} />

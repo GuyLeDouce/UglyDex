@@ -1,3 +1,4 @@
+import { collectorHandle } from '@/domain/profile';
 import Link from 'next/link';
 import { Artwork } from '@/components/artwork';
 import { topCollectors } from '@/server/community';
@@ -52,7 +53,7 @@ export default async function TopCollectors({
               <Artwork src={c.avatar} alt="" avatar />
               <div className="collector-rank-name">
                 <h2>{c.displayName || c.slug}</h2>
-                <p>@{c.slug}</p>
+                <p>{collectorHandle(c.slug, c.unclaimed)}</p>
                 <small>{c.discovered.toLocaleString()} Squigs discovered</small>
               </div>
               <div className="collector-rank-score">

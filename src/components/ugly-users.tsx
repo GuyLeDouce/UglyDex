@@ -35,7 +35,7 @@ export async function UglyUsers({
             <Link href={'/collector/' + user.slug}>
               <Artwork src={user.avatar} alt="" avatar />
               <span>{user.displayName || user.slug}</span>
-              {user.unclaimed && <small>Unclaimed holder</small>}
+              {user.unclaimed && <small>Unverified Squig Holder</small>}
             </Link>
           </li>
         ))}

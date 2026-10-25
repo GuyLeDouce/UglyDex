@@ -250,7 +250,12 @@ export async function publicSetCollector(slug: string) {
     select: { id: true, ...publicNameSelect },
   });
   return c
-    ? { id: c.id, slug: c.slug, displayName: publicCollectorName(c) }
+    ? {
+        id: c.id,
+        slug: c.slug,
+        displayName: publicCollectorName(c),
+        unclaimed: c.claimedAt === null && c.wallets.length === 0,
+      }
     : null;
 }
 export async function completionCount(key: string) {

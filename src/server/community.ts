@@ -245,7 +245,13 @@ export async function topCollectors(page = 1) {
             where: { slug: { in: rows.map((r) => r.slug) } },
             select: publicNameSelect,
           })
-        ).map((c) => [c.slug, publicCollectorName(c)]),
+        ).map((c) => [
+          c.slug,
+          {
+            name: publicCollectorName(c),
+            unclaimed: c.claimedAt === null && c.wallets.length === 0,
+          },
+        ]),
       );
       return {
         page,
@@ -253,7 +259,8 @@ export async function topCollectors(page = 1) {
         total: Number(count),
         collectors: rows.map((c) => ({
           ...c,
-          displayName: names.get(c.slug) || 'Collector',
+          displayName: names.get(c.slug)?.name || 'Collector',
+          unclaimed: names.get(c.slug)?.unclaimed ?? false,
           rank: Number(c.rank),
         })),
       };

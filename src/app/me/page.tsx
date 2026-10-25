@@ -1,3 +1,4 @@
+import { collectorHandle } from '@/domain/profile';
 import { RecalculateFieldGuide } from '@/components/recalculate-field-guide';
 import { appEnvironment } from '@/domain/deployment';
 import { DexSummary } from '@/components/dex';
@@ -56,7 +57,7 @@ export default async function Me() {
         <div>
           <p className="eyebrow">PRIVATE FIELD NOTES</p>
           <h1>{c.displayName || 'Your UglyDex'}</h1>
-          <p>@{c.slug}</p>
+          <p>{collectorHandle(c.slug, false)}</p>
         </div>
         <Link className="button" href="/settings/profile">
           Edit profile ↗
