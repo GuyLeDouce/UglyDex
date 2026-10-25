@@ -1,5 +1,6 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import 'server-only';
+import { recalculateSquigsOnStartup } from './squig-startup';
 import { createHash } from 'node:crypto';
 import { COLLECTION_RULESET } from '@/domain/dex';
 import { assertDeploymentBinding } from './deployment';
@@ -27,6 +28,7 @@ export async function recalculateOnStartup(signal: AbortSignal) {
   await assertDeploymentBinding();
   await seedCollections();
   await seedProgression();
+  await recalculateSquigsOnStartup(signal);
   const replayId = startupReplayId();
   let queued = false,
     stalled = 0;

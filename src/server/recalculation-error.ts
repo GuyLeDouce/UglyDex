@@ -7,6 +7,8 @@ export function recalculationErrorCode(error: unknown): string {
     'UNKNOWN_CANONICAL_TRAIT_REQUIRES_VERSION',
     'COLLECTIONS_NOT_SEEDED',
     'COLLECTION_STARTUP_BLOCKED',
+    'SQUIG_STARTUP_BLOCKED',
+    'SQUIG_STARTUP_STALLED',
     'COLLECTION_STARTUP_STALLED',
     'P1001',
     'P1002',

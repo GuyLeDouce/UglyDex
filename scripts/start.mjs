@@ -35,7 +35,7 @@ const artwork =
       )
     : null;
 artwork?.on('error', () => console.error('Artwork importer could not start.'));
-// Derived Field Guides only: no upstream imports, profile creation or migrations.
+// Rebuild derived Squig history/achievements, then Field Guides; no upstream imports or migrations.
 const collectionsEnabled =
   process.env.COLLECTIONS_RECALCULATE_ON_START === 'true' ||
   (process.env.APP_ENV === 'staging' &&
@@ -57,7 +57,7 @@ collections?.on('error', () =>
 collections?.on('exit', (code) => {
   if (code)
     console.error(
-      'Field Guide recalculation paused; inspect collection diagnostics.',
+      'History recalculation paused; inspect provenance and collection diagnostics.',
     );
 });
 for (const signal of ['SIGINT', 'SIGTERM'])
