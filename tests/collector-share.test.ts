@@ -48,10 +48,10 @@ it('renders the combined card in both shapes with all slots occupied', async () 
     description: '',
     stats: [],
     badges: [],
-    tokens: [1, 2, 3, 4, 5, 6],
+    tokens: Array.from({ length: 12 }, (_, i) => i + 1),
     path: '/collector/guy',
     indexable: true,
-    achievementBadges: Array.from({ length: 8 }, (_, i) => ({
+    achievementBadges: Array.from({ length: 14 }, (_, i) => ({
       key: [
         'collector-discoveries-1',
         'collector-discoveries-5',
@@ -78,7 +78,7 @@ it('renders the combined card in both shapes with all slots occupied', async () 
       completion: 43.2,
       squigs: 24,
       discovered: 137,
-      sets: Array.from({ length: 9 }, (_, i) => ({
+      sets: Array.from({ length: 21 }, (_, i) => ({
         key: String(i),
         name: [
           'First Specimen',

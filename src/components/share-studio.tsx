@@ -22,6 +22,7 @@ export function ShareStudio({
   milestones: string[];
   template: ShareSpec['template'];
 }) {
+  const [automatic, setAutomatic] = useState(true);
   const [kind, setKind] = useState<ShareSpec['kind']>('collector'),
     [privatePreview, setPrivatePreview] = useState(false),
     [key, setKey] = useState(''),
@@ -37,7 +38,7 @@ export function ShareStudio({
     template,
     entity: slug,
     kind,
-    ...(kind === 'collector'
+    ...(kind === 'collector' && !automatic
       ? { achievements: selected.join(','), sets: selectedSets.join(',') }
       : key
         ? { key }
@@ -64,6 +65,23 @@ export function ShareStudio({
         </select>
       </label>
       {kind === 'collector' && (
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={automatic}
+            onChange={(e) => setAutomatic(e.target.checked)}
+          />
+          Automatically choose my highest achievements and sets for the selected
+          shape
+        </label>
+      )}
+      {kind === 'collector' && (
+        <p>
+          Favorites appear first, followed by your highest-ranked owned Squigs.
+          Landscape fits 6 Squigs; square fits 12.
+        </p>
+      )}
+      {kind === 'collector' && !automatic && (
         <fieldset>
           <legend>
             Earned achievements · {selected.length}/{COLLECTOR_BADGE_LIMIT}{' '}
@@ -102,7 +120,7 @@ export function ShareStudio({
           {!achievements.length && <p>No earned achievements available yet.</p>}
         </fieldset>
       )}
-      {kind === 'collector' && (
+      {kind === 'collector' && !automatic && (
         <fieldset>
           <legend>Completed sets · {selectedSets.length}/9 selected</legend>
           <p>
