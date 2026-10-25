@@ -79,7 +79,29 @@ export async function communityVisible(slug: string) {
 
 // Read earned projections; no event duplication, XP writes or automatic publishing
 // to external services. Re-evaluate visibility and eligibility on every request.
-export async function collectorThread(page = 1) {
+export async function collectorThread(page = 1, collectorSlug?: string) {
+  page = Number.isSafeInteger(page) && page > 0 ? page : 1;
+  // Filter before pagination. A profile must never fall back to the global feed.
+  const scope =
+    collectorSlug === undefined
+      ? Prisma.empty
+      : Prisma.sql`
+    AND (c.slug = ${collectorSlug} OR (e.kind = 'transfer' AND EXISTS (
+      SELECT 1 FROM "Collector" owner
+      WHERE owner.slug = ${collectorSlug} AND owner."isPublic"
+        AND owner."showCommunityActivity" AND owner."showWallets"
+        AND owner."mergedIntoCollectorId" IS NULL
+        AND (
+          EXISTS (SELECT 1 FROM "CollectorWallet" w
+            WHERE w."collectorId" = owner.id AND w.status = 'ACTIVE'
+              AND w."revokedAt" IS NULL AND w."chainId" = transfer."chainId"
+              AND w."walletAddress" IN (transfer."fromAddress", transfer."toAddress"))
+          OR EXISTS (SELECT 1 FROM "DiscoveredWallet" w
+            WHERE w."collectorId" = owner.id AND w."chainId" = transfer."chainId"
+              AND w."walletAddress" IN (transfer."fromAddress", transfer."toAddress"))
+        )
+    )))
+  `;
   const rows = await db().$queryRaw<
     {
       slug: string;
@@ -130,7 +152,8 @@ export async function collectorThread(page = 1) {
     ) e LEFT JOIN "Collector" c ON c.id=e."collectorId"
     LEFT JOIN "NftTransfer" transfer ON e.kind='transfer' AND transfer.id=e.key
     LEFT JOIN "Squig" art ON art.id=transfer."squigId"
-    WHERE e.kind = 'transfer' OR (c."isPublic" AND c."showCommunityActivity" AND c."mergedIntoCollectorId" IS NULL)
+    WHERE (e.kind = 'transfer' OR (c."isPublic" AND c."showCommunityActivity" AND c."mergedIntoCollectorId" IS NULL))
+    ${scope}
     ORDER BY e.at DESC, c.slug ASC, e.kind ASC, e.key ASC
     LIMIT ${COMMUNITY_PAGE_SIZE + 1} OFFSET ${(page - 1) * COMMUNITY_PAGE_SIZE}
   `);

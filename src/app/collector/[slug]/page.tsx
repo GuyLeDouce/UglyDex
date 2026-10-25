@@ -1,3 +1,4 @@
+import { CollectorThread } from '@/components/collector-thread';
 import { collectorHandle } from '@/domain/profile';
 import { ShareControls } from '@/components/share-controls';
 import { absoluteUrl } from '@/server/sharing';
@@ -28,6 +29,7 @@ export async function generateMetadata({
 }
 export default async function Collector({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
   searchParams: Promise<SearchParams>;
@@ -43,6 +45,11 @@ export default async function Collector({
       </section>
     );
   const p = r.profile;
+  const { threadPage } = await searchParams;
+  const page =
+    typeof threadPage === 'string' && /^\d{1,4}$/.test(threadPage)
+      ? Math.max(1, Number(threadPage))
+      : 1;
   const [style, editions] = await Promise.all([
     appearance(r.collectorId),
     ownedEditions(r.collectorId, true),
@@ -138,6 +145,7 @@ export default async function Collector({
         </section>
       )}
       <GalleryShowcase id={r.collectorId} slug={p.slug} />
+      <CollectorThread collectorSlug={p.slug} page={page} />
       <CollectorActivityPreview id={r.collectorId} slug={p.slug} />
       {r.collectionVisibility === 'FULL' && (
         <Link className="button" href={'/collector/' + p.slug + '/collection'}>

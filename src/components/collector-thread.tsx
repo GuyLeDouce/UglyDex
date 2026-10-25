@@ -8,13 +8,23 @@ import { collectorThread } from '@/server/community';
 export async function CollectorThread({
   page = 1,
   preview = false,
+  collectorSlug,
 }: {
   page?: number;
   preview?: boolean;
+  collectorSlug?: string;
 }) {
+  const threadPath =
+    collectorSlug === undefined
+      ? '/thread'
+      : `/collector/${encodeURIComponent(collectorSlug)}`;
+  const pageLink = (number: number) =>
+    collectorSlug === undefined
+      ? `${threadPath}?page=${number}`
+      : `${threadPath}?threadPage=${number}#collector-thread`;
   let result;
   try {
-    result = await collectorThread(page);
+    result = await collectorThread(page, collectorSlug);
   } catch {
     return (
       <section className="panel">
@@ -25,6 +35,7 @@ export async function CollectorThread({
   }
   return (
     <section
+      id="collector-thread"
       className="collector-thread"
       aria-labelledby="collector-thread-title"
     >
@@ -34,10 +45,14 @@ export async function CollectorThread({
           <p className="eyebrow">EARNED IN THE WILD</p>
           <h2 id="collector-thread-title">Collector thread</h2>
         </div>
-        <Link href="/settings/profile">Sharing settings →</Link>
+        {collectorSlug === undefined && (
+          <Link href="/settings/profile">Sharing settings →</Link>
+        )}
       </div>
       <p>
-        Achievements, completed sets, milestones, and confirmed Squig transfers.
+        {collectorSlug === undefined
+          ? 'Achievements, completed sets, milestones, and confirmed Squig transfers from across the community.'
+          : 'This collector’s achievements, completed sets, milestones, and public wallet transfers.'}{' '}
         Updates every 30 seconds while this page is visible; transfers appear
         after indexing.
       </p>
@@ -127,7 +142,11 @@ export async function CollectorThread({
       </div>
       {!result.cards.length && (
         <div className="empty-state">
-          <h3>The next milestone could be yours.</h3>
+          <h3>
+            {collectorSlug === undefined
+              ? 'The next milestone could be yours.'
+              : 'No public updates yet.'}
+          </h3>
           <p>
             Achievements, completed sets, and indexed transfers appear here
             automatically. Public collector milestones respect their sharing
@@ -136,19 +155,15 @@ export async function CollectorThread({
         </div>
       )}
       {preview ? (
-        <Link className="button" href="/thread">
+        <Link className="button" href={threadPath}>
           Open the collector thread →
         </Link>
       ) : (
         <nav className="pagination" aria-label="Collector thread pages">
-          {page > 1 ? (
-            <Link href={`/thread?page=${page - 1}`}>← Newer</Link>
-          ) : (
-            <span />
-          )}
+          {page > 1 ? <Link href={pageLink(page - 1)}>← Newer</Link> : <span />}
           <span>Page {page}</span>
           {result.hasMore ? (
-            <Link href={`/thread?page=${page + 1}`}>Older →</Link>
+            <Link href={pageLink(page + 1)}>Older →</Link>
           ) : (
             <span />
           )}
