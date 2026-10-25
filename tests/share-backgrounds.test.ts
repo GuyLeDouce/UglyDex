@@ -6,6 +6,7 @@ import { renderShare } from '../src/server/share-render';
 import {
   resolveShareStyle,
   shareStyleLabels,
+  type ShareStyle,
 } from '../src/domain/share-styles';
 import { resolveAppearance } from '../src/domain/cosmetics';
 import type { ShareCard } from '../src/domain/sharing';
@@ -53,6 +54,8 @@ const originals = [
   ],
 ] as const;
 
+const allStyles = Object.keys(shareStyleLabels) as ShareStyle[];
+
 describe('supplied sharing backgrounds', () => {
   it.each(originals)(
     '%s embeds the original supplied PNG without a remote fetch',
@@ -78,10 +81,10 @@ describe('supplied sharing backgrounds', () => {
     expect(resolveShareStyle('clean', 'ugly')).toBe('clean');
   });
   it.each(['landscape', 'square'] as const)(
-    'renders three distinct backgrounds in %s exports',
+    'renders all distinct backgrounds in %s exports',
     async (ratio) => {
       const samples = [];
-      for (const [template] of originals) {
+      for (const template of allStyles) {
         const png = Buffer.from(
           await renderShare(card, { ratio, template }, {}).arrayBuffer(),
         );
@@ -96,7 +99,7 @@ describe('supplied sharing backgrounds', () => {
           .toBuffer();
         samples.push(createHash('sha256').update(strip).digest('hex'));
       }
-      expect(new Set(samples).size).toBe(3);
+      expect(new Set(samples).size).toBe(allStyles.length);
     },
     30000,
   );
@@ -110,7 +113,7 @@ describe('share download style selection', () => {
     mocks.shareLimit.mockResolvedValue(undefined);
     mocks.sharePng.mockResolvedValue(new Uint8Array([137, 80, 78, 71]));
   });
-  it.each(['clean', 'ugly', 'stats'] as const)(
+  it.each(allStyles)(
     'honors an explicit %s selection over a saved preference',
     async (template) => {
       const response = await GET(

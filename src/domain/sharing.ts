@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { shareStyleLabels, type ShareStyle } from './share-styles';
 import { slugSchema } from './profile';
 export const gallerySchema = z
   .object({
@@ -94,7 +95,9 @@ export const shareSchema = z
       )
       .optional(),
     ratio: z.enum(['landscape', 'square']).default('landscape'),
-    template: z.enum(['clean', 'ugly', 'stats']).default('clean'),
+    template: z
+      .enum(Object.keys(shareStyleLabels) as [ShareStyle, ...ShareStyle[]])
+      .default('clean'),
     preset: z
       .enum(['featured', 'points', 'recent', 'random'])
       .default('featured'),
@@ -124,7 +127,7 @@ export type ShareCard = {
   };
   achievementIcons?: { key: string; name: string; icon: string }[];
   achievementBadges?: import('./achievement-badges').VisibleAchievementBadge[];
-  appearance?: { accent: string; share: 'clean' | 'ugly' | 'stats' };
+  appearance?: { accent: string; share: ShareStyle };
   variants?: Record<number, { uri: string; sha256: string }>;
   title: string;
   eyebrow: string;

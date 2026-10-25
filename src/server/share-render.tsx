@@ -51,7 +51,10 @@ export function renderShare(
           width: '100%',
           height: '100%',
           padding: 48,
-          background: spec.template === 'ugly' ? '#243d29' : '#171e28',
+          background: '#171e28',
+          backgroundImage: `url(${shareBackground(spec.template)})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
           color: '#f8efd9',
           fontFamily: 'sans-serif',
         }}
