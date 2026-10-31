@@ -240,6 +240,12 @@ export async function replayProof() {
     const changed =
       fingerprintDiff(input, middle).length ||
       fingerprintDiff(input, end).length;
+    const changedInputs = [
+      ...new Set([
+        ...fingerprintDiff(input, middle),
+        ...fingerprintDiff(input, end),
+      ]),
+    ].sort();
     if (lost) throw new Error('REPLAY_LOCK_LOST');
     const stable = !changed && !differences.length;
     await db().replayProof.update({
@@ -276,7 +282,15 @@ export async function replayProof() {
           'Completed Replay A/B; tracked evidence only',
           { id, input: hash(input) },
         );
-    if (!stable) throw new Error('REPLAY_UNSTABLE');
+    if (!stable) {
+      // Table names and hashes only; never log identity records or source rows.
+      log('launch.replay_unstable', {
+        runId: id,
+        changedInputs: changedInputs.join(','),
+        differences: differences.join(','),
+      });
+      throw new Error('REPLAY_UNSTABLE');
+    }
     return {
       id,
       status: 'VERIFIED',
@@ -287,8 +301,10 @@ export async function replayProof() {
     };
   } catch (e) {
     if (id) {
-      await db().replayProof.update({
-        where: { id },
+      await db().replayProof.updateMany({
+        // Preserve INPUTS_CHANGED / SEMANTIC_DIFFERENCE from a completed A/B
+        // comparison instead of replacing the diagnostic with a generic code.
+        where: { id, status: 'RUNNING' },
         data: {
           status: 'FAILED',
           finishedAt: new Date(),

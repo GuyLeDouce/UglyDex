@@ -59,7 +59,27 @@ export async function phase9ReplayTests(
       select: { squigId: true },
     }))
       await deriveToken(row.squigId);
-    const result = await replayProof();
+    const result = await replayProof().catch(async (error: unknown) => {
+      const proof = await db().replayProof.findFirst({
+        orderBy: { startedAt: 'desc' },
+        select: {
+          status: true,
+          errorCode: true,
+          inputHash: true,
+          replayA: true,
+          replayB: true,
+          differences: true,
+        },
+      });
+      // This runner only uses its disposable cluster. Export hashes/table names,
+      // not raw collector records, source credentials or private evidence.
+      await writeFile(
+        '.data/phase9-replay-failure.json',
+        JSON.stringify(proof, null, 2),
+      );
+      console.log(JSON.stringify({ event: 'test.replay_failed', ...proof }));
+      throw error;
+    });
     check(
       result.status === 'VERIFIED' && !result.differences.length,
       'complete Replay A/B stable on safe fixture database',
