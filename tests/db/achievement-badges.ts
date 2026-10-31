@@ -111,11 +111,23 @@ export async function achievementBadgeWebTests(
   ] as const) {
     const card = await shareCard({ kind, entity });
     check(
-      card?.achievementBadges?.length === 3 &&
+      card?.achievementBadges?.length === (kind === 'collector' ? 2 : 3) &&
         card.achievementBadges.every((b) => card.badges.includes(b.name)),
       `${kind} share captions match the selected badge artwork`,
     );
   }
+  const selectedCard = await shareCard({
+    kind: 'collector',
+    entity: c.slug,
+    achievements: 'collector-wins-25',
+  });
+  check(
+    selectedCard?.achievementBadges?.length === 1 &&
+      selectedCard.achievementBadges[0].key === 'collector-wins-25' &&
+      selectedCard.badges.includes('Certified Menace') &&
+      !selectedCard.badges.includes('Battle Regular'),
+    'explicit collector selection controls artwork and captions together',
+  );
   check(
     summary.status === 'ready' &&
       summary.badges.length === 7 &&

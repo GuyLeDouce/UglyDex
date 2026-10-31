@@ -124,20 +124,6 @@ async function replay(label: 'A' | 'B') {
   const started = Date.now();
   log('launch.replay', { stage: label, service: 'replay', status: 'STARTED' });
   await reattributePending();
-  await queueReplay(true);
-  while (!(await queueReplay())) {}
-  while (await db().progressionJob.count({ where: { errorCode: null } })) {
-    if ((await processProgression(50)).failed)
-      throw new Error('PROGRESSION_REPLAY_FAILED');
-  }
-  if (await db().progressionJob.count())
-    throw new Error('PROGRESSION_JOBS_REMAIN');
-  log('launch.replay', {
-    stage: label,
-    service: 'progression',
-    status: 'COMPLETE',
-    durationMs: Date.now() - started,
-  });
   await queueCollections(true);
   while (!(await queueCollections())) {}
   while (await db().collectionJob.count({ where: { errorCode: null } })) {
@@ -155,6 +141,22 @@ async function replay(label: 'A' | 'B') {
     status: 'COMPLETE',
     durationMs: Date.now() - started,
     rssBytes: process.memoryUsage().rss,
+  });
+  // Collections materialize discovery evidence and enqueue progression. Drain
+  // that dependency first so the final pass cannot leave newly queued XP work.
+  await queueReplay(true);
+  while (!(await queueReplay())) {}
+  while (await db().progressionJob.count({ where: { errorCode: null } })) {
+    if ((await processProgression(50)).failed)
+      throw new Error('PROGRESSION_REPLAY_FAILED');
+  }
+  if (await db().progressionJob.count())
+    throw new Error('PROGRESSION_JOBS_REMAIN');
+  log('launch.replay', {
+    stage: label,
+    service: 'progression',
+    status: 'COMPLETE',
+    durationMs: Date.now() - started,
   });
 }
 export async function replayProof() {
@@ -240,6 +242,12 @@ export async function replayProof() {
     const changed =
       fingerprintDiff(input, middle).length ||
       fingerprintDiff(input, end).length;
+    const changedInputs = [
+      ...new Set([
+        ...fingerprintDiff(input, middle),
+        ...fingerprintDiff(input, end),
+      ]),
+    ].sort();
     if (lost) throw new Error('REPLAY_LOCK_LOST');
     const stable = !changed && !differences.length;
     await db().replayProof.update({
@@ -276,7 +284,15 @@ export async function replayProof() {
           'Completed Replay A/B; tracked evidence only',
           { id, input: hash(input) },
         );
-    if (!stable) throw new Error('REPLAY_UNSTABLE');
+    if (!stable) {
+      // Table names and hashes only; never log identity records or source rows.
+      log('launch.replay_unstable', {
+        runId: id,
+        changedInputs: changedInputs.join(','),
+        differences: differences.join(','),
+      });
+      throw new Error('REPLAY_UNSTABLE');
+    }
     return {
       id,
       status: 'VERIFIED',
@@ -287,8 +303,10 @@ export async function replayProof() {
     };
   } catch (e) {
     if (id) {
-      await db().replayProof.update({
-        where: { id },
+      await db().replayProof.updateMany({
+        // Preserve INPUTS_CHANGED / SEMANTIC_DIFFERENCE from a completed A/B
+        // comparison instead of replacing the diagnostic with a generic code.
+        where: { id, status: 'RUNNING' },
         data: {
           status: 'FAILED',
           finishedAt: new Date(),

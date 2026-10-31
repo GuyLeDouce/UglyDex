@@ -110,8 +110,22 @@ export async function fieldGuidePossessionTests(
     (await collectionSummary(c.id)).discovered === 315,
     'current union fills missing discovery without duplicate counting',
   );
+  await seedProgression();
+  await rebuildSubject('COLLECTOR', c.id);
+  const beforeMaterialization = await progressionFacts(db(), 'COLLECTOR', c.id);
   await seedCollections();
   await rebuildCollection(c.id);
+  const afterMaterialization = await progressionFacts(db(), 'COLLECTOR', c.id);
+  check(
+    JSON.stringify(beforeMaterialization.facts) ===
+      JSON.stringify(afterMaterialization.facts),
+    'persisting current discovery preserves progression evidence identity',
+  );
+  const materializedReplay = await rebuildSubject('COLLECTOR', c.id);
+  check(
+    materializedReplay.created === 0 && materializedReplay.revoked === 0,
+    'materializing the same holding never revokes and regrants discovery XP',
+  );
   const summary = await collectionSummary(c.id),
     view = await dexView(c.id);
   check(

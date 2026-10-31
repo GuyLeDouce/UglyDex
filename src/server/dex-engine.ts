@@ -155,7 +155,9 @@ export async function collectionDiscoveries(tx: DerivedReadClient, id: string) {
       unique.set(held.squigId, {
         squigId: held.squigId,
         discoveredAt: held.discoveredAt,
-        firstOwnershipPeriod: 'possession:' + held.sourceKey,
+        // Materializing this same observation must not change progression's
+        // evidence identity (which participates in deterministic grant IDs).
+        firstOwnershipPeriod: 'discovery:' + held.sourceKey,
       });
   }
   return [...unique.values()].sort((a, b) =>

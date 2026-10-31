@@ -16,6 +16,14 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm run test:db -- --web --browser --catalog
+      - name: Preserve sanitized replay evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: replay-evidence
+          path: .data/phase9-replay*.json
+          if-no-files-found: ignore
+          retention-days: 14
       - run: npm run format:check
 
   identity:

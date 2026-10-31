@@ -239,6 +239,12 @@ export async function shareCard(
     card.achievementBadges = chosen.flatMap((a) =>
       a.badge.status === 'earned' ? [a.badge] : [],
     );
+    card.badges = [
+      ...new Set([
+        ...(p?.status === 'ready' && p.title ? [p.title] : []),
+        ...card.achievementBadges.map((badge) => badge.name),
+      ]),
+    ];
     card.collectorLayout = {
       avatar: c.avatar,
       level: p?.status === 'ready' ? p.level : null,
