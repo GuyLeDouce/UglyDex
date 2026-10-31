@@ -1,3 +1,4 @@
+import type { DerivedReadClient } from './derived-verification';
 import { favoriteTokenIds } from './favorites';
 import { collectionDiscoveries } from './dex-engine';
 import 'server-only';
@@ -81,18 +82,24 @@ export type SquigCardData = ReturnType<typeof cardDTO> & {
     lastLossIsChain: boolean;
   };
 };
-export async function activeAddresses(collectorId: string) {
+export async function activeAddresses(
+  collectorId: string,
+  reader: DerivedReadClient = db(),
+) {
   return (
-    await db().collectorWallet.findMany({
+    await reader.collectorWallet.findMany({
       where: { collectorId, status: 'ACTIVE', chainId: 1, revokedAt: null },
       select: { walletAddress: true },
     })
   ).map((w) => w.walletAddress);
 }
-export async function collectionAddresses(collectorId: string) {
-  const verified = await activeAddresses(collectorId);
+export async function collectionAddresses(
+  collectorId: string,
+  reader: DerivedReadClient = db(),
+) {
+  const verified = await activeAddresses(collectorId, reader);
   if (verified.length) return verified;
-  const holder = await db().collector.findFirst({
+  const holder = await reader.collector.findFirst({
     where: {
       id: collectorId,
       claimedAt: null,
@@ -364,65 +371,85 @@ export async function collectionPage(
 }
 export async function currentCollectionScope(
   collectorId: string,
+  reader: DerivedReadClient = db(),
 ): Promise<Prisma.SquigWhereInput> {
   return {
-    AND: [catalogScope, ownedScope(await collectionAddresses(collectorId))],
+    AND: [
+      catalogScope,
+      ownedScope(await collectionAddresses(collectorId, reader)),
+    ],
   };
 }
 export async function collectionSummary(collectorId: string) {
-  const where = await currentCollectionScope(collectorId);
-  const [stats, og, legendary, discovered, rarities, top, traits, recorded] =
-    await Promise.all([
-      db().squig.aggregate({
-        where,
-        _count: { _all: true, uglyPoints: true, og: true, legendary: true },
-        _sum: { uglyPoints: true },
-      }),
-      db().squig.count({ where: { ...where, og: true } }),
-      db().squig.count({ where: { ...where, legendary: true } }),
-      collectionDiscoveries(db(), collectorId).then((rows) => rows.length),
-      db().squig.groupBy({
-        by: ['rarityTier'],
-        where,
-        _count: { _all: true },
-        orderBy: { rarityTier: 'asc' },
-      }),
-      db().squig.findMany({
-        where,
-        select: cardSelect,
-        orderBy: collectionOrder('points-desc'),
-        take: 3,
-      }),
-      db().squigTrait.groupBy({
-        by: ['traitType', 'value'],
-        where: { squig: where, value: { notIn: ['None', 'none', ''] } },
-        _count: { _all: true },
-        orderBy: { _count: { value: 'desc' } },
-        take: 5,
-      }),
-      db().squigDiscovery.count({
-        where: { collectorId, everOwned: true, squig: catalogScope },
-      }),
-    ]);
-  return {
-    owned: stats._count._all,
-    uglyPoints:
-      stats._count.uglyPoints === stats._count._all
-        ? Number(stats._sum.uglyPoints ?? 0)
-        : null,
-    og: stats._count.og === stats._count._all ? og : null,
-    legendary: stats._count.legendary === stats._count._all ? legendary : null,
-    discovered,
-    unresolvedDiscoveries: Math.max(0, recorded - discovered),
-    rarities: rarities.map((r) => ({
-      name: r.rarityTier ?? 'Unclassified',
-      count: r._count._all,
-    })),
-    top: await cardsWithBadges(top),
-    traits: traits.map((t) => ({
-      type: t.traitType,
-      value: t.value,
-      count: t._count._all,
-    })),
-  };
+  const summary = await db().$transaction(
+    async (tx) => {
+      const where = await currentCollectionScope(collectorId, tx);
+      const [
+        stats,
+        og,
+        legendary,
+        discovered,
+        rarities,
+        top,
+        traits,
+        recorded,
+      ] = await Promise.all([
+        tx.squig.aggregate({
+          where,
+          _count: { _all: true, uglyPoints: true, og: true, legendary: true },
+          _sum: { uglyPoints: true },
+        }),
+        tx.squig.count({ where: { ...where, og: true } }),
+        tx.squig.count({ where: { ...where, legendary: true } }),
+        collectionDiscoveries(tx, collectorId).then((rows) => rows.length),
+        tx.squig.groupBy({
+          by: ['rarityTier'],
+          where,
+          _count: { _all: true },
+          orderBy: { rarityTier: 'asc' },
+        }),
+        tx.squig.findMany({
+          where,
+          select: cardSelect,
+          orderBy: collectionOrder('points-desc'),
+          take: 3,
+        }),
+        tx.squigTrait.groupBy({
+          by: ['traitType', 'value'],
+          where: { squig: where, value: { notIn: ['None', 'none', ''] } },
+          _count: { _all: true },
+          orderBy: { _count: { value: 'desc' } },
+          take: 5,
+        }),
+        tx.squigDiscovery.count({
+          where: { collectorId, everOwned: true, squig: catalogScope },
+        }),
+      ]);
+      return {
+        owned: stats._count._all,
+        uglyPoints:
+          stats._count.uglyPoints === stats._count._all
+            ? Number(stats._sum.uglyPoints ?? 0)
+            : null,
+        og: stats._count.og === stats._count._all ? og : null,
+        legendary:
+          stats._count.legendary === stats._count._all ? legendary : null,
+        discovered,
+        unresolvedDiscoveries: Math.max(0, recorded - discovered),
+        rarities: rarities.map((r) => ({
+          name: r.rarityTier ?? 'Unclassified',
+          count: r._count._all,
+        })),
+        top,
+        traits: traits.map((t) => ({
+          type: t.traitType,
+          value: t.value,
+          count: t._count._all,
+        })),
+      };
+    },
+    { isolationLevel: 'RepeatableRead' },
+  );
+  // Badge decoration has no bearing on the ownership/discovery metric snapshot.
+  return { ...summary, top: await cardsWithBadges(summary.top) };
 }

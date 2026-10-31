@@ -53,15 +53,6 @@ export default async function Page() {
         holdings and may become incomplete. Evidence corrections can change
         either.
       </p>
-      {view?.status === 'ready' && (
-        <small>
-          Evaluated{' '}
-          {new Date(view.updatedAt).toLocaleString('en-US', {
-            timeZone: 'UTC',
-          })}{' '}
-          UTC
-        </small>
-      )}
     </>
   );
 }
