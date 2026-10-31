@@ -1,6 +1,6 @@
 # Automatic Field Guide recalculation
 
-`npm start` launches a separate background process in staging. It seeds the current collection rules and queues **all existing collectors**, including discovered unclaimed wallets, linked users, private profiles, and former holders. It runs the same `rebuildCollection` calculation as the manual button. No sign-in is needed. Current holdings of unclaimed profiles use the discovery mapping, never fabricated wallet credentials. Existing credential assignments take precedence, including revoked credentials.
+`npm start` launches a separate background process in staging. It seeds the current collection rules and queues **all existing collectors**, including discovered unclaimed wallets, linked users, private profiles, and former holders. It runs the same `rebuildCollection` calculation as the manual button. No sign-in is needed. Public current holdings of unclaimed profiles use the discovery mapping, but personal Field Guide evaluation uses active verified wallets only. Startup never creates personal discoveries from unverified holder mappings. Existing attributed history remains preserved for evidence-based review.
 
 The web server starts immediately. Totals update progressively as batches of ten complete; launch does not imply every profile is already rebuilt. This does not import missing upstream history or create missing holder profiles: ownership indexing and the controlled holder-discovery backfill remain responsible for those.
 

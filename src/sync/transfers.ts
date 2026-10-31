@@ -69,7 +69,12 @@ export async function rewindFrom(tx: Prisma.TransactionClient, from: bigint) {
   });
   await tx.squigDiscovery.updateMany({
     where: {
-      sourceKey: { in: removedObservations.map((r) => r.sourceKey) },
+      sourceKey: {
+        in: removedObservations.flatMap((r) => [
+          r.sourceKey,
+          `linked:${r.sourceKey}`,
+        ]),
+      },
       attributionStatus: 'OBSERVED',
     },
     data: { everOwned: false, attributionStatus: 'INVALIDATED' },

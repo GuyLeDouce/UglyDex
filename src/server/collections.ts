@@ -1,3 +1,4 @@
+import { favoriteTokenIds } from './favorites';
 import { collectionDiscoveries } from './dex-engine';
 import 'server-only';
 import { personalIconSummaries } from './status-icons';
@@ -147,8 +148,17 @@ export async function collectionPage(
       ? { id: { in: eligible.map((d) => d.squigId) } }
       : ownedScope(addresses)
     : {};
+  const favoriteScope: Prisma.SquigWhereInput = filters.favorites
+    ? { tokenId: { in: viewerId ? await favoriteTokenIds(viewerId) : [] } }
+    : {};
   const where: Prisma.SquigWhereInput = {
-    AND: [catalogScope, scope, collectionWhere(filters), personalizedScope],
+    AND: [
+      catalogScope,
+      scope,
+      collectionWhere(filters),
+      personalizedScope,
+      favoriteScope,
+    ],
   };
   const market = isListingSort(filters.sort) ? await readListings() : null;
   let listedIds: number[] | undefined;

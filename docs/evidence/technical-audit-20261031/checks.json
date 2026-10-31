@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-31",
+  "baseCommit": "650f8dff7c0646b07ccbda0d80843dc1645b23ec",
+  "node": "24.22.1",
+  "npm": "11.9.0",
+  "baseline": {
+    "ci": "PASS",
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "format": "PASS",
+    "unit": {
+      "passed": 977,
+      "skipped": 17,
+      "passedFiles": 54,
+      "failedFiles": 2,
+      "reason": "Chromium executable absent"
+    },
+    "testDb": "BLOCKED_TSX_IPC_EPERM",
+    "testIdentity": "BLOCKED_TSX_IPC_EPERM",
+    "releaseCheck": "BLOCKED_TSX_IPC_EPERM"
+  },
+  "candidate": {
+    "lint": "PASS",
+    "build": "PASS_CLEAN_CACHE",
+    "unit": {
+      "passed": 986,
+      "files": 56,
+      "command": "npm test -- --maxWorkers=2 --exclude tests/account-menu-stacking.test.ts --exclude tests/squig-card-rarity.test.ts"
+    },
+    "runtimeAudit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "ci": "PASS",
+    "typecheck": "PASS",
+    "format": "PASS"
+  },
+  "limitations": [
+    "Database fixtures not executed: tsx IPC denied; direct loader then blocked by PostgreSQL root guard; switching groups prohibited.",
+    "Chromium installation failed with invalid/truncated archive. Browser and visual assertions not executed.",
+    "Railway requires reauthentication; live state not inspected.",
+    "Full release check not completed; production readiness not established."
+  ],
+  "productionMutations": false
+}

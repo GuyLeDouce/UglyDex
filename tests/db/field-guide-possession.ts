@@ -1,3 +1,4 @@
+import { adoptDiscoveredWallet } from '../../src/server/collector-discovery';
 import { setFavorite, favoriteTokenIds } from '../../src/server/favorites';
 import { collectorProfile } from '../../src/server/profiles';
 import { shareCard } from '../../src/server/sharing';
@@ -14,7 +15,10 @@ import {
   seedCollections,
   queueCollections,
 } from '../../src/server/dex-engine';
-import { collectionSummary } from '../../src/server/collections';
+import {
+  collectionPage,
+  collectionSummary,
+} from '../../src/server/collections';
 import { dexView } from '../../src/server/dex';
 import { canonicalTokens } from '../../src/domain/dex-catalog';
 import { SQUIGS_CONTRACT } from '../../src/domain/validation';
@@ -144,6 +148,21 @@ export async function fieldGuidePossessionTests(
   );
   const favorites = await favoriteTokenIds(c.id);
   check(favorites.length === 6, 'six currently owned favorites retained');
+  const favoritePage = await collectionPage(
+    { favorites: '1' },
+    c.id,
+    false,
+    c.id,
+  );
+  check(
+    favoritePage.total === 6 &&
+      favoritePage.items.every((item) => favorites.includes(item.tokenId)),
+    'favorites filter returns only the verified viewers current favorites',
+  );
+  check(
+    (await collectionPage({ favorites: '1' })).total === 0,
+    'anonymous favorites filter cannot infer a collector identity',
+  );
   await setFavorite(c.id, { tokenId: favorites[0], favorite: true });
   check(
     (await favoriteTokenIds(c.id)).length === 6,
@@ -220,6 +239,10 @@ export async function fieldGuidePossessionTests(
   check(
     !(await favoriteTokenIds(c.id)).includes(selected[0]),
     'sold Squig is removed from visible favorites',
+  );
+  check(
+    (await collectionPage({ favorites: '1' }, c.id, false, c.id)).total === 5,
+    'favorites filter excludes sold favorites immediately',
   );
   const afterSaleCard = await shareCard({ kind: 'collector', entity: c.slug });
   check(
@@ -390,14 +413,24 @@ export async function fieldGuidePossessionTests(
   });
   await rebuildCollection(unclaimed.id);
   check(
-    (await collectionEvidence(db(), unclaimed.id)).historical.length === 1,
-    'unclaimed discovered wallet gets a Field Guide from current ownership',
+    (await collectionEvidence(db(), unclaimed.id)).historical.length === 0,
+    'unverified holder observations do not become personal discoveries',
   );
   check(
     (await db().collectorWallet.count({
       where: { collectorId: unclaimed.id },
     })) === 0,
     'startup never fabricates a credential for a discovered wallet',
+  );
+  check(
+    (await collectionSummary(unclaimed.id)).owned === 1,
+    'unverified holder still displays public current ownership',
+  );
+  check(
+    (await db().squigDiscovery.count({
+      where: { collectorId: unclaimed.id },
+    })) === 0,
+    'rebuild leaves an unverified shell free of fabricated personal history',
   );
   const replayId = 'test-startup-deployment';
   while (!(await queueCollections(false, replayId))) {}
@@ -447,6 +480,19 @@ export async function fieldGuidePossessionTests(
       where: { collectorId: unclaimed.id },
     })),
     'next deployment queues profiles again',
+  );
+  await db().$transaction((tx) =>
+    adoptDiscoveredWallet(tx, publicWallet, c.id),
+  );
+  check(
+    (
+      await db().discoveredWallet.findUniqueOrThrow({
+        where: {
+          chainId_walletAddress: { chainId: 1, walletAddress: publicWallet },
+        },
+      })
+    ).collectorId === c.id,
+    'evaluating an unverified holder does not block later verified shell adoption',
   );
   await db().squigOwnership.updateMany({
     where: { sourceKey: 'startup-unclaimed-current' },

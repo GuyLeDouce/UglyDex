@@ -49,6 +49,17 @@ export async function Catalog({
               </select>
             </label>
           )}
+          {viewerId && (
+            <label className="check">
+              <input
+                type="checkbox"
+                name="favorites"
+                value="1"
+                defaultChecked={!!f.favorites}
+              />
+              My favorites
+            </label>
+          )}
           {f.set && <input type="hidden" name="set" value={f.set} />}
           <label>
             Token ID

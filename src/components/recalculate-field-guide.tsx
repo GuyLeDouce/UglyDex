@@ -25,7 +25,10 @@ export function RecalculateFieldGuide() {
         method: 'POST',
       });
       const result = await response.json();
-      if (!response.ok) throw Error(result.error);
+      if (!response.ok) {
+        if (result.fieldGuideComplete) router.refresh();
+        throw Error(result.error || 'Recalculation failed. Please retry.');
+      }
       setMessage(
         `Recalculated: ${result.counts.discovered} discoveries, ${result.counts.traits} traits.`,
       );

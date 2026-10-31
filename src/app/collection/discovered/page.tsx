@@ -31,6 +31,7 @@ export default async function Discoveries({
       </section>
       <Catalog
         collectorId={id}
+        viewerId={id}
         discovered
         params={await searchParams}
         path="/collection/discovered"

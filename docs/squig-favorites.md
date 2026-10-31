@@ -9,3 +9,13 @@ Reuse `Collector.featuredTokenIds`: existing featured selections remain favorite
 No credentials or private external identifiers are returned. Share image cache keys include the projected favorites, so changing the selection generates a new image; social platforms may independently cache their previews.
 
 Validation covers API authentication/origin/rate limits and errors, plus isolated database fixtures for concurrent six-item limits, idempotency, unowned rejection, profile/share consistency, hidden collection privacy and sales. Roll out through the normal staging PR deployment. Reverting restores the old featured-token settings UI; selections remain compatible and are not deleted. No production deployment was executed.
+
+## October 31 browsing improvements
+
+The private dashboard shows all current favorites immediately after Field Guide
+completion, before secondary ecosystem details. `/collection?favorites=1` filters
+to the authenticated viewer's currently owned favorites; the same control is
+available alongside personal Field Guide filters in the discovery catalog.
+Anonymous favorite requests return an empty result. Filters preserve existing
+pagination, trait, OG, Legendary and sort controls. A sold favorite disappears
+from the filtered view through the same ownership check used by sharing.
