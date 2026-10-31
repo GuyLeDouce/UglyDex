@@ -164,8 +164,18 @@ on `7f1427d` passed the isolated identity job, lint, typecheck, full Vitest run
 an older assertion expected zero total discoveries after verifying a wallet with
 two current holdings. That contradicts the V3 union rule. The revised assertion
 independently requires zero attributed historical rows and two current discoveries;
-it does not relax historical attribution safeguards. The complete DB/HTTP/browser
-release gate remains pending the rerun.
+it does not relax historical attribution safeguards. The next run passed database
+phases 1–9 and then failed the public achievement HTML assertion. The HTTP fixture
+now settles its shared collector projection through the real evaluator immediately
+before asserting earned history; it retains the HTML check and adds status/pending
+diagnostics. This is fixture preparation, not a production projection bypass.
+
+At code commit `05a17e733daab0568eb79f7187d36edfa7cc56a9`, run
+[41196349869](https://github.com/GuyLeDouce/UglyDex/actions/runs/41196349869)
+passed lint, typecheck, the full Vitest suite, build and the isolated identity job
+(87 assertions, including ownership/discovery, favorites, adoption and HTTP identity).
+The combined DB/HTTP/browser/catalog step was still running at this checkpoint.
+The complete release gate is not claimed as passed.
 
 The build also confirmed broad filesystem tracing for dynamic share-art and policy
 reads. Paths now statically constrain artwork to `assets/share-backgrounds` and

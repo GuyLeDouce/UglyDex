@@ -4,7 +4,6 @@
   "node": "24.22.1",
   "npm": "11.9.0",
   "baseline": {
-    "ci": "PASS",
     "lint": "PASS",
     "typecheck": "PASS",
     "build": "PASS",
@@ -18,7 +17,8 @@
     },
     "testDb": "BLOCKED_TSX_IPC_EPERM",
     "testIdentity": "BLOCKED_TSX_IPC_EPERM",
-    "releaseCheck": "BLOCKED_TSX_IPC_EPERM"
+    "releaseCheck": "BLOCKED_TSX_IPC_EPERM",
+    "npmCi": "PASS"
   },
   "candidate": {
     "lint": "PASS",
@@ -36,7 +36,6 @@
       "critical": 0,
       "total": 0
     },
-    "ci": "PASS",
     "typecheck": "PASS",
     "format": "PASS",
     "fullDependencyAudit": {
@@ -47,21 +46,22 @@
       "critical": 0,
       "total": 18
     },
-    "toolingUpdate": "Vite 8.3.5; 986 non-browser tests passed again"
+    "toolingUpdate": "Vite 8.3.5; 986 non-browser tests passed again",
+    "npmCi": "PASS"
   },
   "limitations": [
-    "Local DB fixtures blocked by tsx IPC and PostgreSQL root guard. CI isolated identity suite passed; full DB rerun pending.",
+    "Local DB fixtures blocked by tsx IPC and PostgreSQL root guard. CI identity suite passed 87 assertions; latest combined DB/HTTP/browser suite in progress.",
     "Local Chromium download failed; CI full Vitest passed, DB browser suite still pending.",
     "Railway config and sampled logs inspected read-only; data correctness, backups and queue totals not established.",
     "Full release check not completed; production readiness not established."
   ],
   "productionMutations": false,
   "followup": {
-    "commit": "f5ec930f3b216d08e790358c4d2b6a310d4f2b37",
+    "commit": "05a17e733daab0568eb79f7187d36edfa7cc56a9",
     "priorCIRun": 41195558603,
-    "identity": "PASS on 7f1427d",
-    "fullVitest": "PASS on 7f1427d",
-    "database": "Phase 1 obsolete discovery assertion corrected; rerun pending",
+    "identity": "PASS: 87 assertions",
+    "fullVitest": "PASS",
+    "database": "Prior run passed phases 1\u20139, then failed public achievement HTTP fixture. Fixture now settles its shared projection before asserting earned HTML; latest combined DB/HTTP/browser run in progress.",
     "filesystemTracingBuild": "PASS; whole-project tracing warnings eliminated",
     "shareBackgroundTests": "20 passed",
     "railway": {
@@ -73,6 +73,11 @@
       "stagingCollectionsSample": "LIVE, success=true, processed=0, failed=0, deferred=0",
       "secretValuesRead": false,
       "mutations": false
-    }
+    },
+    "ciRun": 41196349869,
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "assetManifest": "Policy files and share backgrounds retained in Next file traces"
   }
 }
