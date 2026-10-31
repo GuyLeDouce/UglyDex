@@ -357,13 +357,22 @@ try {
       'HTTP passport excludes review evidence',
     );
     check((await fetch(`${base}/`)).status === 200, 'landing renders');
+    // Later phases deliberately dirty shared catalog/projection inputs. Settle
+    // this fixture through the real evaluator before asserting earned HTML;
+    // pending projections correctly withhold stale achievements.
+    const achievementCollector = await db().collector.findUniqueOrThrow({
+      where: { slug: 'progression-test' },
+    });
+    const { rebuildSubject: settleAchievementFixture } =
+      await import('../src/server/progression-engine');
+    await settleAchievementFixture('COLLECTOR', achievementCollector.id);
     const achievementResponse = await fetch(
         `${base}/collector/progression-test/achievements`,
       ),
       achievementHTML = await achievementResponse.text();
     check(
       achievementResponse.ok && achievementHTML.includes('Step into the Ring'),
-      'public achievement page renders earned history',
+      `public achievement page renders earned history (HTTP ${achievementResponse.status}, pending=${achievementHTML.includes('awaiting evaluation')})`,
     );
     check(
       !achievementHTML.includes('744444444444444444') &&
