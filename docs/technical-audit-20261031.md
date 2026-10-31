@@ -23,9 +23,21 @@ recovery), and #43 (share owned count). Those changes were retained. GitHub retu
 no open issues and one open PR, #29, “Temporarily hide Galleries and My Galleries.”
 That PR reported `mergeable: false`; this branch does not duplicate its visibility edits.
 
-Railway project discovery returned `UNAUTHORIZED`: the connection requires
-reauthentication. All deployment revisions, queue sizes, live ownership totals,
-backup health, source permissions and latencies remain operationally unverified.
+Initial Railway discovery returned `UNAUTHORIZED`; subsequent read-only access succeeded.
+UglyDex is in the **Ugly Bot** project. Production deployment
+`798da2de-6cb1-4b27-bdf4-ef5a5c3aa41c` reports SUCCESS at the exact starting main SHA,
+created October 25. Production uses Railpack, `npm start`, pre-deploy
+`npm run db:migrate`, `/api/ready`, one replica and `source.checkSuites=false`.
+The latter is an operational risk: Railway does not wait for CI before deployment.
+Changing this production setting requires approval and was not performed.
+All six returned staging UglyDex services were online with one running replica,
+no pending changes and no failures in the default eight-hour window. Sampled
+collections-worker logs on October 31 report LIVE, successful batches and zero
+processed/failed/deferred records. These samples do not prove queue completeness.
+Staging web logs record `collections.startup_complete` on October 25; no reproduced
+`CHECK_COLLECTION_DIAGNOSTICS` failure was present in the sampled logs.
+Queue sizes, live ownership totals, backup health, source permissions and latencies
+remain operationally unverified. No secret variable values were requested.
 Historical phase reports must not be treated as current observations.
 
 ## Architecture and boundaries
@@ -81,7 +93,13 @@ source inspection found an existing mechanism, not proof of operational health.
 | Dashboard hierarchy          | Identity, stats, CHARM, guide, progression, global feed, standouts                                 | UX weakness: favorites absent and secondary integration precedes guide                                                        | Low                | me/page.tsx                                                               | Move guide/favorites before secondary ecosystem connection card                                                             | me/page.tsx                                       | Production build; responsive/keyboard review pending                                         |
 | Documentation                | Historical phase reports and newer feature docs coexist                                            | Confirmed documentation weakness: older README privacy/deferred-feature statements are easy to misread as current             | Low                | README versus collector-discovery/community/V3 docs                       | Add current audit pointer; correct startup discovery statement                                                              | README; V3/startup/favorites docs                 | Review links and formatting                                                                  |
 | CI and tests                 | Two jobs: checks and isolated identity; browser installation present                               | Operational limitation: local browser download fails, tsx IPC denied, root PostgreSQL unsupported                             | Release blocker    | Baseline results below                                                    | Keep CI intact and PR draft; require full checks on supported non-root runner                                               | Existing .github/workflows                        | No skipped DB/browser checks counted as passed                                               |
-| Railway/release              | Docker configs, migrations pre-deploy, readiness and rollout gates                                 | Operationally unverified deployment, permissions, backups, worker health                                                      | Release blocker    | Railway UNAUTHORIZED response; committed configs only                     | Reauthenticate separately; read-only state inspection; explicit production approval still required                          | No infra changes                                  | Verify exact SHA, controls, queues, backups, source scope before approval                    |
+| Railway/release              | Docker configs, migrations pre-deploy, readiness and rollout gates                                 | Architectural risk: production CI gating disabled; data/backup conditions still unverified                                    | Release blocker    | Read-only deployment/config/status and sampled worker logs                | Review CI gating and complete data/backup checks; explicit production approval still required                               | No infra changes                                  | Verify exact SHA, controls, queues, backups, source scope before approval                    |
+
+### Additional confirmed build finding
+
+| Area                     | Current implementation   | Verified issue                                                                        | Severity | Evidence                                                       | Proposed solution                                                | Files affected                                                   | Test plan                                                                          |
+| ------------------------ | ------------------------ | ------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Asset and policy tracing | Dynamic filesystem paths | Performance opportunity: Next build traced the whole project for two filesystem reads | Low      | CI build warnings at legal-policy.tsx and share-backgrounds.ts | Statically scope artwork directory and explicit policy filenames | src/components/legal-policy.tsx; src/server/share-backgrounds.ts | Production build passes without these warnings; all 20 existing artwork tests pass |
 
 ## Dependency findings and applicability
 
@@ -140,7 +158,19 @@ The patched dependency revision passes the production build and lint, and all 98
 non-browser tests across 56 files. Next and eslint-config-next are now 16.4.3,
 Zod 4.6.7, and the compatible fast-uri dependency is updated. The final runtime
 audit reports zero known vulnerabilities; this is not a general security guarantee.
-The full DB/HTTP/browser release gate remains incomplete.
+GitHub run [41195558603](https://github.com/GuyLeDouce/UglyDex/actions/runs/41195558603)
+on `7f1427d` passed the isolated identity job, lint, typecheck, full Vitest run
+(including browser-dependent tests) and build. The DB fixture stopped at phase 1:
+an older assertion expected zero total discoveries after verifying a wallet with
+two current holdings. That contradicts the V3 union rule. The revised assertion
+independently requires zero attributed historical rows and two current discoveries;
+it does not relax historical attribution safeguards. The complete DB/HTTP/browser
+release gate remains pending the rerun.
+
+The build also confirmed broad filesystem tracing for dynamic share-art and policy
+reads. Paths now statically constrain artwork to `assets/share-backgrounds` and
+policy reads to the two checked-in filenames, preserving the existing assets and
+renderers while preventing whole-project tracing from those calls.
 
 ## Features and remaining work
 

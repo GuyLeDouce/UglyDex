@@ -21,7 +21,12 @@ export async function LegalPolicy({
 }: {
   file: 'PRIVACY.md' | 'TERMS.md';
 }) {
-  const source = await readFile(path.join(process.cwd(), file), 'utf8');
+  const source = await readFile(
+    file === 'PRIVACY.md'
+      ? path.join(process.cwd(), 'PRIVACY.md')
+      : path.join(process.cwd(), 'TERMS.md'),
+    'utf8',
+  );
   return (
     <article className="legal-policy">
       {source

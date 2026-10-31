@@ -50,10 +50,29 @@
     "toolingUpdate": "Vite 8.3.5; 986 non-browser tests passed again"
   },
   "limitations": [
-    "Database fixtures not executed: tsx IPC denied; direct loader then blocked by PostgreSQL root guard; switching groups prohibited.",
-    "Chromium installation failed with invalid/truncated archive. Browser and visual assertions not executed.",
-    "Railway requires reauthentication; live state not inspected.",
+    "Local DB fixtures blocked by tsx IPC and PostgreSQL root guard. CI isolated identity suite passed; full DB rerun pending.",
+    "Local Chromium download failed; CI full Vitest passed, DB browser suite still pending.",
+    "Railway config and sampled logs inspected read-only; data correctness, backups and queue totals not established.",
     "Full release check not completed; production readiness not established."
   ],
-  "productionMutations": false
+  "productionMutations": false,
+  "followup": {
+    "commit": "f5ec930f3b216d08e790358c4d2b6a310d4f2b37",
+    "priorCIRun": 41195558603,
+    "identity": "PASS on 7f1427d",
+    "fullVitest": "PASS on 7f1427d",
+    "database": "Phase 1 obsolete discovery assertion corrected; rerun pending",
+    "filesystemTracingBuild": "PASS; whole-project tracing warnings eliminated",
+    "shareBackgroundTests": "20 passed",
+    "railway": {
+      "productionCommit": "650f8dff7c0646b07ccbda0d80843dc1645b23ec",
+      "productionDeployment": "798da2de-6cb1-4b27-bdf4-ef5a5c3aa41c",
+      "productionDeploymentStatus": "SUCCESS",
+      "waitForCI": false,
+      "stagingServicesOnline": 6,
+      "stagingCollectionsSample": "LIVE, success=true, processed=0, failed=0, deferred=0",
+      "secretValuesRead": false,
+      "mutations": false
+    }
+  }
 }
