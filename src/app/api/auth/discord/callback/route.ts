@@ -14,7 +14,9 @@ import { readEnv } from '@/server/env';
 import { db } from '@/server/db';
 import { discordId } from '@/domain/validation';
 import { authError } from '@/server/http';
+import { safeOAuthFailure, oauthRejection } from '@/server/oauth-diagnostics';
 export async function GET(request: Request) {
+  let stage = 'challenge';
   try {
     const env = readEnv(),
       params = new URL(request.url).searchParams,
@@ -52,6 +54,7 @@ export async function GET(request: Request) {
     });
     if (consumed.count !== 1) throw new Error('INVALID_CHALLENGE');
     jar.delete(oauthCookie);
+    stage = 'token_exchange';
     const response = await fetch('https://discord.com/api/v10/oauth2/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -65,10 +68,21 @@ export async function GET(request: Request) {
       }),
       signal: AbortSignal.timeout(10000),
     });
-    if (!response.ok) throw new Error('OAUTH_EXCHANGE_FAILED');
+    if (!response.ok) {
+      console.error(
+        JSON.stringify({
+          event: 'auth.discord_upstream_rejected',
+          stage,
+          status: response.status,
+          code: await oauthRejection(response),
+        }),
+      );
+      throw new Error('OAUTH_EXCHANGE_FAILED');
+    }
     const token = z
       .object({ access_token: z.string() })
       .parse(await response.json());
+    stage = 'identity_fetch';
     const userResponse = await fetch('https://discord.com/api/v10/users/@me', {
       headers: { Authorization: `Bearer ${token.access_token}` },
       signal: AbortSignal.timeout(10000),
@@ -78,6 +92,7 @@ export async function GET(request: Request) {
     const user = z
       .object({ id: discordId, username: z.string().max(100) })
       .parse(await userResponse.json());
+    stage = 'identity_and_session';
     try {
       await authenticateDiscord(user.id, user.username, challenge.collectorId);
     } catch (error) {
@@ -95,6 +110,13 @@ export async function GET(request: Request) {
         `${readEnv().PUBLIC_BASE_URL}/connect?error=IDENTITY_REVIEW_REQUIRED`,
         303,
       );
+    console.error(
+      JSON.stringify({
+        event: 'auth.discord_callback_failed',
+        stage,
+        code: safeOAuthFailure(error),
+      }),
+    );
     return authError(error);
   }
 }
