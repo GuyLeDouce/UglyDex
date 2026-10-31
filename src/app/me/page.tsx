@@ -9,7 +9,12 @@ import { Progression } from '@/components/progression';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
-import { collectionSummary } from '@/server/collections';
+import {
+  cardSelect,
+  cardsWithBadges,
+  catalogScope,
+  collectionSummary,
+} from '@/server/collections';
 import { refreshStatus } from '@/server/refresh';
 import { Stats } from '@/components/stats';
 import { Refresh } from '@/components/refresh';
@@ -47,6 +52,16 @@ export default async function Me() {
     collectionSummary(id),
     refreshStatus(),
   ]);
+  const favorites = await favoriteTokenIds(id);
+  const favoriteRows = await db().squig.findMany({
+    where: { ...catalogScope, tokenId: { in: favorites } },
+    select: cardSelect,
+  });
+  const favoriteCards = await cardsWithBadges(
+    favoriteRows.sort(
+      (a, b) => favorites.indexOf(a.tokenId) - favorites.indexOf(b.tokenId),
+    ),
+  );
   return (
     <div className="collector-dashboard">
       <nav className="anchor-nav">
@@ -65,12 +80,31 @@ export default async function Me() {
         </Link>
       </section>
       <Stats summary={s} />
-      {promptDripLink ? <CharmDripLink /> : <CharmBalanceCard value={charm} />}
-      <Link href="/charm">Your $CHARM activity →</Link>
       <DexSummary id={id} />
       {appEnvironment() === 'staging' && <RecalculateFieldGuide />}
+      <section aria-label="Your favorite Squigs">
+        <div className="section-heading inline">
+          <h2>Your favorites.</h2>
+          <Link href="/collection?favorites=1">View favorites →</Link>
+        </div>
+        {favoriteCards.length ? (
+          <CollectionGrid
+            items={favoriteCards}
+            controls={false}
+            favorites={favorites}
+            editableFavorites
+          />
+        ) : (
+          <p>
+            Choose up to six currently owned Squigs with the heart in your
+            collection.
+          </p>
+        )}
+      </section>
       <Progression subject="COLLECTOR" id={id} path="/me/achievements" />
       <CollectorThread preview />
+      {promptDripLink ? <CharmDripLink /> : <CharmBalanceCard value={charm} />}
+      <Link href="/charm">Your $CHARM activity →</Link>
       <EcosystemSummary collectorId={id} path="/me/activity" />
       <nav className="anchor-nav">
         <Link href="/me/activity">Activity</Link>
@@ -84,7 +118,7 @@ export default async function Me() {
       <CollectionGrid
         items={s.top}
         controls={false}
-        favorites={await favoriteTokenIds(id)}
+        favorites={favorites}
         editableFavorites
       />
       <section className="passport">

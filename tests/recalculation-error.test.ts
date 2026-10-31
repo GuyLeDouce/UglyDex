@@ -21,3 +21,9 @@ it('handles circular errors safely', () => {
   e.cause = e;
   expect(recalculationErrorCode(e)).toBe('EVALUATION_FAILED');
 });
+
+it('preserves the collection engine ruleset mismatch diagnostic', () => {
+  expect(
+    recalculationErrorCode(new Error('COLLECTION_VERSION_BUMP_REQUIRED')),
+  ).toBe('COLLECTION_VERSION_BUMP_REQUIRED');
+});

@@ -259,8 +259,20 @@ export async function topCollectors(page = 1) {
       const [{ count }] = await tx.$queryRaw<{ count: bigint }[]>(
         Prisma.sql`SELECT COUNT(*) AS count ${eligibility}`,
       );
+      const [{ pending }] = await tx.$queryRaw<
+        { pending: bigint }[]
+      >(Prisma.sql`
+        SELECT COUNT(*) AS pending FROM "Collector" c
+        WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL
+          AND (EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=c.id)
+            OR NOT EXISTS (SELECT 1 FROM "CollectionSnapshot" s
+              WHERE s."collectorId"=c.id AND s.ruleset=${COLLECTION_RULESET}))
+      `);
       const pages = Math.max(1, Math.ceil(Number(count) / 24));
-      page = Math.min(Math.max(page, 1), pages);
+      page = Math.min(
+        Math.max(Number.isSafeInteger(page) ? page : 1, 1),
+        pages,
+      );
       const rows = await tx.$queryRaw<
         {
           slug: string;
@@ -291,6 +303,7 @@ export async function topCollectors(page = 1) {
         page,
         pages,
         total: Number(count),
+        pending: Number(pending),
         collectors: rows.map((c) => ({
           ...c,
           displayName: names.get(c.slug)?.name || 'Collector',

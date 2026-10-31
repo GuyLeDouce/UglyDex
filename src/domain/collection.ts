@@ -3,6 +3,7 @@ import { canonicalTokens } from './dex-catalog';
 import { normalizeTrait } from './dex';
 import type { Prisma } from '@/generated/prisma/client';
 export const filterSchema = z.object({
+  favorites: z.enum(['1', '']).catch(''),
   dex: z.enum(['', 'undiscovered', 'traits', 'advances']).catch(''),
   set: z.string().max(100).catch(''),
   page: z.coerce.number().int().min(1).max(186).catch(1),

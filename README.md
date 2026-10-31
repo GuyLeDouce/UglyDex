@@ -1,5 +1,11 @@
 # UglyDex
 
+Current source review: [October 31 technical audit](docs/technical-audit-20261031.md).
+The phase reports below are historical checkpoints, not current deployment evidence.
+Current discovery semantics are in [Field Guide V3](docs/field-guide-v3.md);
+auto-discovered holder profiles are public observations, while personal discoveries
+require verified wallets or existing attributed history.
+
 Phase 9 adds [launch evidence gates](docs/launch-readiness.md), [replay proof](docs/replay-validation.md) and [reconciliation reporting](docs/data-reconciliation.md). Use `npm run release:check` for code readiness and `npm run launch:check` for the actual deployment. The latter intentionally fails until critical external evidence exists. See [Phase 9 report](docs/phase9-report.md).
 
 ## Phase 8 operations

@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-31",
+  "baseCommit": "650f8dff7c0646b07ccbda0d80843dc1645b23ec",
+  "node": "24.22.1",
+  "npm": "11.9.0",
+  "baseline": {
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "format": "PASS",
+    "unit": {
+      "passed": 977,
+      "skipped": 17,
+      "passedFiles": 54,
+      "failedFiles": 2,
+      "reason": "Chromium executable absent"
+    },
+    "testDb": "BLOCKED_TSX_IPC_EPERM",
+    "testIdentity": "BLOCKED_TSX_IPC_EPERM",
+    "releaseCheck": "BLOCKED_TSX_IPC_EPERM",
+    "npmCi": "PASS"
+  },
+  "candidate": {
+    "lint": "PASS",
+    "build": "PASS_CLEAN_CACHE",
+    "unit": {
+      "passed": 986,
+      "files": 56,
+      "command": "npm test -- --maxWorkers=2 --exclude tests/account-menu-stacking.test.ts --exclude tests/squig-card-rarity.test.ts"
+    },
+    "runtimeAudit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "typecheck": "PASS",
+    "format": "PASS",
+    "fullDependencyAudit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 18,
+      "high": 0,
+      "critical": 0,
+      "total": 18
+    },
+    "toolingUpdate": "Vite 8.3.5; 986 non-browser tests passed again",
+    "npmCi": "PASS"
+  },
+  "limitations": [
+    "Local DB fixtures blocked by tsx IPC and PostgreSQL root guard. CI identity suite passed 87 assertions; latest combined DB/HTTP/browser suite in progress.",
+    "Local Chromium download failed; CI full Vitest passed, DB browser suite still pending.",
+    "Railway config and sampled logs inspected read-only; data correctness, backups and queue totals not established.",
+    "Full release check not completed; production readiness not established."
+  ],
+  "productionMutations": false,
+  "followup": {
+    "commit": "05a17e733daab0568eb79f7187d36edfa7cc56a9",
+    "priorCIRun": 41195558603,
+    "identity": "PASS: 87 assertions",
+    "fullVitest": "PASS",
+    "database": "Prior run passed phases 1\u20139, then failed public achievement HTTP fixture. Fixture now settles its shared projection before asserting earned HTML; latest combined DB/HTTP/browser run in progress.",
+    "filesystemTracingBuild": "PASS; whole-project tracing warnings eliminated",
+    "shareBackgroundTests": "20 passed",
+    "railway": {
+      "productionCommit": "650f8dff7c0646b07ccbda0d80843dc1645b23ec",
+      "productionDeployment": "798da2de-6cb1-4b27-bdf4-ef5a5c3aa41c",
+      "productionDeploymentStatus": "SUCCESS",
+      "waitForCI": false,
+      "stagingServicesOnline": 6,
+      "stagingCollectionsSample": "LIVE, success=true, processed=0, failed=0, deferred=0",
+      "secretValuesRead": false,
+      "mutations": false
+    },
+    "ciRun": 41196349869,
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS",
+    "assetManifest": "Policy files and share backgrounds retained in Next file traces"
+  }
+}

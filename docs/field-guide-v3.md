@@ -24,3 +24,17 @@ Railway console. V1/V2 snapshots and audits remain; no schema migration is neede
 For all collectors, use the existing approved collections seed/rebuild procedure.
 No production replay or deployment is performed by this change. Rollback reads
 preserved older-version snapshots and requires the standard reconciliation gates.
+
+## October 31 attribution repair
+
+Unverified `DiscoveredWallet` mappings must not participate in
+`currentCollectionHoldings` or be materialized as personal `SquigDiscovery` rows.
+They still supply public current holdings through `collectionAddresses`.
+Rebuilding an empty holder shell therefore cannot manufacture personal history or
+make the shell ineligible for the existing verified adoption flow. This enforces
+the V3 definition above; the completion formula, catalog and denominator are unchanged.
+
+Existing discovery records are preserved. Previously materialized shell history
+requires a separately reviewed, evidence-based reconciliation plan; do not delete
+or reattribute it automatically, and do not infer that deploying this code repairs
+those historical rows. No production reconciliation was run.

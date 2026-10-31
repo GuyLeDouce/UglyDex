@@ -105,6 +105,8 @@ export async function seedCollections() {
  * Attribution is established by ingestion/reconciliation, not re-inferred here
  * from today's wallet credential. Explicit corrections still remove history.
  */
+// Public holder mappings are observations, not proof of personal ownership.
+// Keep their current holdings in the holder profile, never in personal discovery.
 export async function currentCollectionHoldings(
   tx: DerivedReadClient,
   id: string,
@@ -116,17 +118,8 @@ export async function currentCollectionHoldings(
       GREATEST(o."observedAt", w."verifiedAt") AS "discoveredAt", o."sourceKey"
     FROM "SquigOwnership" o
     JOIN "Squig" s ON s.id=o."squigId" AND s."chainId"=1 AND s."contractAddress"=${SQUIGS_CONTRACT}
-    JOIN (
-      SELECT "walletAddress", "collectorId", "verifiedAt" FROM "CollectorWallet"
-      WHERE "chainId"=1 AND status='ACTIVE' AND "revokedAt" IS NULL
-      UNION ALL
-      SELECT d."walletAddress", d."collectorId", d."discoveredAt" AS "verifiedAt"
-      FROM "DiscoveredWallet" d
-      WHERE d."chainId"=1 AND NOT EXISTS (
-        SELECT 1 FROM "CollectorWallet" credential
-        WHERE credential."chainId"=1 AND credential."walletAddress"=d."walletAddress"
-      )
-    ) w ON w."walletAddress"=o."walletAddress"
+    JOIN "CollectorWallet" w ON w."walletAddress"=o."walletAddress"
+      AND w."chainId"=1 AND w.status='ACTIVE' AND w."revokedAt" IS NULL
     WHERE w."collectorId"=${id}::uuid AND o."isCurrent"
     AND NOT EXISTS(SELECT 1 FROM "CollectorActivity" a WHERE a."squigId"=o."squigId" AND a."sourceType"='maw' AND a."eventType"='MAW_DIGESTED' AND a."recordStatus"='ACTIVE')
     ORDER BY o."squigId", o."observedAt", o."sourceKey"`;

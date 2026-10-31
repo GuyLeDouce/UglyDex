@@ -37,6 +37,7 @@ export default async function CollectionPage({
       <Catalog
         params={await searchParams}
         collectorId={id}
+        viewerId={id}
         path="/collection"
         editableFavorites
       />

@@ -42,6 +42,13 @@ export default async function TopCollectors({
           shares a rank.
         </small>
       </section>
+      {result.pending > 0 && (
+        <p role="status">
+          {result.pending.toLocaleString()} public collector profiles are
+          awaiting Field Guide evaluation and are not ranked yet. Current
+          holdings remain available in the collector directory.
+        </p>
+      )}
       <ol
         className="collector-leaderboard"
         aria-label="Field Guide completion leaderboard"

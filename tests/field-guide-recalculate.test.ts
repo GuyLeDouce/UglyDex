@@ -76,6 +76,35 @@ it('respects request throttling', async () => {
 
 it('reports failure if achievements fail after Field Guide completes', async () => {
   m.progression.mockRejectedValue(Error('retry'));
-  expect((await POST(request())).status).toBe(400);
+  const response = await POST(request());
+  expect(response.status).toBe(503);
+  expect(await response.json()).toMatchObject({
+    phase: 'achievements',
+    fieldGuideComplete: true,
+    code: 'EVALUATION_FAILED',
+  });
   expect(m.rebuild).toHaveBeenCalledOnce();
+});
+
+it('returns throttling status and retry interval without starting evaluation', async () => {
+  m.rate.mockRejectedValue(Error('RATE_LIMITED'));
+  const response = await POST(request());
+  expect(response.status).toBe(429);
+  expect(response.headers.get('Retry-After')).toBe('60');
+  expect(m.seed).not.toHaveBeenCalled();
+});
+it('reports an allowlisted cause without leaking database parameters', async () => {
+  m.rebuild.mockRejectedValue(
+    new Error('postgres://secret', { cause: { code: 'P2028' } }),
+  );
+  const response = await POST(request());
+  expect(response.status).toBe(503);
+  const body = await response.json();
+  expect(body).toMatchObject({
+    phase: 'field-guide',
+    fieldGuideComplete: false,
+    code: 'P2028',
+  });
+  expect(JSON.stringify(body)).not.toContain('secret');
+  expect(m.progression).not.toHaveBeenCalled();
 });
