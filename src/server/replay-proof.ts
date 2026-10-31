@@ -124,20 +124,6 @@ async function replay(label: 'A' | 'B') {
   const started = Date.now();
   log('launch.replay', { stage: label, service: 'replay', status: 'STARTED' });
   await reattributePending();
-  await queueReplay(true);
-  while (!(await queueReplay())) {}
-  while (await db().progressionJob.count({ where: { errorCode: null } })) {
-    if ((await processProgression(50)).failed)
-      throw new Error('PROGRESSION_REPLAY_FAILED');
-  }
-  if (await db().progressionJob.count())
-    throw new Error('PROGRESSION_JOBS_REMAIN');
-  log('launch.replay', {
-    stage: label,
-    service: 'progression',
-    status: 'COMPLETE',
-    durationMs: Date.now() - started,
-  });
   await queueCollections(true);
   while (!(await queueCollections())) {}
   while (await db().collectionJob.count({ where: { errorCode: null } })) {
@@ -155,6 +141,22 @@ async function replay(label: 'A' | 'B') {
     status: 'COMPLETE',
     durationMs: Date.now() - started,
     rssBytes: process.memoryUsage().rss,
+  });
+  // Collections materialize discovery evidence and enqueue progression. Drain
+  // that dependency first so the final pass cannot leave newly queued XP work.
+  await queueReplay(true);
+  while (!(await queueReplay())) {}
+  while (await db().progressionJob.count({ where: { errorCode: null } })) {
+    if ((await processProgression(50)).failed)
+      throw new Error('PROGRESSION_REPLAY_FAILED');
+  }
+  if (await db().progressionJob.count())
+    throw new Error('PROGRESSION_JOBS_REMAIN');
+  log('launch.replay', {
+    stage: label,
+    service: 'progression',
+    status: 'COMPLETE',
+    durationMs: Date.now() - started,
   });
 }
 export async function replayProof() {

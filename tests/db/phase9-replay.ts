@@ -84,6 +84,11 @@ export async function phase9ReplayTests(
       result.status === 'VERIFIED' && !result.differences.length,
       'complete Replay A/B stable on safe fixture database',
     );
+    check(
+      (await db().collectionJob.count()) === 0 &&
+        (await db().progressionJob.count()) === 0,
+      'replay drains progression queued by collection evaluation before declaring completion',
+    );
     const exactVerified = await verifyReplayProof();
     if (!exactVerified) {
       const gate = await db().launchGate.findUnique({

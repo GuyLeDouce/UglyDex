@@ -21,6 +21,11 @@ repair does not authorize a production replay or erase prior grant records.
 Full A/B replay is still required; this finding alone does not prove the absence
 of other drift.
 
+The replay order also matters: queuing collections enqueues progression. Running
+progression first therefore leaves new progression jobs after each pass. Replay
+now evaluates collections first, then progression, and the fixture explicitly
+requires both queues to be empty before accepting completion.
+
 Replay diagnostics now preserve the specific comparison error, log only changed
 table names, and upload sanitized fixture fingerprints before cleanup. Raw identity
 records and credentials are excluded. The comparison remains strict: no extra
