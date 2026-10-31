@@ -38,7 +38,16 @@
     },
     "ci": "PASS",
     "typecheck": "PASS",
-    "format": "PASS"
+    "format": "PASS",
+    "fullDependencyAudit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 18,
+      "high": 0,
+      "critical": 0,
+      "total": 18
+    },
+    "toolingUpdate": "Vite 8.3.5; 986 non-browser tests passed again"
   },
   "limitations": [
     "Database fixtures not executed: tsx IPC denied; direct loader then blocked by PostgreSQL root guard; switching groups prohibited.",

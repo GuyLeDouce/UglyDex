@@ -89,6 +89,14 @@ The registry reported three runtime dependency findings at baseline. Its critica
 Next classification is a package-version finding, not proof of an exposed RCE.
 The image advisory documents Sharp >=0.35.5 as a workaround; the baseline already
 resolves Sharp 0.35.5. Other Next advisories still justify the compatible update.
+A subsequent full dependency audit also flagged the Vite development toolchain.
+Vite was updated compatibly from 8.3.1 to 8.3.5 and all 986 non-browser tests
+passed again. The final full audit reports 18 moderate findings, no high or critical findings.
+The minimatch advisory in the ESLint/tooling dependency chain
+requires a separate compatibility review: the suggested ESLint/Next config
+fix includes major downgrades, which were not applied. The existing Dockerfile
+retains development dependencies, so these are shipped-package findings even
+though no Vite development server is started by the production command.
 No exploit probes were sent to the application. Existing framework and validation
 APIs are retained; no forced major upgrade or blanket `npm audit fix` was used.
 
@@ -103,7 +111,7 @@ References checked during this audit:
 ## Baseline validation
 
 Node 24.22.1; npm 11.9.0; clean `npm ci` installed 588 packages.
-No production environment file or credentials were loaded.
+No production environment file or credentials were configured by this work.
 
 | Requested check       | Baseline result                                                                                               |
 | --------------------- | ------------------------------------------------------------------------------------------------------------- |
