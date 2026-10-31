@@ -127,8 +127,14 @@ export async function phase1DatabaseTests(
   });
   await reconcileCurrentDiscoveries(other.id);
   check(
-    (await collectionSummary(other.id)).discovered === 0,
-    'new wallet does not claim discoveries from stale pre-signature observations',
+    (await db().squigDiscovery.count({ where: { collectorId: other.id } })) ===
+      0,
+    'new wallet does not attribute pre-signature observations as personal history',
+  );
+  const newlyVerified = await collectionSummary(other.id);
+  check(
+    newlyVerified.owned === 2 && newlyVerified.discovered === 2,
+    'current holdings count in the verified discovery union before historical attribution',
   );
   const base = {
     slug: 'Phase1-Alice',
