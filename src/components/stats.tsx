@@ -21,9 +21,11 @@ export function Stats({
         ))}
       </div>
       <p className="muted">
-        Discovered counts unique Squigs currently or previously owned across
-        your linked wallets. Sales, rebuying and transfers between your wallets
-        never count a Squig twice.
+        Discovered counts each Squig once: current holdings across active
+        verified wallets, plus previously attributed discoveries. Linking a
+        wallet does not automatically claim its entire past history. Sales,
+        rebuying and transfers between verified wallets never count a Squig
+        twice.
       </p>
     </>
   );

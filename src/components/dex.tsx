@@ -33,6 +33,17 @@ export function DexScore({ view }: { view: DexView }) {
           <span>%</span>
         </h2>
         <p>A field guide built from real discoveries.</p>
+        <small>
+          Last evaluated{' '}
+          <time dateTime={view.updatedAt}>
+            {new Date(view.updatedAt).toLocaleString('en-US', {
+              timeZone: 'UTC',
+            })}{' '}
+            UTC
+          </time>
+          . Ownership updates and Field Guide evaluation can finish at different
+          times.
+        </small>
       </div>
       <div className="dex-breakdown">
         {[
