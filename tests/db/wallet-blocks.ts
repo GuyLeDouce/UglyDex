@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { db } from '../../src/server/db';
 import { changeWalletBlock } from '../../src/server/wallet-blocks';
@@ -7,9 +8,9 @@ import { collectorProfile } from '../../src/server/profiles';
 export async function walletBlockTests(
   check: (value: unknown, message: string) => void,
 ) {
-  const a = '0x' + 'ba'.repeat(20),
-    b = '0x' + 'bb'.repeat(20),
-    future = '0x' + 'bc'.repeat(20);
+  const a = '0x' + randomBytes(20).toString('hex'),
+    b = '0x' + randomBytes(20).toString('hex'),
+    future = '0x' + randomBytes(20).toString('hex');
   const actor = 'test:wallet-block';
   const block = (walletAddress: string) =>
     changeWalletBlock(actor, {

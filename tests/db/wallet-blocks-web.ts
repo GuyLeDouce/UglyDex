@@ -9,7 +9,7 @@ export async function walletBlockWebTests(
   check: (value: unknown, message: string) => void,
   browserTests: boolean,
 ) {
-  const address = '0x' + 'bd'.repeat(20);
+  const address = '0x' + randomBytes(20).toString('hex');
   const holder = await db().$transaction((tx) => discoverHolder(tx, address));
   if (!holder) throw new Error('Expected holder fixture');
   const profile = await db().collector.findUniqueOrThrow({
