@@ -23,8 +23,9 @@ export default async function MergeIdentity({
       {!request ? (
         <section className="panel">
           <p>
-            This merge request expired or is not linked to your signed-in
-            account.
+            {requestId
+              ? 'This merge request expired or is not linked to your signed-in account.'
+              : 'There is no merge request selected. To link Discord and a wallet, stay signed in to the account you want to keep and connect the other identity. If it belongs to a separate account, you will be asked to review the merge.'}
           </p>
           <Link className="button" href="/connect">
             Return to connection settings

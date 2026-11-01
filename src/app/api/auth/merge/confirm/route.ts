@@ -3,6 +3,7 @@ import { authGuard, currentSession, installSession } from '@/server/auth';
 import { confirmCollectorMerge } from '@/server/collector-merge';
 import { authError, jsonBody } from '@/server/http';
 import { db } from '@/server/db';
+import { log, errorCode } from '@/server/log';
 
 export async function POST(request: Request) {
   try {
@@ -28,6 +29,7 @@ export async function POST(request: Request) {
       },
     );
   } catch (error) {
+    log('auth.merge.failed', { code: errorCode(error) });
     return authError(error);
   }
 }

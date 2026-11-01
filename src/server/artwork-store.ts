@@ -6,9 +6,9 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
-import { SQUIG_ART_CID, squigArtwork } from '@/domain/assets';
+import { SQUIG_ART_CID } from '@/domain/assets';
 import { artworkWidths, type ArtworkSize } from '@/domain/artwork-delivery';
-import { inspectCollectibleArtwork } from './collectible-art';
+import { fetchCanonicalArtwork } from './canonical-artwork';
 
 // Only immutable public collection artwork belongs here. Never store profile cards.
 const prefix = `squigs/${SQUIG_ART_CID}/v1/`;
@@ -186,11 +186,7 @@ export async function squigImage(
     }
     let asset: Asset;
     if (size === 'original') {
-      const source = await limited(() =>
-        inspectCollectibleArtwork(squigArtwork(token), (url, init) =>
-          fetch(url, { ...init, signal: AbortSignal.timeout(15000) }),
-        ),
-      );
+      const source = await limited(() => fetchCanonicalArtwork(token));
       asset = { bytes: source.bytes, mime: source.mime };
     } else {
       const original = await squigImage(token, 'original', requireStorage);

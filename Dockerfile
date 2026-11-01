@@ -12,6 +12,7 @@ RUN npm run build
 RUN mkdir -p .next/cache/images && chown -R node:node .next/cache
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 USER node
 EXPOSE 3000
 CMD ["npm", "start"]
