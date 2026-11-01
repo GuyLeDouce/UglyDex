@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { collectorHandle } from '@/domain/profile';
 import { shareMetadata, absoluteUrl } from '@/server/sharing';
 export async function generateMetadata({
@@ -23,7 +22,7 @@ export default async function Page({
 }) {
   const c = await publicSetCollector((await params).slug);
   if (!c) notFound();
-  const view = c.unclaimed ? null : await dexView(c.id, true);
+  const view = await dexView(c.id, true);
   return (
     <>
       <section className="page-heading">
@@ -32,25 +31,16 @@ export default async function Page({
         </p>
         <h1>{c.displayName ?? c.slug}&apos;s strange pursuits.</h1>
       </section>
-      {c.unclaimed ? (
-        <section className="panel">
-          <h2>Personal Field Guide not verified</h2>
-          <p>
-            Completion is unavailable until this wallet is claimed. This is not
-            a zero-completion score.
-          </p>
-          <Link href={'/collector/' + c.slug + '/collection'}>
-            Browse indexed wallet holdings →
-          </Link>
-        </section>
-      ) : (
-        <DexScore view={view} />
-      )}
+      <DexScore view={view} />
       {view?.status === 'ready' && (
         <>
           <h2>Featured collections.</h2>
           <SetGrid cards={view.cards.filter((c) => c.featured)} />
-          <h2>Historical discoveries.</h2>
+          <h2>
+            {c.unclaimed
+              ? 'Tracked wallet history.'
+              : 'Historical discoveries.'}
+          </h2>
           <SetGrid
             cards={view.cards.filter((c) => c.mode === 'HISTORICAL_DISCOVERY')}
           />

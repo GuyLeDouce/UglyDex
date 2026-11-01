@@ -182,7 +182,10 @@ export async function shareCard(
   let card: ShareCard = {
     ...generic,
     title: name,
-    eyebrow: 'UGLYDEX COLLECTOR',
+    eyebrow:
+      d?.status === 'ready' && d.basis === 'wallet'
+        ? 'UNCLAIMED WALLET · PUBLIC TRACKING'
+        : 'UGLYDEX COLLECTOR',
     description: 'Still ugly. Still hunting.',
     path: base,
     indexable: c.isPublic,
@@ -196,7 +199,10 @@ export async function shareCard(
       ...(d?.status === 'ready'
         ? [
             d.score.overall.toFixed(1) + '% UglyDex complete',
-            d.discovered + ' Squigs discovered',
+            d.discovered +
+              (d.basis === 'wallet'
+                ? ' Squigs tracked in wallet history'
+                : ' Squigs discovered'),
           ]
         : []),
     ],

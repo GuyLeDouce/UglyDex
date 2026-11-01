@@ -115,7 +115,7 @@ export default async function Collector({
         url={absoluteUrl('/collector/' + p.slug)}
         copy={(p.displayName || p.slug) + ' — still ugly. Still hunting.'}
       />
-      {!p.unclaimed && <CollectorHighlights id={r.collectorId} slug={p.slug} />}
+      <CollectorHighlights id={r.collectorId} slug={p.slug} />
       {r.featured.length > 0 && (
         <section className="featured-exhibition">
           <p className="eyebrow">PERSONALLY SELECTED</p>

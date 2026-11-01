@@ -116,10 +116,13 @@ export async function communityTests(
     data: { claimedAt: new Date() },
   });
   const ranked = await topCollectors();
+  const allRanked = [...ranked.collectors];
+  for (let page = 2; page <= ranked.pages; page++)
+    allRanked.push(...(await topCollectors(page)).collectors);
   check(
-    !ranked.collectors.some((c) => c.slug === unclaimed.slug) &&
+    allRanked.some((c) => c.slug === unclaimed.slug && c.unclaimed) &&
       ranked.unclaimed > 0,
-    'unclaimed wallet snapshots never enter verified rankings or affect ranks',
+    'unclaimed wallets remain visible and are marked without login',
   );
   const first = ranked.collectors.find((c) => c.slug === winner.slug)!;
   const second = ranked.collectors.find((c) => c.slug === tied.slug)!;
@@ -130,7 +133,10 @@ export async function communityTests(
     'leaderboard uses the exact public Field Guide percentage',
   );
   check(
-    first.rank === second.rank && third.rank > first.rank,
+    first.rank !== null &&
+      third.rank !== null &&
+      first.rank === second.rank &&
+      third.rank > first.rank,
     'equal completion shares a rank and lower scores follow',
   );
   check(
@@ -138,10 +144,9 @@ export async function communityTests(
     'leaderboard ties use a stable slug order',
   );
   check(
-    !ranked.collectors.some((c) =>
-      [privateC.slug, pending.slug].includes(c.slug),
-    ),
-    'private and recalculating collectors stay out of rankings',
+    !ranked.collectors.some((c) => c.slug === privateC.slug) &&
+      ranked.collectors.some((c) => c.slug === pending.slug && c.pending),
+    'private profiles stay hidden while recalculating collectors remain visible',
   );
   const awards = achievements
     .filter((a) => a.enabled && a.subject === 'COLLECTOR' && !a.hidden)

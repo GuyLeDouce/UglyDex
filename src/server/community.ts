@@ -1,3 +1,8 @@
+import { publicWalletEvidence } from './wallet-field-guide';
+import {
+  walletFieldGuide,
+  rankCollectorRows,
+} from '@/domain/wallet-field-guide';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { db } from './db';
@@ -253,79 +258,80 @@ export async function collectorThread(page = 1, collectorSlug?: string) {
 export async function topCollectors(page = 1) {
   return db().$transaction(
     async (tx) => {
-      const claimed = Prisma.sql`(c."claimedAt" IS NOT NULL
-        OR EXISTS (SELECT 1 FROM "CollectorWallet" w WHERE w."collectorId"=c.id AND w.status='ACTIVE' AND w."revokedAt" IS NULL)
-        OR EXISTS (SELECT 1 FROM "ExternalIdentity" i WHERE i."collectorId"=c.id AND i."authenticatedAt" IS NOT NULL))`;
-      const eligibility = Prisma.sql`FROM "Collector" c JOIN "CollectionSnapshot" s ON s."collectorId"=c.id AND s.ruleset=${COLLECTION_RULESET}
-      WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL AND ${claimed}
-      AND NOT EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=c.id)`;
-      const [{ count }] = await tx.$queryRaw<{ count: bigint }[]>(
-        Prisma.sql`SELECT COUNT(*) AS count ${eligibility}`,
+      // Include public wallets before login, and keep collectors visible while a job runs.
+      const rows = await tx.$queryRaw<
+        {
+          id: string;
+          slug: string;
+          avatar: string | null;
+          overall: number | null;
+          discovered: number | null;
+          unclaimed: boolean;
+          walletTracked: boolean;
+          pending: boolean;
+        }[]
+      >(Prisma.sql`
+      SELECT c.id, c.slug, c.avatar, s.overall, s.discovered,
+        EXISTS (SELECT 1 FROM "DiscoveredWallet" w WHERE w."collectorId"=c.id AND w."chainId"=1) AS "walletTracked",
+        (c."claimedAt" IS NULL
+          AND NOT EXISTS (SELECT 1 FROM "CollectorWallet" w WHERE w."collectorId"=c.id AND w.status='ACTIVE' AND w."revokedAt" IS NULL)
+          AND NOT EXISTS (SELECT 1 FROM "ExternalIdentity" i WHERE i."collectorId"=c.id AND i."authenticatedAt" IS NOT NULL)) AS unclaimed,
+        (s."collectorId" IS NULL OR EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=c.id)) AS pending
+      FROM "Collector" c LEFT JOIN "CollectionSnapshot" s ON s."collectorId"=c.id AND s.ruleset=${COLLECTION_RULESET}
+      WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL
+    `);
+      const evidence = new Map(
+        (await publicWalletEvidence(tx)).map((e) => [e.collectorId, e]),
       );
-      const [{ pending }] = await tx.$queryRaw<
-        { pending: bigint }[]
-      >(Prisma.sql`
-        SELECT COUNT(*) AS pending FROM "Collector" c
-        WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL AND ${claimed}
-          AND (EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=c.id)
-            OR NOT EXISTS (SELECT 1 FROM "CollectionSnapshot" s
-              WHERE s."collectorId"=c.id AND s.ruleset=${COLLECTION_RULESET}))
-      `);
-      const [{ unclaimed }] = await tx.$queryRaw<
-        { unclaimed: bigint }[]
-      >(Prisma.sql`
-        SELECT COUNT(*) AS unclaimed FROM "Collector" c
-        WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL AND NOT ${claimed}
-          AND EXISTS (SELECT 1 FROM "DiscoveredWallet" w WHERE w."collectorId"=c.id)
-      `);
-      const pages = Math.max(1, Math.ceil(Number(count) / 24));
+      const ranked = rankCollectorRows(
+        rows.map((row) => {
+          const e = evidence.get(row.id);
+          const observed =
+            row.unclaimed && row.walletTracked
+              ? walletFieldGuide(e?.currentIds ?? [], e?.historyIds ?? [])
+              : null;
+          return {
+            ...row,
+            owned: e?.currentIds.length ?? 0,
+            overall: observed?.score.overall ?? row.overall,
+            discovered: observed?.discovered ?? row.discovered,
+            pending: !observed && row.pending,
+          };
+        }),
+      );
+      const pages = Math.max(1, Math.ceil(ranked.length / 24));
       page = Math.min(
         Math.max(Number.isSafeInteger(page) ? page : 1, 1),
         pages,
       );
-      const rows = await tx.$queryRaw<
-        {
-          slug: string;
-          displayName: string | null;
-          avatar: string | null;
-          overall: number;
-          discovered: number;
-          rank: bigint;
-        }[]
-      >(Prisma.sql`SELECT c.slug, c."displayName", c.avatar, s.overall, s.discovered,
-      DENSE_RANK() OVER (ORDER BY s.overall DESC) AS rank ${eligibility}
-      ORDER BY s.overall DESC, c.slug ASC LIMIT 24 OFFSET ${(page - 1) * 24}`);
+      const selected = ranked.slice((page - 1) * 24, page * 24);
       const names = new Map(
         (
           await tx.collector.findMany({
-            where: { slug: { in: rows.map((r) => r.slug) } },
+            where: { id: { in: selected.map((c) => c.id) } },
             select: publicNameSelect,
           })
-        ).map((c) => [
-          c.slug,
-          {
-            name: publicCollectorName(c),
-            unclaimed:
-              c.claimedAt === null &&
-              c.wallets.length === 0 &&
-              c.identities.length === 0,
-          },
-        ]),
+        ).map((c) => [c.slug, publicCollectorName(c)]),
       );
       return {
         page,
         pages,
-        total: Number(count),
-        pending: Number(pending),
-        unclaimed: Number(unclaimed),
-        collectors: rows.map((c) => ({
-          ...c,
-          displayName: names.get(c.slug)?.name || 'Collector',
-          unclaimed: names.get(c.slug)?.unclaimed ?? false,
-          rank: Number(c.rank),
+        total: ranked.length,
+        pending: ranked.filter((c) => c.pending).length,
+        unclaimed: ranked.filter((c) => c.unclaimed).length,
+        collectors: selected.map((c) => ({
+          slug: c.slug,
+          avatar: c.avatar,
+          owned: c.owned,
+          overall: c.overall,
+          discovered: c.discovered,
+          rank: c.rank,
+          pending: c.pending,
+          unclaimed: c.unclaimed,
+          displayName: names.get(c.slug) || 'Collector',
         })),
       };
     },
-    { isolationLevel: 'RepeatableRead' },
+    { isolationLevel: 'RepeatableRead', timeout: 15000 },
   );
 }

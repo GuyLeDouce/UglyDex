@@ -1,3 +1,4 @@
+import { dexView } from '../../src/server/dex';
 import assert from 'node:assert/strict';
 import { db } from '../../src/server/db';
 import {
@@ -62,6 +63,36 @@ export async function collectorIdentityTests(
     (await collectionSummary(first.collectorId)).owned === 1,
     'unclaimed public collection reads indexed holdings',
   );
+  const beforeDiscoveries = await db().squigDiscovery.count({
+    where: { collectorId: first.collectorId },
+  });
+  const walletGuide = await dexView(first.collectorId, true);
+  check(
+    walletGuide?.status === 'ready' &&
+      walletGuide.basis === 'wallet' &&
+      walletGuide.owned === 1 &&
+      walletGuide.discovered >= 1 &&
+      walletGuide.score.overall > 0,
+    'unclaimed public wallet Field Guide tracks indexed holdings before login or snapshot evaluation',
+  );
+  check(
+    (await db().squigDiscovery.count({
+      where: { collectorId: first.collectorId },
+    })) === beforeDiscoveries,
+    'wallet Field Guide reads never create personal discoveries',
+  );
+  await db().collector.update({
+    where: { id: first.collectorId },
+    data: { isPublic: false },
+  });
+  check(
+    (await dexView(first.collectorId, true)) === null,
+    'turning public visibility off hides wallet Field Guide',
+  );
+  await db().collector.update({
+    where: { id: first.collectorId },
+    data: { isPublic: true },
+  });
   const profile = await collectorProfile(first.collector.slug);
   check(
     profile.status === 'ready' && profile.profile.unclaimed,

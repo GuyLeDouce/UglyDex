@@ -122,8 +122,9 @@ batch. The cursor advances only after a successful apply; copy it to resume in a
 later session. Continue until the UI reports the pass complete. Repeating an
 interrupted batch or restarting from the beginning is safe. Existing private
 collectors stay private; conflicts are counted rather than overwriting links.
-Check `/collectors/directory` after applying. The Field Guide leaderboard remains
-restricted to public, fully evaluated profiles; it is not the holder directory.
+Check `/collectors/directory` and `/collectors` after applying. Top Collectors
+includes public unclaimed wallets using the read-only wallet projection described
+below; signing in is not required for public tracking.
 
 The HTTP repair requires existing authenticated admin access, same-origin POST,
 APP_ENV=staging, and a matching registered database fingerprint. Explicit UI
@@ -138,19 +139,26 @@ from confirmed Field Guide discoveries. No historical evidence is discarded and
 no eligibility rules are relaxed. This repair does not refresh DRIP balances or
 prove the health of external-source workers.
 
-## Public claim status and rankings
+## Public wallet tracking and rankings
 
-Unclaimed wallet shells remain browsable in the holder directory and keep their
-indexed current holdings. Every public holder subpage carries a wallet-not-claimed
-notice. Personal Field Guide completion is unavailable for these shells, not zero.
-The public set page and profile highlights therefore do not present empty personal
-projections as evaluated collector achievements. Claiming does not attribute all
-pre-verification wallet history.
+Unclaimed wallets are public by default and appear in Top Collectors without
+login or a personal CollectionSnapshot. Claim status is a label, not an eligibility
+gate. Profiles explicitly made private and merged tombstones remain excluded.
+Claiming an existing public wallet preserves its public setting; this change does
+not reset existing privacy choices or publish private Discord relationships.
 
-Top Collectors includes claimed public profiles with a current, settled Field Guide
-snapshot. Claim eligibility follows the public identity boundary: claimedAt, an
-active non-revoked wallet, or an authenticated external identity. Imported external
-identities and public wallet discovery alone are insufficient. Eligibility is
-applied before ranking, counting, and pagination. The page separately reports
-unclaimed holder records and claimed profiles awaiting evaluation. Private and
-merged profiles remain excluded; no publication preferences are changed.
+Public unclaimed Field Guides derive current holdings from canonical ownership
+and history from clean, complete WalletOwnershipPeriod provenance. Current and
+historical token IDs are unioned and deduplicated. Existing canonical traits,
+set definitions and completion weights apply. These are read-only wallet
+observations, explicitly labeled as such: no personal discoveries, credentials,
+awards, historical attribution or completion timestamps are invented. The public
+profile, set page and leaderboard use the same wallet projection. Canonical
+indexing continues to update it without requiring a login or enabling new jobs.
+
+Claimed collectors keep their personal Field Guide semantics. Pending jobs do not
+remove them from rankings: prior scores are labeled as last evaluated; those
+without an evaluation stay visible with an updating state. All lightweight scores
+are ordered before pagination with dense ranks and stable slug tie-breaking; only
+24 public display cards are returned. The browser never receives the global token
+ID evidence used to calculate rankings.
