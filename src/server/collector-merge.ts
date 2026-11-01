@@ -2,11 +2,26 @@ import 'server-only';
 import { db } from './db';
 import { hasCollectorUsername } from '@/domain/profile';
 import { markWalletDirty } from '@/sync/provenance';
+import { isTransactionConflict } from './transaction-conflict';
+import { log } from './log';
 
 export async function confirmCollectorMerge(
   requestId: string,
   survivorCollectorId: string,
 ) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await mergeOnce(requestId, survivorCollectorId);
+    } catch (error) {
+      if (!isTransactionConflict(error)) throw error;
+      if (attempt >= 2) throw new Error('MERGE_BUSY');
+      log('auth.merge.retry', { attempt: attempt + 1 });
+      await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
+    }
+  }
+}
+
+async function mergeOnce(requestId: string, survivorCollectorId: string) {
   const result = await db().$transaction(
     async (tx) => {
       const request = await tx.collectorMergeRequest.findUnique({

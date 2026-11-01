@@ -8,7 +8,7 @@ export function CollectorMergeConfirm({ requestId }: { requestId: string }) {
   const [message, setMessage] = useState('');
   async function confirm() {
     setBusy(true);
-    setMessage('');
+    setMessage('Combining your accounts. Please keep this page open.');
     try {
       const response = await fetch('/api/auth/merge/confirm', {
         method: 'POST',
@@ -17,6 +17,9 @@ export function CollectorMergeConfirm({ requestId }: { requestId: string }) {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'MERGE_FAILED');
+      setMessage(
+        'Accounts merged. Opening your profile; collection progress may take a little longer to refresh.',
+      );
       router.replace('/me');
       router.refresh();
     } catch (error) {
@@ -26,7 +29,12 @@ export function CollectorMergeConfirm({ requestId }: { requestId: string }) {
           : error instanceof Error &&
               error.message === 'MERGE_CHARM_IDENTITY_CONFLICT'
             ? 'These accounts have separate DRIP identities that need review before they can be merged.'
-            : 'This merge request expired or could not be completed. Prove both accounts again to create a new request.',
+            : error instanceof Error &&
+                error.message === 'MERGE_REQUEST_EXPIRED'
+              ? 'This request has expired. Reconnect both accounts to create a fresh request.'
+              : error instanceof Error && error.message === 'MERGE_BUSY'
+                ? 'Your collection is being updated. Wait a moment, then try confirming again.'
+                : 'We could not confirm the result. Check My UglyDex first; if your accounts are still separate, try confirming again. You do not need to repeat verification unless the request has expired.',
       );
     } finally {
       setBusy(false);

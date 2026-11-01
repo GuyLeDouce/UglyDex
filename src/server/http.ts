@@ -34,6 +34,7 @@ export function authError(error: unknown) {
     'USERNAME_REQUIRED',
     'IDENTITY_REVIEW_REQUIRED',
     'MERGE_REQUEST_EXPIRED',
+    'MERGE_BUSY',
     'MERGE_CHARM_IDENTITY_CONFLICT',
     'AUTH_UNCONFIGURED',
     'INVALID_BODY',
@@ -51,7 +52,9 @@ export function authError(error: unknown) {
       status:
         message === 'RATE_LIMITED'
           ? 429
-          : message === 'AUTH_UNAVAILABLE' || message === 'AUTH_UNCONFIGURED'
+          : message === 'AUTH_UNAVAILABLE' ||
+              message === 'AUTH_UNCONFIGURED' ||
+              message === 'MERGE_BUSY'
             ? 503
             : 400,
       headers: { 'Cache-Control': 'no-store' },
