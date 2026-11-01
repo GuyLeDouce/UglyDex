@@ -228,6 +228,26 @@ export async function phase7DatabaseTests(
     'from refuses incomplete prerequisites',
   );
   await db().productionStage.deleteMany();
+  let pendingCollectionProgression = 0;
+  let verificationReached = false;
+  await productionBackfill({
+    batches: 8,
+    runner: async (stage) => {
+      // Model the real dependency: queueCollections enqueues progression.
+      if (stage === 'collections') pendingCollectionProgression++;
+      if (stage === 'progression') pendingCollectionProgression = 0;
+      if (stage === 'verification') {
+        check(
+          pendingCollectionProgression === 0,
+          'backfill drains collection-generated progression before verification',
+        );
+        verificationReached = true;
+      }
+      return { complete: true, counts: {} };
+    },
+  });
+  check(verificationReached, 'dependent backfill reaches verification');
+  await db().productionStage.deleteMany();
   const checks = await preflight();
   check(
     checks.some((c) => c.name === 'rpc.configured' && c.status === 'WARN'),

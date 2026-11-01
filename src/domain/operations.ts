@@ -17,8 +17,10 @@ export const backfillStages = [
   'provenance',
   'identity',
   'activity',
-  'progression',
   'collections',
+  // Collection replay enqueues collector progression. Drain it afterwards so
+  // verification and resumed stage gates do not see freshly stranded jobs.
+  'progression',
   'verification',
 ] as const;
 export type BackfillStage = (typeof backfillStages)[number];
