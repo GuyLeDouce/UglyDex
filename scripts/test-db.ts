@@ -967,12 +967,17 @@ try {
             .isVisible(),
           'browser hero visible',
         );
+        await page
+          .getByRole('link', { name: /^Sign in/ })
+          .first()
+          .click();
         await page.getByRole('button', { name: 'Connect Wallet' }).click();
         check(
           (await page.getByRole('status').textContent()) ===
             'Open UglyDex in a browser with an Ethereum wallet installed.',
           'wallet missing state shown',
         );
+        await page.goto(base);
         if (process.argv.includes('--catalog')) {
           await page
             .locator('.landing-specimens img')
