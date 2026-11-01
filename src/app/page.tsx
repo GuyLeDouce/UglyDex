@@ -11,7 +11,6 @@ import {
   type SquigCardData,
 } from '@/server/collections';
 import { CollectionGrid } from '@/components/collection';
-import { Connect } from '@/components/connect';
 import { Artwork } from '@/components/artwork';
 export const dynamic = 'force-dynamic';
 export default async function Home({
@@ -54,7 +53,7 @@ export default async function Home({
     <div className="landing-world">
       <section className="landing-heading">
         <div className="landing-copy">
-          <p className="eyebrow">UGLY LABS / FIELD GUIDE № 001</p>
+          <p className="eyebrow">WELCOME TO UGLYDEX</p>
           <h1 className="landing-headline-image-wrap">
             <Image
               className="landing-headline-image"
@@ -66,15 +65,16 @@ export default async function Home({
             />
           </h1>
           <p className="hero-description">
-            Squigs are strange little creatures, and this is where they keep
-            their stories.
+            Meet the Squigs, discover their stories, and see what the community
+            has been up to. Take a look around—you don&apos;t need an account to
+            explore.
           </p>
           <div className="actions">
-            <Link className="button primary" href="/connect">
-              Connect Wallet ↗
-            </Link>
-            <Link className="button" href="/squigs">
+            <Link className="button primary" href="/squigs">
               Explore Squigs →
+            </Link>
+            <Link className="button" href="/thread">
+              Meet the community →
             </Link>
           </div>
         </div>
@@ -113,7 +113,10 @@ export default async function Home({
       ) : (
         <div className="empty-state">
           <h2>The field guide is warming up.</h2>
-          <p>Squig artwork appears here after the catalog is imported.</p>
+          <p>
+            The collection is taking a moment to load. You can still visit the
+            index.
+          </p>
           <Link href="/squigs">Explore the index →</Link>
         </div>
       )}
@@ -121,24 +124,22 @@ export default async function Home({
       <UglyUsers page={page} />
       <section className="manifesto">
         <div className="manifesto-copy">
-          <p className="eyebrow">WELCOME TO THE UGLYDEX</p>
-          <h2>Every Squig has a story. Yours is still being written.</h2>
+          <p className="eyebrow">MAKE YOURSELF AT HOME</p>
+          <h2>A little strange. A lot to discover.</h2>
           <p>
-            More than a wallet. More than a collection. This is where your Ugly
-            legacy comes to life.
+            Start with a Squig that catches your eye. Open its Passport to
+            explore its traits and recorded history, or drop into the Collector
+            Thread to see what&apos;s happening across the community.
           </p>
           <p>
-            Every Squig you&apos;ve held, every move you&apos;ve made, every
-            milestone you&apos;ve reached, and every achievement still waiting
-            to be unlocked.
+            Have Squigs of your own? When you&apos;re ready, sign in to bring
+            your verified collection, favorites, and Field Guide progress
+            together.
           </p>
-          <p>
-            Explore your past, discover your progress, and keep building a
-            legacy that&apos;s uniquely yours.
-          </p>
-          <p>We&apos;ve been watching. Now it&apos;s your turn to see.</p>
-          <p className="manifesto-signoff">Stay Ugly. Keep Building.</p>
-          <Connect />
+          <p className="manifesto-signoff">Stay curious. Stay Ugly.</p>
+          <Link className="text-link" href="/connect">
+            Sign in to your UglyDex →
+          </Link>
         </div>
         {sample[0] && (
           <Link

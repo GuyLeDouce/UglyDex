@@ -44,7 +44,7 @@ export function SiteHeader({
   slug: string | null;
   isPublic: boolean;
 }) {
-  const homeHref = slug ? '/me' : '/connect';
+  const homeHref = slug ? '/me' : '/';
   return (
     <header
       className="site-header"
@@ -79,7 +79,7 @@ export function SiteHeader({
         />
       </Link>
       <nav className="primary-nav" aria-label="Primary navigation">
-        <Link href={homeHref}>My UglyDex</Link>
+        <Link href={homeHref}>{slug ? 'My UglyDex' : 'Home'}</Link>
         <Link href="/squigs">Explore</Link>
         <Link href="/editions">Editions</Link>
         <Link href="/collectors">Top Collectors</Link>
@@ -101,8 +101,8 @@ export function SiteHeader({
             </nav>
           </details>
         ) : (
-          <Link className="button primary header-connect" href="/connect">
-            Connect wallet <span aria-hidden>↗</span>
+          <Link className="button header-connect" href="/connect">
+            Sign in <span aria-hidden>↗</span>
           </Link>
         )}
       </div>
@@ -115,7 +115,7 @@ export function SiteHeader({
         </summary>
         <nav aria-label="Mobile navigation">
           <Link className="mobile-primary-link" href={homeHref}>
-            My UglyDex
+            {slug ? 'My UglyDex' : 'Home'}
           </Link>
           <Link className="mobile-primary-link" href="/squigs">
             Explore Squigs
@@ -133,8 +133,8 @@ export function SiteHeader({
           )}
           {slug && <AccountLinks slug={slug} isPublic={isPublic} />}
           {!slug && (
-            <Link className="button primary" href="/connect">
-              Connect wallet ↗
+            <Link className="button" href="/connect">
+              Sign in
             </Link>
           )}
         </nav>
