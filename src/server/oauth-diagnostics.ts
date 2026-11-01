@@ -43,3 +43,34 @@ export async function oauthRejection(response: Response) {
     return 'unclassified';
   }
 }
+
+// Do not retry a one-use OAuth code or expose provider response bodies.
+export function discordRateLimitResponse(
+  response: Response,
+  publicBaseUrl: string,
+) {
+  const raw = response.headers.get('retry-after');
+  const seconds =
+    raw && /^\d+(?:\.\d+)?$/.test(raw) ? Math.ceil(Number(raw)) : null;
+  const retryAfter =
+    seconds !== null &&
+    Number.isSafeInteger(seconds) &&
+    seconds > 0 &&
+    seconds <= 86400
+      ? seconds
+      : null;
+  console.error(
+    JSON.stringify({
+      event: 'auth.discord_rate_limited',
+      retryAfterSeconds: retryAfter,
+    }),
+  );
+  const url = new URL('/connect', publicBaseUrl);
+  url.searchParams.set('error', 'DISCORD_RATE_LIMITED');
+  if (retryAfter !== null)
+    url.searchParams.set('retryAfter', String(retryAfter));
+  return new Response(null, {
+    status: 303,
+    headers: { Location: url.href, 'Cache-Control': 'no-store' },
+  });
+}

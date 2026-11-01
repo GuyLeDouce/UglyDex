@@ -2,9 +2,15 @@ import { Connect } from '@/components/connect';
 export default async function ConnectPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; retryAfter?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, retryAfter } = await searchParams;
+  const seconds =
+    retryAfter && /^\d{1,5}$/.test(retryAfter) ? Number(retryAfter) : 0;
+  const wait =
+    seconds > 0 && seconds <= 86400
+      ? `Wait at least ${seconds} seconds before starting a fresh sign-in.`
+      : 'Please wait before starting a fresh sign-in.';
   return (
     <section className="connect-layout">
       <div className="connect-panel">
@@ -16,9 +22,11 @@ export default async function ConnectPage({
         </p>
         <Connect
           initialMessage={
-            error === 'IDENTITY_REVIEW_REQUIRED'
-              ? 'This credential belongs to another Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.'
-              : ''
+            error === 'DISCORD_RATE_LIMITED'
+              ? `Discord is temporarily limiting sign-in requests. ${wait} Use Connect Discord below rather than refreshing the previous callback. This attempt stopped before account linking.`
+              : error === 'IDENTITY_REVIEW_REQUIRED'
+                ? 'This credential belongs to another Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.'
+                : ''
           }
         />
         <small>One identity at a time. Your collection stays yours.</small>

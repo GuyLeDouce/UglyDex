@@ -14,7 +14,11 @@ import { readEnv } from '@/server/env';
 import { db } from '@/server/db';
 import { discordId } from '@/domain/validation';
 import { authError } from '@/server/http';
-import { safeOAuthFailure, oauthRejection } from '@/server/oauth-diagnostics';
+import {
+  safeOAuthFailure,
+  oauthRejection,
+  discordRateLimitResponse,
+} from '@/server/oauth-diagnostics';
 export async function GET(request: Request) {
   let stage = 'challenge';
   try {
@@ -68,6 +72,8 @@ export async function GET(request: Request) {
       }),
       signal: AbortSignal.timeout(10000),
     });
+    if (response.status === 429)
+      return discordRateLimitResponse(response, env.PUBLIC_BASE_URL);
     if (!response.ok) {
       console.error(
         JSON.stringify({
@@ -88,6 +94,8 @@ export async function GET(request: Request) {
       signal: AbortSignal.timeout(10000),
       cache: 'no-store',
     });
+    if (userResponse.status === 429)
+      return discordRateLimitResponse(userResponse, env.PUBLIC_BASE_URL);
     if (!userResponse.ok) throw new Error('OAUTH_IDENTITY_FAILED');
     const user = z
       .object({ id: discordId, username: z.string().max(100) })
