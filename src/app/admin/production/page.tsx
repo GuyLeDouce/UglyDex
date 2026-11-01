@@ -54,6 +54,7 @@ export default async function Page() {
         checks run through <code>npm run production:preflight</code>.
       </p>
       <nav className="tabs">
+        <Link href="/admin/blockwallet">Blocked wallets</Link>
         <Link href="/admin/integrations">Integrations</Link>
         <Link href="/admin/provenance">Provenance</Link>
         <Link href="/admin/sharing">Rendering</Link>

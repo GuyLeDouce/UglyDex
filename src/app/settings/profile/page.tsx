@@ -19,6 +19,13 @@ export default async function Settings() {
           )}
         </div>
       </section>
+      {c.walletBlockPublicPreference !== null && (
+        <p role="status">
+          An admin wallet block currently hides your public profile. You can
+          still set your preferred visibility below; it will apply after the
+          block is removed.
+        </p>
+      )}
       <ProfileForm
         initial={{
           slug: c.slug,
@@ -27,7 +34,7 @@ export default async function Settings() {
           bio: c.bio ?? '',
           avatar: c.avatar ?? '',
           collectionVisibility: c.collectionVisibility,
-          isPublic: c.isPublic,
+          isPublic: c.walletBlockPublicPreference ?? c.isPublic,
           showWallets: c.showWallets,
           showDiscord: c.showDiscord,
           showCharmBalance: c.showCharmBalance,

@@ -32,6 +32,8 @@ model Collector {
   bio          String?
   avatar       String?
   isPublic     Boolean                @default(false)
+  // Owner visibility preference while an admin wallet block suppresses publication.
+  walletBlockPublicPreference Boolean?
   showWallets  Boolean                @default(false)
   showDiscord  Boolean                @default(false)
   showCharmBalance Boolean             @default(false)
@@ -1296,4 +1298,15 @@ model CharmDirtyNonce {
  id String @id
  expiresAt DateTime
  @@index([expiresAt])
+}
+
+// Admin moderation only; never used to remove ownership or historical evidence.
+model BlockedWallet {
+  chainId Int @default(1)
+  walletAddress String @db.VarChar(42)
+  reason String
+  blockedBy String
+  createdAt DateTime @default(now())
+  @@id([chainId, walletAddress])
+  @@index([createdAt])
 }

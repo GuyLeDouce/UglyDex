@@ -47,6 +47,7 @@ export default async function Page() {
           Private imported identities are not public holder profiles. Mapping a
           verified private wallet preserves its privacy.
         </p>
+        <Link href="/admin/blockwallet">Manage blocked wallets →</Link>
         <Link href="/admin/collections">Field Guide calculations →</Link>
       </section>
       {appEnvironment() === 'staging' ? (

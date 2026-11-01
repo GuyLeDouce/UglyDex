@@ -284,6 +284,9 @@ try {
   await external.end();
   console.log(JSON.stringify({ event: 'test.close_readers' }));
   await closeExternalPools();
+  const { walletBlockTests } = await import('../tests/db/wallet-blocks');
+  await walletBlockTests(check);
+  console.log(JSON.stringify({ event: 'test.wallet_blocks_passed' }));
   const identityStart = assertions;
   const { collectorIdentityTests } =
     await import('../tests/db/collector-identity');
@@ -1269,6 +1272,9 @@ try {
     }
   }
   if (process.argv.includes('--web')) {
+    const { walletBlockTests } = await import('../tests/db/wallet-blocks');
+    await walletBlockTests(check);
+    console.log(JSON.stringify({ event: 'test.wallet_blocks_passed' }));
     const identityStart = assertions;
     const { collectorIdentityWebTests } =
       await import('../tests/db/collector-identity-web');
@@ -1348,6 +1354,13 @@ try {
     );
     const { ownershipWebTests } = await import('../tests/db/ownership-web');
     await ownershipWebTests(
+      `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
+    const { walletBlockWebTests } =
+      await import('../tests/db/wallet-blocks-web');
+    await walletBlockWebTests(
       `http://127.0.0.1:${webPort}`,
       check,
       process.argv.includes('--browser'),

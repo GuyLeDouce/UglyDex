@@ -162,3 +162,32 @@ without an evaluation stay visible with an updating state. All lightweight score
 are ordered before pagination with dense ranks and stable slug tie-breaking; only
 24 public display cards are returned. The browser never receives the global token
 ID evidence used to calculate rankings.
+
+## Admin wallet blocks
+
+`/admin/blockwallet` lists blocked Ethereum wallets with admin-only reasons,
+25 per page. Authenticated Discord admins can add a block or explicitly confirm
+unblocking. `/api/admin/blockwallet` requires the existing admin allowlist,
+same-origin requests and rate limiting. Block/unblock operations are atomic with
+an `OperationalAudit` entry. Repeated requests are idempotent; an old unblock
+request cannot remove a newer block.
+
+A block suppresses the entire public collector profile associated with that
+wallet (including a collector with multiple wallets), using the same effective
+`isPublic` flag as rankings, directories, profiles, galleries and sharing.
+On-chain transfer records remain public evidence; this is not an erasure tool or
+an authentication ban. Indexing, historical evidence and identity verification
+are unaffected. Blocks may be added before a holder profile exists.
+
+`BlockedWallet` is independent of owner privacy. Database triggers preserve the
+owner's desired visibility in `Collector.walletBlockPublicPreference` while a
+block is active. Claiming, merging or linking a blocked wallet recomputes the
+public-visibility restriction within the same transaction. Removing the final
+applicable block restores the desired visibility, including any private choice
+made while blocked. Profile settings explain this restriction. Triggers serialize
+moderation and relevant wallet association changes with a dedicated advisory
+lock; a failed transaction rolls back both moderation and its audit.
+
+Deployment requires the additive `202611020001_wallet_blocks` migration before
+the web release. No ledger rewrite or reindex is required. To reverse an admin
+block, use Unblock on the page; do not delete ownership or attribution evidence.
