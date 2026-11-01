@@ -253,8 +253,11 @@ export async function collectorThread(page = 1, collectorSlug?: string) {
 export async function topCollectors(page = 1) {
   return db().$transaction(
     async (tx) => {
+      const claimed = Prisma.sql`(c."claimedAt" IS NOT NULL
+        OR EXISTS (SELECT 1 FROM "CollectorWallet" w WHERE w."collectorId"=c.id AND w.status='ACTIVE' AND w."revokedAt" IS NULL)
+        OR EXISTS (SELECT 1 FROM "ExternalIdentity" i WHERE i."collectorId"=c.id AND i."authenticatedAt" IS NOT NULL))`;
       const eligibility = Prisma.sql`FROM "Collector" c JOIN "CollectionSnapshot" s ON s."collectorId"=c.id AND s.ruleset=${COLLECTION_RULESET}
-      WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL
+      WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL AND ${claimed}
       AND NOT EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=c.id)`;
       const [{ count }] = await tx.$queryRaw<{ count: bigint }[]>(
         Prisma.sql`SELECT COUNT(*) AS count ${eligibility}`,
@@ -263,10 +266,17 @@ export async function topCollectors(page = 1) {
         { pending: bigint }[]
       >(Prisma.sql`
         SELECT COUNT(*) AS pending FROM "Collector" c
-        WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL
+        WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL AND ${claimed}
           AND (EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=c.id)
             OR NOT EXISTS (SELECT 1 FROM "CollectionSnapshot" s
               WHERE s."collectorId"=c.id AND s.ruleset=${COLLECTION_RULESET}))
+      `);
+      const [{ unclaimed }] = await tx.$queryRaw<
+        { unclaimed: bigint }[]
+      >(Prisma.sql`
+        SELECT COUNT(*) AS unclaimed FROM "Collector" c
+        WHERE c."isPublic" AND c."mergedIntoCollectorId" IS NULL AND NOT ${claimed}
+          AND EXISTS (SELECT 1 FROM "DiscoveredWallet" w WHERE w."collectorId"=c.id)
       `);
       const pages = Math.max(1, Math.ceil(Number(count) / 24));
       page = Math.min(
@@ -295,7 +305,10 @@ export async function topCollectors(page = 1) {
           c.slug,
           {
             name: publicCollectorName(c),
-            unclaimed: c.claimedAt === null && c.wallets.length === 0,
+            unclaimed:
+              c.claimedAt === null &&
+              c.wallets.length === 0 &&
+              c.identities.length === 0,
           },
         ]),
       );
@@ -304,6 +317,7 @@ export async function topCollectors(page = 1) {
         pages,
         total: Number(count),
         pending: Number(pending),
+        unclaimed: Number(unclaimed),
         collectors: rows.map((c) => ({
           ...c,
           displayName: names.get(c.slug)?.name || 'Collector',

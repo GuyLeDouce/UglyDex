@@ -11,6 +11,10 @@ export const publicNameSelect = {
     where: { status: 'ACTIVE', revokedAt: null },
     select: { walletAddress: true, isPrimary: true, chainId: true },
   },
+  identities: {
+    where: { authenticatedAt: { not: null } },
+    select: { username: true },
+  },
   discoveredWallets: { select: { walletAddress: true } },
 } as const satisfies Prisma.CollectorSelect;
 export function publicCollectorName(
@@ -22,7 +26,7 @@ export function publicCollectorName(
       bio: null,
       avatar: null,
       showDiscord: false,
-      identities: [],
+      identities: c.identities,
     }).displayName || 'Collector'
   );
 }

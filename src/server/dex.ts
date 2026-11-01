@@ -254,7 +254,10 @@ export async function publicSetCollector(slug: string) {
         id: c.id,
         slug: c.slug,
         displayName: publicCollectorName(c),
-        unclaimed: c.claimedAt === null && c.wallets.length === 0,
+        unclaimed:
+          c.claimedAt === null &&
+          c.wallets.length === 0 &&
+          c.identities.length === 0,
       }
     : null;
 }

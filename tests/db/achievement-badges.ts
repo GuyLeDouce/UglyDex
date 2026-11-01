@@ -37,6 +37,8 @@ export async function achievementBadgeWebTests(
       collectorId: c.id,
       provider: 'DISCORD',
       externalId: '899999999999999998',
+      // This fixture signs in below and represents a claimed collector.
+      authenticatedAt: new Date(),
     },
   });
   const canonical = catalog.records.find((r) => r.tokenId === 4398)!;

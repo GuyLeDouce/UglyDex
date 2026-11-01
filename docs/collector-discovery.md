@@ -137,3 +137,20 @@ The broad profile statistic is labeled “Recorded ownership history,” distinc
 from confirmed Field Guide discoveries. No historical evidence is discarded and
 no eligibility rules are relaxed. This repair does not refresh DRIP balances or
 prove the health of external-source workers.
+
+## Public claim status and rankings
+
+Unclaimed wallet shells remain browsable in the holder directory and keep their
+indexed current holdings. Every public holder subpage carries a wallet-not-claimed
+notice. Personal Field Guide completion is unavailable for these shells, not zero.
+The public set page and profile highlights therefore do not present empty personal
+projections as evaluated collector achievements. Claiming does not attribute all
+pre-verification wallet history.
+
+Top Collectors includes claimed public profiles with a current, settled Field Guide
+snapshot. Claim eligibility follows the public identity boundary: claimedAt, an
+active non-revoked wallet, or an authenticated external identity. Imported external
+identities and public wallet discovery alone are insufficient. Eligibility is
+applied before ranking, counting, and pagination. The page separately reports
+unclaimed holder records and claimed profiles awaiting evaluation. Private and
+merged profiles remain excluded; no publication preferences are changed.
