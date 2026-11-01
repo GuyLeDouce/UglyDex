@@ -89,15 +89,6 @@ export default async function Collector({
       </section>
       {p.unclaimed && (
         <section className="panel">
-          <h2>Your wallet. Your history.</h2>
-          <p>
-            This public holder record comes from indexed blockchain ownership.
-            No owner has claimed it. Wallet history is not proof of who
-            controlled it in the past.
-          </p>
-          <Link className="button" href="/connect">
-            Verify your wallet to claim this profile
-          </Link>
           <p>{r.summary.owned} Squigs currently held.</p>
         </section>
       )}
@@ -124,7 +115,7 @@ export default async function Collector({
         url={absoluteUrl('/collector/' + p.slug)}
         copy={(p.displayName || p.slug) + ' — still ugly. Still hunting.'}
       />
-      <CollectorHighlights id={r.collectorId} slug={p.slug} />
+      {!p.unclaimed && <CollectorHighlights id={r.collectorId} slug={p.slug} />}
       {r.featured.length > 0 && (
         <section className="featured-exhibition">
           <p className="eyebrow">PERSONALLY SELECTED</p>
@@ -136,7 +127,7 @@ export default async function Collector({
           />
         </section>
       )}
-      <TrophyCase id={r.collectorId} slug={p.slug} />
+      {!p.unclaimed && <TrophyCase id={r.collectorId} slug={p.slug} />}
       {editions.length > 0 && (
         <section>
           <p className="eyebrow">A DIFFERENT KIND OF COLLECTIBLE</p>

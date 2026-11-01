@@ -103,7 +103,24 @@ export async function communityTests(
     ),
     'UglyUsers exposes only public display fields',
   );
+  const unclaimed = await create('community-unclaimed', 4444);
+  await db().discoveredWallet.create({
+    data: {
+      collectorId: unclaimed.id,
+      chainId: 1,
+      walletAddress: '0x' + 'ab'.repeat(20),
+    },
+  });
+  await db().collector.updateMany({
+    where: { id: { in: [tied.id, lower.id] } },
+    data: { claimedAt: new Date() },
+  });
   const ranked = await topCollectors();
+  check(
+    !ranked.collectors.some((c) => c.slug === unclaimed.slug) &&
+      ranked.unclaimed > 0,
+    'unclaimed wallet snapshots never enter verified rankings or affect ranks',
+  );
   const first = ranked.collectors.find((c) => c.slug === winner.slug)!;
   const second = ranked.collectors.find((c) => c.slug === tied.slug)!;
   const third = ranked.collectors.find((c) => c.slug === lower.slug)!;

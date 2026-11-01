@@ -38,10 +38,16 @@ export default async function TopCollectors({
         </Link>
         <p>Ranked by overall Field Guide completion. Every discovery counts.</p>
         <small>
-          Public profiles with an up-to-date Field Guide · Equal completion
-          shares a rank.
+          Claimed public profiles with an up-to-date Field Guide · Equal
+          completion shares a rank.
         </small>
       </section>
+      <p className="panel">
+        {result.unclaimed.toLocaleString()} unclaimed wallet profiles are listed
+        in the <Link href="/collectors/directory">holder directory</Link>, not
+        ranked as verified collector Field Guides. Indexed wallet holdings are
+        distinct from personal discoveries. Private profiles are not listed.
+      </p>
       {result.pending > 0 && (
         <p role="status">
           {result.pending.toLocaleString()} public collector profiles are
@@ -79,7 +85,11 @@ export default async function TopCollectors({
       {!result.collectors.length && (
         <section className="empty-state">
           <h2>A new chapter is waiting.</h2>
-          <p>Collectors appear once their public Field Guide is ready.</p>
+          <p>
+            Collectors appear after claiming their profile, making it public,
+            and completing Field Guide evaluation. Unclaimed wallets are not
+            shown as zero-score collectors.
+          </p>
         </section>
       )}
       <nav className="pagination" aria-label="Leaderboard pages">

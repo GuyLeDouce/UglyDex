@@ -31,6 +31,25 @@ export async function collectorIdentityWebTests(
     before.includes('UNCLAIMED HOLDER') && before.includes(address),
     'HTTP unclaimed holder renders full public blockchain address',
   );
+  check(
+    before.includes('Wallet not claimed'),
+    'holder profile clearly identifies unclaimed wallet',
+  );
+  const fieldGuide = await (
+    await fetch(`${base}/collector/${discovered.collector.slug}/sets`)
+  ).text();
+  check(
+    fieldGuide.includes('Personal Field Guide not verified') &&
+      !fieldGuide.includes('A field guide built from real discoveries.'),
+    'unclaimed holder Field Guide explains unavailable personal completion instead of zero score',
+  );
+  const holdings = await (
+    await fetch(`${base}/collector/${discovered.collector.slug}/collection`)
+  ).text();
+  check(
+    holdings.includes('Wallet not claimed') && holdings.includes('4430'),
+    'unclaimed collection retains holdings and trust notice',
+  );
   const post = (path: string, body: unknown, cookie = '') =>
     fetch(base + path, {
       method: 'POST',

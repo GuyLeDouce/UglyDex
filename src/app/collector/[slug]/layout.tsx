@@ -1,5 +1,6 @@
 import { CollectorNav } from '@/components/collector-nav';
-import { db } from '@/server/db';
+import { publicSetCollector } from '@/server/dex';
+import { UnclaimedHolderNotice } from '@/components/unclaimed-holder';
 export default async function Layout({
   children,
   params,
@@ -8,16 +9,15 @@ export default async function Layout({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  let visible = false;
+  let collector = null;
   try {
-    visible = !!(await db().collector.findFirst({
-      where: { slug, isPublic: true },
-      select: { id: true },
-    }));
+    collector = await publicSetCollector(slug);
   } catch {}
   return (
     <>
-      {visible && <CollectorNav slug={slug} />} {children}
+      {collector && <CollectorNav slug={slug} />}
+      {collector?.unclaimed && <UnclaimedHolderNotice />}
+      {children}
     </>
   );
 }
