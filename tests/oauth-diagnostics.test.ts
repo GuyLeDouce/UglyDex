@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   oauthRejection,
+  discordRateLimitResponse,
   safeOAuthFailure,
 } from '../src/server/oauth-diagnostics';
 
@@ -35,4 +36,31 @@ it('discards provider descriptions and unrecognized provider errors', async () =
   expect(await oauthRejection(new Response('private upstream html'))).toBe(
     'unclassified',
   );
+});
+
+it('redirects rate-limited OAuth to a fresh sign-in without leaking provider data', async () => {
+  const response = discordRateLimitResponse(
+    new Response('private provider body', {
+      status: 429,
+      headers: { 'retry-after': '2.5' },
+    }),
+    'https://ugly.test',
+  );
+  expect(response.status).toBe(303);
+  expect(response.headers.get('location')).toBe(
+    'https://ugly.test/connect?error=DISCORD_RATE_LIMITED&retryAfter=3',
+  );
+  expect(response.headers.get('cache-control')).toBe('no-store');
+  expect(await response.text()).toBe('');
+});
+it('omits unknown or malformed retry timing instead of inventing a cooldown', () => {
+  for (const value of ['', 'secret', '-1', 'Infinity', '999999999', '0']) {
+    const response = discordRateLimitResponse(
+      new Response(null, { status: 429, headers: { 'retry-after': value } }),
+      'https://ugly.test',
+    );
+    expect(response.headers.get('location')).toBe(
+      'https://ugly.test/connect?error=DISCORD_RATE_LIMITED',
+    );
+  }
 });
