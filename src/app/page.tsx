@@ -12,6 +12,7 @@ import {
 } from '@/server/collections';
 import { CollectionGrid } from '@/components/collection';
 import { Artwork } from '@/components/artwork';
+import { HomeIntroduction, HomeCardGuide } from '@/components/home-guide';
 export const dynamic = 'force-dynamic';
 export default async function Home({
   searchParams,
@@ -100,6 +101,7 @@ export default async function Home({
           </div>
         )}
       </section>
+      <HomeIntroduction />
       <div className="section-heading inline landing-section-heading">
         <div>
           <p className="eyebrow">SPECIMENS FROM THE COLLECTION</p>
@@ -120,6 +122,7 @@ export default async function Home({
           <Link href="/squigs">Explore the index →</Link>
         </div>
       )}
+      <HomeCardGuide sample={sample[0]} />
       <CollectorThread preview />
       <UglyUsers page={page} />
       <section className="manifesto">
