@@ -47,7 +47,7 @@ export function WalletBlockControls({
     }
   }
   return (
-    <form action={submit}>
+    <form className="settings-form" action={submit}>
       {!walletAddress && (
         <>
           <label>

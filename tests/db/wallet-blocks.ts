@@ -153,6 +153,12 @@ export async function walletBlockTests(
   );
   await db().collectorWallet.deleteMany({ where: { collectorId: claimed.id } });
   await db().discoveredWallet.deleteMany({ where: { collectorId: id } });
+  await db().collectionJob.deleteMany({
+    where: { collectorId: { in: [id, claimed.id, later.collectorId] } },
+  });
+  await db().progressionJob.deleteMany({
+    where: { subjectId: { in: [id, claimed.id, later.collectorId] } },
+  });
   await db().collector.deleteMany({
     where: { id: { in: [id, claimed.id, later.collectorId] } },
   });
