@@ -10,6 +10,7 @@ export const filterSchema = z.object({
   sort: z
     .enum([
       'token',
+      'sets-desc',
       'points-desc',
       'points-asc',
       'price-asc',

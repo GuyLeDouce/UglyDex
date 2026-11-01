@@ -43,3 +43,16 @@ export function cardPersonalization(candidate: Candidates[string] | undefined) {
       }
     : {};
 }
+
+// Sort the lightweight matching IDs globally before loading a page of cards.
+// Candidates already exclude hidden sets and respect current/historical modes.
+export function mostSetsAdvanced<T extends { tokenId: number }>(
+  tokens: T[],
+  candidates: Candidates | null,
+): T[] {
+  return [...tokens].sort(
+    (a, b) =>
+      (candidates?.[b.tokenId]?.sets.length ?? 0) -
+        (candidates?.[a.tokenId]?.sets.length ?? 0) || a.tokenId - b.tokenId,
+  );
+}

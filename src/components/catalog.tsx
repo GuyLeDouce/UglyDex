@@ -75,6 +75,9 @@ export async function Catalog({
             Sort
             <select name="sort" aria-label="Sort" defaultValue={f.sort}>
               <option value="token">Token ID</option>
+              {viewerId && (
+                <option value="sets-desc">Most sets advanced</option>
+              )}
               <option value="points-desc">UglyPoints ↓</option>
               <option value="points-asc">UglyPoints ↑</option>
               <ListingSortOptions />
@@ -158,6 +161,15 @@ export async function Catalog({
           <span>{data.total.toLocaleString()} Squigs</span>
         </div>
       </form>
+      {f.sort === 'sets-desc' && (
+        <p className="muted" role="status">
+          {data.setSortUnavailable
+            ? viewerId
+              ? 'Your Field Guide is updating. Showing token ID order until your set progress is ready.'
+              : 'Sign in to sort by your set progress. Showing token ID order.'
+            : 'Most unfinished sets advanced first, based on your Field Guide. Ties use token ID.'}
+        </p>
+      )}
       {data.market?.status === 'unavailable' ? (
         <section className="empty-state">
           <h2>Listings are temporarily unavailable.</h2>

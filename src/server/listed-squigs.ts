@@ -6,6 +6,7 @@ import { personalizedCandidates } from './dex';
 import {
   cardPersonalization,
   matchesFieldGuide,
+  mostSetsAdvanced,
   type FieldGuideFilter,
 } from './card-personalization';
 import {
@@ -16,7 +17,12 @@ import {
 } from '@/domain/opensea';
 
 export type ListedSort =
-  ListingSort | 'points-desc' | 'points-asc' | 'rank' | 'rank-desc';
+  | ListingSort
+  | 'sets-desc'
+  | 'points-desc'
+  | 'points-asc'
+  | 'rank'
+  | 'rank-desc';
 export async function listedSquigPage(
   market: OpenSeaListings,
   sort: ListedSort,
@@ -43,7 +49,9 @@ export async function listedSquigPage(
   const known = new Set(candidates.map((s) => s.tokenId));
   const ordered = isListingSort(sort)
     ? sortedListings(listed, sort).filter((l) => known.has(l.tokenId))
-    : candidates;
+    : sort === 'sets-desc'
+      ? mostSetsAdvanced(candidates, personal)
+      : candidates;
   const pages = Math.max(1, Math.ceil(ordered.length / 24));
   page = Math.min(Math.max(1, page), pages);
   const ids = ordered.slice((page - 1) * 24, page * 24).map((s) => s.tokenId);

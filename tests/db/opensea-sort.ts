@@ -171,7 +171,12 @@ export async function openSeaSortTests(check: (v: unknown, m: string) => void) {
             discovered: i < 10,
             owned: i < 2,
             missingTraits: i < 27 ? 2 : 0,
-            sets: i >= 15 ? ['first-specimen'] : [],
+            sets:
+              i === 0
+                ? []
+                : i >= 25
+                  ? ['first-specimen', 'og-archive']
+                  : ['first-specimen'],
           },
         ]),
       );
@@ -193,7 +198,65 @@ export async function openSeaSortTests(check: (v: unknown, m: string) => void) {
         where: { collectorId: collector.id },
       });
       const market = await readListings();
+      const byImpact = (a: { tokenId: number }, b: { tokenId: number }) =>
+        candidates[b.tokenId].sets.length - candidates[a.tokenId].sets.length ||
+        a.tokenId - b.tokenId;
+      const listedFirst = await listedSquigPage(
+        market,
+        'sets-desc',
+        1,
+        collector.id,
+      );
+      const listedSecond = await listedSquigPage(
+        market,
+        'sets-desc',
+        2,
+        collector.id,
+      );
+      check(
+        JSON.stringify(
+          [...listedFirst.items, ...listedSecond.items].map((c) => c.tokenId),
+        ) ===
+          JSON.stringify(
+            [...tokens.slice(0, 30)].sort(byImpact).map((t) => t.tokenId),
+          ),
+        'most sets advanced globally orders listed tokens before pagination with stable ties',
+      );
+      const setPage = (page: string) =>
+        collectionPage(
+          { sort: 'sets-desc', dex: 'advances', page },
+          undefined,
+          false,
+          collector.id,
+          readListings,
+        );
+      const setFirst = await setPage('1');
+      const setSecond = await setPage('2');
+      const expectedSets = tokens
+        .filter((t) => candidates[t.tokenId].sets.length > 0)
+        .sort(byImpact);
+      check(
+        setFirst.total === expectedSets.length &&
+          setFirst.items.length === 24 &&
+          JSON.stringify(
+            [...setFirst.items, ...setSecond.items].map((c) => c.tokenId),
+          ) === JSON.stringify(expectedSets.map((t) => t.tokenId)),
+        'catalog set sort intersects personal filters and sorts globally before pagination',
+      );
+      const searchedSet = await collectionPage(
+        { sort: 'sets-desc', q: String(tokens[29].tokenId) },
+        undefined,
+        false,
+        collector.id,
+        readListings,
+      );
+      check(
+        searchedSet.total === 1 &&
+          searchedSet.items[0].tokenId === tokens[29].tokenId,
+        'set sorting retains token search',
+      );
       for (const sort of [
+        'sets-desc',
         'price-asc',
         'price-desc',
         'points-asc',
@@ -248,6 +311,36 @@ export async function openSeaSortTests(check: (v: unknown, m: string) => void) {
         'anonymous listings have no collector personalization',
       );
       await db().collectionJob.create({ data: { collectorId: collector.id } });
+      const pendingSets = await collectionPage(
+        { sort: 'sets-desc' },
+        undefined,
+        false,
+        collector.id,
+        readListings,
+      );
+      const pendingListedSets = await listedSquigPage(
+        market,
+        'sets-desc',
+        1,
+        collector.id,
+      );
+      check(
+        pendingSets.setSortUnavailable &&
+          pendingSets.items.every((c) => !c.personalization),
+        'catalog set sorting does not use stale snapshot during recalculation',
+      );
+      check(
+        pendingListedSets.personalizationPending &&
+          JSON.stringify(pendingListedSets.items.map((c) => c.tokenId)) ===
+            JSON.stringify(tokens.slice(0, 24).map((t) => t.tokenId)),
+        'listed set sorting falls back to token order while recalculation is pending',
+      );
+      const anonymousSets = await collectionPage({ sort: 'sets-desc' });
+      check(
+        anonymousSets.setSortUnavailable &&
+          anonymousSets.items.every((c) => !c.personalization),
+        'anonymous requests cannot obtain personalized set rankings',
+      );
       const pending = await listedSquigPage(
         market,
         'price-asc',

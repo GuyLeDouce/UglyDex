@@ -34,7 +34,7 @@ export default async function Page() {
         <p>Collection gaps, drawn from your indexed history.</p>
       </section>
       <div className="anchor-nav">
-        <Link className="button" href="/squigs?dex=advances">
+        <Link className="button" href="/squigs?dex=advances&sort=sets-desc">
           Advances my UglyDex ↗
         </Link>
         <Link className="button" href="/squigs?dex=traits">
