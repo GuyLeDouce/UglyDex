@@ -1,0 +1,143 @@
+.section {
+  margin-block: 2rem 3rem;
+  padding-block: 1.5rem;
+  border-top: 1px solid #ffffff30;
+  color: var(--ugly-paper);
+}
+.section p {
+  line-height: 1.65;
+}
+.intro {
+  max-width: 75ch;
+  font-size: 1.05rem;
+}
+.destinations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.destinations article {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  border: 1px solid #ffffff30;
+  border-radius: 16px;
+  background: #11131870;
+}
+.destinations h3,
+.legend h3 {
+  margin: 0;
+  color: var(--ugly-green);
+}
+.destinations a {
+  margin-top: auto;
+  font-weight: 700;
+}
+.section a:focus-visible,
+.details summary:focus-visible {
+  outline: 3px solid var(--ugly-green);
+  outline-offset: 5px;
+}
+.note a,
+.details a,
+.destinations a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.note {
+  margin-top: 1.5rem;
+  max-width: 80ch;
+}
+.anatomy {
+  display: grid;
+  grid-template-columns: minmax(0, 330px) minmax(0, 1fr);
+  align-items: start;
+  gap: 2.5rem;
+  margin-top: 1.5rem;
+}
+.example {
+  margin: 0;
+  min-width: 0;
+}
+.example figcaption {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.legend {
+  list-style: none;
+  counter-reset: card-guide;
+  padding: 0;
+  margin: 0;
+}
+.legend li {
+  counter-increment: card-guide;
+  position: relative;
+  padding-left: 3rem;
+  margin-bottom: 1.35rem;
+}
+.legend li::before {
+  content: counter(card-guide);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--ugly-green);
+  border-radius: 50%;
+  color: var(--ugly-green);
+  font-weight: 700;
+}
+.legend p {
+  margin: 0.5rem 0 0;
+}
+.details {
+  padding: 1.2rem 0;
+  border-top: 1px solid #ffffff30;
+}
+.details summary {
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.details p {
+  max-width: 85ch;
+}
+.definitions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+.definitions dt {
+  color: var(--ugly-green);
+  font-weight: 700;
+}
+.definitions dd {
+  margin: 0.5rem 0 0;
+  line-height: 1.65;
+}
+@media (max-width: 700px) {
+  .destinations,
+  .anatomy,
+  .definitions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .anatomy {
+    gap: 1.5rem;
+  }
+  .example {
+    width: min(100%, 330px);
+    margin-inline: auto;
+  }
+  .destinations article {
+    padding: 1.1rem;
+  }
+}
+
+.withoutExample {
+  grid-template-columns: minmax(0, 1fr);
+}
