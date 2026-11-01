@@ -39,9 +39,9 @@ export async function collectorIdentityWebTests(
     await fetch(`${base}/collector/${discovered.collector.slug}/sets`)
   ).text();
   check(
-    fieldGuide.includes('Personal Field Guide not verified') &&
+    fieldGuide.includes('Wallet Field Guide') &&
       !fieldGuide.includes('A field guide built from real discoveries.'),
-    'unclaimed holder Field Guide explains unavailable personal completion instead of zero score',
+    'unclaimed holder Field Guide displays tracked wallet progress before login',
   );
   const holdings = await (
     await fetch(`${base}/collector/${discovered.collector.slug}/collection`)

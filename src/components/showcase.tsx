@@ -40,7 +40,11 @@ export async function CollectorHighlights({
       {d?.status === 'ready' && (
         <div className="showcase-completion">
           <div>
-            <p className="eyebrow">THE FIELD GUIDE</p>
+            <p className="eyebrow">
+              {d.basis === 'wallet'
+                ? 'WALLET FIELD GUIDE · UNCLAIMED'
+                : 'THE FIELD GUIDE'}
+            </p>
             <h2>
               {d.score.overall.toFixed(1)}
               <span>% complete</span>
@@ -56,7 +60,11 @@ export async function CollectorHighlights({
           </div>
           <dl>
             <div>
-              <dt>Squigs discovered</dt>
+              <dt>
+                {d.basis === 'wallet'
+                  ? 'Squigs tracked in wallet history'
+                  : 'Squigs discovered'}
+              </dt>
               <dd>{d.discovered} / 4,444</dd>
             </div>
             <div>

@@ -38,21 +38,21 @@ export default async function TopCollectors({
         </Link>
         <p>Ranked by overall Field Guide completion. Every discovery counts.</p>
         <small>
-          Claimed public profiles with an up-to-date Field Guide · Equal
-          completion shares a rank.
+          All public collectors and tracked wallets · Equal completion shares a
+          rank.
         </small>
       </section>
-      <p className="panel">
-        {result.unclaimed.toLocaleString()} unclaimed wallet profiles are listed
-        in the <Link href="/collectors/directory">holder directory</Link>, not
-        ranked as verified collector Field Guides. Indexed wallet holdings are
-        distinct from personal discoveries. Private profiles are not listed.
+      <p>
+        Unclaimed wallets are included automatically and marked “Wallet not
+        claimed”. Their scores reflect tracked wallet holdings and history, not
+        verified personal attribution. Owners can turn public visibility off in
+        settings.
       </p>
       {result.pending > 0 && (
         <p role="status">
-          {result.pending.toLocaleString()} public collector profiles are
-          awaiting Field Guide evaluation and are not ranked yet. Current
-          holdings remain available in the collector directory.
+          {result.pending.toLocaleString()} collector Field Guides are updating.
+          These profiles remain visible; existing scores are marked as the last
+          evaluation.
         </p>
       )}
       <ol
@@ -62,19 +62,40 @@ export default async function TopCollectors({
         {result.collectors.map((c) => (
           <li key={c.slug}>
             <Link className="collector-rank-card" href={'/collector/' + c.slug}>
-              <span className="collector-rank">#{c.rank}</span>
+              <span className="collector-rank">
+                {c.rank === null ? '—' : '#' + c.rank}
+              </span>
               <Artwork src={c.avatar} alt="" avatar />
               <div className="collector-rank-name">
                 <h2>{c.displayName || c.slug}</h2>
                 <p>{collectorHandle(c.slug, c.unclaimed)}</p>
-                <small>{c.discovered.toLocaleString()} Squigs discovered</small>
+                {c.unclaimed && <p className="badge">Wallet not claimed</p>}
+                <small>{c.owned.toLocaleString()} Squigs currently held</small>
+                <br />
+                <small>
+                  {c.discovered === null
+                    ? 'Field Guide updating'
+                    : `${c.discovered.toLocaleString()} ${c.unclaimed ? 'Squigs tracked in wallet history' : 'Squigs discovered'}`}
+                </small>
               </div>
               <div className="collector-rank-score">
-                <strong>{c.overall.toFixed(1)}%</strong>
-                <span>Field Guide complete</span>
+                <strong>
+                  {c.overall === null ? 'Updating' : c.overall.toFixed(1) + '%'}
+                </strong>
+                <span>
+                  {c.unclaimed ? 'Wallet Field Guide' : 'Field Guide complete'}
+                </span>
+                {c.pending && (
+                  <small>
+                    Updating ·{' '}
+                    {c.overall === null
+                      ? 'awaiting first evaluation'
+                      : 'last evaluated score'}
+                  </small>
+                )}
                 <progress
                   max={100}
-                  value={c.overall}
+                  value={c.overall ?? undefined}
                   aria-label={`${c.displayName || c.slug} Field Guide completion`}
                 />
               </div>
@@ -86,9 +107,8 @@ export default async function TopCollectors({
         <section className="empty-state">
           <h2>A new chapter is waiting.</h2>
           <p>
-            Collectors appear after claiming their profile, making it public,
-            and completing Field Guide evaluation. Unclaimed wallets are not
-            shown as zero-score collectors.
+            Public wallet profiles appear automatically as ownership is indexed.
+            No login is required to be listed.
           </p>
         </section>
       )}

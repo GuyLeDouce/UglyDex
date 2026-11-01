@@ -1,3 +1,5 @@
+import { publicWalletEvidence } from './wallet-field-guide';
+import { walletFieldGuide } from '@/domain/wallet-field-guide';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { db } from './db';
@@ -94,13 +96,57 @@ export async function dexView(id: string, isPublic = false) {
       const collector = await tx.collector.findUnique({
         where: { id },
         select: {
+          ...publicNameSelect,
           isPublic: true,
-          showWallets: true,
           featuredSetIds: true,
           collectionVisibility: true,
         },
       });
       if (!collector || (isPublic && !collector.isPublic)) return null;
+      const unclaimed =
+        collector.claimedAt === null &&
+        collector.wallets.length === 0 &&
+        collector.identities.length === 0;
+      if (isPublic && unclaimed && collector.discoveredWallets.length > 0) {
+        const [evidence] = await publicWalletEvidence(tx, [id]);
+        const observed = walletFieldGuide(
+          evidence?.currentIds ?? [],
+          evidence?.historyIds ?? [],
+        );
+        return {
+          status: 'ready' as const,
+          basis: 'wallet' as const,
+          ruleset: R,
+          score: observed.score,
+          discovered: observed.discovered,
+          owned: observed.owned,
+          traits: observed.traits,
+          traitTotal: observed.traitTotal,
+          historicalSets: observed.historicalSets,
+          historicalTotal: observed.historicalTotal,
+          currentSets: observed.currentSets,
+          cards: observed.sets.map(({ definition, result }) =>
+            setProjection(
+              definition,
+              result,
+              collector.showWallets &&
+                collector.collectionVisibility === 'FULL',
+            ),
+          ),
+          updatedAt: new Date().toISOString(),
+          traitDiscoveries: [] as {
+            key: string;
+            tokenId: number;
+            at: string;
+          }[],
+          traitCounts: {} as Record<
+            string,
+            { owned: number; discovered: number }
+          >,
+          currentIds: [] as number[],
+          discoveredIds: [] as number[],
+        };
+      }
       const pending = await tx.collectionJob.findUnique({
           where: { collectorId: id },
         }),
@@ -141,6 +187,8 @@ export async function dexView(id: string, isPublic = false) {
       ).length;
       return {
         status: 'ready' as const,
+        basis: 'personal' as const,
+        owned: snapshot.currentTokenIds.length,
         ruleset: R,
         score: completion(
           snapshot.discovered,

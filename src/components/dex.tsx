@@ -32,7 +32,18 @@ export function DexScore({ view }: { view: DexView }) {
           {view.score.overall.toFixed(1)}
           <span>%</span>
         </h2>
-        <p>A field guide built from real discoveries.</p>
+        <p>
+          {view.basis === 'wallet'
+            ? 'Wallet Field Guide · tracked public ownership, owner not verified.'
+            : 'A field guide built from real discoveries.'}
+        </p>
+        {view.basis === 'wallet' && (
+          <p>
+            {view.owned} Squigs currently held. Historical coverage includes
+            indexed, reconciled wallet records; it does not identify the person
+            who held them.
+          </p>
+        )}
         <small>
           Last evaluated{' '}
           <time dateTime={view.updatedAt}>
@@ -47,7 +58,14 @@ export function DexScore({ view }: { view: DexView }) {
       </div>
       <div className="dex-breakdown">
         {[
-          ['Squigs discovered', view.discovered, 4444, view.score.squig],
+          [
+            view.basis === 'wallet'
+              ? 'Squigs tracked in wallet history'
+              : 'Squigs discovered',
+            view.discovered,
+            4444,
+            view.score.squig,
+          ],
           ['Traits discovered', view.traits, view.traitTotal, view.score.trait],
           [
             'Historical sets',
