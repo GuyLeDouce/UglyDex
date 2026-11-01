@@ -6,7 +6,11 @@ import { personalIconSummaries } from './status-icons';
 import { rarestTraitsFirst } from './trait-presentation';
 import { db } from './db';
 import { personalizedCandidates } from './dex';
-import { cardPersonalization, matchesFieldGuide } from './card-personalization';
+import {
+  cardPersonalization,
+  matchesFieldGuide,
+  mostSetsAdvanced,
+} from './card-personalization';
 import { SQUIGS_CONTRACT } from '@/domain/validation';
 import {
   collectionWhere,
@@ -168,7 +172,7 @@ export async function collectionPage(
     ],
   };
   const market = isListingSort(filters.sort) ? await readListings() : null;
-  let listedIds: number[] | undefined;
+  let orderedIds: number[] | undefined;
   if (market && isListingSort(filters.sort)) {
     const listings = sortedListings(market.listings, filters.sort);
     const matching = await db().squig.findMany({
@@ -178,11 +182,18 @@ export async function collectionPage(
       select: { tokenId: true },
     });
     const matches = new Set(matching.map((r) => r.tokenId));
-    listedIds = listings
+    orderedIds = listings
       .filter((l) => matches.has(l.tokenId))
       .map((l) => l.tokenId);
   }
-  const total = listedIds?.length ?? (await db().squig.count({ where }));
+  if (filters.sort === 'sets-desc' && candidates) {
+    const matching = await db().squig.findMany({
+      where,
+      select: { tokenId: true },
+    });
+    orderedIds = mostSetsAdvanced(matching, candidates).map((s) => s.tokenId);
+  }
+  const total = orderedIds?.length ?? (await db().squig.count({ where }));
   const page = Math.min(
     filters.page,
     Math.max(1, Math.ceil(total / PAGE_SIZE)),
@@ -206,13 +217,13 @@ export async function collectionPage(
     recentIds = rows.map((r) => r.squigId);
   }
   const rows = await db().squig.findMany({
-    where: listedIds
+    where: orderedIds
       ? {
           AND: [
             where,
             {
               tokenId: {
-                in: listedIds.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+                in: orderedIds.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
               },
             },
           ],
@@ -222,12 +233,12 @@ export async function collectionPage(
         : where,
     select: cardSelect,
     orderBy: collectionOrder(filters.sort),
-    ...(recentIds || listedIds
+    ...(recentIds || orderedIds
       ? {}
       : { skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE }),
   });
-  if (listedIds) {
-    const positions = new Map(listedIds.map((id, index) => [id, index]));
+  if (orderedIds) {
+    const positions = new Map(orderedIds.map((id, index) => [id, index]));
     rows.sort((a, b) => positions.get(a.tokenId)! - positions.get(b.tokenId)!);
   }
   if (recentIds)
@@ -363,6 +374,7 @@ export async function collectionPage(
     page,
     pages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
     filters,
+    setSortUnavailable: filters.sort === 'sets-desc' && !candidates,
     market: market
       ? { status: market.status, complete: market.complete }
       : null,

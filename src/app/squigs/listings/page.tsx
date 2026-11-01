@@ -42,6 +42,13 @@ async function Listings({
           appear when it is ready.
         </p>
       )}
+      {sort === 'sets-desc' && (
+        <p className="muted">
+          {result.personalizationPending
+            ? 'Showing token ID order until your set progress is ready.'
+            : 'Most unfinished sets advanced first, based on your Field Guide. Ties use token ID.'}
+        </p>
+      )}
       <p>
         {result.total} listed Squigs found
         {!market.complete && ' · Partial results'}. Prices and availability can
@@ -111,9 +118,14 @@ export default async function ListedSquigs({
   const value = params.page;
   const sort: ListedSort =
     typeof params.sort === 'string' &&
-    ['price-desc', 'points-desc', 'points-asc', 'rank', 'rank-desc'].includes(
-      params.sort,
-    )
+    [
+      'price-desc',
+      'points-desc',
+      'points-asc',
+      'rank',
+      'rank-desc',
+      ...(session ? ['sets-desc'] : []),
+    ].includes(params.sort)
       ? (params.sort as ListedSort)
       : 'price-asc';
   const page =
@@ -157,6 +169,7 @@ export default async function ListedSquigs({
             Sort
             <select name="sort" aria-label="Sort" defaultValue={sort}>
               <ListingSortOptions />
+              {session && <option value="sets-desc">Most sets advanced</option>}
               <option value="points-desc">UglyPoints: high to low</option>
               <option value="points-asc">UglyPoints: low to high</option>
               <option value="rank">Maw Rank: low to high</option>
