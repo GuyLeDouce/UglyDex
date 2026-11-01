@@ -7,6 +7,11 @@ export async function register() {
     readEnv();
     const { log } = await import('./server/log');
     log('startup.config_valid');
+    if (process.env.READ_ONLY_STARTUP_DIAGNOSTICS === 'true') {
+      const { reportRuntimeDiagnostics } =
+        await import('./server/runtime-diagnostics');
+      await reportRuntimeDiagnostics();
+    }
   }
 }
 export async function onRequestError() {
