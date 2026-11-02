@@ -1,3 +1,4 @@
+import { SQUIGS_CONTRACT } from '../../src/domain/validation';
 import { db } from '../../src/server/db';
 import {
   collectorThread,
@@ -22,13 +23,61 @@ export async function communityTests(
   const historicalTotal = collectionSets.filter(
     (s) => !s.hidden && s.mode === 'HISTORICAL_DISCOVERY',
   ).length;
-  const create = async (slug: string, discovered: number, isPublic = true) => {
+  let fixtureToken = 4380;
+  const create = async (
+    slug: string,
+    discovered: number,
+    isPublic = true,
+    unclaimed = false,
+  ) => {
     const c = await db().collector.create({
       data: {
         slug,
         displayName: slug + ' Collector',
         showUsername: true,
         isPublic,
+      },
+    });
+    const walletAddress = unclaimed
+      ? '0x' + 'ab'.repeat(20)
+      : '0x' + randomBytes(20).toString('hex');
+    if (unclaimed) {
+      await db().discoveredWallet.create({
+        data: { collectorId: c.id, chainId: 1, walletAddress },
+      });
+    } else {
+      await db().collectorWallet.create({
+        data: {
+          collectorId: c.id,
+          chainId: 1,
+          walletAddress,
+          status: 'ACTIVE',
+          source: 'siwe',
+          verifiedAt: new Date(),
+        },
+      });
+    }
+    const tokenId = fixtureToken++;
+    const squig = await db().squig.upsert({
+      where: {
+        chainId_contractAddress_tokenId: {
+          chainId: 1,
+          contractAddress: SQUIGS_CONTRACT,
+          tokenId,
+        },
+      },
+      create: { chainId: 1, contractAddress: SQUIGS_CONTRACT, tokenId },
+      update: {},
+    });
+    await db().squigOwnership.create({
+      data: {
+        squigId: squig.id,
+        walletAddress,
+        sourceKey: slug,
+        source: 'test',
+        blockNumber: 1n,
+        blockHash: 'community-fixture',
+        isCurrent: true,
       },
     });
     const overall = completion(
@@ -103,14 +152,7 @@ export async function communityTests(
     ),
     'UglyUsers exposes only public display fields',
   );
-  const unclaimed = await create('community-unclaimed', 4444);
-  await db().discoveredWallet.create({
-    data: {
-      collectorId: unclaimed.id,
-      chainId: 1,
-      walletAddress: '0x' + 'ab'.repeat(20),
-    },
-  });
+  const unclaimed = await create('community-unclaimed', 4444, true, true);
   await db().collector.updateMany({
     where: { id: { in: [tied.id, lower.id] } },
     data: { claimedAt: new Date() },
@@ -147,6 +189,29 @@ export async function communityTests(
     !ranked.collectors.some((c) => c.slug === privateC.slug) &&
       ranked.collectors.some((c) => c.slug === pending.slug && c.pending),
     'private profiles stay hidden while recalculating collectors remain visible',
+  );
+  await db().squigOwnership.update({
+    where: { sourceKey: lower.slug },
+    data: { isCurrent: false },
+  });
+  check(
+    !(await topCollectors()).collectors.some((c) => c.slug === lower.slug),
+    'selling the last Squig removes a collector despite a stored discovery score',
+  );
+  check(
+    (await db().collector.findUniqueOrThrow({ where: { id: lower.id } }))
+      .isPublic,
+    'zero-held filtering preserves the public profile',
+  );
+  await db().squigOwnership.update({
+    where: { sourceKey: lower.slug },
+    data: { isCurrent: true },
+  });
+  check(
+    (await topCollectors()).collectors.some(
+      (c) => c.slug === lower.slug && c.owned === 1,
+    ),
+    'current ownership restores leaderboard eligibility',
   );
   const awards = achievements
     .filter((a) => a.enabled && a.subject === 'COLLECTOR' && !a.hidden)

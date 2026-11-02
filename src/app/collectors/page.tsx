@@ -38,8 +38,8 @@ export default async function TopCollectors({
         </Link>
         <p>Ranked by overall Field Guide completion. Every discovery counts.</p>
         <small>
-          All public collectors and tracked wallets · Equal completion shares a
-          rank.
+          Public collectors and tracked wallets holding at least one Squig ·
+          Equal completion shares a rank.
         </small>
       </section>
       <p>
@@ -107,8 +107,9 @@ export default async function TopCollectors({
         <section className="empty-state">
           <h2>A new chapter is waiting.</h2>
           <p>
-            Public wallet profiles appear automatically as ownership is indexed.
-            No login is required to be listed.
+            Public wallet profiles holding at least one Squig appear
+            automatically as ownership is indexed. No login is required to be
+            listed.
           </p>
         </section>
       )}

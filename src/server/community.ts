@@ -284,20 +284,22 @@ export async function topCollectors(page = 1) {
         (await publicWalletEvidence(tx)).map((e) => [e.collectorId, e]),
       );
       const ranked = rankCollectorRows(
-        rows.map((row) => {
-          const e = evidence.get(row.id);
-          const observed =
-            row.unclaimed && row.walletTracked
-              ? walletFieldGuide(e?.currentIds ?? [], e?.historyIds ?? [])
-              : null;
-          return {
-            ...row,
-            owned: e?.currentIds.length ?? 0,
-            overall: observed?.score.overall ?? row.overall,
-            discovered: observed?.discovered ?? row.discovered,
-            pending: !observed && row.pending,
-          };
-        }),
+        rows
+          .filter((row) => (evidence.get(row.id)?.currentIds.length ?? 0) > 0)
+          .map((row) => {
+            const e = evidence.get(row.id);
+            const observed =
+              row.unclaimed && row.walletTracked
+                ? walletFieldGuide(e?.currentIds ?? [], e?.historyIds ?? [])
+                : null;
+            return {
+              ...row,
+              owned: e?.currentIds.length ?? 0,
+              overall: observed?.score.overall ?? row.overall,
+              discovered: observed?.discovered ?? row.discovered,
+              pending: !observed && row.pending,
+            };
+          }),
       );
       const pages = Math.max(1, Math.ceil(ranked.length / 24));
       page = Math.min(
