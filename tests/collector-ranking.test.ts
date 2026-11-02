@@ -28,7 +28,13 @@ beforeEach(() => {
       pending: i < 7,
     })),
   );
-  mocks.evidence.mockResolvedValue([]);
+  mocks.evidence.mockResolvedValue(
+    Array.from({ length: 25 }, (_, i) => ({
+      collectorId: String(i),
+      currentIds: [i + 1],
+      historyIds: [i + 1],
+    })),
+  );
   mocks.names.mockResolvedValue([]);
 });
 it.each([NaN, Infinity, -2, 1.5])(
@@ -80,4 +86,51 @@ it('includes unclaimed wallets without snapshots and computes observation scores
   });
   expect(result.collectors[0].overall).toBeGreaterThan(0);
   expect(result.collectors[0]).not.toHaveProperty('id');
+});
+
+it('excludes zero-held and missing ownership evidence before ranking and pagination', async () => {
+  mocks.evidence.mockResolvedValue(
+    Array.from({ length: 24 }, (_, i) => ({
+      collectorId: String(i),
+      currentIds: i === 23 ? [] : [i + 1],
+      historyIds: [i + 1],
+    })),
+  );
+  const result = await topCollectors(999);
+  expect(result).toMatchObject({ page: 1, pages: 1, total: 23 });
+  expect(result.collectors).toHaveLength(23);
+  expect(result.collectors[0]).toMatchObject({ slug: 'collector-22', rank: 1 });
+  expect(result.collectors.every((c) => c.owned > 0)).toBe(true);
+});
+it('removes an unclaimed former holder and restores it when current holdings return', async () => {
+  mocks.query.mockResolvedValue([
+    {
+      id: 'wallet',
+      slug: 'holder',
+      avatar: null,
+      overall: 90,
+      discovered: 100,
+      unclaimed: true,
+      walletTracked: true,
+      pending: true,
+    },
+  ]);
+  mocks.evidence.mockResolvedValue([
+    { collectorId: 'wallet', currentIds: [], historyIds: [1, 2, 3] },
+  ]);
+  expect(await topCollectors()).toMatchObject({
+    total: 0,
+    pages: 1,
+    pending: 0,
+    unclaimed: 0,
+    collectors: [],
+  });
+  mocks.evidence.mockResolvedValue([
+    { collectorId: 'wallet', currentIds: [3], historyIds: [1, 2, 3] },
+  ]);
+  expect(await topCollectors()).toMatchObject({
+    total: 1,
+    unclaimed: 1,
+    collectors: [{ owned: 1, discovered: 3, rank: 1 }],
+  });
 });

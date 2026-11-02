@@ -35,13 +35,18 @@ public sharing links retain their existing semantics.
 
 ## Top Collectors
 
-`/collectors` ranks public, unmerged collectors with a current collection snapshot
-and no queued collection recalculation. It uses `CollectionSnapshot.overall`, the
-same stored Field Guide completion score, without changing the scoring formula.
-Equal scores share a dense rank; slugs break display-order ties. Pages contain 24
-profiles and link directly to each public profile. No wallet addresses, Discord
-identities or private evidence are selected. Thread opt-out is independent of
-public-profile leaderboard eligibility.
+`/collectors` includes public, unmerged collectors and unclaimed wallets holding
+at least one canonical Squig. Current holdings use the same ownership evidence as
+the displayed held count; historical discoveries alone do not qualify. This
+filter runs before ranking, totals and pagination. Selling the last Squig removes
+the entry; acquiring another restores eligibility on the next indexed page read.
+Profiles and historical records remain intact.
+
+Claimed collectors use `CollectionSnapshot.overall`; unclaimed wallets use their
+observed wallet Field Guide score and remain clearly labeled. Updating profiles
+with current holdings remain visible. Equal scores share a dense rank, with
+stable slug tie-breaking and 24 profiles per page. Private and blocked profiles
+stay hidden. Thread opt-out is independent of leaderboard eligibility.
 
 No XP, achievement qualification, collection-completion, chain indexing or
 provenance verification rules change. Production needs existing indexers to
