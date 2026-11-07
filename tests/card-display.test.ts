@@ -62,8 +62,14 @@ describe('collection display modes', () => {
   });
   it('keeps discovery and set advancement visible outside grid details', () => {
     const html = renderToStaticMarkup(createElement(SquigCard, { item }));
-    expect(html.indexOf('Advances 2 sets')).toBeGreaterThan(
-      html.indexOf('</details>'),
+    expect(html.indexOf('Advances 2 sets')).toBeLessThan(
+      html.indexOf('<details'),
+    );
+    expect(html.indexOf('album-progress')).toBeGreaterThan(
+      html.indexOf('trading-face-inner'),
+    );
+    expect(html.indexOf('album-progress')).toBeGreaterThan(
+      html.indexOf('</a>'),
     );
     expect(html).toContain('Adds 3 missing traits');
   });

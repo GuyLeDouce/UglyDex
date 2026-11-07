@@ -1,205 +1,4 @@
 /* Card faces share the export renderer's palette; no PNG rendering per view. */
-.trading-face {
-  position: relative;
-  isolation: isolate;
-  padding: 7px;
-  border-radius: 18px;
-  background: linear-gradient(
-    130deg,
-    var(--card-light),
-    var(--card-mid) 45%,
-    var(--card-dark)
-  );
-  box-shadow:
-    inset 0 0 0 1px var(--card-light),
-    0 12px 24px #0002;
-  color: #172c22;
-  container-type: inline-size;
-}
-.trading-face-inner {
-  border: 3px double var(--card-dark);
-  border-radius: 12px;
-  padding: 10px;
-  background: linear-gradient(140deg, #fff9e9, #f4e9c9);
-  overflow: hidden;
-}
-.trading-brand {
-  margin: 0 auto 10px !important;
-  width: 88%;
-  padding: 4px 6px;
-  border-radius: 12px;
-  background: #123f2c;
-  color: #fff5dc;
-  text-align: center;
-  font-size: clamp(8px, 4cqi, 13px);
-  font-weight: 900;
-  letter-spacing: 0.15em;
-  line-height: 1.4;
-}
-.trading-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 5px;
-  margin: 0 0 8px;
-}
-.trading-title .trading-name {
-  font-family: var(--font-lilita-one), sans-serif;
-  font-size: clamp(15px, 9cqi, 28px);
-  margin: 0 !important;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-}
-.trading-title .trading-name span {
-  color: #164e35;
-}
-.trading-up {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  border-left: 1px solid #b5b39a;
-  padding-left: 7px;
-  line-height: 1.2;
-}
-.trading-up strong {
-  font-size: clamp(13px, 7cqi, 22px);
-}
-.trading-up small {
-  font-size: clamp(6px, 2.4cqi, 8px);
-  font-weight: 800;
-}
-.trading-face .artwork {
-  border: 2px solid var(--card-dark);
-  border-radius: 3px;
-  aspect-ratio: 1;
-  background: #e6dfc9;
-}
-.trading-face .artwork img {
-  padding: 0;
-  object-fit: contain;
-}
-.trading-rarity {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-  background: var(--card-dark);
-  color: white;
-  padding: 5px 7px;
-  margin-top: 6px;
-  font-size: clamp(7px, 3.5cqi, 11px);
-  font-weight: 800;
-  text-transform: uppercase;
-}
-.trading-traits {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 9px 0;
-  min-height: 45px;
-  font-size: clamp(8px, 3.6cqi, 12px);
-  font-weight: 700;
-  line-height: 1.3;
-}
-.trading-traits span {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  border-bottom: 1px solid #b5b39a;
-  padding-bottom: 4px;
-}
-.trading-type,
-.trading-legend {
-  margin: 6px 0 0;
-  color: #172c22;
-  font-size: clamp(9px, 4cqi, 14px);
-  font-weight: 800;
-}
-.trading-traits small {
-  display: block;
-  font-size: 0.75em;
-  text-transform: uppercase;
-  color: #637062;
-  letter-spacing: 0.08em;
-  margin-bottom: 3px;
-}
-.trading-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 5px;
-  border-top: 1px solid #b5b39a;
-  padding-top: 6px;
-  font-size: clamp(5px, 2.5cqi, 8px);
-  font-weight: 900;
-  letter-spacing: 0.04em;
-}
-.trading-face:after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  background: linear-gradient(
-    115deg,
-    transparent 25%,
-    #ffffff55 45%,
-    #c8fff066 50%,
-    transparent 65%
-  );
-  transition: opacity 0.2s;
-}
-.album-card.squig-card {
-  background: none;
-  border: 0;
-  border-radius: 18px;
-  box-shadow: none;
-  overflow: visible;
-  transition: transform 0.2s;
-}
-.album-card.squig-card:hover {
-  box-shadow: none;
-  transform: none;
-}
-.album-card .squig-card-main {
-  display: block;
-}
-.album-card .card-details {
-  margin-top: 10px;
-  border-bottom: 1px solid #22382e26;
-  color: var(--ink);
-  font-size: 0.8rem;
-}
-.card-details > summary {
-  cursor: pointer;
-  min-height: 38px;
-  padding: 7px 3px;
-  font-weight: 700;
-}
-.card-details[open] {
-  background: var(--panel);
-  border-radius: 8px;
-}
-.card-details .card-title {
-  display: none;
-}
-.card-details .card-body {
-  padding: 12px;
-}
-.collection-grid.grid {
-  gap: 28px 22px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 26px;
-}
-.collection-grid.compact .trading-face {
-  max-width: 230px;
-}
-.collection-grid.compact .album-card {
-  display: grid;
-  grid-template-columns: minmax(140px, 230px) 1fr;
-  gap: 20px;
-}
-.collection-grid.compact .album-card .squig-card-main {
-  display: block;
-}
 .collection-extras {
   margin: 48px 0;
   border-top: 1px solid #22382e33;
@@ -293,10 +92,6 @@
   transform: rotate(-3deg);
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .album-card .squig-card-main:hover {
-    transform: perspective(900px) rotateY(-4deg) rotateX(2deg) translateY(-5px);
-    transition: transform 0.2s;
-  }
   .squig-card-main:hover .trading-face:after,
   .entry-card:hover .trading-face:after {
     opacity: 1;
@@ -307,9 +102,6 @@
   }
 }
 @media (max-width: 1000px) {
-  .collection-grid.grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
   .entry-world {
     gap: 20px;
   }
@@ -350,33 +142,8 @@
   .header-signout {
     margin-left: auto;
   }
-  .collection-grid.grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px 12px;
-  }
-  .trading-face {
-    padding: 5px;
-    border-radius: 12px;
-  }
-  .trading-face-inner {
-    padding: 6px;
-    border-radius: 8px;
-  }
-  .trading-traits {
-    min-height: 38px;
-    padding: 6px 0;
-  }
-  .trading-brand {
-    margin-bottom: 7px !important;
-  }
-  .collection-grid.compact .album-card {
-    grid-template-columns: 140px 1fr;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .trading-face:after {
-    display: none;
-  }
   .entry-card,
   .album-card {
     transition: none !important;
@@ -385,20 +152,6 @@
 .site-header:has(.header-signout) {
   grid-template-columns: minmax(130px, 1fr) auto auto auto;
   gap: 16px;
-}
-.album-card > button,
-.album-card > span[aria-label='Favorite Squig'] {
-  top: auto;
-  bottom: 0;
-  right: 0;
-  width: 36px;
-  height: 36px;
-  font-size: 21px;
-  box-shadow: none;
-  border-width: 1px;
-}
-.album-card .card-details > summary {
-  padding-right: 44px;
 }
 .specimen-art:has(.trading-face) {
   background: transparent;
@@ -428,38 +181,6 @@
     padding: 7px 9px;
   }
 }
-.album-card .opensea-listing {
-  background: transparent;
-  color: var(--ink);
-  border: 0;
-  min-height: 0;
-  padding: 5px 0;
-  font-size: 0.65rem;
-  gap: 4px;
-}
-.album-card .opensea-listing a {
-  font-size: 0.65rem;
-  min-height: 32px;
-}
-.album-card .opensea-note {
-  font-size: 0.6rem;
-  opacity: 0.7;
-}
-.album-card > button,
-.album-card > span[aria-label='Favorite Squig'] {
-  top: -10px;
-  bottom: auto;
-  right: -6px;
-}
-.collection-grid.compact .album-card .trading-face .artwork {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-  border: 2px solid var(--card-dark);
-}
-.collection-grid.compact .album-card .opensea-listing {
-  grid-column: 1/-1;
-}
 main#main:has(.entry-world) {
   background: transparent;
   color: var(--ugly-paper);
@@ -474,12 +195,6 @@ main#main:has(.entry-world) {
 .entry-cards.landing-specimens:after {
   display: none;
 }
-.collection-grid.compact .album-card .card-details[open] .card-body {
-  display: block;
-}
-.collection-grid.compact .album-card .card-details[open] .card-body > * {
-  display: block;
-}
 
 /* Transparent controls sit on the night background, not a paper panel. */
 main .filters {
@@ -493,27 +208,371 @@ main .filters .filter-actions > span,
 main .filters .filter-actions > a {
   color: #c3cbe0;
 }
-.album-card .card-details:not([open]),
-.album-card .opensea-listing,
-.album-card .opensea-listing a {
-  color: var(--ugly-paper);
-}
-.album-card .opensea-listing {
-  --surface-muted: #c3cbe0;
-}
-.album-card .card-details {
-  border-bottom-color: #c3cbe044;
-}
 
+/* One framed collectible, with personal discovery context inside the frame. */
+.trading-face {
+  --surface-muted: #52654c;
+  --surface-accent: #164e35;
+  position: relative;
+  isolation: isolate;
+  container-type: inline-size;
+  padding: 7px;
+  border: 1px solid var(--card-light);
+  border-radius: 22px;
+  background: linear-gradient(
+    125deg,
+    var(--card-dark),
+    var(--card-light) 42%,
+    var(--card-mid) 70%,
+    var(--card-dark)
+  );
+  color: #172c22;
+  box-shadow: 0 8px 20px #0003;
+}
+.trading-face-inner {
+  border: 3px solid #164e35;
+  border-radius: 16px;
+  padding: 12px;
+  background: linear-gradient(140deg, #fff9e9, #f4e9c9);
+}
+.trading-face .squig-card-main {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.trading-brand {
+  margin: -6px auto 12px !important;
+  width: 88%;
+  padding: 7px 5px;
+  border: 1px solid var(--card-light);
+  border-radius: 22px;
+  background: #123f2c;
+  color: #fff5dc;
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(9px, 3.9cqi, 15px);
+  letter-spacing: 0.13em;
+  line-height: 1.1;
+}
+.trading-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.trading-title .trading-name {
+  font-family: var(--font-lilita-one), sans-serif;
+  font-size: clamp(18px, 8.4cqi, 36px);
+  margin: 0 !important;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: #172c22;
+}
+.trading-title .trading-name span {
+  color: #164e35;
+}
+.trading-up {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  border-left: 1px solid #b5b39a;
+  padding-left: 10px;
+  line-height: 1.1;
+  color: #164e35;
+}
+.trading-up strong {
+  font-size: clamp(17px, 8cqi, 32px);
+  font-weight: 900;
+}
+.trading-up small {
+  font-size: clamp(6px, 2.3cqi, 10px);
+  color: #172c22;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+}
+.trading-face .artwork {
+  border: 3px solid var(--card-dark);
+  border-radius: 9px;
+  aspect-ratio: 1;
+  background: #e6dfc9;
+  overflow: hidden;
+}
+.trading-face .artwork img {
+  padding: 0;
+  object-fit: contain;
+}
+.trading-identity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 0 7px;
+  border-bottom: 1px solid var(--card-mid);
+  font-weight: 800;
+  font-size: clamp(9px, 3.5cqi, 14px);
+  text-transform: uppercase;
+}
+.trading-type {
+  margin-right: auto;
+  color: #164e35;
+}
+.trading-og {
+  border: 1px solid #164e35;
+  border-radius: 6px;
+  padding: 3px 5px;
+}
+.trading-rarity {
+  border: 1px solid var(--card-dark);
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: linear-gradient(
+    125deg,
+    var(--card-light),
+    var(--card-mid),
+    var(--card-light)
+  );
+  color: #152c22;
+}
+.trading-rank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: #123f2c;
+  color: #fff5dc;
+  border: 1px solid var(--card-mid);
+  border-radius: 7px;
+  padding: 6px;
+  margin-top: 7px;
+  font-size: clamp(10px, 3.7cqi, 15px);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.trading-rank strong {
+  font-family: var(--font-lilita-one), sans-serif;
+  font-size: 1.55em;
+  color: var(--card-light);
+}
+.trading-rank small {
+  color: #fff5dc;
+  font-size: 0.65em;
+}
+.trading-traits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(36px, auto);
+  gap: 5px 12px;
+  padding: 10px 0;
+  min-height: 156px;
+  align-content: start;
+  color: #172c22;
+  font-size: clamp(10px, 3.7cqi, 15px);
+  font-weight: 750;
+  line-height: 1.2;
+}
+.trading-traits > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid #b5b39a;
+  padding-bottom: 5px;
+}
+.trading-traits small {
+  display: block;
+  color: #52654c;
+  font-size: 0.7em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.trading-legend {
+  min-height: 156px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px 6px;
+  gap: 8px;
+  color: #164e35;
+}
+.trading-legend small {
+  color: var(--card-dark);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.trading-legend strong {
+  font-family: var(--font-lilita-one), sans-serif;
+  font-size: clamp(22px, 8cqi, 36px);
+}
+.trading-legend + .trading-traits:empty {
+  display: none;
+}
+.trading-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border-radius: 5px;
+  background: #123f2c;
+  color: #fff5dc;
+  padding: 6px 8px;
+  font-size: clamp(8px, 2.6cqi, 11px);
+  letter-spacing: 0.06em;
+}
+.trading-footer strong {
+  font-weight: 900;
+}
+.album-card.squig-card {
+  background: none;
+  border: 0;
+  border-radius: 22px;
+  box-shadow: none;
+  overflow: visible;
+  align-self: start;
+}
+.album-card.squig-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+.album-card .album-progress {
+  color: #172c22;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
 .album-progress:has(> *) {
-  background: var(--ugly-paper);
-  color: var(--ugly-ink);
-  --surface-muted: #535b69;
-  --surface-accent: var(--ugly-green-deep);
-  border-radius: 8px;
-  padding: 8px;
-  margin-top: 8px;
+  border-top: 1px solid #b5b39a !important;
+  padding-top: 9px !important;
 }
 .album-progress .ownership-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 10px;
+  margin: 0 0 3px;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 850;
+  color: #164e35;
+}
+.album-progress .ownership-label small {
+  display: inline;
   margin: 0;
+  font-size: 11px;
+  font-weight: 550;
+  color: #52654c;
+}
+.album-progress .set-mini-strip {
+  display: inline-block;
+  padding: 0;
+  margin: 0 6px 0 0;
+  vertical-align: top;
+}
+.album-progress .set-mini-icons {
+  gap: 2px;
+}
+.album-progress .set-mini-button,
+.album-progress .set-mini-more {
+  min-width: 32px;
+  min-height: 36px;
+}
+.album-card .card-details {
+  margin: 0;
+  color: #172c22;
+  border-top: 1px solid #b5b39a;
+  font-size: 12px;
+}
+.album-card .card-details > summary {
+  cursor: pointer;
+  display: list-item;
+  padding: 12px 0;
+  min-height: 44px;
+  font-weight: 700;
+}
+.album-card .card-details[open] {
+  background: transparent;
+}
+.album-card .card-title {
+  display: none;
+}
+.album-card .card-details .card-body {
+  padding: 0 0 10px;
+}
+.album-card .opensea-listing {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid #b5b39a;
+  padding: 2px 0;
+  min-height: 44px;
+  color: #52654c;
+  font-size: 11px;
+  gap: 4px;
+}
+.album-card .opensea-listing a {
+  color: #164e35;
+  min-height: 44px;
+  font-size: 11px;
+}
+.album-card .opensea-note {
+  font-size: 10px;
+}
+.album-card > button,
+.album-card > span[aria-label='Favorite Squig'] {
+  top: -8px;
+  right: -5px;
+  bottom: auto;
+  width: 38px;
+  height: 38px;
+  font-size: 21px;
+  box-shadow: none;
+  border-width: 1px;
+}
+.collection-grid.grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 22px;
+  margin-top: 24px;
+}
+@media (max-width: 1000px) {
+  .collection-grid.grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 18px;
+  }
+}
+@media (max-width: 600px) {
+  .collection-grid.grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 420px;
+    margin: 20px auto;
+    gap: 24px;
+  }
+  .view-controls {
+    justify-content: center;
+    gap: 4px;
+    margin: 16px auto;
+  }
+  .view-controls button {
+    min-height: 44px;
+    padding: 9px 18px;
+    font-size: 13px;
+    border-width: 1px;
+    box-shadow: none;
+  }
+  .trading-face-inner {
+    padding: 12px;
+  }
+  .trading-traits {
+    font-size: 13px;
+  }
+  .entry-cards .trading-traits {
+    font-size: clamp(8px, 3.7cqi, 13px);
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .album-card .artwork img {
+    transition: transform 0.2s;
+  }
+  .album-card .squig-card-main:hover .artwork img {
+    transform: scale(1.025);
+  }
 }

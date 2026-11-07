@@ -1,5 +1,4 @@
 'use client';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import favoriteStyles from './favorite-heart.module.css';
 import { StatusIconStrip } from './status-icon-strip';
@@ -35,7 +34,6 @@ export function SquigCard(props: Parameters<typeof AlbumSquigCard>[0]) {
 function AlbumSquigCard({
   item,
   priority = false,
-  compact = false,
   listing,
   marketStatus,
   marketComplete,
@@ -78,139 +76,144 @@ function AlbumSquigCard({
           ♥
         </span>
       ) : null}
-      <Link className="squig-card-main" href={`/squig/${item.tokenId}`}>
-        <TradingCardFace item={item} priority={priority} />
-      </Link>
-      <details className="card-details">
-        <summary>
-          Details {item.currentlyOwned === false ? '· Previously owned' : ''}
-        </summary>
-        <div className="card-body">
-          {item.representation && (
-            <p className="eyebrow">{item.representation}</p>
-          )}
-          <div className="card-title">
-            <h3>
-              Squig <span>#{item.tokenId}</span>
-            </h3>
-            <span className="rarity">{item.rarity ?? 'Unclassified'}</span>
-          </div>
-          <div className="card-numbers">
-            <span>
-              <strong>{item.uglyPoints?.toLocaleString() ?? '—'}</strong> UP
-            </span>
-            <span>Rank {item.mawRank ?? '—'}</span>
-          </div>
-          <div className="tags">
-            {item.og && <span>OG</span>}
-            {item.legendary && <span className="legendary">Legendary</span>}
-            {item.traits
-              .filter(
-                (t) =>
-                  t.value.trim() && t.value.trim().toLowerCase() !== 'none',
-              )
-              .slice(0, 3)
-              .map((t) => (
-                <span key={t.traitType} title={t.traitType}>
-                  {t.value}
-                </span>
-              ))}
-          </div>
-          {item.achievements && (
-            <AchievementStrip summary={item.achievements} subject="SQUIG" />
-          )}
-          {item.currentlyOwned !== undefined && (
+      <TradingCardFace
+        item={item}
+        priority={priority}
+        href={`/squig/${item.tokenId}`}
+      >
+        <div className="album-progress">
+          {item.personalization && (
             <p className="ownership-label">
-              {item.currentlyOwned ? 'Currently Owned' : 'Previously Owned'}
-              {item.discoveredAt && (
+              {item.personalization.owned
+                ? 'Owned'
+                : item.personalization.discovered
+                  ? 'Discovered'
+                  : 'New discovery'}
+              {item.personalization.missingTraits > 0 && (
                 <small>
-                  Discovered{' '}
-                  {new Date(item.discoveredAt).toLocaleDateString('en-US', {
-                    timeZone: 'UTC',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
+                  Adds {item.personalization.missingTraits} missing traits
+                </small>
+              )}
+              {item.personalization.advances > 0 && (
+                <small>
+                  Advances {item.personalization.advances}{' '}
+                  {item.personalization.advances === 1 ? 'set' : 'sets'}
                 </small>
               )}
             </p>
           )}
-          {item.history && (
-            <div className="holding-history">
-              <small>
-                {item.history.firstAcquiredIsChain
-                  ? 'First acquired'
-                  : 'First confirmed holding'}{' '}
-                {new Date(item.history.firstAcquired).toLocaleDateString(
-                  'en-US',
-                  { timeZone: 'UTC' },
-                )}
-              </small>
-              <small>
-                {item.history.lastAcquiredIsChain
-                  ? 'Last acquired'
-                  : 'Latest confirmed holding'}{' '}
-                {new Date(item.history.lastAcquired).toLocaleDateString(
-                  'en-US',
-                  {
-                    timeZone: 'UTC',
-                  },
-                )}
-              </small>
-              {item.history.lastLoss && (
-                <small>
-                  {item.history.lastLossIsChain
-                    ? 'Last held until'
-                    : 'Evidence valid until'}{' '}
-                  {new Date(item.history.lastLoss).toLocaleDateString('en-US', {
-                    timeZone: 'UTC',
-                  })}
-                </small>
-              )}
-              <small>
-                {Math.floor(item.history.heldSeconds / 86400)} indexed days ·{' '}
-                {item.history.periods} holding{' '}
-                {item.history.periods === 1 ? 'period' : 'periods'}
-              </small>
-            </div>
+          {!!item.statusIcons?.length && (
+            <StatusIconStrip icons={item.statusIcons} limit={4} />
+          )}
+          {!!item.personalization?.sets?.length && (
+            <SetIconStrip sets={item.personalization.sets} limit={4} advances />
           )}
         </div>
-      </details>
-      <div className="album-progress">
-        {item.personalization && (
-          <p className="ownership-label">
-            {item.personalization.owned
-              ? 'Currently Owned'
-              : item.personalization.discovered
-                ? 'Already Discovered'
-                : 'NEW DISCOVERY'}
-            {item.personalization.missingTraits > 0 && (
-              <small>
-                Adds {item.personalization.missingTraits} missing traits
-              </small>
+        <details className="card-details">
+          <summary>
+            Details {item.currentlyOwned === false ? '· Previously owned' : ''}
+          </summary>
+          <div className="card-body">
+            {item.representation && (
+              <p className="eyebrow">{item.representation}</p>
             )}
-            {item.personalization.advances > 0 && (
-              <small>Advances {item.personalization.advances} sets</small>
+            <div className="card-title">
+              <h3>
+                Squig <span>#{item.tokenId}</span>
+              </h3>
+              <span className="rarity">{item.rarity ?? 'Unclassified'}</span>
+            </div>
+            <div className="card-numbers">
+              <span>
+                <strong>{item.uglyPoints?.toLocaleString() ?? '—'}</strong> UP
+              </span>
+              <span>Rank {item.mawRank ?? '—'}</span>
+            </div>
+            <div className="tags">
+              {item.og && <span>OG</span>}
+              {item.legendary && <span className="legendary">Legendary</span>}
+              {item.traits
+                .filter(
+                  (t) =>
+                    t.value.trim() && t.value.trim().toLowerCase() !== 'none',
+                )
+                .slice(0, 3)
+                .map((t) => (
+                  <span key={t.traitType} title={t.traitType}>
+                    {t.value}
+                  </span>
+                ))}
+            </div>
+            {item.achievements && (
+              <AchievementStrip summary={item.achievements} subject="SQUIG" />
             )}
-          </p>
-        )}
-        {!!item.statusIcons?.length && (
-          <StatusIconStrip icons={item.statusIcons} limit={compact ? 1 : 4} />
-        )}
-        {!!item.personalization?.sets?.length && (
-          <SetIconStrip
-            sets={item.personalization.sets}
-            limit={compact ? 1 : 4}
-            advances
-          />
-        )}
-      </div>
-      <OpenSeaLink
-        tokenId={item.tokenId}
-        listing={listing}
-        status={marketStatus}
-        complete={marketComplete}
-      />
+            {item.currentlyOwned !== undefined && (
+              <p className="ownership-label">
+                {item.currentlyOwned ? 'Currently Owned' : 'Previously Owned'}
+                {item.discoveredAt && (
+                  <small>
+                    Discovered{' '}
+                    {new Date(item.discoveredAt).toLocaleDateString('en-US', {
+                      timeZone: 'UTC',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </small>
+                )}
+              </p>
+            )}
+            {item.history && (
+              <div className="holding-history">
+                <small>
+                  {item.history.firstAcquiredIsChain
+                    ? 'First acquired'
+                    : 'First confirmed holding'}{' '}
+                  {new Date(item.history.firstAcquired).toLocaleDateString(
+                    'en-US',
+                    { timeZone: 'UTC' },
+                  )}
+                </small>
+                <small>
+                  {item.history.lastAcquiredIsChain
+                    ? 'Last acquired'
+                    : 'Latest confirmed holding'}{' '}
+                  {new Date(item.history.lastAcquired).toLocaleDateString(
+                    'en-US',
+                    {
+                      timeZone: 'UTC',
+                    },
+                  )}
+                </small>
+                {item.history.lastLoss && (
+                  <small>
+                    {item.history.lastLossIsChain
+                      ? 'Last held until'
+                      : 'Evidence valid until'}{' '}
+                    {new Date(item.history.lastLoss).toLocaleDateString(
+                      'en-US',
+                      {
+                        timeZone: 'UTC',
+                      },
+                    )}
+                  </small>
+                )}
+                <small>
+                  {Math.floor(item.history.heldSeconds / 86400)} indexed days ·{' '}
+                  {item.history.periods} holding{' '}
+                  {item.history.periods === 1 ? 'period' : 'periods'}
+                </small>
+              </div>
+            )}
+          </div>
+        </details>
+        <OpenSeaLink
+          tokenId={item.tokenId}
+          listing={listing}
+          status={marketStatus}
+          complete={marketComplete}
+        />
+      </TradingCardFace>
     </article>
   );
 }
