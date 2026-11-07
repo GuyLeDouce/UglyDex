@@ -173,8 +173,8 @@ textarea:focus-visible {
 .account-menu[open] > summary,
 .mobile-menu[open] > summary {
   background: var(--brand-yellow);
-  border-color: var(--ink);
-  color: var(--ink);
+  border-color: var(--brand-yellow);
+  color: var(--on-accent);
 }
 
 .account-orbit {

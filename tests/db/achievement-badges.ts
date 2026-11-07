@@ -531,6 +531,9 @@ export async function achievementBadgeWebTests(
         if (name === 'share') {
           await page.locator('.share-controls > button').click();
           await page.locator('.share-panel').waitFor({ state: 'visible' });
+          await page
+            .locator('.share-preview')
+            .waitFor({ state: 'visible', timeout: 60000 });
           await page.locator('.share-panel').scrollIntoViewIfNeeded();
           await page.waitForFunction(() =>
             Array.from(

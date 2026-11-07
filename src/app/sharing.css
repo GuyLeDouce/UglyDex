@@ -148,9 +148,6 @@
 .share-options select {
   width: 100%;
   padding: 0.7rem;
-  background: #181c17;
-  color: #eee;
-  border: 1px solid #4d5844;
 }
 .share-art-grid {
   display: grid;
@@ -269,10 +266,6 @@
   max-width: 100%;
   min-height: 44px;
   padding: 12px;
-  border: 2px solid #143e2e;
-  border-radius: 10px;
-  background: #fff9e9;
-  color: #143e2e;
 }
 .share-panel .share-preview--trading {
   width: min(100%, 420px);
