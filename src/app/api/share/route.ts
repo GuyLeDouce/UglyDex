@@ -1,3 +1,4 @@
+import { shareFilename } from '@/domain/trading-card';
 import { ZodError } from 'zod';
 import { shareSchema } from '@/domain/sharing';
 import { shareCard } from '@/server/sharing';
@@ -53,7 +54,11 @@ export async function GET(request: Request) {
         ...(download
           ? {
               'Content-Disposition':
-                'attachment; filename="uglydex-' + spec.kind + '.png"',
+                'attachment; filename="' +
+                (spec.format === 'trading-card'
+                  ? shareFilename(spec)
+                  : 'uglydex-' + spec.kind + '.png') +
+                '"',
             }
           : {}),
       },
@@ -67,7 +72,11 @@ export async function GET(request: Request) {
           ? 400
           : 503;
     return new Response(
-      status === 429 ? 'Please try again shortly.' : 'Share image unavailable.',
+      status === 429
+        ? 'Please try again shortly.'
+        : message === 'TRADING_CARD_ARTWORK_UNAVAILABLE'
+          ? 'Original artwork unavailable. Please retry.'
+          : 'Share image unavailable.',
       {
         status,
         headers: {

@@ -154,3 +154,28 @@ describe('share download style selection', () => {
     expect(mocks.sharePng).not.toHaveBeenCalled();
   });
 });
+
+it('serves a named trading-card download and rejects changed metadata or unavailable artwork', async () => {
+  mocks.currentSession.mockResolvedValue(null);
+  mocks.shareLimit.mockResolvedValue(undefined);
+  mocks.shareCard.mockResolvedValue(card);
+  mocks.sharePng.mockResolvedValue(new Uint8Array([137, 80, 78, 71]));
+  const request = () =>
+    new Request(
+      'https://uglydex.test/api/share?kind=passport&entity=312&format=trading-card&download=1',
+    );
+  const response = await GET(request());
+  expect(response.status).toBe(200);
+  expect(response.headers.get('Content-Disposition')).toContain(
+    'squigs-reloaded-312-trading-card.png',
+  );
+  expect(response.headers.get('Cache-Control')).toContain('private');
+  mocks.shareCard
+    .mockResolvedValueOnce(card)
+    .mockResolvedValueOnce({ ...card, title: 'changed' });
+  expect((await GET(request())).status).toBe(409);
+  mocks.sharePng.mockRejectedValueOnce(
+    new Error('TRADING_CARD_ARTWORK_UNAVAILABLE'),
+  );
+  expect((await GET(request())).status).toBe(503);
+});
