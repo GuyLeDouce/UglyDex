@@ -1,5 +1,6 @@
 import { favoriteTokenIds } from '@/server/favorites';
-import { DexNav } from '@/components/dex';
+import { DexNav, DexScore } from '@/components/dex';
+import { dexView } from '@/server/dex';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { collectionSummary } from '@/server/collections';
@@ -14,10 +15,11 @@ export default async function CollectionPage({
   searchParams: Promise<SearchParams>;
 }) {
   const id = await requireCollector();
-  const [summary, status, favorites] = await Promise.all([
+  const [summary, status, favorites, view] = await Promise.all([
     collectionSummary(id),
     refreshStatus(),
     favoriteTokenIds(id),
+    dexView(id),
   ]);
   return (
     <>
@@ -31,6 +33,18 @@ export default async function CollectionPage({
           Open your discoveries →
         </Link>
       </section>
+      <DexNav />
+      <Stats summary={summary} />
+      <DexScore view={view} />
+      <nav className="anchor-nav" aria-label="Find Squigs for your Dex">
+        <Link href="/squigs?dex=advances&sort=sets-desc">
+          Advances my UglyDex
+        </Link>
+        <Link href="/squigs?dex=traits">Missing traits</Link>
+        <Link href="/squigs?dex=undiscovered">Undiscovered Squigs</Link>
+        <Link href="/squigs">Search all Squigs</Link>
+      </nav>
+      <Refresh initial={status} />
       <Catalog
         params={await searchParams}
         collectorId={id}
@@ -39,10 +53,7 @@ export default async function CollectionPage({
         editableFavorites
       />
       <details className="collection-extras">
-        <summary>Discoveries, progress & collection details</summary>
-        <DexNav />
-        <Stats summary={summary} />
-        <Refresh initial={status} />
+        <summary>More collection details</summary>
         <section className="section-heading">
           <p className="eyebrow">COLLECTION NOTES</p>
           <h2>What makes yours different.</h2>
