@@ -257,3 +257,31 @@
   border-bottom: 1px solid #384033;
   letter-spacing: 0.06em;
 }
+
+.share-format {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+  margin-bottom: 16px;
+}
+.share-format select {
+  max-width: 100%;
+  min-height: 44px;
+  padding: 12px;
+  border: 2px solid #143e2e;
+  border-radius: 10px;
+  background: #fff9e9;
+  color: #143e2e;
+}
+.share-panel .share-preview--trading {
+  width: min(100%, 420px);
+  height: auto;
+  aspect-ratio: 5 / 7;
+  padding: 0;
+  margin: 20px auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: 0 12px 28px #0003;
+}

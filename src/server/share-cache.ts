@@ -1,4 +1,5 @@
 import 'server-only';
+import { TRADING_CARD_VERSION } from '@/domain/trading-card';
 import { createHash } from 'node:crypto';
 import { db } from './db';
 import { shareAvatar } from './share-avatar';
@@ -6,6 +7,8 @@ import { artworkBatch } from './share-art';
 import { renderShareSafe } from './share-render';
 import type { ShareCard, ShareSpec } from '@/domain/sharing';
 const cache = new Map<string, { at: number; bytes: Uint8Array }>();
+let cacheBytes = 0;
+const MAX_CACHE_BYTES = 48_000_000;
 const inflight = new Map<string, Promise<Uint8Array>>();
 let rendering = 0;
 const waiting: (() => void)[] = [];
@@ -51,9 +54,9 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
       .update(
         JSON.stringify({
           card,
-          ratio: spec.ratio,
-          template: spec.template,
-          version: 3,
+          ratio: card.tradingCard ? '5:7' : spec.ratio,
+          template: card.tradingCard ? 'rarity' : spec.template,
+          version: card.tradingCard ? `trading-${TRADING_CARD_VERSION}` : 3,
         }),
       )
       .digest('hex');
@@ -62,7 +65,10 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
     failed = 0,
     status = 'OK';
   try {
-    if (cached && cached.at > Date.now() - 60000) {
+    if (
+      cached &&
+      cached.at > Date.now() - (card.tradingCard ? 600000 : 60000)
+    ) {
       hit = true;
       return cached.bytes;
     }
@@ -77,7 +83,7 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
         await shareLimit('renders', 30);
         // Only server-projected, verified assets; never request-supplied URLs.
         const [art, avatar] = await Promise.all([
-          artworkBatch(card.tokens, card.variants),
+          artworkBatch(card.tokens, card.tradingCard ? {} : card.variants),
           card.collectorLayout
             ? shareAvatar(card.collectorLayout.avatar)
             : Promise.resolve(null),
@@ -90,9 +96,23 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
           failed = card.tokens.length;
           status = 'FALLBACK';
         }
-        if (bytes.length < 2_000_000) {
-          if (cache.size >= 24) cache.delete(cache.keys().next().value!);
+        if (bytes.length < (card.tradingCard ? 8_000_000 : 2_000_000)) {
+          const old = cache.get(key);
+          if (old) {
+            cacheBytes -= old.bytes.length;
+            cache.delete(key);
+          }
+          while (
+            cache.size >= 24 ||
+            cacheBytes + bytes.length > MAX_CACHE_BYTES
+          ) {
+            const oldest = cache.keys().next().value;
+            if (oldest === undefined) break;
+            cacheBytes -= cache.get(oldest)!.bytes.length;
+            cache.delete(oldest);
+          }
           cache.set(key, { at: Date.now(), bytes });
+          cacheBytes += bytes.length;
         }
         return bytes;
       } finally {

@@ -1,6 +1,7 @@
 import { favoriteTokenIds } from './favorites';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
+import { tradingCardData } from '@/domain/trading-card';
 import { shareCapacity } from '@/domain/share-capacity';
 import {
   rankedShareAchievements,
@@ -76,6 +77,38 @@ export async function shareCard(
         '/share?' +
         shareQuery({ kind: 'custom', entity: String(n), key: custom.key }),
       ...(custom.issuedAt ? { date: custom.issuedAt.toISOString() } : {}),
+    };
+  }
+  if (q.format === 'trading-card') {
+    const s = await db().squig.findFirst({
+      where: { ...catalogScope, tokenId: Number(q.entity) },
+      select: {
+        tokenId: true,
+        rarityTier: true,
+        legendary: true,
+        og: true,
+        uglyPoints: true,
+        mawRank: true,
+        metadataSourceHash: true,
+        metadataUpdatedAt: true,
+        traits: { select: { traitType: true, value: true } },
+      },
+    });
+    if (!s) return null;
+    return {
+      ...generic,
+      title: 'Squig #' + s.tokenId,
+      eyebrow: 'SQUIGS RELOADED · TRADING CARD',
+      description: 'Original artwork. Every Squig has a story.',
+      tokens: [s.tokenId],
+      path:
+        '/share?' +
+        shareQuery({
+          kind: 'passport',
+          entity: String(s.tokenId),
+          format: 'trading-card',
+        }),
+      tradingCard: tradingCardData(s),
     };
   }
   if (q.kind === 'squig' || q.kind === 'passport') {
@@ -581,6 +614,7 @@ export async function shareMetadata(
         '/api/share?' +
           shareQuery({
             ...q,
+            format: undefined,
             template: resolveShareStyle(spec.template, c.appearance?.share),
           }),
       );

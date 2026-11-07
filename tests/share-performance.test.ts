@@ -132,3 +132,42 @@ describe('share render admission and reuse', () => {
     expect(mocks.render).toHaveBeenCalledTimes(5);
   });
 });
+
+it('caches large trading exports within the byte budget and ignores irrelevant social options', async () => {
+  const { sharePng } = await import('../src/server/share-cache');
+  const trading = {
+    ...card,
+    tradingCard: {
+      tokenId: 1,
+      rarity: 'epic' as const,
+      og: true,
+      legendary: false,
+      uglyPoints: '795',
+      mawRank: 433,
+      type: 'Squig',
+      legend: null,
+      traits: [],
+      sourceRevision: 'v1',
+      metadataUpdatedAt: null,
+    },
+  };
+  const large = { bytes: new Uint8Array(3_000_000), fallback: false };
+  mocks.render.mockResolvedValue(large);
+  await sharePng(trading, { ...spec, format: 'trading-card' });
+  await sharePng(trading, {
+    ...spec,
+    format: 'trading-card',
+    ratio: 'square',
+    template: 'ugly',
+  });
+  expect(mocks.render).toHaveBeenCalledTimes(1);
+  expect(mocks.art).toHaveBeenCalledWith([1], {});
+  await sharePng(
+    {
+      ...trading,
+      tradingCard: { ...trading.tradingCard, sourceRevision: 'v2' },
+    },
+    { ...spec, format: 'trading-card' },
+  );
+  expect(mocks.render).toHaveBeenCalledTimes(2);
+});

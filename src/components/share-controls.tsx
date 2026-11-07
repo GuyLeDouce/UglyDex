@@ -1,4 +1,5 @@
 'use client';
+import { shareFilename } from '@/domain/trading-card';
 import { useEffect, useState } from 'react';
 import { shareQuery, type ShareSpec } from '@/domain/sharing';
 import { shareStyleLabels } from '@/domain/share-styles';
@@ -15,14 +16,36 @@ export function ShareControls({
   owner?: boolean;
   label?: string;
 }) {
-  const [open, setOpen] = useState(false),
+  const [open, setOpen] = useState(spec.format === 'trading-card'),
+    [format, setFormat] = useState<ShareSpec['format']>(
+      spec.format ?? 'standard',
+    ),
     [ratio, setRatio] = useState<ShareSpec['ratio']>(spec.ratio ?? 'landscape'),
     [template, setTemplate] = useState<ShareSpec['template']>(
       spec.template ?? 'clean',
     );
+  const canTrade = spec.kind === 'squig' || spec.kind === 'passport';
+  const trading = canTrade && format === 'trading-card';
+  const activeFormat = trading
+    ? 'trading-card'
+    : spec.format
+      ? 'standard'
+      : undefined;
+  const selectedUrl =
+    canTrade && (trading || spec.format === 'trading-card')
+      ? new URL(
+          '/share?' +
+            shareQuery({
+              kind: 'passport',
+              entity: spec.entity,
+              ...(trading ? { format: 'trading-card' } : {}),
+            }),
+          url,
+        ).href
+      : url;
   const image =
     '/api/share?' +
-    shareQuery({ ...spec, ratio, template }) +
+    shareQuery({ ...spec, ratio, template, format: activeFormat }) +
     (owner ? '&preview=1' : '');
   return (
     <div className="share-controls">
@@ -44,35 +67,68 @@ export function ShareControls({
               contents visible to your recipients.
             </p>
           )}
-          <div className="share-options">
-            <label>
-              Shape
+          {canTrade && (
+            <label className="share-format">
+              Format
               <select
-                value={ratio}
-                onChange={(e) => setRatio(e.target.value as typeof ratio)}
+                aria-label="Share format"
+                value={format}
+                onChange={(event) =>
+                  setFormat(event.target.value as ShareSpec['format'])
+                }
               >
-                <option value="landscape">Landscape · 1200 × 630</option>
-                <option value="square">Square · 1080 × 1080</option>
+                <option value="standard">Passport / social image</option>
+                <option value="trading-card">
+                  Squigs Reloaded Trading Card
+                </option>
               </select>
             </label>
-            <label>
-              Style
-              <select
-                value={template}
-                onChange={(e) => setTemplate(e.target.value as typeof template)}
-              >
-                {Object.entries(shareStyleLabels).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          )}
+          {trading && (
+            <p>
+              1500 × 2100 PNG · Original artwork · Rarity-coloured frame. Values
+              reflect the indexed metadata when generated. This card does not
+              certify ownership.
+            </p>
+          )}
+          {!trading && (
+            <div className="share-options">
+              <label>
+                Shape
+                <select
+                  value={ratio}
+                  onChange={(e) => setRatio(e.target.value as typeof ratio)}
+                >
+                  <option value="landscape">Landscape · 1200 × 630</option>
+                  <option value="square">Square · 1080 × 1080</option>
+                </select>
+              </label>
+              <label>
+                Style
+                <select
+                  value={template}
+                  onChange={(e) =>
+                    setTemplate(e.target.value as typeof template)
+                  }
+                >
+                  {Object.entries(shareStyleLabels).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
           <ShareImage
             key={image}
             image={image}
-            url={url}
+            trading={trading}
+            filename={shareFilename({
+              entity: spec.entity,
+              format: activeFormat,
+            })}
+            url={selectedUrl}
             copy={copy}
             owner={owner}
           />
@@ -85,11 +141,15 @@ export function ShareControls({
 // Remount for each selection so an old response can never become the new download.
 function ShareImage({
   image,
+  trading,
+  filename,
   url,
   copy,
   owner,
 }: {
   image: string;
+  trading: boolean;
+  filename: string;
   url: string;
   copy: string;
   owner: boolean;
@@ -119,6 +179,10 @@ function ShareImage({
             );
           if (response.status === 409)
             throw new Error('This card changed. Please try again.');
+          if (trading && response.status === 503)
+            throw new Error(
+              'The trading card could not be prepared. Please retry once the original artwork is available.',
+            );
           throw new Error(
             'Image unavailable. Check privacy or try again shortly.',
           );
@@ -130,7 +194,7 @@ function ShareImage({
         objectUrl = URL.createObjectURL(blob);
         setAsset({
           url: objectUrl,
-          file: new File([blob], 'uglydex.png', { type: 'image/png' }),
+          file: new File([blob], filename, { type: 'image/png' }),
         });
         setMessage('Image ready.');
       } catch (error) {
@@ -148,7 +212,7 @@ function ShareImage({
       controller.abort();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [image, attempt]);
+  }, [image, attempt, filename, trading]);
 
   async function download(native = false) {
     if (!asset || busy) return;
@@ -173,7 +237,7 @@ function ShareImage({
         const objectUrl = URL.createObjectURL(asset.file),
           anchor = document.createElement('a');
         anchor.href = objectUrl;
-        anchor.download = 'uglydex.png';
+        anchor.download = filename;
         document.body.appendChild(anchor);
         anchor.click();
         anchor.remove();
@@ -196,10 +260,16 @@ function ShareImage({
       {asset && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          className="share-preview"
+          className={
+            trading ? 'share-preview share-preview--trading' : 'share-preview'
+          }
           src={asset.url}
           data-source={image}
-          alt="UglyDex share card preview"
+          alt={
+            trading
+              ? 'Squigs Reloaded trading card preview'
+              : 'UglyDex share card preview'
+          }
         />
       )}
       <div className="actions">

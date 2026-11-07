@@ -2,6 +2,7 @@ import type { NextConfig } from 'next';
 const config: NextConfig = {
   poweredByHeader: false,
   outputFileTracingIncludes: {
+    '/api/share': ['./assets/fonts/*.ttf'],
     '/privacy': ['./PRIVACY.md'],
     '/terms': ['./TERMS.md'],
   },

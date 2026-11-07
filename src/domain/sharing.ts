@@ -95,6 +95,7 @@ export const shareSchema = z
       )
       .optional(),
     ratio: z.enum(['landscape', 'square']).default('landscape'),
+    format: z.enum(['standard', 'trading-card']).optional(),
     template: z
       .enum(Object.keys(shareStyleLabels) as [ShareStyle, ...ShareStyle[]])
       .default('clean'),
@@ -114,9 +115,18 @@ export const shareSchema = z
       .regex(/^[a-z0-9-]{1,24}$/)
       .default('ugly'),
   })
-  .strict();
+  .strict()
+  .refine(
+    (q) =>
+      q.format !== 'trading-card' ||
+      ((q.kind === 'squig' || q.kind === 'passport') &&
+        /^[1-9][0-9]{0,3}$/.test(q.entity) &&
+        Number(q.entity) <= 4444),
+    'Trading cards require a Squig token',
+  );
 export type ShareSpec = z.infer<typeof shareSchema>;
 export type ShareCard = {
+  tradingCard?: import('./trading-card').TradingCardData;
   collectorLayout?: {
     avatar: string | null;
     level: number | null;

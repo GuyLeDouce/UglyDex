@@ -450,6 +450,53 @@ export async function phase6WebTests(
         path: '.data/phase6-share-mobile.png',
         fullPage: true,
       });
+      await page.getByLabel('Share format').selectOption('trading-card');
+      const tradingPreview = page.getByRole('img', {
+        name: 'Squigs Reloaded trading card preview',
+      });
+      await tradingPreview.waitFor();
+      check(
+        await tradingPreview.evaluate((img) => {
+          const image = img as HTMLImageElement;
+          return image.naturalWidth === 1500 && image.naturalHeight === 2100;
+        }),
+        'trading-card PNG has exact portrait dimensions',
+      );
+      check(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+        'mobile trading-card panel fits',
+      );
+      check(
+        (await page.getByLabel('Shape', { exact: true }).count()) === 0,
+        'trading card hides social shape choices',
+      );
+      const cardDownload = page.waitForEvent('download');
+      await page
+        .getByRole('button', { name: 'Download PNG', exact: true })
+        .click();
+      check(
+        (await cardDownload).suggestedFilename() ===
+          'squigs-reloaded-4202-trading-card.png',
+        'trading card downloads named file',
+      );
+      check(
+        imageRequests === 2,
+        'trading preview and download reuse exact bytes',
+      );
+      await page.screenshot({
+        path: '.data/trading-card-mobile.png',
+        fullPage: true,
+      });
+      await page.getByLabel('Share format').selectOption('standard');
+      await page
+        .getByRole('img', { name: 'UglyDex share card preview' })
+        .waitFor();
+      check(
+        (await page.getByLabel('Shape', { exact: true }).count()) === 1,
+        'switching back restores social controls',
+      );
       await page.goto(base + '/settings/galleries');
       await page
         .getByLabel('Gallery name', { exact: true })
