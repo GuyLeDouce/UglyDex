@@ -2031,19 +2031,20 @@ footer {
 }
 
 .charm-dashboard .profile-grid > div {
-  padding: 13px 15px;
-  border: 2px solid var(--ugly-ink);
-  border-radius: 13px;
-  background: #fff6c8;
-  box-shadow: 3px 3px 0 var(--ugly-ink);
+  padding: 16px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  border-top: 1px solid var(--line);
 }
 
 .charm-dashboard .profile-grid > div:nth-child(3n + 2) {
-  background: #e8faed;
+  background: transparent;
 }
 
 .charm-dashboard .profile-grid > div:nth-child(3n) {
-  background: #f3edff;
+  background: transparent;
 }
 
 .charm-dashboard .timeline {

@@ -28,3 +28,15 @@ Home introduces the universe, then offers public collection, collector, sets/his
 ## Assets
 
 Use existing official artwork through Artwork and the existing delivery/cache pipeline; retain the established UglyDex logo. No new image service, generated character substitutes, or per-card rendering request. Additional canonical transparent group art could enrich future campaign sections but is not required for this release.
+
+## Implementation notes
+
+- `design-tokens.css`: site palette, display face, page width and section rhythm; original compact-card palette is scoped to the compact collection.
+- `visual.css`: existing shared styling revised in place; retired landing treatments and animated night decoration removed.
+- `field-guide.css` and `EditorialSection`: homepage compositions and responsive editorial layouts; no new runtime dependency.
+- `card-album.css`: collectible appearance retained; obsolete entry-page and night-filter rules removed.
+- `community.css`: leaderboard rows and chronological activity use separators rather than enclosing cards.
+- Existing detailed cards, share/export renderer, artwork delivery, authentication handlers, server data functions and database schema are unchanged.
+- Discovery counting explanations remain available in a labelled disclosure. Advanced trait/UP filters open when an active value is present.
+
+Local validation: production build, lint, TypeScript and nine focused card/export tests passed. The local environment denies browser process and socket startup; full browser/database/identity validation therefore runs in GitHub Actions. Screenshot fixtures cover 360, 390, 430, 768 and 1440px, wait for fonts and visible image requests, and check public discovery, advanced filters and page overflow. CI evidence is retained with the workflow run.
