@@ -11,17 +11,17 @@ export function EditionGrid({
       {items.map((e) => (
         <figure key={e.slug}>
           <Link href={'/editions/' + e.slug}>
-            <Artwork src={e.image} alt={e.name + ' · Official Edition'} />
+            <Artwork src={e.image} alt={e.name + ' · Official Custom'} />
           </Link>
           <figcaption>
-            <p className="eyebrow">OFFICIAL EDITION</p>
+            <p className="eyebrow">OFFICIAL CUSTOM</p>
             <h2>
               <Link href={'/editions/' + e.slug}>{e.name}</Link>
             </h2>
             <p>{e.artist && 'Art by ' + e.artist}</p>
             <p>
               {e.supply !== null
-                ? 'Edition supply: ' + e.supply
+                ? 'Custom supply: ' + e.supply
                 : 'Supply not documented'}
               {e.issuedAt ? ' · ' + e.issuedAt.slice(0, 10) : ''}
             </p>

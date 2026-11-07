@@ -131,7 +131,7 @@ export default async function Collector({
       {editions.length > 0 && (
         <section>
           <p className="eyebrow">A DIFFERENT KIND OF COLLECTIBLE</p>
-          <h2>Editions · {editions.length} owned</h2>
+          <h2>Customs · {editions.length} owned</h2>
           <EditionGrid items={editions} />
         </section>
       )}

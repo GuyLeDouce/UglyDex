@@ -31,7 +31,7 @@ export function EditionCheck({ slug }: { slug: string }) {
           }
         }}
       >
-        {busy ? 'Checking…' : 'Check my Edition ownership'}
+        {busy ? 'Checking…' : 'Check my Custom ownership'}
       </button>
       <p role="status">{message}</p>
     </div>

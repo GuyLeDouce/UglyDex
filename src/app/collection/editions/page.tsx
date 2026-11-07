@@ -11,9 +11,9 @@ export default async function Page() {
   ]);
   return (
     <>
-      <h1>Your verified Editions</h1>
+      <h1>Your verified Customs</h1>
       <p>
-        Editions are a separate collectible category. Only recent verified
+        Customs are a separate collectible category. Only recent verified
         ownership from linked wallets appears here.
       </p>
       {items.length ? (
@@ -21,7 +21,7 @@ export default async function Page() {
       ) : (
         <section className="empty-state">
           <p>
-            No fresh verified Edition ownership is available. This does not mean
+            No fresh verified Custom ownership is available. This does not mean
             you own none.
           </p>
           <Link className="button" href="/editions">
@@ -30,7 +30,7 @@ export default async function Page() {
         </section>
       )}
       <section>
-        <h2>Indexed Edition discoveries</h2>
+        <h2>Indexed Custom discoveries</h2>
         <p>
           Historical acquisition requires confirmed identity evidence at the
           event time. Indexed balances are observations at the displayed block,
@@ -47,7 +47,7 @@ export default async function Page() {
             {e.firstAcquired?.slice(0, 10) ?? 'not attributed'}
           </p>
         ))}
-        {!history.length && <p>No attributable indexed Edition history yet.</p>}
+        {!history.length && <p>No attributable indexed Custom history yet.</p>}
       </section>
     </>
   );
