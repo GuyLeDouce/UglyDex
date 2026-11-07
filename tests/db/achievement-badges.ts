@@ -534,8 +534,10 @@ export async function achievementBadgeWebTests(
             'advanced filters start compact when inactive',
           );
           await filters.locator('summary').click();
+          const traitFilter = filters.locator('select[name="trait"]');
+          await traitFilter.waitFor({ state: 'visible' });
           check(
-            await page.getByLabel('Trait type', { exact: true }).isVisible(),
+            await traitFilter.isVisible(),
             'advanced trait filters remain accessible',
           );
           await filters.locator('summary').click();
