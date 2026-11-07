@@ -11,7 +11,7 @@ export default async function ConnectPage({
   const session = await currentSession();
   if (session && !error) {
     const state = await onboardingState(session.collectorId);
-    redirect(state.step === 'COMPLETE' ? '/settings/wallets' : '/onboarding');
+    redirect(state.step === 'COMPLETE' ? '/collection' : '/onboarding');
   }
   const seconds =
     retryAfter && /^\d{1,5}$/.test(retryAfter) ? Number(retryAfter) : 0;
