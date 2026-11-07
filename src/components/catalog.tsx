@@ -1,7 +1,7 @@
 import { favoriteTokenIds } from '@/server/favorites';
 import Link from 'next/link';
 import { collectionPage } from '@/server/collections';
-import { CollectionGrid } from './collection';
+import { CollectionGrid } from './collection-grid';
 import { ListingSortOptions } from './listing-sort-options';
 export type SearchParams = Record<string, string | string[] | undefined>;
 export async function Catalog({

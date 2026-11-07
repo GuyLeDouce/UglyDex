@@ -428,3 +428,38 @@
     transform: scale(1.025);
   }
 }
+
+/* An owner action sits outside the card-face link, never on the printed card. */
+.collector-card-link {
+  --ink: #101318;
+  --on-accent: #101318;
+  background: var(--brand-yellow);
+  border: 2px solid #101318;
+  color: #101318;
+  min-height: 44px;
+  gap: 8px;
+  font-size: 13px;
+  white-space: normal;
+  text-align: center;
+}
+.album-card .collector-card-link {
+  display: flex;
+  margin-block: 8px;
+}
+.collection-grid.compact .collector-card-link {
+  flex: 0 0 44px;
+  width: 44px;
+  padding: 8px;
+  margin-inline: 4px;
+  font-size: 22px;
+}
+.collection-grid.compact .collector-card-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}

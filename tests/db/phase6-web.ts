@@ -29,6 +29,42 @@ export async function phase6WebTests(
     },
   });
   const cookie = 'uglydex_session=' + token;
+  const shortcut = '/squig/4202/collector-card';
+  const anonymousShortcut = await fetch(base + shortcut, {
+    redirect: 'manual',
+  });
+  check(
+    anonymousShortcut.status === 307 &&
+      anonymousShortcut.headers.get('location') === '/connect',
+    'collector-card shortcut requires sign-in',
+  );
+  const ownerShortcut = await fetch(base + shortcut, {
+    redirect: 'manual',
+    headers: { Cookie: cookie },
+  });
+  check(
+    ownerShortcut.status === 307 &&
+      ownerShortcut.headers.get('location') ===
+        '/share?kind=passport&entity=4202&format=trading-card',
+    'owner shortcut opens preselected trading card',
+  );
+  check(
+    (
+      await fetch(base + '/squig/4201/collector-card', {
+        headers: { Cookie: cookie },
+      })
+    ).status === 404,
+    'shortcut rechecks ownership after sale',
+  );
+  check(
+    (
+      await fetch(base + '/squig/0/collector-card', {
+        headers: { Cookie: cookie },
+      })
+    ).status === 404,
+    'shortcut rejects invalid token',
+  );
+
   await rebuildCollection(c.id);
   await rebuildSubject('COLLECTOR', c.id);
   const progress = await progressionView('COLLECTOR', c.id);
@@ -378,6 +414,78 @@ export async function phase6WebTests(
           });
         }
       }
+      await page.goto(base + '/collection?q=4202');
+      const ownerCard = page
+        .getByRole('link', {
+          name: 'Download Collector Card for Squig #4202',
+          exact: true,
+        })
+        .first();
+      await ownerCard.waitFor();
+      await page.screenshot({
+        path: '.data/collector-card-grid-mobile.png',
+        fullPage: true,
+      });
+      await page
+        .getByRole('button', { name: '▤ Compact', exact: true })
+        .click();
+      check(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+        'owned-card shortcut fits compact mobile rows',
+      );
+      await page.screenshot({
+        path: '.data/collector-card-compact-mobile.png',
+        fullPage: true,
+      });
+      await ownerCard.click();
+      const directPreview = page.getByRole('img', {
+        name: 'Squigs Reloaded trading card preview',
+        exact: true,
+      });
+      await directPreview.waitFor();
+      check(
+        await directPreview.evaluate(async (node) => {
+          const img = node as HTMLImageElement;
+          await img.decode();
+          return img.naturalWidth === 1500 && img.naturalHeight === 2100;
+        }),
+        'owned shortcut automatically generates full collector card',
+      );
+      const directDownload = page.waitForEvent('download');
+      await page
+        .getByRole('button', { name: 'Download PNG', exact: true })
+        .click();
+      check(
+        (await directDownload).suggestedFilename() ===
+          'squigs-reloaded-4202-trading-card.png',
+        'owned shortcut downloads the selected Squig collector card',
+      );
+      await page.screenshot({
+        path: '.data/collector-card-ready-mobile.png',
+        fullPage: true,
+      });
+      await page.goto(base + '/collection/discovered?q=4201');
+      check(
+        (await page
+          .getByRole('link', {
+            name: 'Download Collector Card for Squig #4201',
+            exact: true,
+          })
+          .count()) === 0,
+        'previously owned card has no download shortcut',
+      );
+      await page.goto(base + '/squig/4202');
+      check(
+        (await page
+          .getByRole('link', {
+            name: 'Download Collector Card for Squig #4202',
+            exact: true,
+          })
+          .count()) === 1,
+        'owned Passport includes collector card shortcut',
+      );
       let imageRequests = 0;
       page.on('request', (request) => {
         if (new URL(request.url()).pathname === '/api/share') imageRequests++;

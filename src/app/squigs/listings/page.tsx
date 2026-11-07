@@ -4,7 +4,7 @@ import { openSeaListings } from '@/server/opensea';
 import { OPENSEA_COLLECTION_URL } from '@/domain/opensea';
 import { listedSquigPage, type ListedSort } from '@/server/listed-squigs';
 import { ListingSortOptions } from '@/components/listing-sort-options';
-import { CollectionGrid } from '@/components/collection';
+import { CollectionGrid } from '@/components/collection-grid';
 import { currentSession } from '@/server/auth';
 import type { FieldGuideFilter } from '@/server/card-personalization';
 export const dynamic = 'force-dynamic';

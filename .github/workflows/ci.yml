@@ -27,6 +27,7 @@ jobs:
           include-hidden-files: true
           path: |
             .data/phase9-replay*.json
+            .data/collector-card-*.png
             .data/mobile-card-*.png
             .data/design/*.png
             .data/uglydex-*.png

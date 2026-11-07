@@ -8,7 +8,7 @@ import { refreshStatus } from '@/server/refresh';
 import { Stats } from '@/components/stats';
 import { Refresh } from '@/components/refresh';
 import { Catalog, type SearchParams } from '@/components/catalog';
-import { CollectionGrid } from '@/components/collection';
+import { CollectionGrid } from '@/components/collection-grid';
 export default async function CollectionPage({
   searchParams,
 }: {

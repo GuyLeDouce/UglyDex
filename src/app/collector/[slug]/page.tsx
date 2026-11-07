@@ -12,7 +12,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { collectorProfile } from '@/server/profiles';
 import { type SearchParams } from '@/components/catalog';
-import { CollectionGrid } from '@/components/collection';
+import { CollectionGrid } from '@/components/collection-grid';
 import { Artwork } from '@/components/artwork';
 import { publicCollectorMetadata } from './metadata';
 import { appearance } from '@/server/cosmetics';
