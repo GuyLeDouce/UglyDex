@@ -518,6 +518,15 @@ try {
       !privateBody.includes(account.address.toLowerCase()),
       'private profile hides linked wallet',
     );
+    const onboarding = await post(
+      '/api/onboarding',
+      { action: 'decline' },
+      sessionCookie,
+    );
+    check(
+      onboarding.ok && (await onboarding.json()).next === '/settings/profile',
+      'wallet-only onboarding completes before dashboard access',
+    );
     const ownBody = await (
       await fetch(`${base}/me`, {
         headers: { Cookie: sessionCookie },
