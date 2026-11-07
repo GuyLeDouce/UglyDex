@@ -11,7 +11,7 @@ import {
   type SquigCardData,
 } from '@/server/collections';
 import { EditorialSection } from '@/components/editorial-section';
-import { Artwork } from '@/components/artwork';
+import { CardCarousel } from '@/components/card-carousel';
 import { TradingCardFace } from '@/components/trading-card-face';
 export const dynamic = 'force-dynamic';
 export default async function Home() {
@@ -65,23 +65,16 @@ export default async function Home() {
             </Link>
           </div>
         </div>
-        <div className="field-hero-art" aria-label="Original Squigs artwork">
-          {sample.slice(0, 3).map((item, index) => (
-            <Link
-              className={`field-specimen field-specimen-${index}`}
+        <CardCarousel>
+          {sample.map((item, index) => (
+            <TradingCardFace
               key={item.tokenId}
+              item={item}
+              priority={index < 2}
               href={`/squig/${item.tokenId}`}
-            >
-              <Artwork
-                src={item.image}
-                alt={`Squig #${item.tokenId}`}
-                priority
-                sizes="(max-width: 600px) 45vw, 340px"
-              />
-              <span>FIELD RECORD / #{item.tokenId}</span>
-            </Link>
+            />
           ))}
-        </div>
+        </CardCarousel>
       </section>
       <div className="field-masthead">
         <span>4,444 ORIGINAL SQUIGS</span>
