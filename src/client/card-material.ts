@@ -74,6 +74,50 @@ export function paintCard(
   ctx.fillStyle = light;
   ctx.fillRect(0, 0, 1500, 2100);
   ctx.restore();
+  // Broad rarity bars use a separate multiply-only foil pass. Dark printed
+  // lettering remains dark while reflections travel across the colored stock.
+  // The NFT and cream trait area are outside this mask.
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(275, 53, 950, 78, 39);
+  ctx.roundRect(124, 1605, 1252, 82, 18);
+  ctx.roundRect(95, 1986, 1310, 50, 15);
+  ctx.clip();
+  const travel = pose.x * 1050 + pose.y * 500;
+  const barFoil = ctx.createLinearGradient(
+    -600 + travel,
+    2100,
+    1900 + travel,
+    0,
+  );
+  for (let i = 0; i <= 12; i++) {
+    barFoil.addColorStop(
+      i / 12,
+      material.foil
+        ? `hsl(${(i * 60 + 185) % 360} 90% 88%)`
+        : i % 2
+          ? '#f0f0f0'
+          : '#ffffff',
+    );
+  }
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.globalAlpha = material.foil
+    ? Math.min(1, material.foil + 0.3)
+    : material.sheen;
+  ctx.fillStyle = barFoil;
+  ctx.fillRect(0, 0, 1500, 2100);
+  if (material.foil) {
+    const sweep = ctx.createLinearGradient(-1400 + travel, 0, 2300 + travel, 0);
+    sweep.addColorStop(0, '#e6e6e6');
+    sweep.addColorStop(0.4, '#e6e6e6');
+    sweep.addColorStop(0.5, '#ffffff');
+    sweep.addColorStop(0.6, '#e6e6e6');
+    sweep.addColorStop(1, '#e6e6e6');
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = sweep;
+    ctx.fillRect(0, 0, 1500, 2100);
+  }
+  ctx.restore();
   // Print grain confined to the outer edge, never the NFT or metadata.
   ctx.globalAlpha = 0.12;
   ctx.fillStyle = '#fff';
@@ -224,8 +268,8 @@ export function paintScene(
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.uniform2f(
     gl.getUniformLocation(program, 'angle'),
-    pose.x * 0.14,
-    pose.y * 0.1,
+    pose.x * 0.3,
+    pose.y * 0.23,
   );
   gl.uniform2f(gl.getUniformLocation(program, 'size'), size, height);
   gl.uniform2f(gl.getUniformLocation(program, 'viewport'), w, h);

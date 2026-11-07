@@ -1,7 +1,10 @@
 import type { CSSProperties, ReactNode } from 'react';
 import Link from 'next/link';
 import type { SquigCardData } from '@/server/collections';
-import { tradingCardPalettes } from '@/domain/trading-card-palette';
+import {
+  tradingCardPalettes,
+  TRADING_BAR_INK,
+} from '@/domain/trading-card-palette';
 import { tradingCardData, type CardRarity } from '@/domain/trading-card';
 import { squigRarityClass } from '@/domain/squig-rarity';
 import { Artwork } from './artwork';
@@ -95,6 +98,8 @@ export function TradingCardFace({
           '--card-light': palette.light,
           '--card-mid': palette.mid,
           '--card-dark': palette.dark,
+          '--card-bar': palette.bar,
+          '--card-ink': TRADING_BAR_INK,
         } as CSSProperties
       }
     >

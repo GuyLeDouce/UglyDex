@@ -15,7 +15,7 @@ The renderer embeds Lilita One and Montserrat, fetches original artwork through
 the existing safe artwork pipeline, and uses existing render concurrency/cache
 limits. It already contains the brand, number, UP, Maw rank, OG, rarity, seven
 possible traits, Legendary name, and footer. These fields and all canonical
-metadata are preserved. Card render version 2 invalidates the existing image
+metadata are preserved. Card render version 3 invalidates the existing image
 cache after material changes; the existing printed V1 identifier stays unchanged. No metadata, ownership, authentication, schema,
 rank, score, or progression changes are included.
 
@@ -43,8 +43,7 @@ No reference code is included. Animated encoding uses the unmodified Mediabunny 
 | Unclassified   | Standard print  | Safe neutral treatment, no invented rarity                |
 
 OG is orthogonal: a gold printed OG seal and gold brand rail accompany the
-indexed rarity. No OG rarity is invented. Foil is clipped to frame rails and
-the artwork-window edge; the original character pixels and printed information
+indexed rarity. No OG rarity is invented. Foil covers the frame rails, artwork-window edge and rarity-colored brand, Maw Rank and footer bars. The bars use a multiply-only material over dark ink, with a conservative AA contrast check; the original character pixels and printed information
 are not recolored by the material layer. No fictional abilities or back are
 introduced.
 
@@ -57,7 +56,7 @@ authorization, refresh check and limits are unchanged.
 
 `card-material.ts` paints the same material for focused preview, finished PNG
 and animation. A single GPU-projected plane presents the complete card without tile seams, with
-restrained angles and room on all sides. Only the focused modal paints frames;
+a wider ±17° horizontal / ±13° vertical interactive range and room on all sides. The six-second orbit reaches about ±15° / ±9°, with the same path in preview and export. Only the focused modal paints frames;
 collection grids have no animation loop or export work. If WebGL is unavailable, the readable flat card and material remain available. GPU resources are explicitly released on close and after export. Canvas code is loaded
 through a dynamic component only for a prepared trading card.
 

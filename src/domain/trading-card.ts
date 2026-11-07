@@ -1,4 +1,4 @@
-export const TRADING_CARD_VERSION = 2;
+export const TRADING_CARD_VERSION = 3;
 export const TRADING_CARD_WIDTH = 1500;
 export const TRADING_CARD_HEIGHT = 2100;
 const rarityNames = [
