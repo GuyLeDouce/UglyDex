@@ -28,6 +28,7 @@ jobs:
           path: |
             .data/phase9-replay*.json
             .data/mobile-card-*.png
+            .data/design/*.png
           if-no-files-found: ignore
           retention-days: 14
       - run: npm run format:check

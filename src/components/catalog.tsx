@@ -117,7 +117,10 @@ export async function Catalog({
             Legendary
           </label>
         </div>
-        <details className="more-filters" open>
+        <details
+          className="more-filters"
+          open={Boolean(f.trait || f.value || f.min || f.max)}
+        >
           <summary>Traits & UglyPoints</summary>
           <div className="filter-top">
             <label>

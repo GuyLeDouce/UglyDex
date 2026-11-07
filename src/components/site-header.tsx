@@ -75,6 +75,8 @@ export function SiteHeader({
       <nav className="primary-nav" aria-label="Primary navigation">
         <Link href={homeHref}>{slug ? 'My Collection' : 'Home'}</Link>
         <Link href="/squigs">Explore</Link>
+        <Link href="/collectors">Collectors</Link>
+        <Link href="/thread">History</Link>
         {slug && <Link href="/me">Profile</Link>}
       </nav>
       {slug && (

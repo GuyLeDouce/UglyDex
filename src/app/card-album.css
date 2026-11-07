@@ -162,13 +162,6 @@
   width: 100%;
   padding: 0;
 }
-.filters {
-  background: transparent !important;
-  box-shadow: none !important;
-  border-width: 0 0 1px !important;
-  border-radius: 0 !important;
-  padding: 12px 0 !important;
-}
 .entry-world .trading-face {
   box-shadow: 0 22px 35px #0003;
 }
@@ -181,12 +174,6 @@
     padding: 7px 9px;
   }
 }
-main#main:has(.entry-world) {
-  background: transparent;
-  color: var(--ugly-paper);
-  border: 0;
-  box-shadow: none;
-}
 .entry-copy h1,
 .entry-copy .eyebrow {
   color: inherit;
@@ -197,17 +184,6 @@ main#main:has(.entry-world) {
 }
 
 /* Transparent controls sit on the night background, not a paper panel. */
-main .filters {
-  --muted: #c3cbe0;
-  --surface-muted: #c3cbe0;
-  color: var(--ugly-paper);
-}
-main .filters label,
-main .filters summary,
-main .filters .filter-actions > span,
-main .filters .filter-actions > a {
-  color: #c3cbe0;
-}
 
 /* One framed collectible, with personal discovery context inside the frame. */
 .trading-face {
