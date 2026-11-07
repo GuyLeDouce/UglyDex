@@ -194,13 +194,13 @@ export function SquigCard({
             advances
           />
         )}
-        <OpenSeaLink
-          tokenId={item.tokenId}
-          listing={listing}
-          status={marketStatus}
-          complete={marketComplete}
-        />
       </details>
+      <OpenSeaLink
+        tokenId={item.tokenId}
+        listing={listing}
+        status={marketStatus}
+        complete={marketComplete}
+      />
     </article>
   );
 }
