@@ -88,6 +88,8 @@ export function TradingCardFace({
   return (
     <div
       className="trading-face"
+      data-finish={rarity}
+      data-og={card.og || undefined}
       style={
         {
           '--card-light': palette.light,

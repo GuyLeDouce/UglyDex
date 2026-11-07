@@ -65,6 +65,7 @@ export async function animatedCard(
   render(0);
   const stream = scene.element.captureStream(30);
   const chunks: Blob[] = [];
+  let renderedFrames = 0;
   let recorder: MediaRecorder | undefined;
   let raf = 0,
     watchdog: ReturnType<typeof setTimeout> | undefined;
@@ -118,7 +119,8 @@ export async function animatedCard(
         }
         if (elapsed - last >= 1000 / 30) {
           render(elapsed / 6000);
-          last = elapsed;
+          last = elapsed - (elapsed % (1000 / 30));
+          renderedFrames++;
           progress(Math.min(95, Math.floor((elapsed / 6000) * 95)));
         }
         raf = requestAnimationFrame(tick);
@@ -126,6 +128,10 @@ export async function animatedCard(
       raf = requestAnimationFrame(tick);
     });
     signal.throwIfAborted();
+    if (renderedFrames < 90)
+      throw new Error(
+        'This device could not render a smooth video. Close other apps and retry, or download PNG.',
+      );
     const type = recording.mimeType.split(';')[0];
     const blob = new Blob(chunks, { type });
     if (blob.size < 1024)

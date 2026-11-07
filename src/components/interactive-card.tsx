@@ -30,6 +30,7 @@ export function InteractiveCard({
     surface = useRef<HTMLCanvasElement>(null);
   const base = useRef<HTMLImageElement | null>(null),
     pose = useRef<CardPose>({ x: 0, y: 0 });
+  const interacted = useRef(false);
   const active = useRef(false),
     exporting = useRef<AbortController | null>(null);
   const [open, setOpen] = useState(
@@ -42,6 +43,7 @@ export function InteractiveCard({
   const [message, setMessage] = useState(''),
     [progress, setProgress] = useState<number | null>(null),
     [video, setVideo] = useState<{ file: File; url: string } | null>(null);
+  const isExporting = progress !== null;
   useEffect(() => {
     const media = matchMedia('(prefers-reduced-motion: reduce)');
     const update = () => setMotion(!media.matches);
@@ -93,11 +95,14 @@ export function InteractiveCard({
     function draw(now: number) {
       if (!target || !base.current) return;
       if (!document.hidden && now - last >= 1000 / 30) {
-        const goal = !motion
-          ? { x: 0, y: 0 }
-          : active.current
-            ? pose.current
-            : loopPose((now - start) / 10000);
+        const goal =
+          !motion || isExporting
+            ? { x: 0, y: 0 }
+            : active.current
+              ? pose.current
+              : interacted.current
+                ? { x: 0, y: 0 }
+                : loopPose((now - start) / 10000);
         current = {
           x: current.x + (goal.x - current.x) * 0.13,
           y: current.y + (goal.y - current.y) * 0.13,
@@ -106,14 +111,14 @@ export function InteractiveCard({
         paintScene(target, face.element, current);
         last = now;
       }
-      if (motion) raf = requestAnimationFrame(draw);
+      if (motion && !isExporting) raf = requestAnimationFrame(draw);
     }
     draw(performance.now());
     return () => {
       cancelAnimationFrame(raf);
       face.element.width = 1;
     };
-  }, [open, ready, motion, finish]);
+  }, [open, ready, motion, finish, isExporting]);
   function close() {
     exporting.current?.abort();
     dialog.current?.close();
@@ -205,6 +210,7 @@ export function InteractiveCard({
                 if (!motion) return;
                 event.currentTarget.setPointerCapture(event.pointerId);
                 active.current = true;
+                interacted.current = true;
               }}
               onPointerMove={(event) => {
                 if (
@@ -219,6 +225,7 @@ export function InteractiveCard({
                   y: clampPose(((event.clientY - r.top) / r.height) * 2 - 1),
                 };
                 active.current = true;
+                interacted.current = true;
               }}
               onPointerUp={(event) => {
                 if (event.currentTarget.hasPointerCapture(event.pointerId))
@@ -241,6 +248,7 @@ export function InteractiveCard({
                   return;
                 event.preventDefault();
                 active.current = true;
+                interacted.current = true;
                 pose.current = {
                   x: clampPose(
                     pose.current.x +

@@ -84,6 +84,26 @@
   color: #172c22;
   box-shadow: 0 8px 20px #0003;
 }
+/* Lightweight print finishes only; focused viewing owns all moving material. */
+.trading-face[data-finish='common'],
+.trading-face[data-finish='unclassified'] {
+  background: linear-gradient(
+    125deg,
+    var(--card-dark),
+    var(--card-mid) 65%,
+    var(--card-dark)
+  );
+}
+.trading-face[data-og] .trading-og {
+  background: linear-gradient(
+    120deg,
+    #b08528,
+    #fff4bd 35%,
+    #edc449 65%,
+    #fff4bd
+  );
+  color: #123f2c;
+}
 .trading-face-inner {
   border: 3px solid #164e35;
   border-radius: 16px;
