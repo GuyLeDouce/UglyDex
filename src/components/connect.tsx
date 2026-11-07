@@ -14,6 +14,7 @@ export function Connect({
   const router = useRouter();
   const [message, setMessage] = useState(initialMessage),
     [busy, setBusy] = useState(false),
+    [walletUrl, setWalletUrl] = useState(''),
     [mergeRequestId, setMergeRequestId] = useState<string | null>(null);
   async function connect() {
     setBusy(true);
@@ -21,8 +22,9 @@ export function Connect({
     try {
       const provider = (window as unknown as { ethereum?: Provider }).ethereum;
       if (!provider) {
+        setWalletUrl(`${window.location.origin}/connect`);
         setMessage(
-          'Open UglyDex in a browser with an Ethereum wallet installed.',
+          'No wallet detected in this browser. Open UglyDex in your wallet app to continue.',
         );
         return;
       }
@@ -91,6 +93,37 @@ export function Connect({
           </form>
         )}
       </div>
+      {walletUrl && (
+        <div className="wallet-handoff">
+          <p>Choose your wallet app, then tap Connect Wallet there.</p>
+          <div className="actions">
+            <a
+              className="button primary"
+              href={`https://link.metamask.io/dapp/${walletUrl.replace(/^https?:\/\//, '')}`}
+            >
+              Open in MetaMask
+            </a>
+            <a
+              className="button"
+              href={`https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(walletUrl)}`}
+            >
+              Open in Trust Wallet
+            </a>
+          </div>
+          <p className="hint">
+            Continue wallet verification and Discord setup inside the wallet
+            browser. Signing in there does not sign you into this browser. To
+            add another wallet, first sign in to your existing Collector there.
+          </p>
+          <p className="hint">
+            App not opening? Open this address in your wallet’s built-in
+            browser: <a href={walletUrl}>{walletUrl}</a>. If you opened UglyDex
+            inside Discord, try opening it in Safari or Chrome first. On
+            desktop, enable your Ethereum wallet extension and try Connect
+            Wallet again.
+          </p>
+        </div>
+      )}
       <p role="status" className="hint">
         {message || 'Your identity. Your collection. No transaction required.'}
       </p>
