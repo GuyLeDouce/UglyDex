@@ -208,6 +208,7 @@
   color: var(--ugly-ink);
 }
 .thread-row .avatar-image {
+  min-width: 0;
   width: 42px;
   height: 42px;
   flex: 0 0 42px;
