@@ -781,6 +781,15 @@ try {
     const { importRecord: importProgressionRecord } =
       await import('../src/sync/import-event');
     const { rebuildSubject } = await import('../src/server/progression-engine');
+    // The browser achievement fixture explicitly opts back into community
+    // tracking; a wallet-only opt-out must never earn imported Discord awards.
+    await db().collector.update({
+      where: { id: signedCollector.id },
+      data: {
+        discordTrackingConsent: true,
+        discordTrackingConsentAt: new Date(),
+      },
+    });
     await importProgressionRecord(
       'survival',
       'phase4-browser',
