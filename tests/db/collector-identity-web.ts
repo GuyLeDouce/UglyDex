@@ -111,6 +111,15 @@ export async function collectorIdentityWebTests(
     gated.headers.get('location') === '/onboarding',
     'dashboard cannot bypass incomplete onboarding',
   );
+  const recovery = await fetch(
+    base + '/connect?error=IDENTITY_REVIEW_REQUIRED',
+    { headers: { Cookie: session } },
+  );
+  check(
+    recovery.ok &&
+      (await recovery.text()).includes('Verify your current wallet again'),
+    'expired merge proof has a reachable wallet re-verification screen',
+  );
   const finishEarly = await post(
     '/api/onboarding',
     { action: 'complete' },

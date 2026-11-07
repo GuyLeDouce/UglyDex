@@ -7,12 +7,12 @@ export default async function ConnectPage({
 }: {
   searchParams: Promise<{ error?: string; retryAfter?: string }>;
 }) {
+  const { error, retryAfter } = await searchParams;
   const session = await currentSession();
-  if (session) {
+  if (session && !error) {
     const state = await onboardingState(session.collectorId);
     redirect(state.step === 'COMPLETE' ? '/settings/wallets' : '/onboarding');
   }
-  const { error, retryAfter } = await searchParams;
   const seconds =
     retryAfter && /^\d{1,5}$/.test(retryAfter) ? Number(retryAfter) : 0;
   const wait =
@@ -37,7 +37,7 @@ export default async function ConnectPage({
                 : error === 'DISCORD_RATE_LIMITED'
                   ? `Discord is temporarily limiting sign-in requests. ${wait} Use Connect Discord below rather than refreshing the previous callback. This attempt stopped before account linking.`
                   : error === 'IDENTITY_REVIEW_REQUIRED'
-                    ? 'This credential belongs to another Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.'
+                    ? 'This identity is linked to another Collector. Verify your current wallet again, then retry linking the other identity to review the merge.'
                     : ''
           }
         />
