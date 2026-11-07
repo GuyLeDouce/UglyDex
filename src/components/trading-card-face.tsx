@@ -34,9 +34,9 @@ export function TradingCardFace({
       <div className="trading-face-inner">
         <p className="trading-brand">SQUIGS RELOADED</p>
         <div className="trading-title">
-          <h3>
+          <span className="trading-name">
             Squig <span>#{item.tokenId}</span>
-          </h3>
+          </span>
           <span className="trading-up">
             <strong>{item.uglyPoints?.toLocaleString() ?? '—'}</strong>
             <small>UGLYPOINTS</small>
