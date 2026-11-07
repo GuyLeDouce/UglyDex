@@ -203,6 +203,7 @@ export function InteractiveCard({
               width={900}
               height={1260}
               className="interactive-card-canvas"
+              style={{ touchAction: motion ? 'none' : 'pan-y' }}
               role="img"
               aria-label={description}
               tabIndex={0}

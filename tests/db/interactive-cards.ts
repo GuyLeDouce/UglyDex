@@ -62,6 +62,7 @@ export async function interactiveCardTests(
       const page = await browser.newPage({
         viewport: { width: 1440, height: 1000 },
         reducedMotion: 'reduce',
+        hasTouch: true,
       });
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
@@ -139,9 +140,18 @@ export async function interactiveCardTests(
         await viewer
           .getByRole('button', { name: 'Download Animated Card' })
           .click();
-        await viewer
-          .locator('video')
-          .waitFor({ state: 'visible', timeout: 35000 });
+        try {
+          await viewer
+            .locator('video')
+            .waitFor({ state: 'visible', timeout: 35000 });
+        } catch {
+          await viewer.screenshot({
+            path: `.data/interactive-cards/${name}-export-error.png`,
+          });
+          throw new Error(
+            `Export failed in ${name}: ${await viewer.innerText()}`,
+          );
+        }
         const save = viewer.getByRole('button', { name: /^Save (MP4|WebM)$/ });
         const label = await save.textContent();
         const videoDownload = page.waitForEvent('download');
@@ -155,6 +165,7 @@ export async function interactiveCardTests(
             [
               '-v',
               'quiet',
+              '-count_frames',
               '-show_streams',
               '-show_format',
               '-of',
@@ -170,6 +181,10 @@ export async function interactiveCardTests(
         check(
           stream.width === 900 && stream.height === 1260,
           'real animated file has expected dimensions',
+        );
+        check(
+          Number(stream.nb_read_frames) >= 90,
+          'animated download has at least 15 decoded frames per second',
         );
         const frames = execFileSync(
           'ffmpeg',
@@ -197,11 +212,14 @@ export async function interactiveCardTests(
         ]);
         evidence.push({
           engine,
+          browserVersion: browser.version(),
           tokenId: record.tokenId,
           rarity: record.rarityTier,
           og: record.og,
           format: probe.format,
           codec: stream.codec_name,
+          frameRate: stream.avg_frame_rate,
+          frameCount: stream.nb_read_frames,
           decodedFrames: frames.length,
         });
         if (record === records[2])
@@ -216,6 +234,46 @@ export async function interactiveCardTests(
             await viewer.screenshot({
               path: `.data/interactive-cards/${engine}-${width}.png`,
             });
+            if (engine === 'chromium' && width === 390) {
+              await viewer.getByRole('button', { name: 'Motion off' }).click();
+              const box = await viewer.locator('canvas').boundingBox();
+              if (!box) throw new Error('Missing touch card');
+              const cdp = await page.context().newCDPSession(page);
+              await cdp.send('Input.dispatchTouchEvent', {
+                type: 'touchStart',
+                touchPoints: [
+                  { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+                ],
+              });
+              const before = await viewer
+                .locator('canvas')
+                .evaluate((c: HTMLCanvasElement) => c.toDataURL());
+              await cdp.send('Input.dispatchTouchEvent', {
+                type: 'touchMove',
+                touchPoints: [
+                  { x: box.x + box.width * 0.8, y: box.y + box.height * 0.3 },
+                ],
+              });
+              await page.waitForFunction(
+                (previous) =>
+                  document
+                    .querySelector<HTMLCanvasElement>('dialog canvas')
+                    ?.toDataURL() !== previous,
+                before,
+              );
+              await cdp.send('Input.dispatchTouchEvent', {
+                type: 'touchEnd',
+                touchPoints: [],
+              });
+              await cdp.detach();
+              await viewer.getByRole('button', { name: 'Reset angle' }).click();
+              check(
+                await viewer
+                  .getByRole('button', { name: 'Motion off' })
+                  .isVisible(),
+                'touch tilt and reset work in mobile Chromium',
+              );
+            }
           }
         await page.setViewportSize({ width: 1440, height: 1000 });
         await viewer.getByRole('button', { name: 'Motion off' }).click();
