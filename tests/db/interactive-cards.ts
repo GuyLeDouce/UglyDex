@@ -146,7 +146,7 @@ export async function interactiveCardTests(
         try {
           await viewer
             .locator('video')
-            .waitFor({ state: 'visible', timeout: 35000 });
+            .waitFor({ state: 'visible', timeout: 130000 });
         } catch {
           await viewer.screenshot({
             path: `.data/interactive-cards/${name}-export-error.png`,
@@ -186,7 +186,7 @@ export async function interactiveCardTests(
           'real animated file has expected dimensions',
         );
         check(
-          Number(stream.nb_read_frames) >= 90,
+          Number(stream.nb_read_frames) === 180,
           'animated download has at least 15 decoded frames per second',
         );
         const frames = execFileSync(
@@ -228,6 +228,9 @@ export async function interactiveCardTests(
         if (record === records[2])
           for (const width of [360, 390, 430, 768]) {
             await page.setViewportSize({ width, height: 900 });
+            await viewer.evaluate((el) => {
+              el.scrollTop = 0;
+            });
             await viewer.screenshot({
               path: `.data/interactive-cards/${engine}-${width}.png`,
             });

@@ -1,4 +1,4 @@
-import { loopPose, recordingType, type CardFinish } from '@/domain/card-finish';
+import { loopPose, type CardFinish } from '@/domain/card-finish';
 import { disposeScene, paintCard, paintScene } from './card-material';
 
 export function canvas(width: number, height: number) {
@@ -47,113 +47,89 @@ export async function animatedCard(
   signal: AbortSignal,
   progress: (value: number) => void,
 ): Promise<File> {
-  const mime =
-    typeof MediaRecorder === 'undefined'
-      ? null
-      : recordingType((type) => MediaRecorder.isTypeSupported(type));
-  if (!mime || !HTMLCanvasElement.prototype.captureStream)
+  signal.throwIfAborted();
+  const {
+    Output,
+    Mp4OutputFormat,
+    WebMOutputFormat,
+    BufferTarget,
+    CanvasSource,
+    canEncodeVideo,
+  } = await import('mediabunny');
+  const options = {
+    width: 900,
+    height: 1260,
+    bitrate: 6_000_000,
+    frameRate: 30,
+  };
+  const codec = (await canEncodeVideo('avc', options))
+    ? 'avc'
+    : (await canEncodeVideo('vp9', options))
+      ? 'vp9'
+      : (await canEncodeVideo('vp8', options))
+        ? 'vp8'
+        : null;
+  if (!codec)
     throw new Error(
       'Animated export is unavailable in this browser. Try a current Chrome or Safari, or download PNG.',
     );
+  signal.throwIfAborted();
   const face = canvas(900, 1260),
     scene = canvas(900, 1260);
-  const render = (time: number) => {
-    const pose = loopPose(time);
-    paintCard(face.ctx, base, finish, pose);
-    paintScene(scene.ctx, face.element, pose);
+  const target = new BufferTarget();
+  const output = new Output({
+    target,
+    format: codec === 'avc' ? new Mp4OutputFormat() : new WebMOutputFormat(),
+  });
+  const source = new CanvasSource(scene.element, { codec, bitrate: 6_000_000 });
+  output.addVideoTrack(source, { frameRate: 30 });
+  let stopped = false;
+  const abort = () => {
+    stopped = true;
+    void output.cancel().catch(() => undefined);
   };
-  render(0);
-  const stream = scene.element.captureStream(30);
-  const chunks: Blob[] = [];
-  let renderedFrames = 0;
-  let recorder: MediaRecorder | undefined;
-  let raf = 0,
-    watchdog: ReturnType<typeof setTimeout> | undefined;
+  signal.addEventListener('abort', abort, { once: true });
+  const timeout = setTimeout(abort, 120000);
   try {
+    await output.start();
+    // Explicit timestamps preserve every frame even when rendering takes longer
+    // than real time. Backpressure bounds encoder memory on mobile devices.
+    for (let frame = 0; frame < 180; frame++) {
+      signal.throwIfAborted();
+      if (stopped)
+        throw new Error('Export timed out. Please retry or download PNG.');
+      const pose = loopPose(frame / 180);
+      paintCard(face.ctx, base, finish, pose);
+      paintScene(scene.ctx, face.element, pose);
+      await source.add(frame / 30, 1 / 30);
+      progress(Math.floor(((frame + 1) / 180) * 95));
+      if (frame % 3 === 0)
+        await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+    source.close();
+    await output.finalize();
     signal.throwIfAborted();
-    recorder = new MediaRecorder(stream, {
-      mimeType: mime,
-      videoBitsPerSecond: 6_000_000,
-    });
-    const recording = recorder;
-    await new Promise<void>((resolve, reject) => {
-      const fail = (error: Error) => reject(error);
-      recording.ondataavailable = (event) => {
-        if (event.data.size) chunks.push(event.data);
-      };
-      recording.onerror = () =>
-        fail(new Error('Video encoding failed. Try PNG or another browser.'));
-      recording.onstop = () => resolve();
-      const abort = () =>
-        fail(new DOMException('Export cancelled.', 'AbortError'));
-      signal.addEventListener('abort', abort, { once: true });
-      recording.addEventListener(
-        'stop',
-        () => signal.removeEventListener('abort', abort),
-        { once: true },
-      );
-      watchdog = setTimeout(
-        () =>
-          fail(
-            new Error('Export timed out. Keep this tab visible and try again.'),
-          ),
-        20000,
-      );
-      recording.start();
-      const start = performance.now();
-      let last = -100;
-      const tick = (now: number) => {
-        if (signal.aborted) return;
-        if (document.hidden) {
-          fail(
-            new Error(
-              'Export paused because the tab was hidden. Keep it visible and try again.',
-            ),
-          );
-          return;
-        }
-        const elapsed = now - start;
-        if (elapsed >= 6000) {
-          recording.stop();
-          return;
-        }
-        if (elapsed - last >= 1000 / 30) {
-          render(elapsed / 6000);
-          last = elapsed - (elapsed % (1000 / 30));
-          renderedFrames++;
-          progress(Math.min(95, Math.floor((elapsed / 6000) * 95)));
-        }
-        raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    });
-    signal.throwIfAborted();
-    if (renderedFrames < 90)
-      throw new Error(
-        'This device could not render a smooth video. Close other apps and retry, or download PNG.',
-      );
-    const type = recording.mimeType.split(';')[0];
-    const blob = new Blob(chunks, { type });
-    if (blob.size < 1024)
+    if (!target.buffer || target.buffer.byteLength < 1024)
       throw new Error('No usable video was generated. Please retry.');
-    // Decode the generated file before offering it: a successful recorder alone
-    // does not prove the browser produced a playable video.
+    const type = codec === 'avc' ? 'video/mp4' : 'video/webm';
+    const blob = new Blob([target.buffer], { type });
     await validateVideo(blob, signal);
     progress(100);
     return new File(
       [blob],
-      name.replace(/\.png$/, type === 'video/mp4' ? '.mp4' : '.webm'),
+      name.replace(/\.png$/, codec === 'avc' ? '.mp4' : '.webm'),
       { type },
     );
   } finally {
-    cancelAnimationFrame(raf);
-    clearTimeout(watchdog);
-    if (recorder && recorder.state !== 'inactive') recorder.stop();
-    stream.getTracks().forEach((track) => track.stop());
+    clearTimeout(timeout);
+    signal.removeEventListener('abort', abort);
+    if (output.state !== 'finalized' && output.state !== 'canceled')
+      await output.cancel();
     disposeScene(scene.element);
     face.element.width = scene.element.width = 1;
   }
 }
+
 async function validateVideo(blob: Blob, signal: AbortSignal) {
   const video = document.createElement('video'),
     url = URL.createObjectURL(blob);

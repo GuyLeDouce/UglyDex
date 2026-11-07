@@ -134,7 +134,7 @@ export function InteractiveCard({
     setProgress(0);
     setMessage(
       animated
-        ? 'Rendering six seconds of motion. Keep this tab visible…'
+        ? 'Rendering 180 frames of motion…'
         : 'Preparing high-resolution PNG…',
     );
     try {
@@ -321,6 +321,15 @@ export function InteractiveCard({
               <small>
                 PNG · 1500 × 2100. Video · 6 seconds, 900 × 1260. MP4 where
                 supported; otherwise WebM. No camera or microphone access.
+              </small>
+              <small>
+                <a
+                  href="/licenses/mediabunny.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Video encoder license and source
+                </a>
               </small>
               {progress !== null && (
                 <>

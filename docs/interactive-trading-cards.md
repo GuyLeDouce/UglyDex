@@ -29,8 +29,7 @@ https://github.com/simeydotme/hover-tilt uses pointer normalization, spring
 motion, glare masks and requestAnimationFrame batching; its LICENSE is MIT.
 Neither codebase, its assets, textures, Pokémon art, or runtime is copied or
 included. The implementation here is original procedural Canvas drawing and a small native WebGL projection shader.
-No new package or hosted service is required. This avoids introducing a
-reference-code licensing obligation into the application.
+No reference code is included. Animated encoding uses the unmodified Mediabunny 1.65.2 package (MPL-2.0), lazy-loaded only for export. Its license and exact package-source link are served at `/licenses/mediabunny.txt`; preserve these notices when distributing. Changes to that library itself would require reviewing MPL source-distribution obligations. No hosted service is required.
 
 ## Finish system
 
@@ -74,13 +73,7 @@ the shared material at a fixed light angle. Original fonts are already baked
 into the server PNG, avoiding client font races and browser text differences.
 Same-origin blob input prevents cross-origin canvas tainting.
 
-Animated: draw real frames to a 900 × 1260 canvas, capture at up to 30 fps,
-record a six-second closed motion cycle using MediaRecorder, then decode the
-result before offering save/share. Prefer supported H.264 MP4; use honestly
-labelled WebM where MP4 encoding is unavailable. Runtime feature detection is
-required: MIME support alone is not proof an encode succeeds. Export has
-progress, cancellation, error feedback, watchdog and cleanup. Switching away
-from the tab cancels rather than silently saving a frozen recording.
+Animated: render 180 actual frames to a 900 × 1260 canvas with explicit 30 fps timestamps for a six-second closed motion cycle. Mediabunny packages native WebCodecs output into H.264 MP4, or correctly labelled VP9/VP8 WebM where AVC is unavailable. Each frame is awaited with encoder backpressure, so slower devices take longer to generate without losing playback frames. Real-time MediaRecorder was evaluated but dropped frames on constrained devices and is not used. The generated file must decode before save/share is offered. Export has progress, cancellation, a two-minute timeout and cleanup. Browsers without a supported WebCodecs encoder retain PNG and receive a clear unsupported message.
 
 MP4/WebM are video containers; looping depends on the receiving app. The
 movement is cyclic and the built-in result player loops. Animated WebP has no
@@ -91,10 +84,9 @@ FFmpeg is used **only in CI** to inspect actual downloaded videos.
 
 Primary technical references:
 
-- https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/isTypeSupported_static
-- https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/MediaRecorder
-- https://developer.chrome.com/blog/capture-stream
-- https://webkit.org/blog/11353/mediarecorder-api/
+- https://mediabunny.dev/guide/media-sources
+- https://mediabunny.dev/guide/writing-media-files
+- https://github.com/Vanilagy/mediabunny/blob/main/LICENSE
 
 ## Validation
 

@@ -31,14 +31,3 @@ export function loopPose(progress: number): CardPose {
   const angle = progress * Math.PI * 2;
   return { x: Math.sin(angle) * 0.6, y: Math.cos(angle) * 0.4 };
 }
-export function recordingType(supported: (type: string) => boolean) {
-  return (
-    [
-      'video/mp4;codecs=avc1.424028',
-      'video/mp4',
-      'video/webm;codecs=vp9',
-      'video/webm;codecs=vp8',
-      'video/webm',
-    ].find(supported) ?? null
-  );
-}

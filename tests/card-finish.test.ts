@@ -4,7 +4,6 @@ import {
   clampPose,
   loopPose,
   parseCardFinish,
-  recordingType,
 } from '../src/domain/card-finish';
 it('keeps OG independent and defaults missing metadata safely', () => {
   expect(parseCardFinish('rare', '1')).toEqual({ rarity: 'rare', og: true });
@@ -31,11 +30,4 @@ it('clamps interaction and produces a continuous restrained loop', () => {
     expect(Math.abs(p.x)).toBeLessThanOrEqual(0.6);
     expect(Math.abs(p.y)).toBeLessThanOrEqual(0.4);
   }
-});
-it('prefers actual supported MP4 and never disguises WebM as MP4', () => {
-  expect(recordingType(() => true)).toMatch(/^video\/mp4/);
-  expect(recordingType((t) => t.startsWith('video/webm'))).toMatch(
-    /^video\/webm/,
-  );
-  expect(recordingType(() => false)).toBeNull();
 });

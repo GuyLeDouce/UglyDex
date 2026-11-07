@@ -95,6 +95,7 @@
     "@prisma/client": "^7.10.0",
     "csv-parse": "^7.0.3",
     "dotenv": "^18.0.4",
+    "mediabunny": "1.65.2",
     "next": "^16.4.3",
     "pg": "^8.23.0",
     "react": "^19.3.0",
