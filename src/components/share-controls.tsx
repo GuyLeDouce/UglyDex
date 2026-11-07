@@ -96,6 +96,7 @@ export function ShareControls({
               <label>
                 Shape
                 <select
+                  aria-label="Shape"
                   value={ratio}
                   onChange={(e) => setRatio(e.target.value as typeof ratio)}
                 >
