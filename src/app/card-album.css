@@ -480,7 +480,10 @@ main .filters {
   --surface-muted: #c3cbe0;
   color: var(--ugly-paper);
 }
-main .filters label {
+main .filters label,
+main .filters summary,
+main .filters .filter-actions > span,
+main .filters .filter-actions > a {
   color: #c3cbe0;
 }
 .album-card .card-details:not([open]),
