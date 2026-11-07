@@ -136,8 +136,9 @@
   padding-top: 24px;
 }
 .chapter-symbol {
-  font-size: 36px;
-  color: var(--acid);
+  display: block;
+  width: 40px;
+  margin-bottom: 12px;
 }
 .field-chapters h3 {
   font-family: var(--font-uglydex-display);
@@ -378,7 +379,8 @@ footer {
   }
   .chapter-symbol {
     grid-row: span 3;
-    font-size: 28px;
+    width: 32px;
+    margin-bottom: 0;
   }
   .field-chapters h3 {
     margin: 0 0 8px;
