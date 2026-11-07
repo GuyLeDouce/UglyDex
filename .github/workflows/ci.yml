@@ -13,7 +13,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
@@ -30,6 +31,7 @@ jobs:
             .data/collector-card-*.png
             .data/mobile-card-*.png
             .data/design/*.png
+            .data/interactive-cards/*
             .data/uglydex-*.png
           if-no-files-found: ignore
           retention-days: 14

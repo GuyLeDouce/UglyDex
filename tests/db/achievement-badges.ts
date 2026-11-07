@@ -1,3 +1,4 @@
+import { interactiveCardTests } from './interactive-cards';
 import { db } from '../../src/server/db';
 import {
   rebuildSubject,
@@ -618,6 +619,7 @@ export async function achievementBadgeWebTests(
         fullPage: true,
       });
     }
+    await interactiveCardTests(base, check);
     check(errors.length === 0, 'badge browser flows have no runtime errors');
     await writeFile(
       '.data/badges/browser-evidence.json',

@@ -11,6 +11,7 @@ import {
   type TradingCardData,
 } from '@/domain/trading-card';
 
+import { cardFinishes } from '@/domain/card-finish';
 import { tradingCardPalettes } from '@/domain/trading-card-palette';
 export { tradingCardPalettes } from '@/domain/trading-card-palette';
 let fonts:
@@ -58,7 +59,11 @@ const display = { fontFamily: 'Lilita', fontWeight: 400 } as const;
 
 export function tradingCardElement(card: TradingCardData, artwork: string) {
   const p = tradingCardPalettes[card.rarity];
-  const foil = `linear-gradient(125deg, ${p.dark} 0%, ${p.mid} 15%, ${p.light} 25%, ${p.mid} 34%, ${p.dark} 49%, ${p.mid} 62%, ${p.light} 74%, ${p.mid} 88%, ${p.dark} 100%)`;
+  const foil = cardFinishes[card.rarity].foil
+    ? `linear-gradient(120deg, ${p.dark} 0%, ${p.mid} 18%, ${p.light} 32%, ${p.mid} 43%, ${p.dark} 56%, ${p.mid} 72%, ${p.light} 88%, ${p.dark} 100%)`
+    : card.rarity === 'uncommon'
+      ? `linear-gradient(120deg, ${p.dark}, ${p.mid} 40%, ${p.light} 50%, ${p.mid} 60%, ${p.dark})`
+      : `linear-gradient(120deg, ${p.dark}, ${p.mid} 65%, ${p.dark})`;
   const rarity = card.rarity === 'unclassified' ? 'Unclassified' : card.rarity;
   const legend = card.legendary && card.legend;
   return (
@@ -229,6 +234,9 @@ export function tradingCardElement(card: TradingCardData, artwork: string) {
                 border: '3px solid #164e35',
                 borderRadius: 24,
                 padding: '4px 19px',
+                background:
+                  'linear-gradient(120deg, #b08528, #fff4bd 35%, #edc449 65%, #fff4bd)',
+                boxShadow: 'inset 0 0 0 3px #fff4bd',
                 ...display,
                 fontSize: 40,
               }}
