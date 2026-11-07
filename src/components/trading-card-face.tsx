@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { SquigCardData } from '@/server/collections';
 import { tradingCardPalettes } from '@/domain/trading-card-palette';
-import type { CardRarity } from '@/domain/trading-card';
+import { tradingCardData, type CardRarity } from '@/domain/trading-card';
 import { squigRarityClass } from '@/domain/squig-rarity';
 import { Artwork } from './artwork';
 
@@ -20,9 +20,17 @@ export function TradingCardFace({
     '',
   ) as CardRarity;
   const palette = tradingCardPalettes[rarity];
-  const traits = item.traits
-    .filter((t) => t.value.trim() && t.value.toLowerCase() !== 'none')
-    .slice(0, 2);
+  const card = tradingCardData({
+    tokenId: item.tokenId,
+    rarityTier: item.rarity,
+    legendary: item.legendary,
+    og: item.og,
+    uglyPoints: item.uglyPoints,
+    mawRank: item.mawRank,
+    traits: item.traits,
+    metadataSourceHash: null,
+    metadataUpdatedAt: null,
+  });
   return (
     <div
       className="trading-face"
@@ -57,13 +65,18 @@ export function TradingCardFace({
             {item.og ? 'OG · ' : ''}Maw #{item.mawRank ?? '—'}
           </span>
         </div>
+        <p className="trading-type">{card.type}</p>
+        {card.legend && <p className="trading-legend">{card.legend}</p>}
         <div className="trading-traits">
-          {traits.map((t) => (
+          {card.traits.map((t) => (
             <span key={t.traitType}>
               <small>{t.traitType}</small>
               {t.value}
             </span>
           ))}
+          {!card.traits.length && !card.legend && (
+            <span>Traits not indexed</span>
+          )}
         </div>
         <div className="trading-footer">
           <span>

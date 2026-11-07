@@ -117,7 +117,7 @@ export async function Catalog({
             Legendary
           </label>
         </div>
-        <details className="more-filters">
+        <details className="more-filters" open>
           <summary>Traits & UglyPoints</summary>
           <div className="filter-top">
             <label>
