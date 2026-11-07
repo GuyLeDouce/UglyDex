@@ -1229,6 +1229,7 @@ progress::-webkit-progress-value {
 }
 
 .relationship {
+  --acid: #28513b;
   display: inline-flex;
   padding: 7px 11px;
   border: 2px solid var(--ugly-ink);
