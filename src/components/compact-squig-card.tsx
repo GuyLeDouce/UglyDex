@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CollectorCardLink } from './collector-card-link';
 import favoriteStyles from './favorite-heart.module.css';
 import { StatusIconStrip } from './status-icon-strip';
 import { SetIconStrip } from './set-icon-strip';
@@ -18,6 +19,7 @@ export function CompactSquigCard({
   favorite,
   onFavorite,
   savingFavorite = false,
+  collectorCard = false,
 }: {
   item: SquigCardData;
   priority?: boolean;
@@ -28,6 +30,7 @@ export function CompactSquigCard({
   favorite?: boolean;
   onFavorite?: () => void;
   savingFavorite?: boolean;
+  collectorCard?: boolean;
 }) {
   return (
     <article
@@ -183,6 +186,7 @@ export function CompactSquigCard({
           advances
         />
       )}
+      {collectorCard && <CollectorCardLink tokenId={item.tokenId} />}
       <OpenSeaLink
         tokenId={item.tokenId}
         listing={listing}

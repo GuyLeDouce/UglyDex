@@ -1,3 +1,4 @@
+import { collectorCardTokenIds } from '../../src/server/collector-card';
 import { db } from '../../src/server/db';
 import {
   saveGallery,
@@ -93,6 +94,47 @@ export async function phase6DatabaseTests(
       },
     });
   }
+  check(
+    (await collectorCardTokenIds(undefined, [4202])).length === 0,
+    'collector card requires a signed-in viewer',
+  );
+  check(
+    (await collectorCardTokenIds(other.id, [4202])).length === 0,
+    'another collector cannot use owner card shortcut',
+  );
+  check(
+    (await collectorCardTokenIds(c.id, [4202, 4203])).length === 2,
+    'owner card eligibility is batched and scoped to visible tokens',
+  );
+  const secondary = await db().collectorWallet.create({
+    data: {
+      collectorId: c.id,
+      chainId: 1,
+      walletAddress: '0x' + '67'.repeat(20),
+      source: 'SIGNATURE',
+      verifiedAt: new Date(),
+    },
+  });
+  await db().squigOwnership.updateMany({
+    where: { sourceKey: 'sharing-own-4204' },
+    data: { walletAddress: secondary.walletAddress },
+  });
+  check(
+    (await collectorCardTokenIds(c.id, [4204])).length === 1,
+    'secondary verified wallet can download collector card',
+  );
+  await db().collectorWallet.update({
+    where: { id: secondary.id },
+    data: { revokedAt: new Date() },
+  });
+  check(
+    (await collectorCardTokenIds(c.id, [4204])).length === 0,
+    'revoked wallet cannot download collector card',
+  );
+  await db().squigOwnership.updateMany({
+    where: { sourceKey: 'sharing-own-4204' },
+    data: { walletAddress: wallet },
+  });
   await rebuildCollection(c.id);
   await rebuildSubject('COLLECTOR', c.id);
   const input = gallerySchema.parse({
@@ -374,6 +416,10 @@ export async function phase6DatabaseTests(
     where: { sourceKey: 'sharing-own-4201' },
     data: { isCurrent: false },
   });
+  check(
+    (await collectorCardTokenIds(c.id, [4201])).length === 0,
+    'previously owned discovery cannot use owner card shortcut',
+  );
   await rebuildCollection(c.id);
   check(
     (await galleryView(c.slug, g.slug))?.items.length === 3,

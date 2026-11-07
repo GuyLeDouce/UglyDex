@@ -74,3 +74,27 @@ describe('collection display modes', () => {
     expect(html).toContain('Adds 3 missing traits');
   });
 });
+
+for (const compact of [false, true]) {
+  it(`offers the collector-card shortcut only with viewer eligibility (${compact ? 'compact' : 'grid'})`, () => {
+    const publicHtml = renderToStaticMarkup(
+      createElement(SquigCard, {
+        item: { ...item, currentlyOwned: true },
+        compact,
+      }),
+    );
+    expect(publicHtml).not.toContain('/collector-card');
+    const ownerHtml = renderToStaticMarkup(
+      createElement(SquigCard, {
+        item,
+        compact,
+        collectorCard: true,
+      }),
+    );
+    expect(ownerHtml).toContain('href="/squig/1/collector-card"');
+    expect(ownerHtml).toContain('Download Collector Card for Squig #1');
+    expect(ownerHtml).not.toMatch(
+      /<a[^>]*squig-card-main[^>]*>(?:(?!<\/a>)[\s\S])*collector-card-link/,
+    );
+  });
+}

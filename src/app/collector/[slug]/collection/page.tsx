@@ -16,7 +16,7 @@ export async function generateMetadata({
 import { notFound } from 'next/navigation';
 import { collectorProfile } from '@/server/profiles';
 import { Catalog, type SearchParams } from '@/components/catalog';
-import { CollectionGrid } from '@/components/collection';
+import { CollectionGrid } from '@/components/collection-grid';
 export default async function Page({
   params,
   searchParams,

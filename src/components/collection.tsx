@@ -1,4 +1,5 @@
 'use client';
+import { CollectorCardLink } from './collector-card-link';
 import { useRouter } from 'next/navigation';
 import favoriteStyles from './favorite-heart.module.css';
 import { StatusIconStrip } from './status-icon-strip';
@@ -40,6 +41,7 @@ function AlbumSquigCard({
   favorite,
   onFavorite,
   savingFavorite = false,
+  collectorCard = false,
 }: {
   item: SquigCardData;
   priority?: boolean;
@@ -50,6 +52,7 @@ function AlbumSquigCard({
   favorite?: boolean;
   onFavorite?: () => void;
   savingFavorite?: boolean;
+  collectorCard?: boolean;
 }) {
   return (
     <article
@@ -207,6 +210,7 @@ function AlbumSquigCard({
             )}
           </div>
         </details>
+        {collectorCard && <CollectorCardLink tokenId={item.tokenId} />}
         <OpenSeaLink
           tokenId={item.tokenId}
           listing={listing}
@@ -222,11 +226,13 @@ export function CollectionGrid({
   controls = true,
   favorites: initialFavorites = [],
   editableFavorites = false,
+  collectorCardTokens = [],
 }: {
   items: SquigCardData[];
   controls?: boolean;
   favorites?: number[];
   editableFavorites?: boolean;
+  collectorCardTokens?: number[];
 }) {
   const router = useRouter();
   const [favorites, setFavorites] = useState(initialFavorites);
@@ -326,6 +332,7 @@ export function CollectionGrid({
             <SquigCard
               key={item.tokenId}
               item={item}
+              collectorCard={collectorCardTokens.includes(item.tokenId)}
               favorite={favorites.includes(item.tokenId)}
               onFavorite={
                 editableFavorites && item.currentlyOwned !== false

@@ -1,3 +1,5 @@
+import { CollectorCardLink } from '@/components/collector-card-link';
+import { collectorCardTokenIds } from '@/server/collector-card';
 import { StatusIconStrip } from '@/components/status-icon-strip';
 import { personalIconSummaries } from '@/server/status-icons';
 import { squigHistoryIcons } from '@/server/activity';
@@ -82,6 +84,8 @@ export default async function Squig({
   const owned = session
     ? await ownedSquig(session.collectorId, s.tokenId)
     : null;
+  const collectorCard =
+    (await collectorCardTokenIds(session?.collectorId, [s.tokenId])).length > 0;
   const preferred =
     session && owned
       ? await displayCustom(session.collectorId, s.tokenId)
@@ -101,6 +105,7 @@ export default async function Squig({
         >
           Share Passport ↗
         </Link>
+        {collectorCard && <CollectorCardLink tokenId={s.tokenId} />}
         <div className="breadcrumb">
           <Link href="/squigs">Field guide</Link>
           <span>/ Squig #{s.tokenId}</span>
