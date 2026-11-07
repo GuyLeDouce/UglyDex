@@ -6,6 +6,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { SquigCard } from '../src/components/collection';
 import type { SquigCardData } from '../src/server/collections';
 
+const tokensStylesheet = await readFile(
+  new URL('../src/app/design-tokens.css', import.meta.url),
+  'utf8',
+);
 const visualStylesheet = await readFile(
   new URL('../src/app/visual.css', import.meta.url),
   'utf8',
@@ -91,7 +95,7 @@ describe('Squig card rarity colors', () => {
   it('renders distinct rarity backgrounds with dark readable card text', async () => {
     const page = await browser.newPage();
     await page.setContent(`
-      <style>${visualStylesheet}</style>
+      <style>${tokensStylesheet}\n${visualStylesheet}</style>
       <div class="squig-card rarity-common"><div class="card-body"><div class="card-title"><h3>Squig #1</h3><span class="rarity">Common</span></div><div class="card-numbers"><span><strong>1,000</strong> UP</span><span>Rank 1</span></div><div class="tags"><span>OG</span></div><p class="ownership-label">Currently Owned</p></div></div>
       <div class="squig-card rarity-uncommon"></div>
       <div class="squig-card rarity-rare"></div>

@@ -1015,13 +1015,13 @@ try {
         await page.goto(base);
         if (process.argv.includes('--catalog')) {
           await page
-            .locator('.landing-specimens img')
+            .locator('.field-hero-art img')
             .first()
             .scrollIntoViewIfNeeded();
           await page.waitForFunction(
             () => {
               const img = document.querySelector<HTMLImageElement>(
-                '.landing-specimens img',
+                '.field-hero-art img',
               );
               return !!img?.complete && img.naturalWidth > 0;
             },
@@ -1031,7 +1031,7 @@ try {
           check(
             (
               await page
-                .locator('.landing-specimens img')
+                .locator('.field-hero-art img')
                 .first()
                 .getAttribute('src')
             )?.includes('/api/artwork/squigs/'),

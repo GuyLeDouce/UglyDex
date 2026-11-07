@@ -496,6 +496,114 @@ export async function achievementBadgeWebTests(
         });
       }
     }
+    // Review the real frontend with isolated identities; no production records.
+    await mkdir('.data/design', { recursive: true });
+    for (const width of [360, 390, 430, 768, 1440]) {
+      await page.setViewportSize({ width, height: width > 1000 ? 1000 : 900 });
+      for (const [route, name] of [
+        ['/squigs?q=4398', 'explorer'],
+        ['/squig/4398', 'passport'],
+        ['/collector/badge-review', 'collector'],
+        ['/collection', 'my-collection'],
+        ['/settings/profile', 'settings'],
+        ['/collectors', 'leaderboard'],
+        ['/thread', 'thread'],
+      ]) {
+        await page.goto(base + route, { waitUntil: 'domcontentloaded' });
+        await page.evaluate(() => document.fonts.ready);
+        await page.waitForFunction(
+          () =>
+            Array.from(document.images)
+              .filter((img) => {
+                const r = img.getBoundingClientRect();
+                return r.top < innerHeight && r.bottom > 0;
+              })
+              .every((img) => img.complete),
+          { timeout: 30000 },
+        );
+        check(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= innerWidth + 1,
+          ),
+          `field guide ${name} fits ${width}px`,
+        );
+        if (name === 'settings') {
+          check(
+            await page
+              .locator(
+                '.settings-form input, .settings-form textarea, .settings-form select',
+              )
+              .evaluateAll((controls) =>
+                controls.every((control) => {
+                  const r = control.getBoundingClientRect();
+                  return !r.width || (r.left >= 0 && r.right <= innerWidth);
+                }),
+              ),
+            `settings controls remain visible at ${width}px`,
+          );
+        }
+        if (name === 'explorer') {
+          const filters = page.locator('.more-filters');
+          check(
+            (await filters.getAttribute('open')) === null,
+            'advanced filters start compact when inactive',
+          );
+          await filters.locator('summary').click();
+          const traitFilter = filters.locator('select[name="trait"]');
+          await traitFilter.waitFor({ state: 'visible' });
+          check(
+            await traitFilter.isVisible(),
+            'advanced trait filters remain accessible',
+          );
+          await filters.locator('summary').click();
+        }
+        await page.screenshot({
+          path: `.data/design/${name}-${width}.png`,
+          fullPage: false,
+        });
+      }
+    }
+    await context.clearCookies();
+    for (const width of [360, 390, 430, 768, 1440]) {
+      await page.setViewportSize({ width, height: width > 1000 ? 1000 : 900 });
+      await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForFunction(
+        () =>
+          Array.from(document.images)
+            .filter((img) => {
+              const rect = img.getBoundingClientRect();
+              return rect.top < innerHeight && rect.bottom > 0;
+            })
+            .every((img) => img.complete),
+        { timeout: 30000 },
+      );
+      check(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth + 1,
+        ),
+        `public homepage fits ${width}px`,
+      );
+      check(
+        await page
+          .getByRole('link', { name: 'Explore the Squigs' })
+          .isVisible(),
+        'public discovery remains the primary homepage action',
+      );
+      await page.locator('.home-card-shelf').scrollIntoViewIfNeeded();
+      await page.waitForFunction(() =>
+        Array.from(
+          document.querySelectorAll<HTMLImageElement>('.home-card-shelf img'),
+        )
+          .filter((img) => img.getBoundingClientRect().width > 0)
+          .every((img) => img.complete && img.naturalWidth > 0),
+      );
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({
+        path: `.data/design/home-${width}.png`,
+        fullPage: true,
+      });
+    }
     check(errors.length === 0, 'badge browser flows have no runtime errors');
     await writeFile(
       '.data/badges/browser-evidence.json',

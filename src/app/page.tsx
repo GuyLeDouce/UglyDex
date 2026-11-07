@@ -9,6 +9,8 @@ import {
   catalogScope,
   type SquigCardData,
 } from '@/server/collections';
+import { EditorialSection } from '@/components/editorial-section';
+import { Artwork } from '@/components/artwork';
 import { TradingCardFace } from '@/components/trading-card-face';
 export const dynamic = 'force-dynamic';
 export default async function Home() {
@@ -40,41 +42,129 @@ export default async function Home() {
     );
   } catch {}
   return (
-    <div className="entry-world">
-      <section className="entry-copy">
-        <p className="eyebrow">A FIELD GUIDE TO THE BEAUTIFULLY MALFORMED</p>
-        <h1>
-          Every Squig
-          <br />
-          has a story.
-        </h1>
-        <p className="entry-lore">
-          Watchers from a distant planet. Strangers on the other side of a
-          portal. The Squigs have arrived—and every one carries a story. Step
-          inside to uncover your collection, its discoveries, and the history
-          that makes it yours.
-        </p>
-        <Link className="button primary" href="/connect">
-          Enter UglyDex ↗
-        </Link>
-        <Link className="entry-explore" href="/squigs">
-          Explore the collection
-        </Link>
+    <div className="field-home">
+      <section className="field-hero">
+        <div className="field-hero-copy">
+          <p className="eyebrow">UGLY LABS / THE SQUIGS FIELD GUIDE</p>
+          <h1>
+            Every Squig
+            <br />
+            has a <em>story.</em>
+          </h1>
+          <p>
+            Watchers from a distant planet. Strangers through a portal. Meet the
+            beautifully malformed—and the history they leave behind.
+          </p>
+          <div className="actions">
+            <Link className="button primary" href="/squigs">
+              Explore the Squigs <span aria-hidden>↗</span>
+            </Link>
+            <Link className="text-link" href="/connect">
+              Open your field guide
+            </Link>
+          </div>
+        </div>
+        <div className="field-hero-art" aria-label="Original Squigs artwork">
+          {sample.slice(0, 3).map((item, index) => (
+            <Link
+              className={`field-specimen field-specimen-${index}`}
+              key={item.tokenId}
+              href={`/squig/${item.tokenId}`}
+            >
+              <Artwork
+                src={item.image}
+                alt={`Squig #${item.tokenId}`}
+                priority
+                sizes="(max-width: 600px) 45vw, 340px"
+              />
+              <span>FIELD RECORD / #{item.tokenId}</span>
+            </Link>
+          ))}
+        </div>
       </section>
-      <div
-        className="entry-cards landing-specimens"
-        aria-label="Real Squigs from the collection"
-      >
-        {sample.slice(0, 3).map((item, index) => (
-          <Link
-            key={item.tokenId}
-            className={`entry-card entry-card-${index}`}
-            href={`/squig/${item.tokenId}`}
-          >
-            <TradingCardFace item={item} priority={index < 2} />
-          </Link>
-        ))}
+      <div className="field-masthead">
+        <span>4,444 ORIGINAL SQUIGS</span>
+        <span>ONE BEAUTIFULLY STRANGE WORLD</span>
+        <span>EVERY STORY COUNTS</span>
       </div>
+      <EditorialSection
+        number="01"
+        eyebrow="THE COLLECTION"
+        title="Find your kind of ugly."
+        href="/squigs"
+        link="The complete catalog"
+      >
+        <p className="editorial-intro">
+          A face, a few strange traits, a life of its own. Open a Passport to
+          meet the Squig behind the card.
+        </p>
+        <div className="home-card-shelf">
+          {sample.slice(3, 6).map((item) => (
+            <TradingCardFace
+              key={item.tokenId}
+              item={item}
+              href={`/squig/${item.tokenId}`}
+            />
+          ))}
+        </div>
+      </EditorialSection>
+      <EditorialSection
+        number="02"
+        eyebrow="THE FIELD GUIDE"
+        title="Collect more than characters."
+      >
+        <div className="field-chapters">
+          <Link href="/collection/dex">
+            <span className="chapter-symbol" aria-hidden>
+              ↗
+            </span>
+            <h3>Follow your discoveries.</h3>
+            <p>
+              Squigs, traits, and sets. Every discovery adds another page to
+              your personal UglyDex.
+            </p>
+            <span className="chapter-link">Open My UglyDex →</span>
+          </Link>
+          <Link href="/collectors">
+            <span className="chapter-symbol" aria-hidden>
+              ✳
+            </span>
+            <h3>Meet the collectors.</h3>
+            <p>
+              Favourite freaks, earned achievements, and field guides built one
+              Squig at a time.
+            </p>
+            <span className="chapter-link">Explore collectors →</span>
+          </Link>
+          <Link href="/thread">
+            <span className="chapter-symbol" aria-hidden>
+              ↳
+            </span>
+            <h3>Nothing without a story.</h3>
+            <p>
+              New homes. Hard-earned milestones. Follow the recorded history of
+              the ecosystem.
+            </p>
+            <span className="chapter-link">Read the collector thread →</span>
+          </Link>
+        </div>
+      </EditorialSection>
+      <section className="field-invitation">
+        <p className="eyebrow">BEAUTIFULLY MALFORMED. ENTIRELY YOURS.</p>
+        <h2>
+          Your collection.
+          <br />
+          Your history. Your legacy.
+        </h2>
+        <div className="actions">
+          <Link className="button primary" href="/connect">
+            Start your field guide ↗
+          </Link>
+          <Link className="text-link" href="/editions">
+            Discover Squigs Customs
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

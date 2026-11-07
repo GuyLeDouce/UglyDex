@@ -1,6 +1,8 @@
 import { currentSession } from '@/server/auth';
 import { onboardingState } from '@/server/onboarding';
 import { redirect } from 'next/navigation';
+import { Artwork } from '@/components/artwork';
+import { squigArtwork } from '@/domain/assets';
 import { Connect } from '@/components/connect';
 export default async function ConnectPage({
   searchParams,
@@ -43,12 +45,14 @@ export default async function ConnectPage({
         />
         <small>One identity at a time. Your collection stays yours.</small>
       </div>
-      <div className="connect-art" aria-hidden="true">
-        <span className="connect-orbit orbit-one" />
-        <span className="connect-orbit orbit-two" />
-        <span className="connect-burst">✳</span>
-        <span className="connect-lightning">ϟ</span>
-        <span className="connect-art-label">FIELD GUIDE Nº 001</span>
+      <div className="connect-art">
+        <Artwork
+          src={squigArtwork(210)}
+          alt="Squig #210 — Squigs Reloaded"
+          priority
+          sizes="(max-width: 600px) 90vw, 440px"
+        />
+        <span className="connect-art-label">EVERY SQUIG HAS A STORY.</span>
       </div>
     </section>
   );

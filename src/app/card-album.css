@@ -24,127 +24,17 @@
   font-weight: 700;
   min-height: 44px;
 }
-.entry-world {
-  min-height: 75vh;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: 48px;
-  padding: 45px 0 80px;
-}
-.entry-copy {
-  max-width: 550px;
-  position: relative;
-  z-index: 2;
-}
-.entry-copy h1 {
-  font-family: var(--font-lilita-one), sans-serif;
-  font-size: clamp(56px, 6vw, 90px);
-  letter-spacing: -0.045em;
-  line-height: 0.98;
-  margin: 24px 0;
-}
-.entry-lore {
-  max-width: 470px;
-  font-size: 1rem;
-  line-height: 1.9;
-  opacity: 0.8;
-  margin-bottom: 30px;
-}
-.entry-copy .eyebrow {
-  font-size: 0.7rem;
-  letter-spacing: 0.15em;
-}
-.entry-explore {
-  display: block;
-  width: fit-content;
-  margin-top: 20px;
-  font-size: 0.85rem;
-  text-decoration: underline;
-  text-underline-offset: 5px;
-}
-.entry-cards.landing-specimens {
-  display: grid !important;
-  grid-template-columns: 1fr;
-  position: relative !important;
-  min-height: 520px;
-  align-items: center;
-  isolation: isolate;
-}
-.entry-card {
-  grid-area: 1/1;
-  width: 60%;
-  max-width: 310px;
-  justify-self: center;
-  transition: transform 0.25s;
-  position: relative;
-  z-index: 1;
-}
-.entry-card-0 {
-  transform: translate(-35%, 8%) rotate(-14deg);
-  z-index: 0;
-}
-.entry-card-1 {
-  transform: translate(35%, 5%) rotate(13deg);
-  z-index: 0;
-}
-.entry-card-2 {
-  transform: rotate(-3deg);
-}
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .squig-card-main:hover .trading-face:after,
-  .entry-card:hover .trading-face:after {
+  .squig-card-main:hover .trading-face:after {
     opacity: 1;
-  }
-  .entry-card:hover {
-    transform: translateY(-12px);
-    z-index: 3;
-  }
-}
-@media (max-width: 1000px) {
-  .entry-world {
-    gap: 20px;
-  }
-  .entry-cards.landing-specimens {
-    min-height: 400px;
   }
 }
 @media (max-width: 700px) {
-  .entry-world {
-    grid-template-columns: 1fr;
-    padding-top: 20px;
-    gap: 20px;
-    text-align: center;
-  }
-  .entry-copy {
-    margin: auto;
-  }
-  .entry-copy h1 {
-    font-size: 60px;
-  }
-  .entry-lore {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .entry-explore {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .entry-cards.landing-specimens {
-    min-height: 420px;
-    max-width: 480px;
-    width: 100%;
-    margin: auto;
-  }
-  .entry-card {
-    width: 55%;
-  }
   .header-signout {
     margin-left: auto;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .entry-card,
   .album-card {
     transition: none !important;
   }
@@ -162,16 +52,6 @@
   width: 100%;
   padding: 0;
 }
-.filters {
-  background: transparent !important;
-  box-shadow: none !important;
-  border-width: 0 0 1px !important;
-  border-radius: 0 !important;
-  padding: 12px 0 !important;
-}
-.entry-world .trading-face {
-  box-shadow: 0 22px 35px #0003;
-}
 @media (max-width: 820px) {
   .site-header:has(.header-signout) {
     grid-template-columns: minmax(105px, 1fr) auto auto;
@@ -181,33 +61,8 @@
     padding: 7px 9px;
   }
 }
-main#main:has(.entry-world) {
-  background: transparent;
-  color: var(--ugly-paper);
-  border: 0;
-  box-shadow: none;
-}
-.entry-copy h1,
-.entry-copy .eyebrow {
-  color: inherit;
-}
-.entry-cards.landing-specimens:before,
-.entry-cards.landing-specimens:after {
-  display: none;
-}
 
 /* Transparent controls sit on the night background, not a paper panel. */
-main .filters {
-  --muted: #c3cbe0;
-  --surface-muted: #c3cbe0;
-  color: var(--ugly-paper);
-}
-main .filters label,
-main .filters summary,
-main .filters .filter-actions > span,
-main .filters .filter-actions > a {
-  color: #c3cbe0;
-}
 
 /* One framed collectible, with personal discovery context inside the frame. */
 .trading-face {
@@ -563,9 +418,6 @@ main .filters .filter-actions > a {
   }
   .trading-traits {
     font-size: 13px;
-  }
-  .entry-cards .trading-traits {
-    font-size: clamp(8px, 3.7cqi, 13px);
   }
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {

@@ -2,11 +2,12 @@ import { readFile } from 'node:fs/promises';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { chromium, type Browser, type Page } from '@playwright/test';
 
-const [baseStylesheet, visualStylesheet] = await Promise.all([
+const [baseStylesheet, tokensStylesheet, visualStylesheet] = await Promise.all([
   readFile(new URL('../src/app/globals.css', import.meta.url), 'utf8'),
+  readFile(new URL('../src/app/design-tokens.css', import.meta.url), 'utf8'),
   readFile(new URL('../src/app/visual.css', import.meta.url), 'utf8'),
 ]);
-const stylesheet = `${baseStylesheet}\n${visualStylesheet}`;
+const stylesheet = `${baseStylesheet}\n${tokensStylesheet}\n${visualStylesheet}`;
 
 let browser: Browser;
 
@@ -101,7 +102,7 @@ describe('account menu stacking', () => {
     await link.hover();
     expect(
       await link.evaluate((node) => getComputedStyle(node).backgroundColor),
-    ).toBe('rgb(239, 233, 255)');
+    ).toBe('rgb(230, 222, 237)');
     await page.locator('.account-menu > summary').focus();
     await page.keyboard.press('Tab');
     expect(
