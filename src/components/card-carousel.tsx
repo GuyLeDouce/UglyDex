@@ -20,8 +20,8 @@ export function CardCarousel({ children }: { children: ReactNode }) {
     if (!node) return;
     const update = () =>
       setEdges({
-        start: node.scrollLeft <= 2,
-        end: node.scrollLeft + node.clientWidth >= node.scrollWidth - 2,
+        start: node.scrollLeft <= 4,
+        end: node.scrollLeft + node.clientWidth >= node.scrollWidth - 4,
       });
     update();
     node.addEventListener('scroll', update, { passive: true });

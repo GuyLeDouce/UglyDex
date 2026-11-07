@@ -1070,8 +1070,8 @@ try {
             .click();
           await page.waitForFunction(
             () =>
-              (document.querySelector('.hero-card-track')?.scrollLeft ?? 999) <
-              2,
+              (document.querySelector('.hero-card-track')?.scrollLeft ?? 999) <=
+              4,
           );
           check(true, 'home carousel previous arrow returns to the first card');
           for (const width of [360, 390, 430, 768, 1440]) {
