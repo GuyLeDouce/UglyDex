@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SquigsIcon } from '@/components/squigs-icon';
 import { redirect } from 'next/navigation';
 import { randomInt } from 'node:crypto';
 import { currentSession } from '@/server/auth';
@@ -116,7 +117,7 @@ export default async function Home() {
         <div className="field-chapters">
           <Link href="/collection/dex">
             <span className="chapter-symbol" aria-hidden>
-              ↗
+              <SquigsIcon name="new-discovery" size={40} />
             </span>
             <h3>Follow your discoveries.</h3>
             <p>
@@ -127,7 +128,7 @@ export default async function Home() {
           </Link>
           <Link href="/collectors">
             <span className="chapter-symbol" aria-hidden>
-              ✳
+              <SquigsIcon name="recorded-victory" size={40} />
             </span>
             <h3>Meet the collectors.</h3>
             <p>
@@ -138,7 +139,7 @@ export default async function Home() {
           </Link>
           <Link href="/thread">
             <span className="chapter-symbol" aria-hidden>
-              ↳
+              <SquigsIcon name="provenance" size={40} />
             </span>
             <h3>Nothing without a story.</h3>
             <p>

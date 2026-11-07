@@ -1,7 +1,7 @@
 /* Card faces share the export renderer's palette; no PNG rendering per view. */
 .collection-extras {
   margin: 48px 0;
-  border-top: 1px solid #22382e33;
+  border-top: 1px solid var(--line);
   padding-top: 20px;
 }
 .collection-extras > summary {

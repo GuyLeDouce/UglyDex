@@ -1,6 +1,7 @@
 'use client';
 import { GALLERIES_ENABLED } from '@/domain/features';
 import Image from 'next/image';
+import { SquigsIcon } from './squigs-icon';
 import Link from 'next/link';
 
 const accountLinks = [
@@ -92,9 +93,7 @@ export function SiteHeader({
         {slug ? (
           <details className="account-menu">
             <summary>
-              <span className="account-orbit" aria-hidden>
-                ✳
-              </span>
+              <SquigsIcon name="currently-owned" size={24} />
               <span>My account</span>
               <span className="menu-chevron" aria-hidden>
                 ⌄
@@ -105,7 +104,7 @@ export function SiteHeader({
             </nav>
           </details>
         ) : (
-          <Link className="button header-connect" href="/connect">
+          <Link className="button primary header-connect" href="/connect">
             Sign in <span aria-hidden>↗</span>
           </Link>
         )}
@@ -137,7 +136,7 @@ export function SiteHeader({
           )}
           {slug && <AccountLinks slug={slug} isPublic={isPublic} />}
           {!slug && (
-            <Link className="button" href="/connect">
+            <Link className="button primary" href="/connect">
               Sign in
             </Link>
           )}

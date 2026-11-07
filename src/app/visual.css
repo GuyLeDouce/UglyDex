@@ -36,7 +36,7 @@ a {
 }
 
 a:hover {
-  color: var(--ugly-green-deep);
+  color: var(--acid);
 }
 
 button,
@@ -58,7 +58,7 @@ summary:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid #237849;
+  outline: 3px solid var(--brand-cyan);
   outline-offset: 3px;
 }
 
@@ -86,7 +86,7 @@ textarea:focus-visible {
   border: 0;
   color: var(--ink);
   height: auto;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 2px solid var(--line);
 }
 
 .brand-mark {
@@ -141,8 +141,8 @@ textarea:focus-visible {
 .account-menu > summary:hover,
 .mobile-menu > summary:hover {
   transform: translateY(-2px);
-  background: var(--ugly-paper);
-  color: var(--ugly-ink);
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .header-account {
@@ -159,6 +159,9 @@ textarea:focus-visible {
 
 .account-menu > summary,
 .mobile-menu > summary {
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--surface-raised);
   list-style: none;
 }
 
@@ -169,19 +172,17 @@ textarea:focus-visible {
 
 .account-menu[open] > summary,
 .mobile-menu[open] > summary {
-  background: var(--ugly-green);
-  border-color: var(--ugly-ink);
-  color: var(--ugly-ink);
+  background: var(--brand-yellow);
+  border-color: var(--brand-yellow);
+  color: var(--on-accent);
 }
 
-.account-orbit {
-  display: grid;
-  width: 25px;
-  height: 25px;
-  place-items: center;
-  border: 2px solid currentColor;
-  border-radius: 50%;
-  font-size: 0.92rem;
+.squigs-icon {
+  display: block;
+  flex-shrink: 0;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .menu-chevron {
@@ -207,9 +208,9 @@ details[open] > summary .menu-chevron {
   padding: 12px;
   border: 1px solid var(--ink);
   border-radius: 6px;
-  background: var(--ugly-paper);
+  background: var(--surface);
   box-shadow: 0 12px 30px #1c241b18;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .account-menu > nav a,
@@ -224,7 +225,7 @@ details[open] > summary .menu-chevron {
   border: 0;
   border-radius: 10px;
   background: transparent;
-  color: var(--ugly-ink);
+  color: var(--ink);
   font-size: 0.86rem;
   font-weight: 700;
   text-align: left;
@@ -234,13 +235,13 @@ details[open] > summary .menu-chevron {
 .account-menu > nav button:hover,
 .mobile-menu > nav a:hover,
 .mobile-menu > nav button:hover {
-  background: var(--ugly-lilac);
-  color: var(--ugly-ink);
+  background: var(--surface-raised);
+  color: var(--ink);
 }
 
 .account-menu > nav form,
 .mobile-menu > nav form {
-  border-top: 1px solid #c7c7c2;
+  border-top: 1px solid var(--line);
   margin-top: 4px;
   padding-top: 4px;
 }
@@ -258,7 +259,8 @@ details[open] > summary .menu-chevron {
 
 .mobile-menu > nav .button {
   justify-content: center;
-  background: var(--ugly-green);
+  background: var(--brand-yellow);
+  color: var(--on-accent);
 }
 
 main#main {
@@ -276,7 +278,7 @@ main#main {
 }
 
 .eyebrow {
-  color: var(--ugly-green-deep);
+  color: var(--acid);
   font-family: var(--font-montserrat), Montserrat, Arial, sans-serif;
   font-size: 0.68rem;
   font-weight: 800;
@@ -358,7 +360,7 @@ main .hint,
 main .fine-print,
 main .panel > p,
 main .feature-grid p {
-  color: var(--ugly-muted);
+  color: var(--muted);
 }
 
 .button,
@@ -369,11 +371,11 @@ button.button {
   justify-content: center;
   gap: 10px;
   padding: 11px 19px;
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--control-border);
   border-radius: 6px;
-  background: var(--ugly-paper);
+  background: var(--surface-raised);
   box-shadow: none;
-  color: var(--ugly-ink);
+  color: var(--ink);
   font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -389,13 +391,15 @@ button.button {
 button.button:hover {
   transform: translateY(-1px);
   box-shadow: none;
-  background: var(--ugly-yellow);
-  color: var(--ugly-ink);
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: var(--on-accent);
 }
 
 .button.primary {
-  background: var(--acid);
-  color: var(--ugly-paper);
+  border-color: var(--brand-yellow);
+  background: var(--brand-yellow);
+  color: var(--on-accent);
 }
 
 .connect-panel .actions .button {
@@ -406,7 +410,18 @@ button.button:hover {
 }
 
 .button.primary:hover {
-  background: var(--ugly-ink);
+  background: var(--brand-cyan);
+  border-color: var(--brand-cyan);
+  color: var(--on-accent);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .text-link {
@@ -415,7 +430,7 @@ button.button:hover {
   align-items: center;
   padding: 4px 0;
   border-bottom: 2px solid currentColor;
-  color: var(--ugly-green-deep);
+  color: var(--acid);
   font-weight: 800;
 }
 
@@ -442,7 +457,7 @@ button.button:hover {
 .page-heading > p:not(.eyebrow),
 .page-heading .bio {
   max-width: 72ch;
-  color: #4f5664;
+  color: var(--muted);
 }
 
 .page-heading.profile-heading {
@@ -468,8 +483,13 @@ button.button:hover {
   overflow: hidden;
   border: var(--ugly-border);
   border-radius: 50%;
-  background: var(--ugly-lilac);
+  background: var(--surface-raised);
   box-shadow: var(--ugly-shadow-sm);
+}
+
+.avatar-image .art-fallback,
+.avatar-image .art-fallback > span {
+  color: var(--brand-cyan);
 }
 
 .avatar-image img {
@@ -525,7 +545,7 @@ button.button:hover {
 .stats > div strong {
   display: block;
   overflow-wrap: anywhere;
-  color: var(--ugly-ink);
+  color: var(--ink);
   font-size: clamp(1.55rem, 3vw, 2.4rem);
   font-weight: 900;
   line-height: 1.05;
@@ -536,7 +556,7 @@ button.button:hover {
 .stats > div span {
   display: block;
   margin-top: 8px;
-  color: #232630;
+  color: var(--muted);
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.07em;
@@ -562,7 +582,7 @@ button.button:hover {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  color: var(--ugly-ink);
+  color: var(--ink);
   border-top: 1px solid var(--line);
 }
 
@@ -578,7 +598,7 @@ button.button:hover {
 .panel > p,
 .panel small,
 .panel .muted {
-  color: #535b69;
+  color: var(--muted);
 }
 
 .charm-balance {
@@ -603,7 +623,7 @@ button.button:hover {
 }
 
 .charm-balance .eyebrow {
-  color: #4f4615;
+  color: var(--muted);
 }
 
 .drip-link-panel {
@@ -658,7 +678,7 @@ button.button:hover {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  color: var(--ugly-ink);
+  color: var(--ink);
   font-size: 0.75rem;
   font-weight: 800;
   text-align: center;
@@ -670,7 +690,7 @@ button.button:hover {
 .activity-filters a:hover,
 .activity-filters a[aria-current] {
   background: transparent;
-  color: var(--ugly-ink);
+  color: var(--ink);
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -710,6 +730,13 @@ button.button:hover {
 }
 
 .squig-card {
+  --acid: #28513b;
+  --line: #c9c9b9;
+  --ink: #111318;
+  --muted: #535b69;
+  --surface-muted: #535b69;
+  --surface-accent: #28513b;
+  color-scheme: light;
   position: relative;
   min-width: 0;
   overflow: hidden;
@@ -763,6 +790,9 @@ button.button:hover {
 }
 
 .opensea-listing {
+  --acid: #28513b;
+  --surface-muted: #535b69;
+  --surface-accent: #28513b;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -793,6 +823,7 @@ button.button:hover {
 }
 
 .opensea-detail {
+  background: var(--ugly-white);
   margin-top: 20px;
   border: 2px solid var(--ugly-ink);
   border-radius: 12px;
@@ -955,16 +986,16 @@ button.button:hover {
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--ugly-ink);
+  color: var(--ink);
   font-weight: 750;
   border-bottom: 2px solid transparent;
   min-height: 44px;
 }
 
 .view-controls button[aria-pressed='true'] {
-  border-color: var(--ugly-ink);
-  background: transparent;
-  color: var(--ugly-ink);
+  border-color: var(--brand-blue);
+  background: var(--brand-blue);
+  color: var(--on-accent);
   border-bottom-color: var(--acid);
 }
 
@@ -988,7 +1019,7 @@ button.button:hover {
 .settings-form > label,
 .passport-filters label,
 .review-form label {
-  color: #4c5360;
+  color: var(--muted);
   font-size: 0.74rem;
   font-weight: 750;
 }
@@ -1008,10 +1039,10 @@ textarea,
 .review-form textarea {
   min-width: 0;
   max-width: 100%;
-  border: 1px solid var(--line);
+  border: 1px solid var(--control-border);
   border-radius: 5px;
-  background: var(--ugly-white);
-  color: var(--ugly-ink);
+  background: var(--surface-raised);
+  color: var(--ink);
 }
 
 input,
@@ -1022,7 +1053,7 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .check {
@@ -1034,18 +1065,18 @@ textarea::placeholder {
 .badge-options input {
   width: 19px;
   height: 19px;
-  accent-color: var(--ugly-green-deep);
+  accent-color: var(--acid);
 }
 
 .more-filters {
-  border-top: 1px solid #d0d0cc;
+  border-top: 1px solid var(--line);
   padding-top: 12px;
 }
 
 .more-filters summary,
 .history-coverage summary,
 .chain-details summary {
-  color: #263044;
+  color: var(--muted);
   font-weight: 800;
 }
 
@@ -1058,13 +1089,13 @@ textarea::placeholder {
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  border-top: 1px solid #d6d7d5;
+  border-top: 1px solid var(--line);
   padding-top: 12px;
 }
 
 .filter-actions > span {
   margin-left: auto;
-  color: #444c58;
+  color: var(--muted);
   font-size: 0.8rem;
   font-weight: 800;
 }
@@ -1077,7 +1108,7 @@ textarea::placeholder {
 }
 
 .pagination > span {
-  color: #424a57;
+  color: var(--muted);
   font-weight: 750;
 }
 
@@ -1087,36 +1118,37 @@ textarea::placeholder {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .refresh-bar p {
-  color: #343b4a;
+  color: var(--muted);
 }
 
 .refresh-bar button {
   min-height: 40px;
   border: 2px solid var(--ugly-ink);
   border-radius: 999px;
-  background: var(--ugly-white);
-  color: var(--ugly-ink);
+  background: var(--surface-raised);
+  color: var(--ink);
   font-weight: 800;
 }
 
 .status-dot {
-  background: var(--ugly-green-deep);
+  background: var(--brand-cyan);
 }
 
 .empty-state {
   padding: clamp(22px, 5vw, 44px);
-  border: 2px dashed #353a46;
-  border-radius: 20px;
-  background: #f0effb;
-  color: var(--ugly-ink);
+  border: 0;
+  border-left: 4px solid var(--brand-blue);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .empty-state > span {
-  color: var(--ugly-green-deep);
+  color: var(--acid);
 }
 
 .completion {
@@ -1129,7 +1161,7 @@ textarea::placeholder {
 }
 
 .completion strong {
-  color: var(--ugly-ink);
+  color: var(--ink);
   font-size: clamp(1.3rem, 3vw, 2rem);
   font-weight: 900;
 }
@@ -1146,12 +1178,12 @@ progress {
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  background: #e7e5df;
-  accent-color: var(--ugly-green-deep);
+  background: var(--surface-raised);
+  accent-color: var(--acid);
 }
 
 progress::-webkit-progress-bar {
-  background: #e7e5df;
+  background: var(--surface-raised);
 }
 
 progress::-webkit-progress-value {
@@ -1191,10 +1223,11 @@ progress::-webkit-progress-value {
 }
 
 .specimen-info h1 span {
-  color: var(--ugly-green-deep);
+  color: var(--acid);
 }
 
 .relationship {
+  --acid: #28513b;
   display: inline-flex;
   padding: 7px 11px;
   border: 2px solid var(--ugly-ink);
@@ -1228,21 +1261,21 @@ progress::-webkit-progress-value {
 .specimen-stats strong {
   display: block;
   overflow-wrap: anywhere;
-  color: var(--ugly-ink);
+  color: var(--ink);
   font-size: clamp(1.6rem, 3.5vw, 2.6rem);
   font-weight: 900;
   line-height: 1;
 }
 
 .specimen-stats span {
-  color: #20242b;
+  color: var(--muted);
   font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .breadcrumb {
-  color: #4d5666;
+  color: var(--muted);
   font-weight: 750;
 }
 
@@ -1264,15 +1297,15 @@ progress::-webkit-progress-value {
 
 .trait small,
 .trait > span {
-  color: #586071;
+  color: var(--muted);
 }
 
 .trait strong {
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .big-number {
-  color: var(--ugly-green-deep);
+  color: var(--acid);
   font-size: clamp(2.3rem, 5vw, 4rem);
   font-weight: 900;
   letter-spacing: -0.08em;
@@ -1285,21 +1318,21 @@ progress::-webkit-progress-value {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .passport h2 {
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .passport li {
-  border-color: #d1d4da;
-  color: var(--ugly-ink);
+  border-color: var(--line);
+  color: var(--ink);
 }
 
 .passport li > time,
 .passport li > span:last-child {
-  color: #586071;
+  color: var(--muted);
 }
 
 .history-timeline {
@@ -1334,22 +1367,22 @@ progress::-webkit-progress-value {
 .history-timeline li[data-category='OBSERVATION'] {
   border-style: dashed;
   border-left: 3px solid #b5b9c2;
-  background: #f1f2f4;
+  background: var(--surface);
 }
 
 .history-timeline h3 {
   margin: 0 0 7px;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .history-timeline time {
-  color: #545d6b;
+  color: var(--muted);
   font-size: 0.72rem;
   font-weight: 750;
 }
 
 .history-timeline p {
-  color: #454d59;
+  color: var(--muted);
 }
 
 .passport-filters {
@@ -1358,12 +1391,12 @@ progress::-webkit-progress-value {
 
 .history-coverage {
   margin-top: 22px;
-  border-top: 1px solid #d1d4da;
+  border-top: 1px solid var(--line);
   padding-top: 16px;
 }
 
 .history-coverage summary {
-  color: #293140;
+  color: var(--muted);
 }
 
 .ecosystem-cards {
@@ -1379,8 +1412,8 @@ progress::-webkit-progress-value {
 .tracked-charm {
   border: 2px dashed #292e39;
   border-radius: 12px;
-  background: #f3f1fa;
-  color: #343b48;
+  background: var(--surface);
+  color: var(--muted);
   padding: 12px 14px;
 }
 
@@ -1413,12 +1446,12 @@ progress::-webkit-progress-value {
   border: 0;
   background: transparent;
   box-shadow: none;
-  color: #343b46;
+  color: var(--muted);
 }
 
 .achievement.locked h3,
 .achievement.locked p {
-  color: #3c4350;
+  color: var(--muted);
 }
 
 .dex-score {
@@ -1432,14 +1465,14 @@ progress::-webkit-progress-value {
 
 .dex-score h2 {
   margin: 0;
-  color: var(--ugly-ink);
+  color: var(--ink);
   font-size: clamp(3.5rem, 8vw, 6rem);
   font-weight: 900;
   line-height: 0.9;
 }
 
 .dex-score h2 span {
-  color: var(--ugly-green-deep);
+  color: var(--acid);
   font-size: 0.45em;
 }
 
@@ -1452,7 +1485,7 @@ progress::-webkit-progress-value {
 .dex-breakdown .inline,
 .set-tile .inline {
   gap: 8px;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .set-grid {
@@ -1472,7 +1505,7 @@ progress::-webkit-progress-value {
 
 .set-tile h3,
 .set-tile p {
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .set-tile.set-complete {
@@ -1492,7 +1525,7 @@ progress::-webkit-progress-value {
 
 .set-requirement,
 .trait-tile {
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .gallery-heading,
@@ -1507,19 +1540,19 @@ progress::-webkit-progress-value {
 
 .gallery-heading h1,
 .gallery-heading h2 {
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .gallery-heading > p {
-  color: #505867;
+  color: var(--muted);
 }
 
 .showcase-highlights,
 .showcase-level,
 .showcase-activity-stats,
 .showcase-completion {
-  border-color: var(--ugly-ink);
-  color: var(--ugly-ink);
+  border-color: var(--ink);
+  color: var(--ink);
 }
 
 .showcase-level,
@@ -1536,20 +1569,20 @@ progress::-webkit-progress-value {
 
 .showcase-completion h2,
 .showcase-completion h2 span {
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .gallery-cover,
 .trophy-grid > a {
   padding: 20px 0;
   background: transparent;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .gallery-cover:hover,
 .trophy-grid > a:hover {
   background: transparent;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .gallery-cover .artwork,
@@ -1560,7 +1593,7 @@ progress::-webkit-progress-value {
 
 .exhibition figcaption,
 .exhibition figcaption p {
-  color: #4c5360;
+  color: var(--muted);
 }
 
 .trophy-grid {
@@ -1568,7 +1601,7 @@ progress::-webkit-progress-value {
 }
 
 .trophy-grid h3 {
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 .table-scroll {
@@ -1582,19 +1615,19 @@ progress::-webkit-progress-value {
 table {
   width: 100%;
   border-collapse: collapse;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 th,
 td {
   padding: 10px 12px;
-  border-bottom: 1px solid #d4d6d7;
+  border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
 }
 
 th {
-  background: var(--ugly-lilac);
+  background: var(--surface-raised);
   font-size: 0.72rem;
   font-weight: 850;
   text-transform: uppercase;
@@ -1605,7 +1638,7 @@ th {
 code,
 pre {
   overflow-wrap: anywhere;
-  color: #343b47;
+  color: var(--muted);
 }
 
 .settings-form,
@@ -1621,7 +1654,7 @@ pre {
 
 .settings-form legend {
   padding: 0 7px;
-  color: #343b47;
+  color: var(--muted);
   font-weight: 800;
 }
 
@@ -1642,14 +1675,14 @@ pre {
 }
 
 .theme-labs {
-  background-color: #fff;
+  background-color: var(--surface);
   background-image:
-    linear-gradient(#2327330c 1px, transparent 1px),
-    linear-gradient(90deg, #2327330c 1px, transparent 1px);
+    linear-gradient(#aeb8c60c 1px, transparent 1px),
+    linear-gradient(90deg, #aeb8c60c 1px, transparent 1px);
 }
 
 .theme-minimal {
-  background: #fff;
+  background: var(--bg);
 }
 
 .frame-og .squig-card,
@@ -1659,7 +1692,7 @@ pre {
 
 .frame-legendary .squig-card,
 .frame-legendary .exhibition figure {
-  border: 3px solid #c29400;
+  border: 3px solid var(--line);
   box-shadow: 5px 5px 0 var(--ugly-ink);
 }
 
@@ -1682,7 +1715,7 @@ footer {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  border-top: 2px solid var(--ink);
+  border-top: 2px solid var(--line);
   background: transparent;
 }
 
@@ -1695,7 +1728,7 @@ footer {
 }
 
 .nav-button:hover {
-  color: var(--ugly-green);
+  color: var(--brand-cyan);
 }
 
 @media (min-width: 1500px) {
@@ -1713,7 +1746,7 @@ footer {
     height: auto;
     padding: 16px 0;
     color: var(--ink);
-    border-bottom: 2px solid var(--ink);
+    border-bottom: 2px solid var(--line);
   }
 
   .primary-nav a {
@@ -1739,7 +1772,7 @@ footer {
     padding: 16px 0;
     height: auto;
     color: var(--ink);
-    border-bottom: 2px solid var(--ink);
+    border-bottom: 2px solid var(--line);
   }
 
   .brand-mark img {
@@ -1792,7 +1825,7 @@ footer {
   footer {
     width: calc(100% - 34px);
     color: var(--ink);
-    border-top: 2px solid var(--ink);
+    border-top: 2px solid var(--line);
     background: transparent;
   }
 }
@@ -1804,7 +1837,7 @@ footer {
     height: auto;
     padding: 16px 0;
     color: var(--ink);
-    border-bottom: 2px solid var(--ink);
+    border-bottom: 2px solid var(--line);
   }
 
   .brand-mark img {
@@ -1988,7 +2021,7 @@ footer {
     flex-direction: column;
     padding-bottom: 22px;
     color: var(--ink);
-    border-top: 2px solid var(--ink);
+    border-top: 2px solid var(--line);
     background: transparent;
   }
 }
@@ -2088,7 +2121,7 @@ footer {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 
 main#main:has(.connect-layout) {
@@ -2108,7 +2141,7 @@ main#main:has(.connect-layout) {
 
 .connect-panel > p:not(.eyebrow) {
   max-width: 450px;
-  color: #4c5360;
+  color: var(--muted);
 }
 
 .connect-panel .actions {
@@ -2125,7 +2158,7 @@ main#main:has(.connect-layout) {
 .connect-panel > small {
   display: block;
   margin-top: 20px;
-  color: #606978;
+  color: var(--muted);
 }
 
 .connect-art {
@@ -2150,7 +2183,8 @@ main#main:has(.connect-layout) {
   margin: auto;
   border: 2px solid rgb(17 19 24 / 10%);
   border-radius: 50%;
-  background: linear-gradient(135deg, #efe9ff, #dcfbe4 50%, #fff0ab);
+  background: var(--brand-yellow);
+  clip-path: polygon(52% 0, 95% 0, 65% 38%, 92% 38%, 20% 100%, 37% 55%, 8% 55%);
   color: transparent;
   font-size: 0;
   animation: artwork-breathe 1.5s ease-in-out infinite alternate;
@@ -2188,7 +2222,7 @@ main#main:has(.connect-layout) {
   overflow: hidden;
   border: 3px solid var(--ugly-ink);
   border-radius: 18px;
-  background: var(--ugly-paper);
+  background: var(--surface);
 }
 
 .specimen-art > .artwork {
@@ -2278,7 +2312,7 @@ main#main:has(.connect-layout) {
 
 .ecosystem-tile[data-source='MARKETPLACE'],
 .ecosystem-tile[data-source='CHARM'] {
-  border-left-color: #f2ca35;
+  border-left-color: var(--brand-yellow);
   background: transparent;
 }
 
@@ -2359,7 +2393,7 @@ main#main:has(.connect-layout) {
 }
 
 .achievement-mini small {
-  color: #626878;
+  color: var(--muted);
   font-size: 0.65rem;
 }
 
@@ -2453,7 +2487,7 @@ main#main:has(.connect-layout) {
   }
 }
 
-/* Pages float on the night background; each light surface owns its contrast. */
+/* Shared editorial surfaces inherit the dark UI palette. */
 main#main {
   --surface-muted: var(--muted);
   --surface-accent: var(--acid);
@@ -2482,7 +2516,6 @@ main
     .gallery-cover,
     .gallery-heading,
     .completion,
-    .squig-card,
     .achievement,
     .specimen,
     .connect-panel,
@@ -2497,9 +2530,9 @@ main
     .ecosystem-tile,
     .achievement-mini
   ) {
-  --surface-muted: #535b69;
-  --surface-accent: var(--ugly-green-deep);
-  color: var(--ugly-ink);
+  --surface-muted: var(--muted);
+  --surface-accent: var(--acid);
+  color: var(--ink);
 }
 main :is(.eyebrow, .text-link) {
   color: var(--surface-accent);
@@ -2569,6 +2602,8 @@ main .personal-showcase {
   outline-offset: 1px;
 }
 .set-mini-tip {
+  --surface-muted: #535b69;
+  --surface-accent: #28513b;
   position: absolute;
   bottom: calc(100% - 1px);
   left: 8px;

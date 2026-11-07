@@ -102,7 +102,7 @@ describe('account menu stacking', () => {
     await link.hover();
     expect(
       await link.evaluate((node) => getComputedStyle(node).backgroundColor),
-    ).toBe('rgb(230, 222, 237)');
+    ).toBe('rgb(34, 42, 53)');
     await page.locator('.account-menu > summary').focus();
     await page.keyboard.press('Tab');
     expect(
@@ -201,4 +201,53 @@ describe('account menu stacking', () => {
 
     await page.close();
   });
+});
+
+it('keeps rendered dark controls readable in default and active states', async () => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 900 } });
+  await page.setContent(`<style>${stylesheet}</style>
+    <details class="mobile-menu" open><summary>Menu</summary></details>
+    <main id="main"><button class="button primary">Explore</button>
+    <button class="button secondary">Share</button><input value="Token ID" />
+    <div class="view-controls"><button aria-pressed="true">Grid</button></div></main>`);
+  const selectors = [
+    '.mobile-menu > summary',
+    '.button.primary',
+    '.button.secondary',
+    'input',
+    '.view-controls button',
+  ];
+  for (const selector of selectors) {
+    for (const hover of [false, true]) {
+      const control = page.locator(selector);
+      if (hover) await control.hover();
+      // Allow the production color transition to finish before sampling.
+      await page.waitForTimeout(200);
+      const ratio = await control.evaluate((node) => {
+        const style = getComputedStyle(node);
+        const light = (color: string) => {
+          const channels = color
+            .match(/[\d.]+/g)!
+            .slice(0, 3)
+            .map(Number)
+            .map((v) => {
+              const c = v / 255;
+              return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+            });
+          return (
+            channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
+          );
+        };
+        const values = [light(style.color), light(style.backgroundColor)].sort(
+          (a, b) => b - a,
+        );
+        return (values[0] + 0.05) / (values[1] + 0.05);
+      });
+      expect(
+        ratio,
+        `${selector} ${hover ? 'hover' : 'default'}`,
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  }
+  await page.close();
 });
