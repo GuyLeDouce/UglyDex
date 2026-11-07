@@ -13,8 +13,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium webkit
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npx playwright install --with-deps chromium
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
@@ -31,7 +30,6 @@ jobs:
             .data/collector-card-*.png
             .data/mobile-card-*.png
             .data/design/*.png
-            .data/interactive-cards/*
             .data/uglydex-*.png
           if-no-files-found: ignore
           retention-days: 14
@@ -49,3 +47,26 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run test:identity
+
+  cards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npm run build
+      - run: node --import tsx --conditions=react-server scripts/test-interactive-cards.ts
+      - name: Preserve real card exports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: interactive-card-evidence
+          include-hidden-files: true
+          path: .data/interactive-cards/*
+          retention-days: 14

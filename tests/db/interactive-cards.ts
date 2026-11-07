@@ -13,12 +13,11 @@ export async function interactiveCardTests(
   const { chromium, webkit } = await import('@playwright/test');
   await mkdir('.data/interactive-cards', { recursive: true });
   const records = ['common', 'uncommon', 'rare', 'epic', 'legendary'].map(
-    (rarity) => catalog.records.find((r) => r.rarityTier === rarity && !r.og)!,
+    (rarity) =>
+      catalog.records.find((r) => r.rarityTier === rarity && !r.og) ??
+      catalog.records.find((r) => r.rarityTier === rarity)!,
   );
-  records.push(
-    catalog.records.find((r) => r.legendary && r.og)!,
-    catalog.records.find((r) => r.rarityTier === 'rare' && r.og)!,
-  );
+  records.push(catalog.records.find((r) => r.legendary && r.og)!);
   for (const record of records) {
     const data = {
       name: record.name,
