@@ -421,3 +421,35 @@
     padding: 7px 9px;
   }
 }
+.album-card .opensea-listing {
+  background: transparent;
+  color: var(--ink);
+  border: 0;
+  min-height: 0;
+  padding: 5px 0;
+  font-size: 0.65rem;
+  gap: 4px;
+}
+.album-card .opensea-listing a {
+  font-size: 0.65rem;
+  min-height: 32px;
+}
+.album-card .opensea-note {
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+.album-card > button,
+.album-card > span[aria-label='Favorite Squig'] {
+  top: -10px;
+  bottom: auto;
+  right: -6px;
+}
+.collection-grid.compact .album-card .trading-face .artwork {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 2px solid var(--card-dark);
+}
+.collection-grid.compact .album-card .opensea-listing {
+  grid-column: 1/-1;
+}
