@@ -1,4 +1,10 @@
 'use client';
+import dynamic from 'next/dynamic';
+import { parseCardFinish, type CardFinish } from '@/domain/card-finish';
+const InteractiveCard = dynamic(
+  () => import('./interactive-card').then((module) => module.InteractiveCard),
+  { ssr: false },
+);
 import { shareFilename } from '@/domain/trading-card';
 import { useEffect, useState } from 'react';
 import { shareQuery, type ShareSpec } from '@/domain/sharing';
@@ -155,7 +161,12 @@ function ShareImage({
   copy: string;
   owner: boolean;
 }) {
-  const [asset, setAsset] = useState<{ url: string; file: File } | null>(null),
+  const [asset, setAsset] = useState<{
+      url: string;
+      file: File;
+      finish: CardFinish;
+      description: string;
+    } | null>(null),
     [message, setMessage] = useState('Preparing image…'),
     [busy, setBusy] = useState(false),
     [prepared, setPrepared] = useState(false),
@@ -195,6 +206,14 @@ function ShareImage({
         objectUrl = URL.createObjectURL(blob);
         setAsset({
           url: objectUrl,
+          description: decodeURIComponent(
+            response.headers.get('X-Card-Description') ??
+              'Squigs Reloaded collector card',
+          ),
+          finish: parseCardFinish(
+            response.headers.get('X-Card-Rarity'),
+            response.headers.get('X-Card-OG'),
+          ),
           file: new File([blob], filename, { type: 'image/png' }),
         });
         setMessage('Image ready.');
@@ -271,6 +290,14 @@ function ShareImage({
               ? 'Squigs Reloaded trading card preview'
               : 'UglyDex share card preview'
           }
+        />
+      )}
+      {asset && trading && (
+        <InteractiveCard
+          image={asset.url}
+          finish={asset.finish}
+          description={asset.description}
+          filename={filename}
         />
       )}
       <div className="actions">

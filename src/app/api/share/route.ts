@@ -54,6 +54,27 @@ export async function GET(request: Request) {
       headers: {
         ...headers,
         'Content-Type': 'image/png',
+        ...(card.tradingCard
+          ? {
+              'X-Card-Rarity': card.tradingCard.rarity,
+              'X-Card-Description': encodeURIComponent(
+                [
+                  `Squig #${card.tradingCard.tokenId}`,
+                  card.tradingCard.rarity,
+                  card.tradingCard.og ? 'OG' : '',
+                  `${card.tradingCard.uglyPoints ?? 'Unknown'} UglyPoints`,
+                  `Maw rank ${card.tradingCard.mawRank ?? 'unknown'}`,
+                  card.tradingCard.legend ?? card.tradingCard.type,
+                  ...card.tradingCard.traits.map(
+                    (t) => `${t.traitType}: ${t.value}`,
+                  ),
+                ]
+                  .filter(Boolean)
+                  .join('. '),
+              ),
+              'X-Card-OG': card.tradingCard.og ? '1' : '0',
+            }
+          : {}),
         ...(download
           ? {
               'Content-Disposition':

@@ -1,0 +1,135 @@
+.card-viewer {
+  border: 0;
+  padding: clamp(16px, 3vw, 40px);
+  background: #101318;
+  color: #f5f4ef;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  overflow: auto;
+}
+.card-viewer::backdrop {
+  background: #080b10ed;
+}
+.card-viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  max-width: 1120px;
+  margin: auto;
+  border-bottom: 1px solid #354354;
+  padding-bottom: 16px;
+}
+.card-viewer-header h2 {
+  margin: 0;
+  font-size: clamp(20px, 3vw, 32px);
+}
+.card-viewer-header p {
+  margin: 0;
+  color: #ffe32b;
+}
+.card-viewer-body {
+  max-width: 1120px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
+  align-items: center;
+  gap: 32px;
+}
+.interactive-card-canvas {
+  display: block;
+  width: 100%;
+  max-height: calc(100dvh - 130px);
+  object-fit: contain;
+  aspect-ratio: 5/7;
+  touch-action: none;
+  cursor: grab;
+}
+.interactive-card-canvas:active {
+  cursor: grabbing;
+}
+.interactive-card-canvas:focus-visible {
+  outline: 3px solid #ffe32b;
+  outline-offset: -4px;
+}
+.card-viewer-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.card-viewer-tools p {
+  margin: 0;
+}
+.card-viewer-tools small {
+  color: #aeb8c6;
+}
+.card-viewer-tools .button {
+  min-height: 44px;
+}
+.card-viewer-tools progress {
+  width: 100%;
+  accent-color: #ffe32b;
+}
+.card-video-result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.card-video-result video {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+}
+@media (max-width: 700px) {
+  .card-viewer-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .interactive-card-canvas {
+    max-height: 62dvh;
+  }
+  .card-viewer-header {
+    padding-bottom: 10px;
+  }
+  .card-viewer-tools {
+    padding-bottom: 24px;
+  }
+}
+
+.card-viewer-details summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+  font-weight: 700;
+  border-bottom: 1px solid #354354;
+}
+.card-viewer-details p {
+  padding: 12px 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.card-viewer-body > *,
+.card-viewer-tools > *,
+.card-viewer-header > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.card-viewer-header .button {
+  flex-shrink: 0;
+}
+.card-viewer-tools {
+  width: 100%;
+}
+.card-viewer-tools small {
+  overflow-wrap: anywhere;
+}
+.card-video-result video {
+  min-width: 0;
+  max-width: 100%;
+  flex-basis: 100%;
+}

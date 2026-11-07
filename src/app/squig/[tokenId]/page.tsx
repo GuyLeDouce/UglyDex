@@ -105,6 +105,16 @@ export default async function Squig({
         >
           Share Passport ↗
         </Link>
+        <Link
+          className="button"
+          href={
+            '/share?kind=passport&entity=' +
+            s.tokenId +
+            '&format=trading-card#interactive-card'
+          }
+        >
+          View Interactive Card
+        </Link>
         {collectorCard && <CollectorCardLink tokenId={s.tokenId} />}
         <div className="breadcrumb">
           <Link href="/squigs">Field guide</Link>
