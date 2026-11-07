@@ -453,3 +453,23 @@
 .collection-grid.compact .album-card .opensea-listing {
   grid-column: 1/-1;
 }
+main#main:has(.entry-world) {
+  background: transparent;
+  color: var(--ugly-paper);
+  border: 0;
+  box-shadow: none;
+}
+.entry-copy h1,
+.entry-copy .eyebrow {
+  color: inherit;
+}
+.entry-cards.landing-specimens:before,
+.entry-cards.landing-specimens:after {
+  display: none;
+}
+.collection-grid.compact .album-card .card-details[open] .card-body {
+  display: block;
+}
+.collection-grid.compact .album-card .card-details[open] .card-body > * {
+  display: block;
+}
