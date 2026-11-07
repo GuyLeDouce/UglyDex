@@ -1,3 +1,4 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
 import { favoriteTokenIds } from '@/server/favorites';
 import { collectorHandle } from '@/domain/profile';
 import { RecalculateFieldGuide } from '@/components/recalculate-field-guide';
@@ -65,7 +66,9 @@ export default async function Me() {
   return (
     <div className="collector-dashboard">
       <nav className="anchor-nav">
-        <Link href="/settings/galleries">My galleries</Link>
+        {GALLERIES_ENABLED && (
+          <Link href="/settings/galleries">My galleries</Link>
+        )}
         <Link href="/settings/sharing">Share studio</Link>
       </nav>
       <section className="page-heading profile-heading">

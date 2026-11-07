@@ -1,3 +1,5 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
@@ -8,6 +10,7 @@ export default async function Galleries({
 }: {
   searchParams: Promise<{ edit?: string }>;
 }) {
+  if (!GALLERIES_ENABLED) notFound();
   const id = await requireCollector(),
     q = await searchParams;
   const rows = await db().collectorGallery.findMany({

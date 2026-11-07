@@ -1,4 +1,5 @@
 'use client';
+import { GALLERIES_ENABLED } from '@/domain/features';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { hasCollectorUsername } from '@/domain/profile';
@@ -145,10 +146,12 @@ export function ProfileForm({ initial }: { initial: Values }) {
             <option value="HIDDEN">Hide collection and featured Squigs</option>
           </select>
         </label>
-        <p>
-          Individually published galleries are a separate, explicit selection.
-          Private profiles hide every gallery.
-        </p>
+        {GALLERIES_ENABLED && (
+          <p>
+            Individually published galleries are a separate, explicit selection.
+            Private profiles hide every gallery.
+          </p>
+        )}
         <label className="check">
           <input
             name="isPublic"

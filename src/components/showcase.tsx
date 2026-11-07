@@ -103,7 +103,7 @@ export async function CollectorActivityPreview({
       <div className="section-heading inline">
         <div>
           <p className="eyebrow">TRACKED ECOSYSTEM HISTORY</p>
-          <h2>A little life outside the gallery.</h2>
+          <h2>A little life beyond the collection.</h2>
         </div>
         <Link href={'/collector/' + slug + '/activity'}>
           Explore activity →

@@ -118,3 +118,7 @@ Initial setup is persisted on the Collector UUID: signed wallet → explicit Dis
 `discordTrackingConsent` is separate from public visibility and is never inferred from a previous OAuth authorization. Existing collectors receive the choice once. Declining preserves authorized login credentials and public on-chain records, suspends community imports and DRIP refreshes, and withholds previously imported community activity from active projections. Account connections can enable tracking again explicitly; enabling it without verified DRIP resumes the DRIP step. Reconnecting or merging accounts cannot silently override an opt-out.
 
 DRIP entry uses `/mydrip` in https://squigs.io/discord. The onboarding endpoint requires a verified Discord match (direct DRIP credential or the verified Discord/wallet source mapping), checks current consent again after the upstream response, and rejects conflicting DRIP ownership. Additional wallets still require individual signatures; existing-account collisions use the existing expiring, two-proof merge confirmation.
+
+## Temporarily hidden galleries
+
+Galleries default to disabled. Set `NEXT_PUBLIC_GALLERIES_ENABLED=true` at build time and rebuild to restore navigation, editing, public gallery pages, gallery styles, and gallery sharing. No records or schema are removed. CI explicitly enables galleries to keep their existing regression coverage; production must omit this variable or set it to false.

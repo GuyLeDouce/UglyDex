@@ -1,3 +1,4 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
 import { shareFilename } from '@/domain/trading-card';
 import { ZodError } from 'zod';
 import { shareSchema } from '@/domain/sharing';
@@ -21,6 +22,8 @@ export async function GET(request: Request) {
     url.searchParams.delete('download');
     url.searchParams.delete('preview');
     const spec = shareSchema.parse(Object.fromEntries(url.searchParams));
+    if (spec.kind === 'gallery' && !GALLERIES_ENABLED)
+      return new Response('Not available', { status: 404, headers });
     await shareLimit();
     const session = await currentSession();
     if (owner && !session)

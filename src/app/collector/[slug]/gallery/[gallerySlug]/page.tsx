@@ -1,3 +1,4 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { galleryView } from '@/server/galleries';
@@ -8,10 +9,12 @@ import { GalleryArt } from '@/components/gallery';
 import { appearanceClass } from '@/domain/cosmetics';
 type Props = { params: Promise<{ slug: string; gallerySlug: string }> };
 export async function generateMetadata({ params }: Props) {
+  if (!GALLERIES_ENABLED) notFound();
   const p = await params;
   return shareMetadata({ kind: 'gallery', entity: p.slug, key: p.gallerySlug });
 }
 export default async function Page({ params }: Props) {
+  if (!GALLERIES_ENABLED) notFound();
   const p = await params,
     s = await currentSession(),
     g = await galleryView(p.slug, p.gallerySlug, s?.collectorId);

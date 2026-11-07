@@ -1,5 +1,8 @@
 name: Validate UglyDex
 on: [push, pull_request]
+# Keep dormant gallery behavior covered by the existing integration suite.
+env:
+  NEXT_PUBLIC_GALLERIES_ENABLED: 'true'
 jobs:
   checks:
     runs-on: ubuntu-latest

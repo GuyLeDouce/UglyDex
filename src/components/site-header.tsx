@@ -1,4 +1,5 @@
 'use client';
+import { GALLERIES_ENABLED } from '@/domain/features';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -25,11 +26,13 @@ function AccountLinks({ slug, isPublic }: { slug: string; isPublic: boolean }) {
       <Link href={isPublic ? `/collector/${slug}` : '/settings/profile'}>
         {isPublic ? 'View public profile' : 'Profile settings'}
       </Link>
-      {accountLinks.map(([href, label]) => (
-        <Link href={href} key={href}>
-          {label}
-        </Link>
-      ))}
+      {accountLinks
+        .filter(([href]) => GALLERIES_ENABLED || href !== '/settings/galleries')
+        .map(([href, label]) => (
+          <Link href={href} key={href}>
+            {label}
+          </Link>
+        ))}
       <form action="/api/auth/logout" method="post">
         <button type="submit">Sign out</button>
       </form>

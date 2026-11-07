@@ -1,4 +1,5 @@
 'use client';
+import { GALLERIES_ENABLED } from '@/domain/features';
 import { useState } from 'react';
 import {
   cosmeticKinds,
@@ -59,33 +60,35 @@ export function AppearanceEditor({
           }
         }}
       >
-        {cosmeticKinds.map((kind) => (
-          <label key={kind}>
-            {kind.toLowerCase().replaceAll('_', ' ')}
-            <select
-              aria-label={kind.toLowerCase().replaceAll('_', ' ')}
-              value={selected[kind]}
-              onChange={(e) =>
-                setSelected({ ...selected, [kind]: e.target.value })
-              }
-            >
-              {cosmeticCatalog
-                .filter((c) => c.kind === kind)
-                .map((c) => (
-                  <option
-                    key={c.id}
-                    value={c.id}
-                    disabled={!unlocked.includes(c.id)}
-                  >
-                    {c.name}
-                    {unlocked.includes(c.id)
-                      ? ''
-                      : ' — requires ' + c.source.toLowerCase()}
-                  </option>
-                ))}
-            </select>
-          </label>
-        ))}
+        {cosmeticKinds
+          .filter((kind) => GALLERIES_ENABLED || kind !== 'GALLERY_STYLE')
+          .map((kind) => (
+            <label key={kind}>
+              {kind.toLowerCase().replaceAll('_', ' ')}
+              <select
+                aria-label={kind.toLowerCase().replaceAll('_', ' ')}
+                value={selected[kind]}
+                onChange={(e) =>
+                  setSelected({ ...selected, [kind]: e.target.value })
+                }
+              >
+                {cosmeticCatalog
+                  .filter((c) => c.kind === kind)
+                  .map((c) => (
+                    <option
+                      key={c.id}
+                      value={c.id}
+                      disabled={!unlocked.includes(c.id)}
+                    >
+                      {c.name}
+                      {unlocked.includes(c.id)
+                        ? ''
+                        : ' — requires ' + c.source.toLowerCase()}
+                    </option>
+                  ))}
+              </select>
+            </label>
+          ))}
         <button className="button" disabled={busy}>
           Save appearance
         </button>
