@@ -995,8 +995,22 @@ try {
         await page.getByRole('button', { name: 'Connect Wallet' }).click();
         check(
           (await page.getByRole('status').textContent()) ===
-            'Open UglyDex in a browser with an Ethereum wallet installed.',
+            'No wallet detected in this browser. Open UglyDex in your wallet app to continue.',
           'wallet missing state shown',
+        );
+        check(
+          (await page
+            .getByRole('link', { name: 'Open in MetaMask', exact: true })
+            .getAttribute('href')) ===
+            `https://link.metamask.io/dapp/${new URL(base).host}/connect`,
+          'MetaMask handoff points to this deployment connect page',
+        );
+        check(
+          (await page
+            .getByRole('link', { name: 'Open in Trust Wallet', exact: true })
+            .getAttribute('href')) ===
+            `https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(new URL('/connect', base).href)}`,
+          'Trust Wallet handoff encodes this deployment connect page',
         );
         await page.goto(base);
         if (process.argv.includes('--catalog')) {
