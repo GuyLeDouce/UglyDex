@@ -489,6 +489,11 @@ button.button:hover {
   box-shadow: var(--ugly-shadow-sm);
 }
 
+.avatar-image .art-fallback,
+.avatar-image .art-fallback > span {
+  color: var(--brand-cyan);
+}
+
 .avatar-image img {
   object-fit: cover;
 }
@@ -787,6 +792,7 @@ button.button:hover {
 }
 
 .opensea-listing {
+  --acid: #28513b;
   --surface-muted: #535b69;
   --surface-accent: #28513b;
   display: flex;
@@ -819,6 +825,7 @@ button.button:hover {
 }
 
 .opensea-detail {
+  background: var(--ugly-white);
   margin-top: 20px;
   border: 2px solid var(--ugly-ink);
   border-radius: 12px;
@@ -1130,7 +1137,7 @@ textarea::placeholder {
 }
 
 .status-dot {
-  background: var(--ugly-green-deep);
+  background: var(--brand-cyan);
 }
 
 .empty-state {
@@ -1722,7 +1729,7 @@ footer {
 }
 
 .nav-button:hover {
-  color: var(--ugly-green);
+  color: var(--brand-cyan);
 }
 
 @media (min-width: 1500px) {

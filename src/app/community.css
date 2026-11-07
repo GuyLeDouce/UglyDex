@@ -37,6 +37,7 @@
   text-decoration: none;
 }
 .share-card-preview {
+  --acid: #28513b;
   --ink: #111318;
   --surface-muted: #535b69;
   --surface-accent: #28513b;
