@@ -42,7 +42,7 @@ export async function onboardingDatabaseTests(
     'wallet-only completion opens Profile Settings',
   );
   check(
-    (await nextAfterAuthentication(c.id)) === '/me',
+    (await nextAfterAuthentication(c.id)) === '/collection',
     'returning collector does not repeat onboarding',
   );
   const identity = await db().externalIdentity.create({
@@ -124,7 +124,7 @@ export async function onboardingDatabaseTests(
     'tracking opt-out preserves authorized Discord sign-in',
   );
   check(
-    (await nextAfterAuthentication(c.id)) === '/me',
+    (await nextAfterAuthentication(c.id)) === '/collection',
     'tracking opt-out preserves completed setup',
   );
   await setDiscordTracking(c.id, true);
