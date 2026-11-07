@@ -21,10 +21,9 @@ export default async function CollectionPage({
   ]);
   return (
     <>
-      <DexNav />
       <section className="page-heading">
         <p className="eyebrow">YOUR LIVING COLLECTION</p>
-        <h1>The usual suspects.</h1>
+        <h1>My Collection.</h1>
         <p>
           Every active, verified wallet. One beautifully strange collection.
         </p>
@@ -32,8 +31,6 @@ export default async function CollectionPage({
           Open your discoveries →
         </Link>
       </section>
-      <Stats summary={summary} />
-      <Refresh initial={status} />
       <Catalog
         params={await searchParams}
         collectorId={id}
@@ -41,50 +38,56 @@ export default async function CollectionPage({
         path="/collection"
         editableFavorites
       />
-      <section className="section-heading">
-        <p className="eyebrow">COLLECTION NOTES</p>
-        <h2>What makes yours different.</h2>
-      </section>
-      <div className="profile-grid">
-        <section className="panel">
-          <h3>Rarity distribution</h3>
-          {summary.rarities.length ? (
-            summary.rarities.map((r) => (
-              <p key={r.name}>
-                {r.name} <strong>{r.count}</strong>
-              </p>
-            ))
-          ) : (
-            <p>No classified Squigs indexed.</p>
-          )}
+      <details className="collection-extras">
+        <summary>Discoveries, progress & collection details</summary>
+        <DexNav />
+        <Stats summary={summary} />
+        <Refresh initial={status} />
+        <section className="section-heading">
+          <p className="eyebrow">COLLECTION NOTES</p>
+          <h2>What makes yours different.</h2>
         </section>
-        <section className="panel">
-          <h3>Recurring traits</h3>
-          {summary.traits.length ? (
-            summary.traits.map((t) => (
-              <p key={`${t.type}:${t.value}`}>
-                {t.value}{' '}
-                <small>
-                  {t.type} · {t.count}
-                </small>
-              </p>
-            ))
-          ) : (
-            <p>Trait summary appears with your collection.</p>
-          )}
-        </section>
-      </div>
-      {summary.top.length > 0 && (
-        <>
-          <h2>Highest UglyPoints</h2>
-          <CollectionGrid
-            items={summary.top}
-            controls={false}
-            favorites={favorites}
-            editableFavorites
-          />
-        </>
-      )}
+        <div className="profile-grid">
+          <section className="panel">
+            <h3>Rarity distribution</h3>
+            {summary.rarities.length ? (
+              summary.rarities.map((r) => (
+                <p key={r.name}>
+                  {r.name} <strong>{r.count}</strong>
+                </p>
+              ))
+            ) : (
+              <p>No classified Squigs indexed.</p>
+            )}
+          </section>
+          <section className="panel">
+            <h3>Recurring traits</h3>
+            {summary.traits.length ? (
+              summary.traits.map((t) => (
+                <p key={`${t.type}:${t.value}`}>
+                  {t.value}{' '}
+                  <small>
+                    {t.type} · {t.count}
+                  </small>
+                </p>
+              ))
+            ) : (
+              <p>Trait summary appears with your collection.</p>
+            )}
+          </section>
+        </div>
+        {summary.top.length > 0 && (
+          <>
+            <h2>Highest UglyPoints</h2>
+            <CollectionGrid
+              items={summary.top}
+              controls={false}
+              favorites={favorites}
+              editableFavorites
+            />
+          </>
+        )}
+      </details>
     </>
   );
 }
