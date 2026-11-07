@@ -527,6 +527,21 @@ export async function achievementBadgeWebTests(
           ),
           `field guide ${name} fits ${width}px`,
         );
+        if (name === 'settings') {
+          check(
+            await page
+              .locator(
+                '.settings-form input, .settings-form textarea, .settings-form select',
+              )
+              .evaluateAll((controls) =>
+                controls.every((control) => {
+                  const r = control.getBoundingClientRect();
+                  return !r.width || (r.left >= 0 && r.right <= innerWidth);
+                }),
+              ),
+            `settings controls remain visible at ${width}px`,
+          );
+        }
         if (name === 'explorer') {
           const filters = page.locator('.more-filters');
           check(
@@ -575,6 +590,15 @@ export async function achievementBadgeWebTests(
           .isVisible(),
         'public discovery remains the primary homepage action',
       );
+      await page.locator('.home-card-shelf').scrollIntoViewIfNeeded();
+      await page.waitForFunction(() =>
+        Array.from(
+          document.querySelectorAll<HTMLImageElement>('.home-card-shelf img'),
+        )
+          .filter((img) => img.getBoundingClientRect().width > 0)
+          .every((img) => img.complete && img.naturalWidth > 0),
+      );
+      await page.evaluate(() => window.scrollTo(0, 0));
       await page.screenshot({
         path: `.data/design/home-${width}.png`,
         fullPage: true,

@@ -208,7 +208,21 @@
   background: transparent;
 }
 .settings-form {
+  width: 100%;
   max-width: 850px;
+  grid-template-columns: minmax(0, 1fr);
+}
+.settings-form > *,
+.settings-form fieldset {
+  min-width: 0;
+}
+.settings-form .check {
+  white-space: normal;
+}
+.settings-form input[type='checkbox'] {
+  flex: 0 0 19px;
+  width: 19px;
+  height: 19px;
 }
 .settings-form fieldset {
   border-top: 1px solid var(--line);

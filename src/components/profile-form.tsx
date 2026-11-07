@@ -60,7 +60,7 @@ export function ProfileForm({ initial }: { initial: Values }) {
   }
   return (
     <form className="settings-form" onSubmit={submit}>
-      <label>
+      <label className="check">
         <input
           type="checkbox"
           name="showCharmBalance"

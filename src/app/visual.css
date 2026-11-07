@@ -433,6 +433,7 @@ button.button:hover {
 }
 
 .page-heading h1 {
+  letter-spacing: 0;
   max-width: 1050px;
   margin: 10px 0 14px;
   font-size: clamp(2.3rem, 5vw, 4.25rem);
@@ -477,6 +478,8 @@ button.button:hover {
 
 .stats-strip,
 .stats {
+  border: 0;
+  border-radius: 0;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
