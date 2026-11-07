@@ -473,3 +473,24 @@ main#main:has(.entry-world) {
 .collection-grid.compact .album-card .card-details[open] .card-body > * {
   display: block;
 }
+
+/* Transparent controls sit on the night background, not a paper panel. */
+main .filters {
+  --muted: #c3cbe0;
+  --surface-muted: #c3cbe0;
+  color: var(--ugly-paper);
+}
+main .filters label {
+  color: #c3cbe0;
+}
+.album-card .card-details:not([open]),
+.album-card .opensea-listing,
+.album-card .opensea-listing a {
+  color: var(--ugly-paper);
+}
+.album-card .opensea-listing {
+  --surface-muted: #c3cbe0;
+}
+.album-card .card-details {
+  border-bottom-color: #c3cbe044;
+}
