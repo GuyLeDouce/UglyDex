@@ -143,4 +143,9 @@ export async function onboardingDatabaseTests(
     (await onboardingState(c.id)).discordTrackingConsent === false,
     'returning Discord-only collector can still withdraw tracking consent after wallet revocation',
   );
+  await setDiscordTracking(c.id, true, new Date(0));
+  check(
+    (await onboardingState(c.id)).discordTrackingConsent === false,
+    'older OAuth authorization cannot overwrite a newer opt-out',
+  );
 }

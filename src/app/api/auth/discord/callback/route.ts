@@ -123,7 +123,11 @@ export async function GET(request: Request) {
     }
     const signedIn = await currentSession();
     if (challenge.message === 'TRACKING_CONSENT' && signedIn)
-      await setDiscordTracking(signedIn.collectorId, true);
+      await setDiscordTracking(
+        signedIn.collectorId,
+        true,
+        new Date(challenge.expiresAt.getTime() - 5 * 60_000),
+      );
     const next = await nextAfterAuthentication(signedIn!.collectorId);
     return Response.redirect(`${env.PUBLIC_BASE_URL}${next}`, 303);
   } catch (error) {

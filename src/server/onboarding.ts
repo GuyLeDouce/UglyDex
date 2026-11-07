@@ -27,6 +27,7 @@ export async function onboardingState(
   const facts = {
     onboardingCompletedAt: collector.onboardingCompletedAt,
     discordTrackingConsent: collector.discordTrackingConsent,
+    discordTrackingConsentAt: collector.discordTrackingConsentAt,
     walletVerified: collector.wallets.length > 0,
     discordVerified: collector.identities.length > 0,
     dripVerified: collector.dripIdentities.length > 0,
@@ -51,10 +52,18 @@ export async function nextAfterAuthentication(collectorId: string) {
 export async function setDiscordTracking(
   collectorId: string,
   consent: boolean,
+  authorizedAt?: Date,
 ) {
   await db().$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${collectorId}, 0))`;
     const state = await onboardingState(collectorId, tx);
+    // An OAuth flow opened before a newer choice cannot override that choice.
+    if (
+      authorizedAt &&
+      state.discordTrackingConsentAt &&
+      state.discordTrackingConsentAt > authorizedAt
+    )
+      return;
     if (!state.walletVerified && !state.onboardingCompletedAt)
       throw new Error('WALLET_REQUIRED');
     if (consent && !state.discordVerified) throw new Error('DISCORD_REQUIRED');
