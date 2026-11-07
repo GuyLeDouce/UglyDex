@@ -234,7 +234,7 @@ export async function collectorIdentityWebTests(
     check(
       returning.ok &&
         returningData.slug === 'identity-http-owner' &&
-        returningData.next === '/me',
+        returningData.next === '/collection',
       'each linked wallet signs back into the same completed profile',
     );
   }
