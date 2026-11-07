@@ -150,6 +150,10 @@ export async function achievementBadgeWebTests(
     'badge reads do not change Squig XP',
   );
   const token = randomBytes(32).toString('hex');
+  await db().collector.update({
+    where: { id: c.id },
+    data: { onboardingCompletedAt: new Date() },
+  });
   await db().authSession.create({
     data: {
       collectorId: c.id,

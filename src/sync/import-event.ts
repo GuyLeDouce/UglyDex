@@ -78,6 +78,45 @@ async function writeEvent(
     existing = await tx.collectorActivity.findUnique({
       where: { eventKey: key },
     });
+  if (['uglybot', 'gauntlet', 'images'].includes(event.sourceSystem)) {
+    const owners = await tx.collector.findMany({
+      where: {
+        OR: [
+          ...(attribution.collectorId ? [{ id: attribution.collectorId }] : []),
+          ...(event.walletAddress
+            ? [
+                {
+                  wallets: {
+                    some: {
+                      walletAddress: event.walletAddress,
+                      status: 'ACTIVE' as const,
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
+      },
+      select: { id: true },
+      orderBy: { id: 'asc' },
+    });
+    for (const owner of owners)
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${owner.id}, 0))`;
+    const optedOut = await tx.collector.count({
+      where: {
+        id: { in: owners.map((owner) => owner.id) },
+        discordTrackingConsent: false,
+      },
+    });
+    if (optedOut) {
+      if (existing && event.recordStatus === 'RETRACTED')
+        await tx.collectorActivity.update({
+          where: { id: existing.id },
+          data: { recordStatus: 'RETRACTED' },
+        });
+      return 'skipped' as const;
+    }
+  }
   if (
     existing?.payloadHash === payloadHash &&
     existing.collectorId === attribution.collectorId &&
@@ -185,7 +224,7 @@ export async function importRecord(
         sourceType,
         sourceId,
         sourceSystem: { in: ['uglybot', 'gauntlet', 'images'] },
-        recordStatus: 'ACTIVE',
+        recordStatus: { in: ['ACTIVE', 'OPTED_OUT'] },
         eventKey: { notIn: events.map(eventKey) },
       },
     });

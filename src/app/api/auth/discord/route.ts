@@ -1,3 +1,4 @@
+import { onboardingState } from '@/server/onboarding';
 import { randomBytes, createHash } from 'node:crypto';
 import { cookies } from 'next/headers';
 import {
@@ -23,10 +24,16 @@ export async function POST(request: Request) {
     const state = randomBytes(32).toString('hex'),
       verifier = randomBytes(32).toString('base64url'),
       session = await currentSession();
+    const form = await request.formData();
+    const trackingConsent = form.get('trackingConsent') === 'yes';
+    if (session && !(await onboardingState(session.collectorId)).walletVerified)
+      throw new Error('WALLET_REQUIRED');
+    if (trackingConsent && !session) throw new Error('WALLET_REQUIRED');
     await db().authChallenge.create({
       data: {
         id: authHash(state),
         kind: 'discord',
+        message: trackingConsent ? 'TRACKING_CONSENT' : null,
         subject: verifier,
         collectorId: session?.collectorId,
         expiresAt: new Date(Date.now() + 5 * 60000),

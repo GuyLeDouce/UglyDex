@@ -2,9 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   currentSession: vi.fn(),
+  onboardingState: vi.fn(),
+  nextAfterAuthentication: vi.fn(),
   rateLimit: vi.fn(),
   requireOrigin: vi.fn(),
   verifyAndLinkDripMember: vi.fn(),
+}));
+
+vi.mock('@/server/onboarding', () => ({
+  onboardingState: mocks.onboardingState,
+  nextAfterAuthentication: mocks.nextAfterAuthentication,
 }));
 
 vi.mock('@/server/auth', () => ({
@@ -31,6 +38,12 @@ function request(body: unknown, origin = 'https://uglydex.example') {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.currentSession.mockResolvedValue({ collectorId: 'collector-fixture' });
+  mocks.onboardingState.mockResolvedValue({
+    walletVerified: true,
+    discordVerified: true,
+    discordTrackingConsent: true,
+  });
+  mocks.nextAfterAuthentication.mockResolvedValue('/settings/profile');
   mocks.rateLimit.mockResolvedValue(undefined);
   mocks.requireOrigin.mockImplementation((req: Request) => {
     if (req.headers.get('origin') !== 'https://uglydex.example')
@@ -65,7 +78,19 @@ describe('POST /api/charm/link', () => {
     expect(mocks.verifyAndLinkDripMember).toHaveBeenCalledWith(
       'collector-fixture',
       memberId,
+      true,
     );
+  });
+
+  it('blocks DRIP entry before wallet and Discord consent', async () => {
+    mocks.onboardingState.mockResolvedValue({
+      walletVerified: true,
+      discordVerified: false,
+      discordTrackingConsent: false,
+    });
+    const response = await POST(request({ dripUserId: memberId }));
+    expect(response.status).toBe(403);
+    expect(mocks.verifyAndLinkDripMember).not.toHaveBeenCalled();
   });
 
   it('enforces the per-Collector link rate limit', async () => {
@@ -84,7 +109,11 @@ describe('POST /api/charm/link', () => {
     const response = await POST(request({ dripUserId: memberId }));
     const body = await response.text();
     expect(response.status).toBe(200);
-    expect(JSON.parse(body)).toEqual({ linked: true, balanceAvailable: true });
+    expect(JSON.parse(body)).toEqual({
+      linked: true,
+      balanceAvailable: true,
+      next: '/settings/profile',
+    });
     expect(body).not.toMatch(
       /dripMemberId|realmMemberId|balances|balance\"\s*:|wallet|discord|c{24}/i,
     );

@@ -52,8 +52,9 @@ export async function phase7DatabaseTests(
   const preflightCLI = spawnSync(
     process.execPath,
     [
-      'node_modules/tsx/dist/cli.mjs',
       '--conditions=react-server',
+      '--import',
+      'tsx',
       'scripts/production.ts',
       'preflight',
       '--offline',

@@ -13,6 +13,10 @@ export async function phase7WebTests(
       where: { slug: 'phase7-collector' },
     }),
     token = randomBytes(32).toString('hex');
+  await db().collector.update({
+    where: { id: c.id },
+    data: { onboardingCompletedAt: new Date() },
+  });
   await db().authSession.create({
     data: {
       collectorId: c.id,
@@ -30,6 +34,10 @@ export async function phase7WebTests(
     },
   });
   const adminToken = randomBytes(32).toString('hex');
+  await db().collector.update({
+    where: { id: admin.collectorId },
+    data: { onboardingCompletedAt: new Date() },
+  });
   await db().authSession.create({
     data: {
       collectorId: admin.collectorId,
@@ -175,10 +183,23 @@ export async function phase7WebTests(
       !customHtml.includes('PRIVATE_SOURCE_REFERENCE'),
     'Custom share page artwork and privacy',
   );
+  // This suite has its own render budget; phase6 exercises the shared limiter.
+  const renderBucket = Math.floor(Date.now() / 60000);
+  await db().rateLimitBucket.deleteMany({
+    where: {
+      key: {
+        in: [renderBucket, renderBucket + 1].map((bucket) =>
+          createHash('sha256')
+            .update('share:renders:' + bucket)
+            .digest('hex'),
+        ),
+      },
+    },
+  });
   let response = await fetch(base + custom);
   check(
     response.ok && response.headers.get('content-type') === 'image/png',
-    'Custom PNG endpoint',
+    'Custom PNG endpoint: ' + response.status,
   );
   const bytes = new Uint8Array(await response.arrayBuffer());
   check(bytes[0] === 137 && bytes[1] === 80, 'Custom real PNG signature');

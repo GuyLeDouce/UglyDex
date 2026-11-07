@@ -20,7 +20,7 @@ export function CollectorMergeConfirm({ requestId }: { requestId: string }) {
       setMessage(
         'Accounts merged. Opening your profile; collection progress may take a little longer to refresh.',
       );
-      router.replace('/me');
+      router.replace(result.next || '/onboarding');
       router.refresh();
     } catch (error) {
       setMessage(

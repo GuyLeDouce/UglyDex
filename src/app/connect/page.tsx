@@ -1,3 +1,6 @@
+import { currentSession } from '@/server/auth';
+import { onboardingState } from '@/server/onboarding';
+import { redirect } from 'next/navigation';
 import { Connect } from '@/components/connect';
 export default async function ConnectPage({
   searchParams,
@@ -5,6 +8,11 @@ export default async function ConnectPage({
   searchParams: Promise<{ error?: string; retryAfter?: string }>;
 }) {
   const { error, retryAfter } = await searchParams;
+  const session = await currentSession();
+  if (session && !error) {
+    const state = await onboardingState(session.collectorId);
+    redirect(state.step === 'COMPLETE' ? '/settings/wallets' : '/onboarding');
+  }
   const seconds =
     retryAfter && /^\d{1,5}$/.test(retryAfter) ? Number(retryAfter) : 0;
   const wait =
@@ -22,11 +30,15 @@ export default async function ConnectPage({
         </p>
         <Connect
           initialMessage={
-            error === 'DISCORD_RATE_LIMITED'
-              ? `Discord is temporarily limiting sign-in requests. ${wait} Use Connect Discord below rather than refreshing the previous callback. This attempt stopped before account linking.`
-              : error === 'IDENTITY_REVIEW_REQUIRED'
-                ? 'This credential belongs to another Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.'
-                : ''
+            error === 'WALLET_REQUIRED'
+              ? 'Start with wallet verification. Discord sign-in is available after you have linked and authorized it.'
+              : error === 'DISCORD_DECLINED'
+                ? 'Discord sign-in was cancelled. You can verify your wallet instead.'
+                : error === 'DISCORD_RATE_LIMITED'
+                  ? `Discord is temporarily limiting sign-in requests. ${wait} Use Connect Discord below rather than refreshing the previous callback. This attempt stopped before account linking.`
+                  : error === 'IDENTITY_REVIEW_REQUIRED'
+                    ? 'This identity is linked to another Collector. Verify your current wallet again, then retry linking the other identity to review the merge.'
+                    : ''
           }
         />
         <small>One identity at a time. Your collection stays yours.</small>

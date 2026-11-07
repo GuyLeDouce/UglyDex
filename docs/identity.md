@@ -110,3 +110,11 @@ Discord OAuth credentials and the existing admin allowlist are configured on bot
 ## Phase 11 checkpoint — 2026-09-27 UTC
 
 See the [actual Phase 11 report](phase11-report.md) and [reader provisioning/access walkthrough](operator/phase11-readers/README.md). Historical Phase 10 evidence above is retained. Staging runs `0687d01`; production remains `c764e28`. Source readers were provisioned with explicit authorization, but public TLS and Gauntlet schema issues remain. RPC retries preserved the existing incomplete cursor. No production replay, populated restore, LIVE worker rollout, physical-device certification or gate-approved launch was claimed. Current gate counts and revision-binding limitations are in the report.
+
+## Wallet-first onboarding
+
+Initial setup is persisted on the Collector UUID: signed wallet → explicit Discord activity choice → verified DRIP ID → Profile Settings. Declining tracking completes setup after wallet verification. Private collector pages send unfinished accounts to `/onboarding`; Profile Settings and merge review remain available for account-recovery requirements. Returning wallet and previously authorized Discord credentials resume the same profile. Imported Discord identities alone cannot create a Discord-first login.
+
+`discordTrackingConsent` is separate from public visibility and is never inferred from a previous OAuth authorization. Existing collectors receive the choice once. Declining preserves authorized login credentials and public on-chain records, suspends community imports and DRIP refreshes, and withholds previously imported community activity from active projections. Account connections can enable tracking again explicitly; enabling it without verified DRIP resumes the DRIP step. Reconnecting or merging accounts cannot silently override an opt-out.
+
+DRIP entry uses `/mydrip` in https://squigs.io/discord. The onboarding endpoint requires a verified Discord match (direct DRIP credential or the verified Discord/wallet source mapping), checks current consent again after the upstream response, and rejects conflicting DRIP ownership. Additional wallets still require individual signatures; existing-account collisions use the existing expiring, two-proof merge confirmation.

@@ -14,6 +14,10 @@ export async function phase12WebTests(
     where: { slug: 'charm-fixture' },
   });
   const token = randomBytes(32).toString('hex');
+  await db().collector.update({
+    where: { id: collector.id },
+    data: { onboardingCompletedAt: new Date() },
+  });
   await db().authSession.create({
     data: {
       collectorId: collector.id,
@@ -168,6 +172,10 @@ export async function phase12WebTests(
           select: { id: true },
         });
         const visualToken = randomBytes(32).toString('hex');
+        await db().collector.update({
+          where: { id: visualCollector.id },
+          data: { onboardingCompletedAt: new Date() },
+        });
         await db().authSession.create({
           data: {
             collectorId: visualCollector.id,

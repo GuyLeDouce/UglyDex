@@ -76,6 +76,7 @@ function credentialIdentityProof(
 export async function verifyAndLinkDripMember(
   collectorId: string,
   submittedId: string,
+  requireDiscord = false,
 ) {
   const id = memberId.parse(submittedId),
     config = dripConfig();
@@ -148,6 +149,13 @@ export async function verifyAndLinkDripMember(
   )
     throw new Error('DRIP_MEMBER_IDENTITY_UNVERIFIED');
 
+  if (
+    requireDiscord &&
+    !sourceProofPairs.length &&
+    !credentialProof.discordIds.length
+  )
+    throw new Error('DRIP_MEMBER_IDENTITY_UNVERIFIED');
+
   const balances = member.balances.filter(
     (balance) => balance.currencyId === config.DRIP_REALM_POINT_ID,
   );
@@ -161,6 +169,14 @@ export async function verifyAndLinkDripMember(
 
   await db().$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'drip-identity:' + config.DRIP_REALM_ID},0))`;
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${collectorId}, 0))`;
+    if (requireDiscord) {
+      const collector = await tx.collector.findUniqueOrThrow({
+        where: { id: collectorId },
+      });
+      if (collector.discordTrackingConsent !== true)
+        throw new Error('DRIP_MEMBER_IDENTITY_UNVERIFIED');
+    }
     const [prior, duplicate, currentIdentities, currentWallets] =
       await Promise.all([
         tx.dripIdentity.findUnique({
@@ -222,6 +238,14 @@ export async function verifyAndLinkDripMember(
                 walletAddress.toLowerCase(),
             ),
           );
+    if (
+      requireDiscord &&
+      !sourceProofPairs.length &&
+      !credentialProof.discordIds.some((id) =>
+        currentIdentities.some((identity) => identity.externalId === id),
+      )
+    )
+      throw new Error('DRIP_MEMBER_IDENTITY_UNVERIFIED');
     if (!hasCurrentProof) throw new Error('DRIP_MEMBER_IDENTITY_UNVERIFIED');
     if (
       prior?.status === 'CONFLICT' ||

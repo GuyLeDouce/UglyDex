@@ -41,7 +41,7 @@ const postgres = new EmbeddedPostgres({
   persistent: true,
   // PG18 async I/O workers can outlive taskkill on Windows and retain pipes.
   // Synchronous I/O keeps this disposable fixture's shutdown deterministic.
-  postgresFlags: ['-h', '127.0.0.1', '-c', 'io_method=sync'],
+  postgresFlags: ['-h', '127.0.0.1', '-k', '', '-c', 'io_method=sync'],
   onLog: () => {},
   onError: () => {},
 });
@@ -518,6 +518,15 @@ try {
       !privateBody.includes(account.address.toLowerCase()),
       'private profile hides linked wallet',
     );
+    const onboarding = await post(
+      '/api/onboarding',
+      { action: 'decline' },
+      sessionCookie,
+    );
+    check(
+      onboarding.ok && (await onboarding.json()).next === '/settings/profile',
+      'wallet-only onboarding completes before dashboard access',
+    );
     const ownBody = await (
       await fetch(`${base}/me`, {
         headers: { Cookie: sessionCookie },
@@ -772,6 +781,15 @@ try {
     const { importRecord: importProgressionRecord } =
       await import('../src/sync/import-event');
     const { rebuildSubject } = await import('../src/server/progression-engine');
+    // The browser achievement fixture explicitly opts back into community
+    // tracking; a wallet-only opt-out must never earn imported Discord awards.
+    await db().collector.update({
+      where: { id: signedCollector.id },
+      data: {
+        discordTrackingConsent: true,
+        discordTrackingConsentAt: new Date(),
+      },
+    });
     await importProgressionRecord(
       'survival',
       'phase4-browser',

@@ -202,6 +202,10 @@ export async function ownershipWebTests(
 
   if (browserTests) {
     const token = randomBytes(32).toString('hex');
+    await db().collector.update({
+      where: { id: collector.id },
+      data: { onboardingCompletedAt: new Date() },
+    });
     await db().authSession.create({
       data: {
         collectorId: collector.id,

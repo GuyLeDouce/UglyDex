@@ -4,7 +4,13 @@ import { useRouter } from 'next/navigation';
 type Provider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
 };
-export function Connect({ initialMessage = '' }: { initialMessage?: string }) {
+export function Connect({
+  initialMessage = '',
+  showDiscord = true,
+}: {
+  initialMessage?: string;
+  showDiscord?: boolean;
+}) {
   const router = useRouter();
   const [message, setMessage] = useState(initialMessage),
     [busy, setBusy] = useState(false),
@@ -55,7 +61,7 @@ export function Connect({ initialMessage = '' }: { initialMessage?: string }) {
         return;
       }
       if (!verified.ok) throw new Error(result.error);
-      router.push('/me');
+      router.push(result.next || '/onboarding');
       router.refresh();
     } catch (error) {
       setMessage(
@@ -77,11 +83,13 @@ export function Connect({ initialMessage = '' }: { initialMessage?: string }) {
           {busy ? 'Waiting for wallet…' : 'Connect Wallet'}{' '}
           <span aria-hidden>↗</span>
         </button>
-        <form method="post" action="/api/auth/discord">
-          <button className="button" type="submit">
-            Connect Discord
-          </button>
-        </form>
+        {showDiscord && (
+          <form method="post" action="/api/auth/discord">
+            <button className="button" type="submit">
+              Sign in with linked Discord
+            </button>
+          </form>
+        )}
       </div>
       <p role="status" className="hint">
         {message || 'Your identity. Your collection. No transaction required.'}

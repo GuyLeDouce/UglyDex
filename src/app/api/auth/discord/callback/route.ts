@@ -1,3 +1,7 @@
+import {
+  nextAfterAuthentication,
+  setDiscordTracking,
+} from '@/server/onboarding';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
 import {
@@ -31,8 +35,8 @@ export async function GET(request: Request) {
     if (
       !state ||
       state.length > 128 ||
-      !code ||
-      code.length > 2048 ||
+      (!code && params.get('error') !== 'access_denied') ||
+      (code !== null && code.length > 2048) ||
       !cookie ||
       !safeEqual(state, cookie)
     )
@@ -58,6 +62,12 @@ export async function GET(request: Request) {
     });
     if (consumed.count !== 1) throw new Error('INVALID_CHALLENGE');
     jar.delete(oauthCookie);
+    if (params.get('error') === 'access_denied')
+      return Response.redirect(
+        `${env.PUBLIC_BASE_URL}${session ? '/onboarding' : '/connect'}?error=DISCORD_DECLINED`,
+        303,
+      );
+    if (!code) throw new Error('INVALID_CHALLENGE');
     stage = 'token_exchange';
     const response = await fetch('https://discord.com/api/v10/oauth2/token', {
       method: 'POST',
@@ -111,8 +121,21 @@ export async function GET(request: Request) {
         );
       throw error;
     }
-    return Response.redirect(`${env.PUBLIC_BASE_URL}/me`, 303);
+    const signedIn = await currentSession();
+    if (challenge.message === 'TRACKING_CONSENT' && signedIn)
+      await setDiscordTracking(
+        signedIn.collectorId,
+        true,
+        new Date(challenge.expiresAt.getTime() - 5 * 60_000),
+      );
+    const next = await nextAfterAuthentication(signedIn!.collectorId);
+    return Response.redirect(`${env.PUBLIC_BASE_URL}${next}`, 303);
   } catch (error) {
+    if (error instanceof Error && error.message === 'WALLET_REQUIRED')
+      return Response.redirect(
+        `${readEnv().PUBLIC_BASE_URL}/connect?error=WALLET_REQUIRED`,
+        303,
+      );
     if (error instanceof Error && error.message === 'IDENTITY_REVIEW_REQUIRED')
       return Response.redirect(
         `${readEnv().PUBLIC_BASE_URL}/connect?error=IDENTITY_REVIEW_REQUIRED`,
