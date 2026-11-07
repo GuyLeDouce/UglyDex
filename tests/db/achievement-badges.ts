@@ -326,6 +326,14 @@ export async function achievementBadgeWebTests(
         // External NFT artwork may keep requests open. Wait for the tested
         // content explicitly; badge decoding is checked below for every image.
         await page.goto(base + path, { waitUntil: 'domcontentloaded' });
+        if (name === 'squig-card') {
+          const details = page.locator('.squig-card .card-details').first();
+          check(
+            !(await details.getAttribute('open')),
+            'card details start collapsed',
+          );
+          await details.locator('summary').click();
+        }
         await page.locator('.achievement-badge img').first().waitFor();
         if (cardCount)
           check(
