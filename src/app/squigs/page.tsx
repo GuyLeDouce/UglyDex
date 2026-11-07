@@ -27,6 +27,11 @@ export default async function Squigs({
           Listed on OpenSea ↗
         </Link>
       </section>
+      <nav className="anchor-nav" aria-label="Explore the ecosystem">
+        <Link href="/squigs">Squigs Reloaded</Link>
+        <Link href="/editions">Squigs Customs</Link>
+        <Link href="/collectors">Collectors</Link>
+      </nav>
       <Catalog params={await searchParams} viewerId={session?.collectorId} />
     </>
   );
