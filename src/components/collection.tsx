@@ -6,6 +6,7 @@ import { StatusIconStrip } from './status-icon-strip';
 import { SetIconStrip } from './set-icon-strip';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { TradingCardFace } from './trading-card-face';
+import { CompactSquigCard } from './compact-squig-card';
 import type { SquigCardData } from '@/server/collections';
 import { squigRarityClass } from '@/domain/squig-rarity';
 import { AchievementStrip } from './achievement-strip';
@@ -24,7 +25,14 @@ const snapshot = () => {
     return 'grid';
   }
 };
-export function SquigCard({
+export function SquigCard(props: Parameters<typeof AlbumSquigCard>[0]) {
+  return props.compact ? (
+    <CompactSquigCard {...props} />
+  ) : (
+    <AlbumSquigCard {...props} />
+  );
+}
+function AlbumSquigCard({
   item,
   priority = false,
   compact = false,
@@ -111,23 +119,6 @@ export function SquigCard({
           {item.achievements && (
             <AchievementStrip summary={item.achievements} subject="SQUIG" />
           )}
-          {item.personalization && (
-            <p className="ownership-label">
-              {item.personalization.owned
-                ? 'Currently Owned'
-                : item.personalization.discovered
-                  ? 'Already Discovered'
-                  : 'NEW DISCOVERY'}
-              {item.personalization.missingTraits > 0 && (
-                <small>
-                  Adds {item.personalization.missingTraits} missing traits
-                </small>
-              )}
-              {item.personalization.advances > 0 && (
-                <small>Advances {item.personalization.advances} sets</small>
-              )}
-            </p>
-          )}
           {item.currentlyOwned !== undefined && (
             <p className="ownership-label">
               {item.currentlyOwned ? 'Currently Owned' : 'Previously Owned'}
@@ -184,6 +175,25 @@ export function SquigCard({
             </div>
           )}
         </div>
+      </details>
+      <div className="album-progress">
+        {item.personalization && (
+          <p className="ownership-label">
+            {item.personalization.owned
+              ? 'Currently Owned'
+              : item.personalization.discovered
+                ? 'Already Discovered'
+                : 'NEW DISCOVERY'}
+            {item.personalization.missingTraits > 0 && (
+              <small>
+                Adds {item.personalization.missingTraits} missing traits
+              </small>
+            )}
+            {item.personalization.advances > 0 && (
+              <small>Advances {item.personalization.advances} sets</small>
+            )}
+          </p>
+        )}
         {!!item.statusIcons?.length && (
           <StatusIconStrip icons={item.statusIcons} limit={compact ? 1 : 4} />
         )}
@@ -194,7 +204,7 @@ export function SquigCard({
             advances
           />
         )}
-      </details>
+      </div>
       <OpenSeaLink
         tokenId={item.tokenId}
         listing={listing}
