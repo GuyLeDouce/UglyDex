@@ -8,10 +8,13 @@ import { Artwork } from './artwork';
 export function TradingCardFace({
   item,
   priority = false,
+  heading = true,
 }: {
   item: SquigCardData;
   priority?: boolean;
+  heading?: boolean;
 }) {
+  const Heading = heading ? 'h3' : 'span';
   const rarity = squigRarityClass(item.rarity).replace(
     'rarity-',
     '',
@@ -34,9 +37,9 @@ export function TradingCardFace({
       <div className="trading-face-inner">
         <p className="trading-brand">SQUIGS RELOADED</p>
         <div className="trading-title">
-          <span className="trading-name">
+          <Heading className="trading-name">
             Squig <span>#{item.tokenId}</span>
-          </span>
+          </Heading>
           <span className="trading-up">
             <strong>{item.uglyPoints?.toLocaleString() ?? '—'}</strong>
             <small>UGLYPOINTS</small>
