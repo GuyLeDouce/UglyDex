@@ -456,3 +456,18 @@ footer {
     transition: none;
   }
 }
+.context-help {
+  margin: 8px 0 24px;
+  max-width: 75ch;
+  color: var(--muted);
+  font-size: 12px;
+}
+.context-help summary {
+  min-height: 44px;
+  padding-block: 12px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.context-help p {
+  margin-top: 0;
+}

@@ -196,8 +196,8 @@ export default async function Squig({
             {s.uglyPoints?.toLocaleString() ?? 'Unavailable'}
           </p>
           <p>
-            Canonical collection power from the UglyBot dataset. Maw Rank
-            follows the ecosystem’s shared rarity rules.
+            This Squig’s collection power. Maw Rank follows the ecosystem’s
+            shared rarity rules.
           </p>
           <small>
             Rarity class: {s.rarity ?? 'Not indexed'} · No financial valuation.

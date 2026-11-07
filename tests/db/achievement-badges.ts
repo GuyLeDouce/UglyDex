@@ -552,7 +552,13 @@ export async function achievementBadgeWebTests(
       await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
       await page.evaluate(() => document.fonts.ready);
       await page.waitForFunction(
-        () => Array.from(document.images).every((img) => img.complete),
+        () =>
+          Array.from(document.images)
+            .filter((img) => {
+              const rect = img.getBoundingClientRect();
+              return rect.top < innerHeight && rect.bottom > 0;
+            })
+            .every((img) => img.complete),
         { timeout: 30000 },
       );
       check(
