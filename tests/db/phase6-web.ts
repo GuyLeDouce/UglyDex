@@ -17,6 +17,10 @@ export async function phase6WebTests(
       where: { slug: 'sharing-test' },
     }),
     token = randomBytes(32).toString('hex');
+  await db().collector.update({
+    where: { id: c.id },
+    data: { onboardingCompletedAt: new Date() },
+  });
   await db().authSession.create({
     data: {
       tokenHash: authHash(token),
