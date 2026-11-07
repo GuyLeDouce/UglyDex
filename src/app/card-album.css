@@ -43,14 +43,14 @@
   gap: 5px;
   margin: 0 0 8px;
 }
-.trading-title h3 {
+.trading-title .trading-name {
   font-family: var(--font-lilita-one), sans-serif;
   font-size: clamp(15px, 9cqi, 28px);
   margin: 0 !important;
   line-height: 1.05;
   letter-spacing: -0.03em;
 }
-.trading-title h3 span {
+.trading-title .trading-name span {
   color: #164e35;
 }
 .trading-up {
