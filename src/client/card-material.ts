@@ -134,20 +134,13 @@ export function paintScene(
   ctx.shadowBlur = w * 0.035;
   ctx.shadowOffsetY = h * 0.012;
   ctx.beginPath();
-  for (const [i, p] of [
-    [0, 0],
-    [1, 0],
-    [1, 1],
-    [0, 1],
-  ]
-    .map(([u, v]) => project(u, v))
-    .entries()) {
-    if (!i) ctx.moveTo(p.x, p.y);
-    else ctx.lineTo(p.x, p.y);
-  }
-  ctx.closePath();
+  ctx.roundRect((w - size) / 2, (h - height) / 2, size, height, size * 0.055);
   ctx.fill();
   ctx.restore();
+  if (Math.abs(pose.x) + Math.abs(pose.y) < 0.001) {
+    ctx.drawImage(face, (w - size) / 2, (h - height) / 2, size, height);
+    return;
+  }
   const cols = 6,
     rows = 8;
   for (let row = 0; row < rows; row++)
@@ -233,6 +226,6 @@ function triangle(
       a.x,
       a.y,
     );
-  ctx.drawImage(face, x, y, w, h, 0, 0, w, h);
+  ctx.drawImage(face, -x, -y);
   ctx.restore();
 }

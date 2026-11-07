@@ -67,10 +67,6 @@ export async function interactiveCardTests(
       page.on('pageerror', (error) => errors.push(error.message));
       for (const record of engine === 'chromium' ? records : [records[2]]) {
         const name = `${engine}-${record.rarityTier}${record.og ? '-og' : ''}`;
-        const pngResponse = page.waitForResponse(
-          (response) =>
-            response.url().includes('/api/share?') && response.status() === 200,
-        );
         await page.goto(
           `${base}/share?kind=passport&entity=${record.tokenId}&format=trading-card`,
         );
@@ -110,7 +106,15 @@ export async function interactiveCardTests(
         const png = await pngDownload;
         const pngPath = `.data/interactive-cards/${name}.png`;
         await png.saveAs(pngPath);
-        const original = await (await pngResponse).body();
+        const original = Buffer.from(
+          await page
+            .locator('.share-preview')
+            .evaluate(async (image: HTMLImageElement) =>
+              Array.from(
+                new Uint8Array(await (await fetch(image.src)).arrayBuffer()),
+              ),
+            ),
+        );
         await writeFile(`.data/interactive-cards/${name}-base.png`, original);
         for (const region of [
           { left: 170, top: 305, width: 1160, height: 1160 },
