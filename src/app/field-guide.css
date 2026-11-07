@@ -317,14 +317,14 @@ footer {
     display: none;
   }
   .editorial-heading {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
     gap: 10px;
   }
-  .editorial-heading > div {
-    flex: 1;
-  }
   .editorial-heading > .text-link {
-    margin: 0 0 0 32px;
+    grid-column: 2;
+    justify-self: start;
+    margin: 0;
   }
   .home-card-shelf {
     grid-template-columns: 1fr;
