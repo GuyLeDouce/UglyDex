@@ -456,8 +456,9 @@ export async function phase6WebTests(
       });
       await tradingPreview.waitFor();
       check(
-        await tradingPreview.evaluate((img) => {
+        await tradingPreview.evaluate(async (img) => {
           const image = img as HTMLImageElement;
+          await image.decode();
           return image.naturalWidth === 1500 && image.naturalHeight === 2100;
         }),
         'trading-card PNG has exact portrait dimensions',
