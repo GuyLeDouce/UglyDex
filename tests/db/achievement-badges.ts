@@ -326,6 +326,27 @@ export async function achievementBadgeWebTests(
         // External NFT artwork may keep requests open. Wait for the tested
         // content explicitly; badge decoding is checked below for every image.
         await page.goto(base + path, { waitUntil: 'domcontentloaded' });
+        if (name === 'squig-card') {
+          const card = page.locator('.album-card').first();
+          await card.waitFor();
+          const bounds = await card.boundingBox();
+          if (width <= 600)
+            check(
+              bounds && bounds.width > width * 0.8,
+              'mobile grid gives each card readable full-row width',
+            );
+          check(
+            (await card
+              .locator('.trading-face-inner > .album-progress')
+              .count()) === 1,
+            'discovery context belongs inside the card frame',
+          );
+          check(
+            (await card.locator('a a, a button, a summary').count()) === 0,
+            'card actions do not nest inside navigation links',
+          );
+          await card.screenshot({ path: `.data/mobile-card-${width}.png` });
+        }
         for (const details of await page.locator('.card-details').all()) {
           check(
             (await details.getAttribute('open')) === null,
