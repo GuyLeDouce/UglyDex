@@ -108,7 +108,7 @@ export default async function Squig({
       </div>
       <section className="specimen">
         <figure className="specimen-art">
-          <TradingCardFace item={s} priority />
+          <TradingCardFace item={s} priority heading={false} />
           <figcaption className="specimen-caption">
             Original · Squigs Reloaded · Ugly Labs
           </figcaption>
