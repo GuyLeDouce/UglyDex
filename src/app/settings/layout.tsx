@@ -1,3 +1,4 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -8,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Link href="/settings/wallets">Account connections</Link>
         <Link href="/settings/profile">Profile & privacy</Link>
         <Link href="/settings/appearance">Appearance</Link>
-        <Link href="/settings/galleries">Galleries</Link>
+        {GALLERIES_ENABLED && <Link href="/settings/galleries">Galleries</Link>}
         <Link href="/settings/sharing">Sharing</Link>
       </nav>
       {children}

@@ -1,3 +1,4 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
 import { favoriteTokenIds } from './favorites';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
@@ -39,6 +40,7 @@ export async function shareCard(
   viewerId?: string,
 ): Promise<ShareCard | null> {
   const q = shareSchema.parse(input);
+  if (q.kind === 'gallery' && !GALLERIES_ENABLED) return null;
   const generic = {
     stats: [] as string[],
     badges: [] as string[],

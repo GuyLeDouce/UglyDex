@@ -60,9 +60,9 @@ export function HomeIntroduction() {
       </div>
       <p className={styles.note}>
         There’s more to explore: <Link href="/editions">Editions</Link> has
-        separate collectible records, while public galleries and share cards let
-        collectors showcase their collections. Your own favorites and Field
-        Guide live in My UglyDex once you sign in.
+        separate collectible records, while share cards let collectors showcase
+        their collections. Your own favorites and Field Guide live in My UglyDex
+        once you sign in.
       </p>
     </section>
   );

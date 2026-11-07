@@ -1,3 +1,4 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
 import { notFound } from 'next/navigation';
 import { adminActor } from '@/server/admin';
 import { db } from '@/server/db';
@@ -9,10 +10,12 @@ export default async function Page({
 }) {
   if (!(await adminActor())) notFound();
   const [counts, metrics] = await Promise.all([
-    db().collectorGallery.groupBy({
-      by: ['visibility'],
-      _count: { _all: true },
-    }),
+    GALLERIES_ENABLED
+      ? db().collectorGallery.groupBy({
+          by: ['visibility'],
+          _count: { _all: true },
+        })
+      : Promise.resolve([]),
     db().shareRenderMetric.findMany({
       orderBy: { createdAt: 'desc' },
       take: 50,
@@ -55,9 +58,11 @@ export default async function Page({
               'trophy',
               'milestone',
               'discovery',
-            ].map((k) => (
-              <option key={k}>{k}</option>
-            ))}
+            ]
+              .filter((kind) => GALLERIES_ENABLED || kind !== 'gallery')
+              .map((k) => (
+                <option key={k}>{k}</option>
+              ))}
           </select>
         </label>
         <label>
@@ -65,7 +70,7 @@ export default async function Page({
           <input name="entity" required />
         </label>
         <label>
-          Gallery / achievement / set / milestone key
+          Achievement / set / milestone key
           <input name="key" />
         </label>
         <button className="button">Preview public card</button>

@@ -1,3 +1,4 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { squigBadgeSummaries } from './achievement-badges';
@@ -124,6 +125,7 @@ export async function deleteGallery(collectorId: string, id: string) {
   await db().collectorGallery.deleteMany({ where: { id, collectorId } });
 }
 export async function galleryList(collectorId: string, owner = false) {
+  if (!GALLERIES_ENABLED) return [];
   return db().collectorGallery.findMany({
     where: {
       collectorId,
@@ -148,6 +150,7 @@ export async function galleryView(
   gallerySlug: string,
   viewerId?: string,
 ) {
+  if (!GALLERIES_ENABLED) return null;
   const g = await db().collectorGallery.findFirst({
     where: { slug: gallerySlug, collector: { slug } },
     include: {

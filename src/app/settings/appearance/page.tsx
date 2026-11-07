@@ -1,3 +1,4 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
@@ -21,7 +22,9 @@ export default async function Page() {
         completed sets or current OG/Legendary ownership. If eligibility
         changes, your display safely returns to its default.
       </p>
-      <Link href="/settings/galleries">Customize your galleries ↗</Link>
+      {GALLERIES_ENABLED && (
+        <Link href="/settings/galleries">Customize your galleries ↗</Link>
+      )}
       <AppearanceEditor preferences={preferences} unlocked={unlocked} />
     </>
   );

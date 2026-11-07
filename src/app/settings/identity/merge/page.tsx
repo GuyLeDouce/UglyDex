@@ -37,16 +37,14 @@ export default async function MergeIdentity({
           <p>
             You proved a credential on each account moments ago. Confirming
             moves the other account’s verified wallets, Discord identities,
-            activity, discoveries, ownership history, galleries, and preferences
-            into this account. Derived XP and collection summaries will be
-            recalculated.
+            activity, discoveries, ownership history, and preferences into this
+            account. Derived XP and collection summaries will be recalculated.
           </p>
           <p>
-            Galleries from the other account will become private. Both profiles
-            will be made private and wallet, Discord, and $CHARM disclosures
-            will be turned off. The other account’s sessions will be revoked,
-            and its Collector record will remain as a private merge tombstone.
-            You can change visibility again after the merge.
+            Both profiles will be made private and wallet, Discord, and $CHARM
+            disclosures will be turned off. The other account’s sessions will be
+            revoked, and its Collector record will remain as a private merge
+            tombstone. You can change visibility again after the merge.
           </p>
           <p>
             This action cannot be undone from the app. Confirm only if both

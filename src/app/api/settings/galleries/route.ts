@@ -1,9 +1,12 @@
+import { GALLERIES_ENABLED } from '@/domain/features';
 import { log, errorCode } from '@/server/log';
 import { currentSession, requireOrigin, rateLimit } from '@/server/auth';
 import { saveGallery, deleteGallery } from '@/server/galleries';
 import { jsonBody } from '@/server/http';
 import { z } from 'zod';
 export async function POST(request: Request) {
+  if (!GALLERIES_ENABLED)
+    return Response.json({ error: 'Not found.' }, { status: 404 });
   try {
     requireOrigin(request);
     const s = await currentSession();
@@ -49,6 +52,8 @@ export async function POST(request: Request) {
   }
 }
 export async function DELETE(request: Request) {
+  if (!GALLERIES_ENABLED)
+    return Response.json({ error: 'Not found.' }, { status: 404 });
   try {
     requireOrigin(request);
     const s = await currentSession();
