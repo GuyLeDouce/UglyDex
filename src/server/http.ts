@@ -32,6 +32,8 @@ export function authError(error: unknown) {
     'INVALID_CHALLENGE',
     'INVALID_SIGNATURE',
     'USERNAME_REQUIRED',
+    'WALLET_REQUIRED',
+    'DISCORD_REQUIRED',
     'IDENTITY_REVIEW_REQUIRED',
     'MERGE_REQUEST_EXPIRED',
     'MERGE_BUSY',

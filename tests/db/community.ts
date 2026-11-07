@@ -352,6 +352,10 @@ export async function communityTests(
   );
   if (!browserTests) return;
   const token = randomBytes(32).toString('hex');
+  await db().collector.update({
+    where: { id: winner.id },
+    data: { onboardingCompletedAt: new Date() },
+  });
   await db().authSession.create({
     data: {
       collectorId: winner.id,

@@ -3,7 +3,7 @@ import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
 import { ProfileForm } from '@/components/profile-form';
 export default async function Settings() {
-  const id = await requireCollector(),
+  const id = await requireCollector({ allowIncomplete: true }),
     c = await db().collector.findUniqueOrThrow({ where: { id } });
   return (
     <>

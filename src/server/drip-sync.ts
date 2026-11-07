@@ -221,6 +221,12 @@ export async function queueCharmRefresh(collectorId: string, user = false) {
   const c = dripConfig();
   return db().$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${'charm-refresh:' + collectorId},0))`;
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${collectorId},0))`;
+    const consent = await tx.collector.findUnique({
+      where: { id: collectorId },
+      select: { discordTrackingConsent: true },
+    });
+    if (consent?.discordTrackingConsent !== true) return false;
     const where = {
       realmId_collectorId: { realmId: c.DRIP_REALM_ID, collectorId },
     };
@@ -244,6 +250,11 @@ export async function queueCharmRefresh(collectorId: string, user = false) {
   });
 }
 export async function charmBalance(collectorId: string, enqueue = true) {
+  const consent = await db().collector.findUnique({
+    where: { id: collectorId },
+    select: { discordTrackingConsent: true },
+  });
+  if (consent?.discordTrackingConsent !== true) return balanceView(null);
   const parsed = configSchema.safeParse(process.env);
   if (!parsed.success) return balanceView(null);
   const c = parsed.data;
@@ -263,6 +274,11 @@ export async function charmBalance(collectorId: string, enqueue = true) {
 }
 
 export async function shouldPromptDripLink(collectorId: string) {
+  const consent = await db().collector.findUnique({
+    where: { id: collectorId },
+    select: { discordTrackingConsent: true },
+  });
+  if (consent?.discordTrackingConsent !== true) return false;
   const parsed = configSchema.safeParse(process.env);
   if (!parsed.success) return true;
   const identity = await db().dripIdentity.findUnique({
@@ -329,6 +345,8 @@ async function syncDripBatch() {
   const identities = await db().externalIdentity.findMany({
     where: {
       provider: 'DISCORD',
+      authenticatedAt: { not: null },
+      collector: { discordTrackingConsent: true },
       ...(sweep
         ? s.memberCursor
           ? { id: { gt: s.memberCursor } }
@@ -594,6 +612,12 @@ async function syncDripBatch() {
     for (const r of resolved) {
       const identity = identities.find((i) => i.externalId === r.discordId)!;
       const collectorId = identity.collectorId;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${collectorId}, 0))`;
+      const consent = await tx.collector.findUnique({
+        where: { id: collectorId },
+        select: { discordTrackingConsent: true },
+      });
+      if (consent?.discordTrackingConsent !== true) continue;
       const currentIdentity = await tx.externalIdentity.findUnique({
         where: { id: identity.id },
       });

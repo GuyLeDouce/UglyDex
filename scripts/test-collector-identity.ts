@@ -40,7 +40,7 @@ const postgres = new EmbeddedPostgres({
   password: new URL(process.env.DATABASE_URL!).password,
   port,
   persistent: true,
-  postgresFlags: ['-h', '127.0.0.1', '-c', 'io_method=sync'],
+  postgresFlags: ['-h', '127.0.0.1', '-k', '', '-c', 'io_method=sync'],
   onLog: () => {},
   onError: () => {},
 });
@@ -61,6 +61,8 @@ try {
     { env: process.env, encoding: 'utf8' },
   );
   check(migration.status === 0, 'identity fixture migrations apply');
+  const { onboardingDatabaseTests } = await import('../tests/db/onboarding');
+  await onboardingDatabaseTests(check);
   const { collectorIdentityTests } =
     await import('../tests/db/collector-identity');
   await collectorIdentityTests(check);

@@ -1,3 +1,4 @@
+import { onboardingState, nextAfterAuthentication } from '@/server/onboarding';
 import { z } from 'zod';
 import { currentSession, rateLimit, requireOrigin } from '@/server/auth';
 import { jsonBody } from '@/server/http';
@@ -16,14 +17,32 @@ export async function POST(request: Request) {
         { error: 'Sign in required.' },
         { status: 401, headers: { 'Cache-Control': 'no-store' } },
       );
+    const setup = await onboardingState(session.collectorId);
+    if (
+      !setup.walletVerified ||
+      !setup.discordVerified ||
+      setup.discordTrackingConsent !== true
+    )
+      return Response.json(
+        {
+          error:
+            'Verify your wallet and authorize Discord activity tracking first.',
+        },
+        { status: 403 },
+      );
     await rateLimit('charm-id-link', session.collectorId, 3);
     const input = inputSchema.parse(await jsonBody(request, 1024));
     const result = await verifyAndLinkDripMember(
       session.collectorId,
       input.dripUserId,
+      true,
     );
     return Response.json(
-      { linked: true, balanceAvailable: result.balanceAvailable },
+      {
+        linked: true,
+        balanceAvailable: result.balanceAvailable,
+        next: await nextAfterAuthentication(session.collectorId),
+      },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (error) {

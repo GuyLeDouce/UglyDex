@@ -13,6 +13,10 @@ export async function phase7WebTests(
       where: { slug: 'phase7-collector' },
     }),
     token = randomBytes(32).toString('hex');
+  await db().collector.update({
+    where: { id: c.id },
+    data: { onboardingCompletedAt: new Date() },
+  });
   await db().authSession.create({
     data: {
       collectorId: c.id,
@@ -30,6 +34,10 @@ export async function phase7WebTests(
     },
   });
   const adminToken = randomBytes(32).toString('hex');
+  await db().collector.update({
+    where: { id: admin.collectorId },
+    data: { onboardingCompletedAt: new Date() },
+  });
   await db().authSession.create({
     data: {
       collectorId: admin.collectorId,

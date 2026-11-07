@@ -41,7 +41,7 @@ const postgres = new EmbeddedPostgres({
   persistent: true,
   // PG18 async I/O workers can outlive taskkill on Windows and retain pipes.
   // Synchronous I/O keeps this disposable fixture's shutdown deterministic.
-  postgresFlags: ['-h', '127.0.0.1', '-c', 'io_method=sync'],
+  postgresFlags: ['-h', '127.0.0.1', '-k', '', '-c', 'io_method=sync'],
   onLog: () => {},
   onError: () => {},
 });

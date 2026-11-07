@@ -1,3 +1,4 @@
+import { onboardingState } from '@/server/onboarding';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { charmBalance } from '@/server/drip-sync';
@@ -18,6 +19,17 @@ export default async function Charm({
 }) {
   const id = await requireCollector(),
     params = await searchParams;
+  if ((await onboardingState(id)).discordTrackingConsent !== true)
+    return (
+      <section className="panel">
+        <h1>Discord activity tracking is off.</h1>
+        <p>
+          To link DRIP and view your $CHARM activity, enable tracking in Account
+          connections.
+        </p>
+        <Link href="/settings/wallets">Account connections →</Link>
+      </section>
+    );
   const [balance, history] = await Promise.all([
     charmBalance(id),
     charmHistory(id, params),

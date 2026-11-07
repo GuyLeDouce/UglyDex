@@ -1,3 +1,4 @@
+import { nextAfterAuthentication } from '@/server/onboarding';
 import { z } from 'zod';
 import { authGuard, currentSession, installSession } from '@/server/auth';
 import { confirmCollectorMerge } from '@/server/collector-merge';
@@ -23,7 +24,11 @@ export async function POST(request: Request) {
       select: { slug: true },
     });
     return Response.json(
-      { ok: true, slug: collector.slug },
+      {
+        ok: true,
+        slug: collector.slug,
+        next: await nextAfterAuthentication(collectorId),
+      },
       {
         headers: { 'Cache-Control': 'no-store' },
       },

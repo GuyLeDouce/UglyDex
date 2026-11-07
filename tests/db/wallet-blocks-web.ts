@@ -24,6 +24,10 @@ export async function walletBlockWebTests(
     },
   });
   const token = randomBytes(32).toString('hex');
+  await db().collector.update({
+    where: { id: admin.collectorId },
+    data: { onboardingCompletedAt: new Date() },
+  });
   await db().authSession.create({
     data: {
       collectorId: admin.collectorId,

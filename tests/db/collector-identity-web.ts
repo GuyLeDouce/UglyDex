@@ -103,6 +103,40 @@ export async function collectorIdentityWebTests(
     (await success.json()).slug === discovered.collector.slug,
     'claim preserves existing public profile URL',
   );
+  const gated = await fetch(base + '/me', {
+    headers: { Cookie: session },
+    redirect: 'manual',
+  });
+  check(
+    gated.headers.get('location') === '/onboarding',
+    'dashboard cannot bypass incomplete onboarding',
+  );
+  const finishEarly = await post(
+    '/api/onboarding',
+    { action: 'complete' },
+    session,
+  );
+  check(
+    (await finishEarly.json()).next === '/onboarding',
+    'completion API cannot skip the Discord choice',
+  );
+  const declined = await post(
+    '/api/onboarding',
+    { action: 'decline' },
+    session,
+  );
+  check(
+    declined.ok && (await declined.json()).next === '/settings/profile',
+    'HTTP opt-out completes wallet-only onboarding',
+  );
+  check(
+    (
+      await db().collector.findUniqueOrThrow({
+        where: { id: discovered.collectorId },
+      })
+    ).discordTrackingConsent === false,
+    'HTTP decline persists tracking opt-out',
+  );
   const linked = await db().collectorWallet.findUniqueOrThrow({
     where: { chainId_walletAddress: { chainId: 1, walletAddress: address } },
   });
@@ -169,6 +203,32 @@ export async function collectorIdentityWebTests(
       !addedWallet.isPrimary,
     'second signed wallet contributes to same UUID without replacing primary',
   );
+  for (const account of [owner, other]) {
+    const freshNonce = await post('/api/auth/wallet/nonce', {
+      address: account.address,
+    });
+    const freshChallenge = await freshNonce.json();
+    const freshCookie = freshNonce.headers
+      .getSetCookie()
+      .find((c) => c.startsWith('uglydex_wallet_challenge='))!
+      .split(';')[0];
+    const returning = await post(
+      '/api/auth/wallet/verify',
+      {
+        signature: await account.signMessage({
+          message: freshChallenge.message,
+        }),
+      },
+      freshCookie,
+    );
+    const returningData = await returning.json();
+    check(
+      returning.ok &&
+        returningData.slug === 'identity-http-owner' &&
+        returningData.next === '/me',
+      'each linked wallet signs back into the same completed profile',
+    );
+  }
   const secret = '909090909090909090';
   await db().externalIdentity.create({
     data: {

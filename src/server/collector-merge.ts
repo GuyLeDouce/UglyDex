@@ -490,6 +490,32 @@ async function mergeOnce(requestId: string, survivorCollectorId: string) {
         },
       });
 
+      // Never turn tracking back on through an account merge.
+      if (
+        survivor.discordTrackingConsent === false ||
+        absorbed.discordTrackingConsent === false
+      ) {
+        await tx.collector.update({
+          where: { id: survivor.id },
+          data: {
+            discordTrackingConsent: false,
+            discordTrackingConsentAt: new Date(),
+          },
+        });
+        await tx.collectorActivity.updateMany({
+          where: {
+            collectorId: survivor.id,
+            sourceSystem: { in: ['uglybot', 'gauntlet', 'images'] },
+            recordStatus: 'ACTIVE',
+          },
+          data: { recordStatus: 'OPTED_OUT' },
+        });
+        await tx.charmRefreshRequest.updateMany({
+          where: { collectorId: survivor.id },
+          data: { pending: false },
+        });
+      }
+
       const reviewCase = await tx.identityReconciliation.findUnique({
         where: { dedupeKey: request.reviewKey },
       });

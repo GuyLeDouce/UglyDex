@@ -1,3 +1,5 @@
+import { onboardingState } from '@/server/onboarding';
+import { OnboardingChoice } from '@/components/onboarding-choice';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
@@ -20,6 +22,7 @@ export default async function Wallets() {
     }),
     db().dripIdentity.count({ where: { collectorId: id } }),
   ]);
+  const setup = await onboardingState(id);
   return (
     <>
       <section className="page-heading">
@@ -69,7 +72,34 @@ export default async function Wallets() {
           independent of UglyBot verification.
         </p>
       </section>
-      <CharmDripLink />
+      <section className="panel">
+        <h2>Discord activity tracking</h2>
+        <p>
+          {setup.discordTrackingConsent === true ? 'Enabled' : 'Opted out'}.
+          This controls community activity imports. Public on-chain history is
+          separate. Changing tracking does not remove an authorized sign-in
+          method.
+        </p>
+        {setup.discordTrackingConsent === true ? (
+          <OnboardingChoice action="decline">
+            Opt out of Discord activity tracking
+          </OnboardingChoice>
+        ) : setup.discordVerified ? (
+          <OnboardingChoice action="enable">
+            Enable Discord activity tracking
+          </OnboardingChoice>
+        ) : (
+          <form method="post" action="/api/auth/discord">
+            <input type="hidden" name="trackingConsent" value="yes" />
+            <button className="button">
+              Authorize Discord and enable tracking
+            </button>
+          </form>
+        )}
+      </section>
+      {setup.discordTrackingConsent === true && setup.discordVerified && (
+        <CharmDripLink />
+      )}
       <section className="panel">
         <h2>Link another identity</h2>
         <p>
@@ -79,7 +109,7 @@ export default async function Wallets() {
           collector profile. Disable wallet sharing before linking if you want
           that association kept private.
         </p>
-        <Connect />
+        <Connect showDiscord={false} />
       </section>
     </>
   );

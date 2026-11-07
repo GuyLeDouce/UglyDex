@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   externalIdentity: vi.fn(),
+  txCollector: vi.fn(),
   collectorWallet: vi.fn(),
   sourceMappings: vi.fn(),
   dripRead: vi.fn(),
@@ -17,6 +18,7 @@ const mocks = vi.hoisted(() => ({
 
 const tx = {
   $executeRaw: mocks.executeRaw,
+  collector: { findUniqueOrThrow: mocks.txCollector },
   dripIdentity: {
     findUnique: vi
       .fn()
@@ -71,6 +73,7 @@ function upstreamMember(overrides: Record<string, unknown> = {}) {
 }
 
 function prepare(member = upstreamMember()) {
+  mocks.txCollector.mockResolvedValue({ discordTrackingConsent: true });
   mocks.externalIdentity.mockResolvedValue([{ externalId: discordId }]);
   mocks.collectorWallet.mockResolvedValue([{ walletAddress }]);
   mocks.sourceMappings.mockResolvedValue({ ok: true, data: [] });
@@ -95,6 +98,29 @@ beforeEach(() => {
 });
 
 describe('verifyAndLinkDripMember', () => {
+  it('requires a Discord match during onboarding, even if the wallet matches', async () => {
+    prepare(
+      upstreamMember({
+        credentials: [{ format: 'wallet', publicIdentifier: walletAddress }],
+      }),
+    );
+    await expect(
+      verifyAndLinkDripMember(collectorId, memberId, true),
+    ).rejects.toThrow('DRIP_MEMBER_IDENTITY_UNVERIFIED');
+    expect(mocks.identityUpsert).not.toHaveBeenCalled();
+  });
+  it('rechecks tracking consent after the upstream request', async () => {
+    mocks.txCollector.mockResolvedValue({ discordTrackingConsent: false });
+    await expect(
+      verifyAndLinkDripMember(collectorId, memberId, true),
+    ).rejects.toThrow('DRIP_MEMBER_IDENTITY_UNVERIFIED');
+    expect(mocks.identityUpsert).not.toHaveBeenCalled();
+  });
+  it('accepts a verified Discord match during onboarding', async () => {
+    await expect(
+      verifyAndLinkDripMember(collectorId, memberId, true),
+    ).resolves.toEqual({ balanceAvailable: true });
+  });
   it('accepts the exact 24-hex DRIP ID shape and performs only the exact GET lookup', async () => {
     await expect(
       verifyAndLinkDripMember(collectorId, memberId),

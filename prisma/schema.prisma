@@ -26,6 +26,9 @@ model Collector {
   id           String                 @id @default(uuid()) @db.Uuid
   slug         String                 @unique
   claimedAt DateTime?
+  onboardingCompletedAt DateTime?
+  discordTrackingConsent Boolean?
+  discordTrackingConsentAt DateTime?
   showUsername Boolean @default(false)
   discoveredWallets DiscoveredWallet[]
   displayName  String?

@@ -14,7 +14,6 @@ import { adoptDiscoveredWallet } from './collector-discovery';
 import { readEnv } from './env';
 import { normalizeWallet, walletDisplay } from '@/domain/validation';
 import { reconcileIdentity } from '@/domain/identity';
-import { resolveDiscord } from '@/sync/import-event';
 import { markWalletDirty } from '@/sync/provenance';
 export const sessionCookie = 'uglydex_session';
 export const walletCookie = 'uglydex_wallet_challenge';
@@ -464,13 +463,15 @@ export async function authenticateDiscord(
       }
       return null;
     }
+    if (!collectorId && !identity?.authenticatedAt)
+      throw new Error('WALLET_REQUIRED');
     const record =
       identity ??
       (collectorId
         ? await tx.externalIdentity.create({
             data: { provider: 'DISCORD', externalId: id, collectorId },
           })
-        : await resolveDiscord(tx, id));
+        : identity!);
     await tx.externalIdentity.update({
       where: { id: record.id },
       data: { username, authenticatedAt: new Date() },

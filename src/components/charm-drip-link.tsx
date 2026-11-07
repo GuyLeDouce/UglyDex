@@ -2,7 +2,11 @@
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
-export function CharmDripLink() {
+export function CharmDripLink({
+  onboarding = false,
+}: {
+  onboarding?: boolean;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState('');
@@ -20,6 +24,7 @@ export function CharmDripLink() {
         body: JSON.stringify({ dripUserId: form.get('dripUserId') }),
       });
       const result = (await response.json()) as {
+        next?: string;
         linked?: boolean;
         balanceAvailable?: boolean;
         error?: string;
@@ -31,6 +36,7 @@ export function CharmDripLink() {
             : 'DRIP account verified, but it did not return a $CHARM balance.',
         );
         formElement.reset();
+        if (onboarding && result.next) router.replace(result.next);
         router.refresh();
       } else {
         setMessage(
@@ -72,15 +78,11 @@ export function CharmDripLink() {
         {message}
       </p>
       <p>
-        Click{' '}
-        <a
-          href="https://app.drip.re/user/profile"
-          target="_blank"
-          rel="noreferrer"
-        >
-          this link
-        </a>{' '}
-        to get your DRIP ID.
+        Don’t know your ID? Use <code>/mydrip</code> in the{' '}
+        <a href="https://squigs.io/discord" target="_blank" rel="noreferrer">
+          Squigs Discord
+        </a>
+        .
       </p>
       <p>
         If you are having troubles, let us know in{' '}

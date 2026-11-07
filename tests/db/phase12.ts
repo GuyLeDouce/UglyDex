@@ -43,9 +43,16 @@ export async function phase12DatabaseTests(
   try {
     const c = await db().collector.create({
       data: {
+        discordTrackingConsent: true,
         slug: 'charm-fixture',
         isPublic: true,
-        identities: { create: { provider: 'DISCORD', externalId: discord } },
+        identities: {
+          create: {
+            provider: 'DISCORD',
+            authenticatedAt: new Date(),
+            externalId: discord,
+          },
+        },
       },
     });
     check(!c.showCharmBalance, 'CHARM privacy defaults false in database');
@@ -129,12 +136,13 @@ export async function phase12DatabaseTests(
     const linkMember = 'f'.repeat(24);
     const linkCollector = await db().collector.create({
       data: {
+        discordTrackingConsent: true,
         slug: 'charm-drip-id-link',
         identities: {
           create: {
             provider: 'DISCORD',
-            externalId: linkDiscord,
             authenticatedAt: new Date(),
+            externalId: linkDiscord,
           },
         },
       },
@@ -206,9 +214,14 @@ export async function phase12DatabaseTests(
     const mappedWallet = `0x${'1'.repeat(40)}`;
     const mappedCollector = await db().collector.create({
       data: {
+        discordTrackingConsent: true,
         slug: 'charm-wallet-link-map',
         identities: {
-          create: { provider: 'DISCORD', externalId: mappedDiscord },
+          create: {
+            provider: 'DISCORD',
+            authenticatedAt: new Date(),
+            externalId: mappedDiscord,
+          },
         },
         wallets: {
           create: {
@@ -495,9 +508,14 @@ export async function phase12DatabaseTests(
     const deniedDiscord = '688888888888888889';
     const deniedCollector = await db().collector.create({
       data: {
+        discordTrackingConsent: true,
         slug: 'charm-denied-credential-read',
         identities: {
-          create: { provider: 'DISCORD', externalId: deniedDiscord },
+          create: {
+            provider: 'DISCORD',
+            authenticatedAt: new Date(),
+            externalId: deniedDiscord,
+          },
         },
       },
     });
@@ -709,6 +727,7 @@ export async function phase12DatabaseTests(
     const sharedMember = 'd'.repeat(24);
     const owner = await db().collector.create({
       data: {
+        discordTrackingConsent: true,
         slug: 'charm-existing-member',
         isPublic: true,
         showCharmBalance: true,
@@ -716,9 +735,14 @@ export async function phase12DatabaseTests(
     });
     const target = await db().collector.create({
       data: {
+        discordTrackingConsent: true,
         slug: 'charm-conflicting-member',
         identities: {
-          create: { provider: 'DISCORD', externalId: '699999999999999999' },
+          create: {
+            provider: 'DISCORD',
+            authenticatedAt: new Date(),
+            externalId: '699999999999999999',
+          },
         },
       },
     });
