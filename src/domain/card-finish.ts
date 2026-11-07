@@ -29,5 +29,5 @@ export type CardPose = { x: number; y: number };
 export const clampPose = (value: number) => Math.max(-1, Math.min(1, value));
 export function loopPose(progress: number): CardPose {
   const angle = progress * Math.PI * 2;
-  return { x: Math.sin(angle) * 0.6, y: Math.cos(angle) * 0.4 };
+  return { x: Math.sin(angle) * 0.85, y: Math.cos(angle) * 0.65 };
 }

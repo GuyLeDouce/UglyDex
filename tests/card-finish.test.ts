@@ -1,3 +1,7 @@
+import {
+  tradingCardPalettes,
+  TRADING_BAR_INK,
+} from '../src/domain/trading-card-palette';
 import { expect, it } from 'vitest';
 import {
   cardFinishes,
@@ -27,7 +31,23 @@ it('clamps interaction and produces a continuous restrained loop', () => {
   expect(loopPose(1).y).toBeCloseTo(loopPose(0).y);
   for (let i = 0; i < 100; i++) {
     const p = loopPose(i / 100);
-    expect(Math.abs(p.x)).toBeLessThanOrEqual(0.6);
-    expect(Math.abs(p.y)).toBeLessThanOrEqual(0.4);
+    expect(Math.abs(p.x)).toBeLessThanOrEqual(0.85);
+    expect(Math.abs(p.y)).toBeLessThanOrEqual(0.65);
+  }
+});
+
+// Worst-case multiply attenuation bounds every RGB channel of the bar material.
+it('keeps rarity bar text AA-readable even under the darkest foil', () => {
+  const luminance = (hex: string, attenuation: number) => {
+    const rgb = [1, 3, 5]
+      .map((i) => (parseInt(hex.slice(i, i + 2), 16) / 255) * attenuation)
+      .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+  };
+  for (const palette of Object.values(tradingCardPalettes)) {
+    expect(
+      (luminance(palette.bar, 0.72) + 0.05) /
+        (luminance(TRADING_BAR_INK, 1) + 0.05),
+    ).toBeGreaterThanOrEqual(4.5);
   }
 });

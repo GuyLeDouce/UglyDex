@@ -11,7 +11,10 @@ import {
 } from '@/domain/trading-card';
 
 import { cardFinishes } from '@/domain/card-finish';
-import { tradingCardPalettes } from '@/domain/trading-card-palette';
+import {
+  tradingCardPalettes,
+  TRADING_BAR_INK,
+} from '@/domain/trading-card-palette';
 export { tradingCardPalettes } from '@/domain/trading-card-palette';
 let fonts:
   | { name: string; data: Buffer; weight: 400 | 600; style: 'normal' }[]
@@ -91,7 +94,7 @@ export function tradingCardElement(card: TradingCardData, artwork: string) {
           ...box(45, 45, 1410, 2010),
           borderRadius: 56,
           border: `4px solid ${p.dark}`,
-          background: '#153e30',
+          background: p.dark,
         }}
       />
       <div
@@ -135,12 +138,12 @@ export function tradingCardElement(card: TradingCardData, artwork: string) {
       <div
         style={{
           ...box(270, 48, 960, 88),
-          background: '#123f2c',
+          background: p.bar,
           border: `5px solid ${p.light}`,
           borderRadius: 44,
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#fff5dc',
+          color: TRADING_BAR_INK,
           ...display,
           fontSize: 55,
           letterSpacing: 6,
@@ -157,9 +160,7 @@ export function tradingCardElement(card: TradingCardData, artwork: string) {
         }}
       >
         <span style={{ color: '#151c19' }}>Squig</span>
-        <span style={{ marginLeft: 25, color: '#164e35' }}>
-          #{card.tokenId}
-        </span>
+        <span style={{ marginLeft: 25, color: p.ink }}>#{card.tokenId}</span>
       </div>
       <div
         style={{
@@ -176,7 +177,7 @@ export function tradingCardElement(card: TradingCardData, artwork: string) {
             ...display,
             fontSize: 82,
             lineHeight: 1,
-            color: '#164e35',
+            color: p.ink,
           }}
         >
           {card.uglyPoints ?? '—'}
@@ -219,7 +220,7 @@ export function tradingCardElement(card: TradingCardData, artwork: string) {
             display: 'flex',
             ...display,
             fontSize: 49,
-            color: '#164e35',
+            color: p.ink,
             textTransform: 'uppercase',
           }}
         >
@@ -274,17 +275,17 @@ export function tradingCardElement(card: TradingCardData, artwork: string) {
       <div
         style={{
           ...box(120, 1601, 1260, 90),
-          background: '#123f2c',
+          background: p.bar,
           border: `4px solid ${p.mid}`,
           borderRadius: 22,
           alignItems: 'center',
           justifyContent: 'center',
           gap: 35,
-          color: '#fff5dc',
+          color: TRADING_BAR_INK,
         }}
       >
         <span style={{ ...label, fontSize: 36 }}>MAW RANK</span>
-        <span style={{ ...display, fontSize: 68, color: p.light }}>
+        <span style={{ ...display, fontSize: 68, color: TRADING_BAR_INK }}>
           #{card.mawRank ?? '—'}
         </span>
         {card.legendary && card.mawRank === 1 && (
@@ -407,8 +408,8 @@ export function tradingCardElement(card: TradingCardData, artwork: string) {
           justifyContent: 'space-between',
           padding: '0 24px',
           borderRadius: 15,
-          background: '#123f2c',
-          color: '#fff5dc',
+          background: p.bar,
+          color: TRADING_BAR_INK,
         }}
       >
         <span style={{ ...display, fontSize: 32, letterSpacing: 3 }}>

@@ -105,7 +105,7 @@
   color: #123f2c;
 }
 .trading-face-inner {
-  border: 3px solid #164e35;
+  border: 3px solid var(--card-dark);
   border-radius: 16px;
   padding: 12px;
   background: linear-gradient(140deg, #fff9e9, #f4e9c9);
@@ -121,8 +121,8 @@
   padding: 7px 5px;
   border: 1px solid var(--card-light);
   border-radius: 22px;
-  background: #123f2c;
-  color: #fff5dc;
+  background: var(--card-bar);
+  color: var(--card-ink);
   text-align: center;
   font-weight: 900;
   font-size: clamp(9px, 3.9cqi, 15px);
@@ -213,8 +213,8 @@
   align-items: center;
   justify-content: center;
   gap: 9px;
-  background: #123f2c;
-  color: #fff5dc;
+  background: var(--card-bar);
+  color: var(--card-ink);
   border: 1px solid var(--card-mid);
   border-radius: 7px;
   padding: 6px;
@@ -226,10 +226,10 @@
 .trading-rank strong {
   font-family: var(--font-lilita-one), sans-serif;
   font-size: 1.55em;
-  color: var(--card-light);
+  color: var(--card-ink);
 }
 .trading-rank small {
-  color: #fff5dc;
+  color: var(--card-ink);
   font-size: 0.65em;
 }
 .trading-traits {
@@ -288,8 +288,8 @@
   justify-content: space-between;
   gap: 6px;
   border-radius: 5px;
-  background: #123f2c;
-  color: #fff5dc;
+  background: var(--card-bar);
+  color: var(--card-ink);
   padding: 6px 8px;
   font-size: clamp(8px, 2.6cqi, 11px);
   letter-spacing: 0.06em;
