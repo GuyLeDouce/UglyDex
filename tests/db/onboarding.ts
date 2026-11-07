@@ -134,4 +134,13 @@ export async function onboardingDatabaseTests(
     })) === 1,
     'explicit re-consent restores preserved history',
   );
+  await db().collectorWallet.updateMany({
+    where: { collectorId: c.id },
+    data: { status: 'REVOKED', revokedAt: new Date() },
+  });
+  await setDiscordTracking(c.id, false);
+  check(
+    (await onboardingState(c.id)).discordTrackingConsent === false,
+    'returning Discord-only collector can still withdraw tracking consent after wallet revocation',
+  );
 }

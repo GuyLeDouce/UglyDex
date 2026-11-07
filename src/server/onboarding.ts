@@ -55,7 +55,8 @@ export async function setDiscordTracking(
   await db().$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${collectorId}, 0))`;
     const state = await onboardingState(collectorId, tx);
-    if (!state.walletVerified) throw new Error('WALLET_REQUIRED');
+    if (!state.walletVerified && !state.onboardingCompletedAt)
+      throw new Error('WALLET_REQUIRED');
     if (consent && !state.discordVerified) throw new Error('DISCORD_REQUIRED');
     await tx.collector.update({
       where: { id: collectorId },
