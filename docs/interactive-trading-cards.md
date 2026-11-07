@@ -16,7 +16,7 @@ the existing safe artwork pipeline, and uses existing render concurrency/cache
 limits. It already contains the brand, number, UP, Maw rank, OG, rarity, seven
 possible traits, Legendary name, and footer. These fields and all canonical
 metadata are preserved. Card render version 2 invalidates the existing image
-cache after material changes. No metadata, ownership, authentication, schema,
+cache after material changes; the existing printed V1 identifier stays unchanged. No metadata, ownership, authentication, schema,
 rank, score, or progression changes are included.
 
 ## Reference assessment
@@ -28,7 +28,7 @@ blend modes and texture layers create rarity finishes. Its LICENSE is GPL-3.0.
 https://github.com/simeydotme/hover-tilt uses pointer normalization, spring
 motion, glare masks and requestAnimationFrame batching; its LICENSE is MIT.
 Neither codebase, its assets, textures, Pokémon art, or runtime is copied or
-included. The implementation here is original procedural Canvas drawing.
+included. The implementation here is original procedural Canvas drawing and a small native WebGL projection shader.
 No new package or hosted service is required. This avoids introducing a
 reference-code licensing obligation into the application.
 
@@ -57,14 +57,14 @@ second metadata fetch from disagreeing with the image. The existing API body,
 authorization, refresh check and limits are unchanged.
 
 `card-material.ts` paints the same material for focused preview, finished PNG
-and animation. A small perspective mesh projects the complete card, with
+and animation. A single GPU-projected plane presents the complete card without tile seams, with
 restrained angles and room on all sides. Only the focused modal paints frames;
-collection grids have no animation loop or export work. Canvas code is loaded
+collection grids have no animation loop or export work. If WebGL is unavailable, the readable flat card and material remain available. GPU resources are explicitly released on close and after export. Canvas code is loaded
 through a dynamic component only for a prepared trading card.
 
 The native modal supports Escape, focus containment/return, pointer/touch,
 keyboard arrows, reset, motion toggle, reduced-motion default, and hidden-tab
-pause. It has a readable accessible card description and full-size original
+pause. It has an expandable, readable card description and full-size original
 PNG fallback. Touch interaction does not request orientation/camera access.
 
 ## Export decision
@@ -98,7 +98,7 @@ Primary technical references:
 
 ## Validation
 
-`tests/db/interactive-cards.ts` uses canonical examples of all five rarities,
+`scripts/test-interactive-cards.ts` runs an isolated fixture database and production build. `tests/db/interactive-cards.ts` uses canonical examples of all five rarities,
 plus OG Rare and OG Legendary. It downloads finished PNGs and real videos,
 checks PNG dimensions, probes codec/dimensions with ffprobe and decodes frames
 with ffmpeg to prove actual motion. It records rendered desktop and mobile

@@ -1,5 +1,5 @@
 import { loopPose, recordingType, type CardFinish } from '@/domain/card-finish';
-import { paintCard, paintScene } from './card-material';
+import { disposeScene, paintCard, paintScene } from './card-material';
 
 export function canvas(width: number, height: number) {
   const element = document.createElement('canvas');
@@ -55,7 +55,7 @@ export async function animatedCard(
     throw new Error(
       'Animated export is unavailable in this browser. Try a current Chrome or Safari, or download PNG.',
     );
-  const face = canvas(750, 1050),
+  const face = canvas(900, 1260),
     scene = canvas(900, 1260);
   const render = (time: number) => {
     const pose = loopPose(time);
@@ -150,6 +150,7 @@ export async function animatedCard(
     clearTimeout(watchdog);
     if (recorder && recorder.state !== 'inactive') recorder.stop();
     stream.getTracks().forEach((track) => track.stop());
+    disposeScene(scene.element);
     face.element.width = scene.element.width = 1;
   }
 }

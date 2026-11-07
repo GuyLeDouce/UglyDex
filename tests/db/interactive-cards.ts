@@ -228,6 +228,27 @@ export async function interactiveCardTests(
         if (record === records[2])
           for (const width of [360, 390, 430, 768]) {
             await page.setViewportSize({ width, height: 900 });
+            await viewer.screenshot({
+              path: `.data/interactive-cards/${engine}-${width}.png`,
+            });
+            await writeFile(
+              `.data/interactive-cards/${engine}-${width}-layout.json`,
+              JSON.stringify(
+                await viewer.evaluate((root) =>
+                  Array.from(root.querySelectorAll('*'))
+                    .map((el) => ({
+                      tag: el.tagName,
+                      cls: el.className,
+                      left: el.getBoundingClientRect().left,
+                      right: el.getBoundingClientRect().right,
+                      width: el.getBoundingClientRect().width,
+                    }))
+                    .filter((el) => el.right > innerWidth + 1 || el.left < 0),
+                ),
+                null,
+                2,
+              ),
+            );
             check(
               await viewer.evaluate(
                 (element) => element.scrollWidth <= innerWidth + 1,

@@ -105,9 +105,89 @@ export function paintCard(
   ctx.restore();
 }
 
-// Perspective-project the existing card as a physical plane. Small triangle
-// patches keep the text sharp without requiring a WebGL context or dependency.
-type Point = { x: number; y: number };
+// A single GPU-projected plane avoids seams across the original artwork.
+// The shared 2D scene remains the video capture source. No external renderer.
+type Projector = {
+  gl: WebGLRenderingContext;
+  program: WebGLProgram;
+  texture: WebGLTexture;
+  buffer: WebGLBuffer;
+};
+const projectors = new WeakMap<HTMLCanvasElement, Projector | null>();
+function projector(target: HTMLCanvasElement): Projector | null {
+  if (projectors.has(target)) return projectors.get(target)!;
+  const surface = document.createElement('canvas');
+  surface.width = target.width;
+  surface.height = target.height;
+  const gl = surface.getContext('webgl', {
+    alpha: true,
+    antialias: true,
+    premultipliedAlpha: true,
+    preserveDrawingBuffer: true,
+  });
+  if (!gl) {
+    projectors.set(target, null);
+    return null;
+  }
+  const vertex = gl.createShader(gl.VERTEX_SHADER)!,
+    fragment = gl.createShader(gl.FRAGMENT_SHADER)!;
+  gl.shaderSource(
+    vertex,
+    `attribute vec2 point; varying vec2 uv; uniform vec2 angle; uniform vec2 size; uniform vec2 viewport;
+  void main(){vec2 p=point*size;float z=-p.x*sin(angle.x)+p.y*sin(angle.y);float depth=1.0-z/(size.x*4.0);gl_Position=vec4(2.0*p.x*cos(angle.x)/viewport.x,-2.0*p.y*cos(angle.y)/viewport.y,0.0,depth);uv=point+0.5;}`,
+  );
+  gl.shaderSource(
+    fragment,
+    `precision highp float; varying vec2 uv; uniform sampler2D face; void main(){gl_FragColor=texture2D(face,uv);}`,
+  );
+  gl.compileShader(vertex);
+  gl.compileShader(fragment);
+  const program = gl.createProgram()!;
+  gl.attachShader(program, vertex);
+  gl.attachShader(program, fragment);
+  gl.linkProgram(program);
+  gl.deleteShader(vertex);
+  gl.deleteShader(fragment);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    gl.deleteProgram(program);
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    projectors.set(target, null);
+    return null;
+  }
+  gl.useProgram(program);
+  const buffer = gl.createBuffer()!;
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5]),
+    gl.STATIC_DRAW,
+  );
+  const point = gl.getAttribLocation(program, 'point');
+  gl.enableVertexAttribArray(point);
+  gl.vertexAttribPointer(point, 2, gl.FLOAT, false, 0, 0);
+  const texture = gl.createTexture()!;
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  gl.uniform1i(gl.getUniformLocation(program, 'face'), 0);
+  const result = { gl, program, texture, buffer };
+  projectors.set(target, result);
+  return result;
+}
+export function disposeScene(target: HTMLCanvasElement) {
+  const renderer = projectors.get(target);
+  projectors.delete(target);
+  if (renderer) {
+    const { gl, texture, program, buffer } = renderer;
+    gl.deleteTexture(texture);
+    gl.deleteBuffer(buffer);
+    gl.deleteProgram(program);
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+  }
+}
 export function paintScene(
   ctx: CanvasRenderingContext2D,
   face: HTMLCanvasElement,
@@ -119,15 +199,6 @@ export function paintScene(
   ctx.fillRect(0, 0, w, h);
   const size = Math.min(w * 0.87, (h * 0.87 * 5) / 7),
     height = (size * 7) / 5;
-  const rx = pose.y * 0.1,
-    ry = pose.x * 0.14;
-  function project(u: number, v: number): Point {
-    const x = (u - 0.5) * size,
-      y = (v - 0.5) * height;
-    const z = -x * Math.sin(ry) + y * Math.sin(rx);
-    const p = (size * 4) / (size * 4 - z);
-    return { x: w / 2 + x * Math.cos(ry) * p, y: h / 2 + y * Math.cos(rx) * p };
-  }
   ctx.save();
   ctx.fillStyle = '#06080c';
   ctx.shadowColor = '#0009';
@@ -141,91 +212,24 @@ export function paintScene(
     ctx.drawImage(face, (w - size) / 2, (h - height) / 2, size, height);
     return;
   }
-  const cols = 6,
-    rows = 8;
-  for (let row = 0; row < rows; row++)
-    for (let col = 0; col < cols; col++) {
-      const u = col / cols,
-        v = row / rows,
-        du = 1 / cols,
-        dv = 1 / rows;
-      const a = project(u, v),
-        b = project(u + du, v),
-        c = project(u, v + dv),
-        d = project(u + du, v + dv);
-      triangle(
-        ctx,
-        face,
-        [
-          u * face.width,
-          v * face.height,
-          face.width / cols,
-          face.height / rows,
-        ],
-        a,
-        b,
-        c,
-        false,
-      );
-      triangle(
-        ctx,
-        face,
-        [
-          u * face.width,
-          v * face.height,
-          face.width / cols,
-          face.height / rows,
-        ],
-        d,
-        c,
-        b,
-        true,
-      );
-    }
-}
-function triangle(
-  ctx: CanvasRenderingContext2D,
-  face: HTMLCanvasElement,
-  source: number[],
-  a: Point,
-  b: Point,
-  c: Point,
-  reverse: boolean,
-) {
-  const [x, y, w, h] = source;
-  ctx.save();
-  ctx.beginPath();
-  const center = { x: (a.x + b.x + c.x) / 3, y: (a.y + b.y + c.y) / 3 };
-  const expand = (p: Point) => ({
-    x: p.x + (p.x - center.x) * 0.006,
-    y: p.y + (p.y - center.y) * 0.006,
-  });
-  const aa = expand(a),
-    bb = expand(b),
-    cc = expand(c);
-  ctx.moveTo(aa.x, aa.y);
-  ctx.lineTo(bb.x, bb.y);
-  ctx.lineTo(cc.x, cc.y);
-  ctx.closePath();
-  ctx.clip();
-  if (reverse)
-    ctx.transform(
-      (a.x - b.x) / w,
-      (a.y - b.y) / w,
-      (a.x - c.x) / h,
-      (a.y - c.y) / h,
-      b.x + c.x - a.x,
-      b.y + c.y - a.y,
-    );
-  else
-    ctx.transform(
-      (b.x - a.x) / w,
-      (b.y - a.y) / w,
-      (c.x - a.x) / h,
-      (c.y - a.y) / h,
-      a.x,
-      a.y,
-    );
-  ctx.drawImage(face, -x, -y);
-  ctx.restore();
+  const renderer = projector(ctx.canvas);
+  if (!renderer || renderer.gl.isContextLost()) {
+    // Static plane fallback retains all information and moving material.
+    ctx.drawImage(face, (w - size) / 2, (h - height) / 2, size, height);
+    return;
+  }
+  const { gl, program } = renderer;
+  gl.viewport(0, 0, w, h);
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.uniform2f(
+    gl.getUniformLocation(program, 'angle'),
+    pose.x * 0.14,
+    pose.y * 0.1,
+  );
+  gl.uniform2f(gl.getUniformLocation(program, 'size'), size, height);
+  gl.uniform2f(gl.getUniformLocation(program, 'viewport'), w, h);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, face);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  ctx.drawImage(gl.canvas, 0, 0);
 }

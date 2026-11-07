@@ -7,7 +7,6 @@ import type { CSSProperties } from 'react';
 import {
   TRADING_CARD_WIDTH,
   TRADING_CARD_HEIGHT,
-  TRADING_CARD_VERSION,
   type TradingCardData,
 } from '@/domain/trading-card';
 
@@ -417,7 +416,7 @@ export function tradingCardElement(card: TradingCardData, artwork: string) {
         </span>
         <span style={{ ...label, fontSize: 23 }}>ETHEREUM · ORIGINAL ART</span>
         <span style={{ ...label, fontSize: 24 }}>
-          #{String(card.tokenId).padStart(4, '0')} · V{TRADING_CARD_VERSION}
+          #{String(card.tokenId).padStart(4, '0')} · V1
         </span>
       </div>
     </div>

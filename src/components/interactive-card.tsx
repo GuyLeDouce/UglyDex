@@ -13,7 +13,7 @@ import {
   saveFile,
   staticCard,
 } from '@/client/card-export';
-import { paintCard, paintScene } from '@/client/card-material';
+import { disposeScene, paintCard, paintScene } from '@/client/card-material';
 
 export function InteractiveCard({
   image,
@@ -87,7 +87,7 @@ export function InteractiveCard({
     if (!open || !ready || !surface.current || !base.current) return;
     const target = surface.current.getContext('2d');
     if (!target) return;
-    const face = canvas(750, 1050);
+    const face = canvas(900, 1260);
     let raf = 0,
       last = 0;
     let current = { x: 0, y: 0 };
@@ -116,6 +116,7 @@ export function InteractiveCard({
     draw(performance.now());
     return () => {
       cancelAnimationFrame(raf);
+      disposeScene(target.canvas);
       face.element.width = 1;
     };
   }, [open, ready, motion, finish, isExporting]);
@@ -203,7 +204,7 @@ export function InteractiveCard({
               width={900}
               height={1260}
               className="interactive-card-canvas"
-              style={{ touchAction: motion ? 'none' : 'pan-y' }}
+              style={{ touchAction: motion ? 'none' : 'pan-y pinch-zoom' }}
               role="img"
               aria-label={description}
               tabIndex={0}
@@ -271,7 +272,10 @@ export function InteractiveCard({
               }}
             />
             <aside className="card-viewer-tools">
-              <p className="sr-only">{description}</p>
+              <details className="card-viewer-details">
+                <summary>Card details</summary>
+                <p>{description}</p>
+              </details>
               <p>
                 {motion
                   ? 'Move your pointer, drag the card, or use arrow keys to catch the light.'
