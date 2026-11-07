@@ -9,6 +9,7 @@ import './appearance.css';
 import './visual.css';
 import './achievement-badges.css';
 import './community.css';
+import './card-album.css';
 import { currentSession } from '@/server/auth';
 import { db } from '@/server/db';
 import { SiteHeader } from '@/components/site-header';

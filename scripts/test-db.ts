@@ -1162,7 +1162,7 @@ try {
         await page.goto(`${base}/collection`);
         check(
           await page
-            .getByRole('heading', { name: 'The usual suspects.' })
+            .getByRole('heading', { name: 'My Collection.' })
             .isVisible(),
           'authenticated collection gallery works in browser',
         );

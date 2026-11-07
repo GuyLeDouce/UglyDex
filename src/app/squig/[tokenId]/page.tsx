@@ -19,6 +19,7 @@ import { Progression } from '@/components/progression';
 import { notFound } from 'next/navigation';
 import { squigProfile } from '@/server/profiles';
 import { Artwork } from '@/components/artwork';
+import { TradingCardFace } from '@/components/trading-card-face';
 import { Passport } from '@/components/passport';
 import { passport } from '@/server/provenance';
 import {
@@ -107,11 +108,7 @@ export default async function Squig({
       </div>
       <section className="specimen">
         <figure className="specimen-art">
-          <Artwork
-            src={s.image}
-            alt={`Original Squig #${s.tokenId}`}
-            priority
-          />
+          <TradingCardFace item={s} priority heading={false} />
           <figcaption className="specimen-caption">
             Original · Squigs Reloaded · Ugly Labs
           </figcaption>

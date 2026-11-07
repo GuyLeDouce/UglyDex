@@ -5,7 +5,7 @@ import favoriteStyles from './favorite-heart.module.css';
 import { StatusIconStrip } from './status-icon-strip';
 import { SetIconStrip } from './set-icon-strip';
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { Artwork } from './artwork';
+import { TradingCardFace } from './trading-card-face';
 import type { SquigCardData } from '@/server/collections';
 import { squigRarityClass } from '@/domain/squig-rarity';
 import { AchievementStrip } from './achievement-strip';
@@ -47,7 +47,7 @@ export function SquigCard({
 }) {
   return (
     <article
-      className={`${favoriteStyles.card} squig-card ${squigRarityClass(item.rarity)} ${item.currentlyOwned === false ? 'previous' : ''}`}
+      className={`${favoriteStyles.card} squig-card album-card ${squigRarityClass(item.rarity)} ${item.currentlyOwned === false ? 'previous' : ''}`}
     >
       {onFavorite ? (
         <button
@@ -71,16 +71,12 @@ export function SquigCard({
         </span>
       ) : null}
       <Link className="squig-card-main" href={`/squig/${item.tokenId}`}>
-        <Artwork
-          src={item.image}
-          alt={`Squig #${item.tokenId}`}
-          priority={priority}
-          sizes={
-            compact
-              ? '56px'
-              : '(max-width: 640px) 45vw, (max-width: 1000px) 30vw, 22vw'
-          }
-        />
+        <TradingCardFace item={item} priority={priority} />
+      </Link>
+      <details className="card-details">
+        <summary>
+          Details {item.currentlyOwned === false ? '· Previously owned' : ''}
+        </summary>
         <div className="card-body">
           {item.representation && (
             <p className="eyebrow">{item.representation}</p>
@@ -188,17 +184,17 @@ export function SquigCard({
             </div>
           )}
         </div>
-      </Link>
-      {!!item.statusIcons?.length && (
-        <StatusIconStrip icons={item.statusIcons} limit={compact ? 1 : 4} />
-      )}
-      {!!item.personalization?.sets?.length && (
-        <SetIconStrip
-          sets={item.personalization.sets}
-          limit={compact ? 1 : 4}
-          advances
-        />
-      )}
+        {!!item.statusIcons?.length && (
+          <StatusIconStrip icons={item.statusIcons} limit={compact ? 1 : 4} />
+        )}
+        {!!item.personalization?.sets?.length && (
+          <SetIconStrip
+            sets={item.personalization.sets}
+            limit={compact ? 1 : 4}
+            advances
+          />
+        )}
+      </details>
       <OpenSeaLink
         tokenId={item.tokenId}
         listing={listing}
