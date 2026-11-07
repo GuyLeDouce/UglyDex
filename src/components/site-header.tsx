@@ -4,20 +4,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const accountLinks = [
-  ['/thread', 'Collector thread'],
-  ['/collection', 'Collection'],
-  ['/collection/dex', 'Dex'],
-  ['/collection/discovered', 'Discovered'],
-  ['/me/activity', 'Activity'],
-  ['/me/achievements', 'Achievements'],
+  ['/me', 'Profile & progress'],
+  ['/thread', 'Community'],
   ['/charm', '$CHARM'],
-  ['/me/creations', 'Creations'],
-  ['/settings/galleries', 'My galleries'],
   ['/settings/sharing', 'Share studio'],
-  ['/settings/wallets', 'Wallets'],
+  ['/settings/wallets', 'Linked wallets'],
   ['/settings/profile', 'Profile settings'],
   ['/settings/appearance', 'Appearance'],
-  ['/settings/identity/merge', 'Identity review'],
+  ['/settings/galleries', 'My galleries'],
 ] as const;
 
 function AccountLinks({ slug, isPublic }: { slug: string; isPublic: boolean }) {
@@ -33,9 +27,6 @@ function AccountLinks({ slug, isPublic }: { slug: string; isPublic: boolean }) {
             {label}
           </Link>
         ))}
-      <form action="/api/auth/logout" method="post">
-        <button type="submit">Sign out</button>
-      </form>
     </>
   );
 }
@@ -47,7 +38,7 @@ export function SiteHeader({
   slug: string | null;
   isPublic: boolean;
 }) {
-  const homeHref = slug ? '/me' : '/';
+  const homeHref = slug ? '/collection' : '/';
   return (
     <header
       className="site-header"
@@ -82,11 +73,19 @@ export function SiteHeader({
         />
       </Link>
       <nav className="primary-nav" aria-label="Primary navigation">
-        <Link href={homeHref}>{slug ? 'My UglyDex' : 'Home'}</Link>
+        <Link href={homeHref}>{slug ? 'My Collection' : 'Home'}</Link>
         <Link href="/squigs">Explore</Link>
-        <Link href="/editions">Customs</Link>
-        <Link href="/collectors">Top Collectors</Link>
+        {slug && <Link href="/me">Profile</Link>}
       </nav>
+      {slug && (
+        <form
+          className="header-signout"
+          action="/api/auth/logout"
+          method="post"
+        >
+          <button type="submit">Sign out</button>
+        </form>
+      )}
       <div className="header-account">
         {slug ? (
           <details className="account-menu">
@@ -118,7 +117,7 @@ export function SiteHeader({
         </summary>
         <nav aria-label="Mobile navigation">
           <Link className="mobile-primary-link" href={homeHref}>
-            {slug ? 'My UglyDex' : 'Home'}
+            {slug ? 'My Collection' : 'Home'}
           </Link>
           <Link className="mobile-primary-link" href="/squigs">
             Explore Squigs
