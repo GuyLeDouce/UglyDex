@@ -102,9 +102,16 @@
 }
 .trading-traits span {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid #b5b39a;
+  padding-bottom: 4px;
+}
+.trading-type,
+.trading-legend {
+  margin: 6px 0 0;
+  color: #172c22;
+  font-size: clamp(9px, 4cqi, 14px);
+  font-weight: 800;
 }
 .trading-traits small {
   display: block;
@@ -496,4 +503,17 @@ main .filters .filter-actions > a {
 }
 .album-card .card-details {
   border-bottom-color: #c3cbe044;
+}
+
+.album-progress:has(> *) {
+  background: var(--ugly-paper);
+  color: var(--ugly-ink);
+  --surface-muted: #535b69;
+  --surface-accent: var(--ugly-green-deep);
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 8px;
+}
+.album-progress .ownership-label {
+  margin: 0;
 }
