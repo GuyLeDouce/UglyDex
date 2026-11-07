@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { CollectorThread } from '@/components/collector-thread';
-import { UglyUsers } from '@/components/ugly-users';
-import Image from 'next/image';
+import { redirect } from 'next/navigation';
 import { randomInt } from 'node:crypto';
+import { currentSession } from '@/server/auth';
 import { db } from '@/server/db';
 import {
   cardSelect,
@@ -10,20 +9,10 @@ import {
   catalogScope,
   type SquigCardData,
 } from '@/server/collections';
-import { CollectionGrid } from '@/components/collection';
-import { Artwork } from '@/components/artwork';
-import { HomeIntroduction, HomeCardGuide } from '@/components/home-guide';
+import { TradingCardFace } from '@/components/trading-card-face';
 export const dynamic = 'force-dynamic';
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const { usersPage } = await searchParams;
-  const page =
-    typeof usersPage === 'string' && /^\d{1,6}$/.test(usersPage)
-      ? Number(usersPage)
-      : 1;
+export default async function Home() {
+  if (await currentSession()) redirect('/collection');
   let sample: SquigCardData[] = [];
   try {
     const where = { ...catalogScope, imageUrl: { not: null } };
@@ -51,112 +40,41 @@ export default async function Home({
     );
   } catch {}
   return (
-    <div className="landing-world">
-      <section className="landing-heading">
-        <div className="landing-copy">
-          <p className="eyebrow">WELCOME TO UGLYDEX</p>
-          <h1 className="landing-headline-image-wrap">
-            <Image
-              className="landing-headline-image"
-              src="https://i.imgur.com/vxZhj8L.png"
-              alt="Every Squig has a story."
-              fill
-              sizes="(max-width: 560px) 100vw, 60vw"
-              unoptimized
-            />
-          </h1>
-          <p className="hero-description">
-            Meet the Squigs, discover their stories, and see what the community
-            has been up to. Take a look around—you don&apos;t need an account to
-            explore.
-          </p>
-          <div className="actions">
-            <Link className="button primary" href="/squigs">
-              Explore Squigs →
-            </Link>
-            <Link className="button" href="/thread">
-              Meet the community →
-            </Link>
-          </div>
-        </div>
-        {sample.length > 0 && (
-          <div
-            className="landing-specimens"
-            aria-label="Real Squigs from the collection"
-          >
-            {sample.slice(0, 3).map((s, index) => (
-              <Link
-                className={`landing-specimen specimen-${index + 1}`}
-                href={`/squig/${s.tokenId}`}
-                key={s.tokenId}
-              >
-                <Artwork
-                  src={s.image}
-                  alt={`Squig #${s.tokenId}`}
-                  priority={index < 2}
-                />
-                <span>Squig #{s.tokenId}</span>
-              </Link>
-            ))}
-          </div>
-        )}
+    <div className="entry-world">
+      <section className="entry-copy">
+        <p className="eyebrow">A FIELD GUIDE TO THE BEAUTIFULLY MALFORMED</p>
+        <h1>
+          Every Squig
+          <br />
+          has a story.
+        </h1>
+        <p className="entry-lore">
+          Watchers from a distant planet. Strangers on the other side of a
+          portal. The Squigs have arrived—and every one carries a story. Step
+          inside to uncover your collection, its discoveries, and the history
+          that makes it yours.
+        </p>
+        <Link className="button primary" href="/connect">
+          Enter UglyDex ↗
+        </Link>
+        <Link className="entry-explore" href="/squigs">
+          Explore the collection
+        </Link>
       </section>
-      <HomeIntroduction />
-      <div className="section-heading inline landing-section-heading">
-        <div>
-          <p className="eyebrow">SPECIMENS FROM THE COLLECTION</p>
-        </div>
-        <span className="badge">ETHEREUM · SQUIGS RELOADED</span>
-      </div>
-      {sample.length > 3 ? (
-        <CollectionGrid items={sample.slice(3, 6)} controls={false} />
-      ) : sample.length ? (
-        <CollectionGrid items={sample} controls={false} />
-      ) : (
-        <div className="empty-state">
-          <h2>The field guide is warming up.</h2>
-          <p>
-            The collection is taking a moment to load. You can still visit the
-            index.
-          </p>
-          <Link href="/squigs">Explore the index →</Link>
-        </div>
-      )}
-      <HomeCardGuide sample={sample[0]} />
-      <CollectorThread preview />
-      <UglyUsers page={page} />
-      <section className="manifesto">
-        <div className="manifesto-copy">
-          <p className="eyebrow">MAKE YOURSELF AT HOME</p>
-          <h2>A little strange. A lot to discover.</h2>
-          <p>
-            Start with a Squig that catches your eye. Open its Passport to
-            explore its traits and recorded history, or drop into the Collector
-            Thread to see what&apos;s happening across the community.
-          </p>
-          <p>
-            Have Squigs of your own? When you&apos;re ready, sign in to bring
-            your verified collection, favorites, and Field Guide progress
-            together.
-          </p>
-          <p className="manifesto-signoff">Stay curious. Stay Ugly.</p>
-          <Link className="text-link" href="/connect">
-            Sign in to your UglyDex →
-          </Link>
-        </div>
-        {sample[0] && (
+      <div
+        className="entry-cards landing-specimens"
+        aria-label="Real Squigs from the collection"
+      >
+        {sample.slice(0, 3).map((item, index) => (
           <Link
-            className="manifesto-specimen"
-            href={`/squig/${sample[0].tokenId}`}
+            key={item.tokenId}
+            className={`entry-card entry-card-${index}`}
+            href={`/squig/${item.tokenId}`}
           >
-            <Artwork
-              src={sample[0].image}
-              alt={`Squig #${sample[0].tokenId}`}
-            />
-            <span>STILL HERE. STILL UGLY.</span>
+            <TradingCardFace item={item} priority={index < 2} />
           </Link>
-        )}
-      </section>
+        ))}
+      </div>
     </div>
   );
 }
