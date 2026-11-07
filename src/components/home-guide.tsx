@@ -59,7 +59,7 @@ export function HomeIntroduction() {
         ))}
       </div>
       <p className={styles.note}>
-        There’s more to explore: <Link href="/editions">Editions</Link> has
+        There’s more to explore: <Link href="/editions">Customs</Link> has
         separate collectible records, while share cards let collectors showcase
         their collections. Your own favorites and Field Guide live in My UglyDex
         once you sign in.

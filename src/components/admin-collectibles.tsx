@@ -47,7 +47,9 @@ export async function AdminCollectibleCatalog({
   return (
     <>
       <Link href="/admin/collectibles">← Collectible diagnostics</Link>
-      <h1>{kind === 'CUSTOM' ? 'Official Customs' : 'Official Editions'}</h1>
+      <h1>
+        {kind === 'CUSTOM' ? 'Reloaded artwork variants' : 'Squigs Customs'}
+      </h1>
       <p>
         Drafts remain private. Verification publishes approved artwork. Retiring
         preserves audit history and removes public presentation.

@@ -84,7 +84,7 @@ export function SiteHeader({
       <nav className="primary-nav" aria-label="Primary navigation">
         <Link href={homeHref}>{slug ? 'My UglyDex' : 'Home'}</Link>
         <Link href="/squigs">Explore</Link>
-        <Link href="/editions">Editions</Link>
+        <Link href="/editions">Customs</Link>
         <Link href="/collectors">Top Collectors</Link>
       </nav>
       <div className="header-account">
@@ -124,7 +124,7 @@ export function SiteHeader({
             Explore Squigs
           </Link>
           <Link className="mobile-primary-link" href="/editions">
-            Editions
+            Customs
           </Link>
           <Link className="mobile-primary-link" href="/collectors">
             Top Collectors

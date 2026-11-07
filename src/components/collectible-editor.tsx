@@ -1,4 +1,8 @@
 'use client';
+import {
+  SQUIGS_CUSTOMS_CONTRACT,
+  SQUIGS_CUSTOMS_CONTRACT_URL,
+} from '@/domain/customs-collection';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 type RecordInput = {
@@ -243,7 +247,7 @@ export function CollectibleEditor({
               />
             </label>
             <label>
-              Edition token ID
+              Custom token ID
               <input name="editionToken" defaultValue={initial.tokenId ?? ''} />
             </label>
             <label>
@@ -255,7 +259,11 @@ export function CollectibleEditor({
             </label>
             <p>
               Only reviewed Ethereum entries support read-only ownership checks.
-              Do not infer a contract from the Edition’s name.
+              Squigs Customs collection:{' '}
+              <a href={SQUIGS_CUSTOMS_CONTRACT_URL}>
+                {SQUIGS_CUSTOMS_CONTRACT}
+              </a>
+              . Verify the token standard and metadata before publishing.
             </p>
           </>
         )}

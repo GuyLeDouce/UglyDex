@@ -11,8 +11,8 @@ export async function generateMetadata({ params }: Props) {
   const e = await editionDetail((await params).slug);
   if (!e) return { title: 'UglyDex', robots: { index: false, follow: false } };
   return {
-    title: e.name + ' | UglyDex Editions',
-    description: e.description || 'Official Squigs Edition',
+    title: e.name + ' | UglyDex Customs',
+    description: e.description || 'Official Squigs Custom',
     alternates: { canonical: absoluteUrl('/editions/' + e.slug) },
   };
 }
@@ -28,11 +28,11 @@ export default async function Page({ params }: Props) {
       : null;
   return (
     <>
-      <Link href="/editions">← Official Editions</Link>
+      <Link href="/editions">← Squigs Customs</Link>
       <section className="specimen">
         <Artwork src={e.image} alt={e.name} priority />
         <div className="specimen-info">
-          <p className="eyebrow">OFFICIAL EDITION</p>
+          <p className="eyebrow">OFFICIAL CUSTOM</p>
           <h1>{e.name}</h1>
           <p>{e.description}</p>
           <p>{e.artist && 'Art by ' + e.artist}</p>
@@ -51,7 +51,7 @@ export default async function Page({ params }: Props) {
             </p>
           )}
           <p>
-            This Edition is separate from Reloaded traits, sets and UglyDex
+            This Custom is separate from Reloaded traits, sets and UglyDex
             completion.
           </p>
           {owned && (
@@ -90,7 +90,7 @@ export default async function Page({ params }: Props) {
       )}
       {history && (
         <section>
-          <h2>Edition history</h2>
+          <h2>Custom history</h2>
           <p>
             {history.complete
               ? 'Indexed through the observed finalized block'
