@@ -506,6 +506,7 @@ export async function achievementBadgeWebTests(
         ['/collector/badge-review', 'collector'],
         ['/collection', 'my-collection'],
         ['/settings/profile', 'settings'],
+        ['/share?kind=passport&entity=4398', 'share'],
         ['/collectors', 'leaderboard'],
         ['/thread', 'thread'],
       ]) {
@@ -527,6 +528,16 @@ export async function achievementBadgeWebTests(
           ),
           `field guide ${name} fits ${width}px`,
         );
+        if (name === 'share') {
+          await page.locator('.share-controls > button').click();
+          await page.locator('.share-panel').waitFor({ state: 'visible' });
+          await page.locator('.share-panel').scrollIntoViewIfNeeded();
+          await page.waitForFunction(() =>
+            Array.from(
+              document.querySelectorAll<HTMLImageElement>('.share-preview'),
+            ).every((img) => img.complete && img.naturalWidth > 0),
+          );
+        }
         if (name === 'settings') {
           check(
             await page

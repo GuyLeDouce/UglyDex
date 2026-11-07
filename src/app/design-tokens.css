@@ -1,4 +1,4 @@
-/* Ugly Labs field guide. Shared UI tokens; collectible frames own their palette. */
+/* Squigs Reloaded: dark editorial UI. Collectibles retain their print palette. */
 :root {
   --font-uglydex-display: var(--font-lilita-one), 'Lilita One', sans-serif;
   --ugly-paper: #f6f1e5;
@@ -18,12 +18,20 @@
   --ugly-shadow-sm: none;
   --ugly-shadow-md: none;
   --ugly-shadow-lg: none;
-  --bg: var(--ugly-paper);
-  --panel: var(--ugly-white);
-  --line: #c9c9b9;
-  --ink: var(--ugly-ink);
-  --muted: var(--ugly-muted);
-  --acid: var(--ugly-green-deep);
+  --bg: #101318;
+  --surface: #191e27;
+  --surface-raised: #222a35;
+  --control-border: #718096;
+  --brand-blue: #168bff;
+  --brand-yellow: #ffe32b;
+  --brand-cyan: #35d5ff;
+  --on-accent: #101318;
+  color-scheme: dark;
+  --panel: var(--surface);
+  --line: #3c4858;
+  --ink: #f5f4ef;
+  --muted: #aeb8c6;
+  --acid: var(--brand-cyan);
   --surface-muted: var(--muted);
   --surface-accent: var(--acid);
   --page-width: 1280px;

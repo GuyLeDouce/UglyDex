@@ -102,7 +102,7 @@ describe('account menu stacking', () => {
     await link.hover();
     expect(
       await link.evaluate((node) => getComputedStyle(node).backgroundColor),
-    ).toBe('rgb(230, 222, 237)');
+    ).toBe('rgb(34, 42, 53)');
     await page.locator('.account-menu > summary').focus();
     await page.keyboard.press('Tab');
     expect(

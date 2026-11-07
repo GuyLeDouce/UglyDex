@@ -105,7 +105,7 @@ export function SiteHeader({
             </nav>
           </details>
         ) : (
-          <Link className="button header-connect" href="/connect">
+          <Link className="button primary header-connect" href="/connect">
             Sign in <span aria-hidden>↗</span>
           </Link>
         )}
@@ -137,7 +137,7 @@ export function SiteHeader({
           )}
           {slug && <AccountLinks slug={slug} isPublic={isPublic} />}
           {!slug && (
-            <Link className="button" href="/connect">
+            <Link className="button primary" href="/connect">
               Sign in
             </Link>
           )}

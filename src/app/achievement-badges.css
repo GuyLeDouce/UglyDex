@@ -27,7 +27,7 @@
 .achievement-mystery {
   font-size: 2rem;
   font-weight: 800;
-  color: #596170;
+  color: var(--muted);
 }
 .achievement-tooltip {
   position: fixed;
@@ -80,10 +80,10 @@
   margin: 0;
 }
 .achievement-grid .achievement h3 {
-  color: #111318;
+  color: var(--ink);
 }
 .achievement-grid .achievement small {
-  color: #454d59;
+  color: var(--muted);
 }
 .achievement-grid .achievement progress {
   margin-top: auto;
@@ -103,7 +103,7 @@
   max-width: 100%;
   gap: 12px;
   padding: 8px 12px;
-  border: 2px solid var(--ugly-ink);
+  border: 1px solid var(--line);
   border-radius: 14px;
 }
 .share-achievement-badges {

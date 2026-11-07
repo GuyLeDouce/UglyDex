@@ -50,7 +50,7 @@ export function ShareControls({
   return (
     <div className="share-controls">
       <button
-        className="button"
+        className="button primary"
         type="button"
         aria-expanded={open}
         onClick={() => setOpen(!open)}

@@ -37,9 +37,12 @@
   text-decoration: none;
 }
 .share-card-preview {
+  --ink: #111318;
+  --surface-muted: #535b69;
+  --surface-accent: #28513b;
   padding: clamp(18px, 3vw, 32px);
   min-width: 0;
-  color: var(--ugly-ink);
+  color: var(--ink);
   background: var(--ugly-paper);
   overflow-wrap: anywhere;
 }
@@ -89,12 +92,12 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--ugly-ink);
+  color: var(--ink);
   text-decoration: none;
   border-bottom: 1px solid var(--line);
 }
 .collector-rank-card:hover {
-  background: var(--ugly-lilac);
+  background: var(--surface-raised);
 }
 .collector-rank {
   font-weight: 900;
@@ -205,7 +208,7 @@
   gap: 10px;
   padding: 8px 12px;
   min-height: 64px;
-  color: var(--ugly-ink);
+  color: var(--ink);
 }
 .thread-row .avatar-image {
   min-width: 0;
@@ -241,7 +244,7 @@
   flex-shrink: 0;
 }
 .thread-row:hover {
-  background: var(--ugly-lilac);
+  background: var(--surface-raised);
 }
 @media (max-width: 640px) {
   .collector-thread .thread-row {
