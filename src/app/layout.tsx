@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
 import './legal.css';
 import { Lilita_One, Montserrat } from 'next/font/google';
@@ -27,6 +27,10 @@ const lilitaOne = Lilita_One({
   display: 'swap',
   variable: '--font-lilita-one',
 });
+export const viewport: Viewport = {
+  themeColor: '#101318',
+  colorScheme: 'dark',
+};
 export const metadata: Metadata = {
   title: 'UglyDex — Every Squig has a story',
   description:

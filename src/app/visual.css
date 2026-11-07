@@ -159,6 +159,9 @@ textarea:focus-visible {
 
 .account-menu > summary,
 .mobile-menu > summary {
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: var(--surface-raised);
   list-style: none;
 }
 
@@ -724,6 +727,8 @@ button.button:hover {
 }
 
 .squig-card {
+  --acid: #28513b;
+  --line: #c9c9b9;
   --ink: #111318;
   --muted: #535b69;
   --surface-muted: #535b69;
@@ -983,9 +988,9 @@ button.button:hover {
 }
 
 .view-controls button[aria-pressed='true'] {
-  border-color: var(--ink);
-  background: transparent;
-  color: var(--ink);
+  border-color: var(--brand-blue);
+  background: var(--brand-blue);
+  color: var(--on-accent);
   border-bottom-color: var(--acid);
 }
 
@@ -1664,14 +1669,14 @@ pre {
 }
 
 .theme-labs {
-  background-color: #fff;
+  background-color: var(--surface);
   background-image:
-    linear-gradient(#2327330c 1px, transparent 1px),
-    linear-gradient(90deg, #2327330c 1px, transparent 1px);
+    linear-gradient(#aeb8c60c 1px, transparent 1px),
+    linear-gradient(90deg, #aeb8c60c 1px, transparent 1px);
 }
 
 .theme-minimal {
-  background: #fff;
+  background: var(--bg);
 }
 
 .frame-og .squig-card,

@@ -40,3 +40,11 @@ Use existing official artwork through Artwork and the existing delivery/cache pi
 - Discovery counting explanations remain available in a labelled disclosure. Advanced trait/UP filters open when an active value is present.
 
 Local validation: production build, lint, TypeScript and nine focused card/export tests passed. The local environment denies browser process and socket startup; full browser/database/identity validation therefore runs in GitHub Actions. Screenshot fixtures cover 360, 390, 430, 768 and 1440px, wait for fonts and visible image requests, and check public discovery, advanced filters and page overflow. CI evidence is retained with the workflow run.
+
+## Dark Reloaded refinement (November 7)
+
+The light redesign's layout is retained. The next iteration uses charcoal #101318, elevated #191e27/#222a35, warm-white text and cool secondary text. Electric blue, yellow and cyan echo the existing crowned UD asset. Primary actions are yellow with dark labels; secondary controls have visible boundaries; cyan identifies text actions and focus. Editorial dividers and a single desktop lightning accent add brand energy without enclosing content in panels. The mobile layout adds no decorative height.
+
+The print palettes in TradingCardFace, Compact and share previews remain independent of the UI palette. Export rendering, card data and all server logic are unchanged. Shared rules are edited in place rather than adding another override stylesheet. Reduced-motion handling remains global.
+
+Palette tests enforce AA normal-text contrast and 3:1 control boundaries. Rendered review includes homepage, Explorer, Passport, collector profile, My collection, settings, leaderboard, history and the expanded Share interface at 360/390/430/768/1440px. Production must remain unchanged until the owner approves the reviewed result.
