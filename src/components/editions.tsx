@@ -18,6 +18,7 @@ export function EditionGrid({
             <h2>
               <Link href={'/editions/' + e.slug}>{e.name}</Link>
             </h2>
+            {e.description && <p>{e.description}</p>}
             <p>{e.artist && 'Art by ' + e.artist}</p>
             <p>
               {e.supply !== null

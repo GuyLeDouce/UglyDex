@@ -1,6 +1,9 @@
 import 'dotenv/config';
 import { spawnSync } from 'node:child_process';
+import { safeOperationalCode } from '../src/domain/operations';
 import { readEnv } from '../src/server/env';
+import { db } from '../src/server/db';
+import { importInitialCustoms } from '../src/server/customs-bootstrap';
 // Validates own-vs-external database separation before invoking Prisma.
 readEnv();
 const result = spawnSync(
@@ -9,3 +12,19 @@ const result = spawnSync(
   { stdio: 'inherit', env: process.env },
 );
 process.exitCode = result.status ?? 1;
+
+if (process.exitCode === 0) {
+  try {
+    console.log(
+      JSON.stringify({
+        event: 'customs.initial_import',
+        ...(await importInitialCustoms()),
+      }),
+    );
+  } catch (error) {
+    console.error('CUSTOMS_INITIAL_IMPORT_FAILED', safeOperationalCode(error));
+    process.exitCode = 1;
+  } finally {
+    await db().$disconnect();
+  }
+}

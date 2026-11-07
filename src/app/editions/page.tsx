@@ -27,9 +27,18 @@ export default async function Page({
         <p className="eyebrow">ANOTHER KIND OF UGLY</p>
         <h1>Squigs Customs.</h1>
         <p>
-          Individual releases. Verified origins. A world beyond the 4,444
-          Reloaded Squigs.
+          Each Squigs Custom is created specifically for the collector who
+          purchases it. Commission yours in the Malformed Marketplace on Discord
+          for 1,000,000 $CHARM.
         </p>
+        <a
+          className="button"
+          href="https://squigs.io/discord"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Visit the Malformed Marketplace ↗
+        </a>
         <p className="wallet-line">
           Contract:{' '}
           <a
