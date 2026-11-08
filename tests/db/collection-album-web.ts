@@ -232,7 +232,9 @@ export async function collectionAlbumWebTests(
     await expect(page.locator('.collection-grid.compact')).toBeVisible();
     await expect(page).toHaveURL(/q=%231300/);
     await page.goto(base + '/collection?q=bad-search&view=album');
-    await expect(page.getByRole('alert')).toContainText('doesn’t look like');
+    await expect(page.locator('main').getByRole('alert')).toContainText(
+      'doesn’t look like',
+    );
     await expect(page.locator('[data-open-card]')).toHaveCount(0);
     await page
       .getByRole('link', {
