@@ -67,6 +67,7 @@ export function TrophyAlbum({
         <label>
           Collection
           <select
+            aria-label="Collection"
             value={kind}
             onChange={(e) => {
               setKind(e.target.value);
@@ -80,7 +81,11 @@ export function TrophyAlbum({
         </label>
         <label>
           {kind === 'set' ? 'Difficulty' : 'Rarity / difficulty'}
-          <select value={tier} onChange={(e) => setTier(e.target.value)}>
+          <select
+            aria-label={kind === 'set' ? 'Difficulty' : 'Rarity / difficulty'}
+            value={tier}
+            onChange={(e) => setTier(e.target.value)}
+          >
             <option value="">All tiers</option>
             {(kind === 'set'
               ? ['Easy', 'Medium', 'Hard', 'Insane']
