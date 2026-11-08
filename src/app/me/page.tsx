@@ -83,6 +83,8 @@ export default async function Me() {
         </Link>
       </section>
       <Stats summary={s} />
+      <Progression subject="COLLECTOR" id={id} path="/me/achievements" />
+
       <DexSummary id={id} />
       {appEnvironment() === 'staging' && <RecalculateFieldGuide />}
       <section aria-label="Your favorite Squigs">
@@ -104,7 +106,6 @@ export default async function Me() {
           </p>
         )}
       </section>
-      <Progression subject="COLLECTOR" id={id} path="/me/achievements" />
       <CollectorThread preview />
       {promptDripLink ? <CharmDripLink /> : <CharmBalanceCard value={charm} />}
       <Link href="/charm">Your $CHARM activity →</Link>

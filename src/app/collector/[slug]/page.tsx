@@ -116,6 +116,7 @@ export default async function Collector({
         copy={(p.displayName || p.slug) + ' — still ugly. Still hunting.'}
       />
       <CollectorHighlights id={r.collectorId} slug={p.slug} />
+      {!p.unclaimed && <TrophyCase id={r.collectorId} slug={p.slug} />}
       {r.featured.length > 0 && (
         <section className="featured-exhibition">
           <p className="eyebrow">PERSONALLY SELECTED</p>
@@ -127,7 +128,6 @@ export default async function Collector({
           />
         </section>
       )}
-      {!p.unclaimed && <TrophyCase id={r.collectorId} slug={p.slug} />}
       {editions.length > 0 && (
         <section>
           <p className="eyebrow">A DIFFERENT KIND OF COLLECTIBLE</p>
@@ -136,8 +136,8 @@ export default async function Collector({
         </section>
       )}
       <GalleryShowcase id={r.collectorId} slug={p.slug} />
-      <CollectorThread collectorSlug={p.slug} page={page} />
       <CollectorActivityPreview id={r.collectorId} slug={p.slug} />
+      <CollectorThread collectorSlug={p.slug} page={page} />
       {r.collectionVisibility === 'FULL' && (
         <Link className="button" href={'/collector/' + p.slug + '/collection'}>
           Explore the full collection →

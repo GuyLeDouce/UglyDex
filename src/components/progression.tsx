@@ -20,7 +20,7 @@ export async function Progression({
   if (!p) return null;
   if (p.status === 'pending')
     return (
-      <section className="panel progression">
+      <section className="panel progression" id="achievements">
         <p className="eyebrow">PROGRESSION</p>
         <h2>History becomes character.</h2>
         <p>
@@ -30,13 +30,13 @@ export async function Progression({
       </section>
     );
   return (
-    <section className="progression" aria-label="Progression">
+    <section className="progression" id="achievements" aria-label="Progression">
       <div className="panel progression-summary">
         <div>
           <p className="eyebrow">
             {subject === 'SQUIG'
-              ? 'CHARACTER HISTORY'
-              : 'TRACKED ECOSYSTEM HISTORY'}
+              ? 'SQUIG ACHIEVEMENTS & BADGES'
+              : 'COLLECTOR ACHIEVEMENTS & BADGES'}
           </p>
           <h2>Level {p.level}</h2>
           {p.title && <p className="badge">{p.title}</p>}

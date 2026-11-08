@@ -1,5 +1,5 @@
 import { favoriteTokenIds } from '@/server/favorites';
-import { DexNav, DexScore } from '@/components/dex';
+import { DexNav, DexScore, DiscoveryActions } from '@/components/dex';
 import { dexView } from '@/server/dex';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
@@ -36,6 +36,7 @@ export default async function CollectionPage({
           Open your discoveries →
         </Link>
       </section>
+      <DiscoveryActions />
       <DexNav />
       <Stats summary={summary} />
       <DexScore view={view} />

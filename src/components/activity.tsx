@@ -13,17 +13,21 @@ export async function EcosystemSummary({
   squigId,
   public: publicView = false,
   path,
+  summary,
 }: {
   collectorId?: string;
   squigId?: string;
   public?: boolean;
   path: string;
+  summary?: Awaited<ReturnType<typeof ecosystemSummary>>;
 }) {
-  const s = await ecosystemSummary({
-    collectorId,
-    squigId,
-    public: publicView,
-  });
+  const s =
+    summary ??
+    (await ecosystemSummary({
+      collectorId,
+      squigId,
+      public: publicView,
+    }));
   if (!s.categories.length && !s.charm.length && !s.creator.submitted)
     return null;
   return (
@@ -144,7 +148,7 @@ export async function ActivityView({
     historyFreshness(),
   ]);
   const query = (category: string, after?: string) =>
-    `${path}?${new URLSearchParams({ category, order: page.filters.order, ...(after ? { after } : {}) })}`;
+    `${path}?${new URLSearchParams({ category, order: page.filters.order, ...(after ? { after } : {}) })}#ecosystem`;
   return (
     <section className="passport" id="ecosystem">
       <div className="section-heading">

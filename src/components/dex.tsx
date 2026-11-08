@@ -4,6 +4,8 @@ export function DexNav() {
   return (
     <nav className="anchor-nav" aria-label="Dex navigation">
       <Link href="/collection/dex">Dex overview</Link>
+      <Link href="/me/achievements">My achievements</Link>
+      <Link href="/me/activity">Survival & Duels history</Link>
       <Link href="/collection/traits">Trait Dex</Link>
       <Link href="/collection/sets">Collection sets</Link>
       <Link href="/collection/editions">Customs</Link>
@@ -173,6 +175,31 @@ export async function DexSummary({
           <SetGrid cards={view.cards.filter((c) => c.featured)} />
         </>
       )}
+    </section>
+  );
+}
+
+export function DiscoveryActions() {
+  return (
+    <section
+      className="discovery-actions"
+      aria-label="Find your next discovery"
+    >
+      <p className="eyebrow">WHAT WILL YOU DISCOVER NEXT?</p>
+      <nav className="actions" aria-label="Discovery shortcuts">
+        <Link
+          className="button primary"
+          href="/collection/traits?state=missing"
+        >
+          Missing traits →
+        </Link>
+        <Link className="button" href="/collection/sets?state=incomplete">
+          Unfinished sets →
+        </Link>
+        <Link className="button" href="/squigs?dex=advances&sort=sets-desc">
+          Squigs that advance my sets →
+        </Link>
+      </nav>
     </section>
   );
 }
