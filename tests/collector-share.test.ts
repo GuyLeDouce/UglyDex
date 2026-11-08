@@ -94,7 +94,9 @@ it('renders the combined card in both shapes with all slots occupied', async () 
   };
   for (const ratio of ['landscape', 'square'] as const) {
     const bytes = Buffer.from(
-      await renderShare(card, { ratio, template: 'clean' }, {}).arrayBuffer(),
+      await (
+        await renderShare(card, { ratio, template: 'clean' }, {})
+      ).arrayBuffer(),
     );
     expect(await sharp(bytes).metadata()).toMatchObject({
       width: ratio === 'square' ? 1080 : 1200,

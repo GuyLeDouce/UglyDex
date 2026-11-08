@@ -8,6 +8,13 @@ export const achievementTiers = [
   'Epic',
   'Legendary',
 ] as const;
+// Presentation only: existing set difficulty and completion rules stay intact.
+export const setFinishes: Record<string, CardRarity> = {
+  Easy: 'common',
+  Medium: 'rare',
+  Hard: 'epic',
+  Insane: 'legendary',
+};
 export type TrophyCardData = {
   key: string;
   kind: 'achievement' | 'set';
@@ -16,7 +23,6 @@ export type TrophyCardData = {
   rarity: CardRarity;
   classification: string;
   badgeUrl: string;
-  setIcon?: string;
   collector: string;
   avatarTokenId: number | null;
   status: string;
@@ -77,10 +83,9 @@ export function setTrophy(
     kind: 'set',
     name: s.name,
     description: s.description,
-    rarity: 'unclassified',
+    rarity: setFinishes[s.difficulty] ?? 'unclassified',
     classification: s.difficulty,
-    badgeUrl: '/achievements/collector/deep-in-the-dex.png',
-    setIcon: setIcons[s.key],
+    badgeUrl: setIcons[s.key] ?? '/icons/sets/first-specimen.png',
     status:
       s.mode === 'CURRENT_HOLDING'
         ? 'CURRENT HOLDING COMPLETE'

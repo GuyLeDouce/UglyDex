@@ -239,14 +239,18 @@ describe('viewer-safe badge presentation', () => {
         indexable: true,
       };
       const withBadge = Buffer.from(
-        await renderShare(
-          { ...card, achievementBadges: [earned('squig-mint-1')] },
-          { ratio, template: 'clean' },
-          {},
+        await (
+          await renderShare(
+            { ...card, achievementBadges: [earned('squig-mint-1')] },
+            { ratio, template: 'clean' },
+            {},
+          )
         ).arrayBuffer(),
       );
       const withoutBadge = Buffer.from(
-        await renderShare(card, { ratio, template: 'clean' }, {}).arrayBuffer(),
+        await (
+          await renderShare(card, { ratio, template: 'clean' }, {})
+        ).arrayBuffer(),
       );
       expect(await sharp(withBadge).metadata()).toMatchObject({
         width: ratio === 'square' ? 1080 : 1200,

@@ -23,7 +23,7 @@ function badgeImage(key: string) {
   return badgeImages.get(key)!;
 }
 // ImageResponse bundles its font; no dependency on a desktop font installation.
-export function renderShare(
+export async function renderShare(
   card: ShareCard,
   spec: Pick<ShareSpec, 'ratio' | 'template'>,
   art: Record<number, string | null>,
@@ -360,17 +360,23 @@ export async function renderShareSafe(
   // Collectible exports must never succeed with a placeholder or missing art.
   if (card.tradingCard || card.collectorCard || card.trophyCard)
     return {
-      bytes: new Uint8Array(await renderShare(card, spec, art).arrayBuffer()),
+      bytes: new Uint8Array(
+        await (await renderShare(card, spec, art)).arrayBuffer(),
+      ),
       fallback: false,
     };
   try {
     return {
-      bytes: new Uint8Array(await renderShare(card, spec, art).arrayBuffer()),
+      bytes: new Uint8Array(
+        await (await renderShare(card, spec, art)).arrayBuffer(),
+      ),
       fallback: false,
     };
   } catch {
     return {
-      bytes: new Uint8Array(await renderShare(card, spec, {}).arrayBuffer()),
+      bytes: new Uint8Array(
+        await (await renderShare(card, spec, {})).arrayBuffer(),
+      ),
       fallback: true,
     };
   }

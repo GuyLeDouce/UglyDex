@@ -86,7 +86,9 @@ describe('supplied sharing backgrounds', () => {
       const samples = [];
       for (const template of allStyles) {
         const png = Buffer.from(
-          await renderShare(card, { ratio, template }, {}).arrayBuffer(),
+          await (
+            await renderShare(card, { ratio, template }, {})
+          ).arrayBuffer(),
         );
         expect(await sharp(png).metadata()).toMatchObject({
           width: ratio === 'square' ? 1080 : 1200,

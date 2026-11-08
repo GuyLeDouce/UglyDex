@@ -14,21 +14,16 @@ export function TrophyCardFace({
   width = 300,
   badge = card.badgeUrl,
   avatar,
-  setIcon = card.setIcon,
   print = false,
 }: {
   card: TrophyCardData;
   width?: number;
   badge?: string;
   avatar?: string | null;
-  setIcon?: string;
   print?: boolean;
 }) {
   const scale = width / 1500;
-  const p =
-    card.kind === 'set'
-      ? { ...tradingCardPalettes.rare, bar: '#ffe32b' }
-      : tradingCardPalettes[card.rarity];
+  const p = tradingCardPalettes[card.rarity];
   const box = (x: number, y: number, w: number, h: number): CSSProperties => ({
     display: 'flex',
     position: 'absolute',
@@ -128,31 +123,17 @@ export function TrophyCardFace({
       <img
         loading={print ? undefined : 'lazy'}
         src={badge}
-        alt={card.name + ' badge'}
+        alt={card.name + (card.kind === 'set' ? ' set icon' : ' badge')}
         width={1000 * scale}
         height={1000 * scale}
-        style={{ ...box(250, 385, 1000, 1000), objectFit: 'contain' }}
+        style={{
+          ...box(250, 385, 1000, 1000),
+          objectFit: 'contain',
+          ...(card.kind === 'set' && !print
+            ? { imageRendering: 'pixelated' }
+            : {}),
+        }}
       />
-      {setIcon && (
-        <div
-          style={{
-            ...box(1110, 320, 190, 190),
-            background: '#faf3dc',
-            border: `${3 * scale}px solid ${p.mid}`,
-            borderRadius: 32 * scale,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <img
-            src={setIcon}
-            alt="Set emblem"
-            width={145 * scale}
-            height={145 * scale}
-            style={{ objectFit: 'contain' }}
-          />
-        </div>
-      )}
       <div
         style={{
           ...box(120, 1514, 1260, 70),

@@ -413,17 +413,49 @@ export async function communityTests(
           ),
         'logo button has a transparent background',
       );
-      const menu = page.locator(width > 820 ? '.account-menu' : '.mobile-menu');
-      await menu.locator('summary').click();
-      await menu
-        .getByRole('link', { name: 'Profile settings', exact: true })
+      const mobile = width <= 1100;
+      const navigation = page.locator(
+        mobile ? '.mobile-menu > nav' : '.primary-nav',
+      );
+      const menu = page
+        .locator(mobile ? '.mobile-menu' : '.primary-nav .nav-group')
+        .first();
+      if (mobile) await page.locator('.mobile-menu > summary').click();
+      const uglyDex = navigation.locator('.nav-group').first();
+      await uglyDex.locator(':scope > summary').click();
+      for (const label of [
+        'Collection',
+        'Achievements',
+        'Progress',
+        '$CHARM',
+        'Community',
+        'My Collector Card',
+      ])
+        check(
+          await uglyDex
+            .getByRole('link', { name: label, exact: true })
+            .isVisible(),
+          `My UglyDex exposes ${label} at ${width}px`,
+        );
+      await mkdir('.data/design', { recursive: true });
+      await page.screenshot({
+        path: `.data/design/navigation-${width}.png`,
+        fullPage: false,
+      });
+      await uglyDex
+        .getByRole('link', { name: 'Collection', exact: true })
         .click();
-      await page.waitForURL('**/settings/profile');
+      await page.waitForURL('**/collection');
       check(
         (await menu.getAttribute('open')) === null,
         'navigation click closes the header menu',
       );
-      await menu.locator('summary').click();
+      if (mobile) await page.locator('.mobile-menu > summary').click();
+      await navigation
+        .getByRole('link', { name: 'Settings', exact: true })
+        .click();
+      await page.waitForURL('**/settings/profile');
+      await menu.locator(':scope > summary').click();
       await page.keyboard.press('Escape');
       check(
         (await menu.getAttribute('open')) === null,

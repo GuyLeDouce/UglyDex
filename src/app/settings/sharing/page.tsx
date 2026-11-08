@@ -34,7 +34,7 @@ export default async function Page() {
     <>
       <section className="page-heading">
         <p className="eyebrow">FROM THE LAB TO YOUR FEED</p>
-        <h1>Share something ugly.</h1>
+        <h1>Share Studio.</h1>
         <p>
           A curated card. A favourite freak. Your whole strange field guide.
         </p>
