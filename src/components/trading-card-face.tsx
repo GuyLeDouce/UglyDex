@@ -15,12 +15,14 @@ export function TradingCardFace({
   heading = true,
   href,
   children,
+  onOpen,
 }: {
   item: SquigCardData;
   priority?: boolean;
   heading?: boolean;
   href?: string;
   children?: ReactNode;
+  onOpen?: () => void;
 }) {
   const Heading = heading ? 'h3' : 'span';
   const rarity = squigRarityClass(item.rarity).replace(
@@ -104,7 +106,17 @@ export function TradingCardFace({
       }
     >
       <div className="trading-face-inner">
-        {href ? (
+        {onOpen ? (
+          <button
+            type="button"
+            className="squig-card-main card-open"
+            data-open-card={item.tokenId}
+            aria-label={`View Squig #${item.tokenId} card`}
+            onClick={onOpen}
+          >
+            {face}
+          </button>
+        ) : href ? (
           <Link className="squig-card-main" href={href}>
             {face}
           </Link>

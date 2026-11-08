@@ -1,15 +1,18 @@
+import { tokenSearch } from './catalog-navigation';
 import { z } from 'zod';
 import { canonicalTokens } from './dex-catalog';
 import { normalizeTrait } from './dex';
 import type { Prisma } from '@/generated/prisma/client';
 export const filterSchema = z.object({
+  view: z.enum(['album', 'grid', 'compact']).catch('grid'),
   favorites: z.enum(['1', '']).catch(''),
   dex: z.enum(['', 'undiscovered', 'traits', 'advances']).catch(''),
   set: z.string().max(100).catch(''),
-  page: z.coerce.number().int().min(1).max(186).catch(1),
+  page: z.coerce.number().int().min(1).max(741).catch(1),
   sort: z
     .enum([
       'token',
+      'favorites',
       'sets-desc',
       'points-desc',
       'points-asc',
@@ -22,10 +25,10 @@ export const filterSchema = z.object({
       'legendary',
     ])
     .catch('token'),
-  q: z
-    .string()
-    .regex(/^\d{0,4}$/)
-    .catch(''),
+  q: z.preprocess((v) => {
+    const r = tokenSearch(v);
+    return r.token === null ? '' : String(r.token);
+  }, z.string()),
   og: z.enum(['1', '']).catch(''),
   legendary: z.enum(['1', '']).catch(''),
   rarity: z
@@ -92,6 +95,7 @@ export function collectionOrder(
   return [first, { tokenId: 'asc' }];
 }
 export const PAGE_SIZE = 24;
+export const ALBUM_PAGE_SIZE = 6;
 
 function traitFilterValues(type: string, value: string) {
   const values = [
