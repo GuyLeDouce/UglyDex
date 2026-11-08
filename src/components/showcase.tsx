@@ -108,6 +108,7 @@ export async function CollectorActivityPreview({
         </Link>
       </div>
       <EcosystemSummary
+        summary={summary}
         collectorId={id}
         public
         path={'/collector/' + slug + '/activity'}

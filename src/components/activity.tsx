@@ -13,17 +13,21 @@ export async function EcosystemSummary({
   squigId,
   public: publicView = false,
   path,
+  summary,
 }: {
   collectorId?: string;
   squigId?: string;
   public?: boolean;
   path: string;
+  summary?: Awaited<ReturnType<typeof ecosystemSummary>>;
 }) {
-  const s = await ecosystemSummary({
-    collectorId,
-    squigId,
-    public: publicView,
-  });
+  const s =
+    summary ??
+    (await ecosystemSummary({
+      collectorId,
+      squigId,
+      public: publicView,
+    }));
   if (!s.categories.length && !s.charm.length && !s.creator.submitted)
     return null;
   return (
