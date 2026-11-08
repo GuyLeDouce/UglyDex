@@ -160,7 +160,9 @@ export async function collectionAlbumWebTests(
       );
     };
     await page.goto(base + '/collection');
-    await expect(page.locator('.collection-grid.grid')).toBeVisible();
+    await expect(
+      page.locator('#collection-cards .collection-grid.grid'),
+    ).toBeVisible();
     await page.getByRole('button', { name: '▥ Album', exact: true }).click();
     await expect(page).toHaveURL(/view=album/);
     // A new visit without a view parameter restores the user's selection.
