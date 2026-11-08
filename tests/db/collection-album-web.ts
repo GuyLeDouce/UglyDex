@@ -6,6 +6,7 @@ import { db } from '../../src/server/db';
 import { authHash } from '../../src/server/auth';
 import { collectionPage } from '../../src/server/collections';
 import { SQUIGS_CONTRACT } from '../../src/domain/validation';
+import { squigArtwork } from '../../src/domain/assets';
 import { stubArtwork } from './artwork-fixture';
 
 // Runs last in the disposable database, never against a caller-selected DB.
@@ -43,7 +44,7 @@ export async function collectionAlbumWebTests(
         rarityTier: 'rare',
         uglyPoints: 750,
         mawRank: tokenId,
-        imageUrl: `https://squigs.io/images/images/${tokenId}.png`,
+        imageUrl: squigArtwork(tokenId),
       },
       update: {},
     });
@@ -214,7 +215,7 @@ export async function collectionAlbumWebTests(
     await page.getByRole('button', { name: '▤ Compact', exact: true }).click();
     await expect(page.locator('.collection-grid.compact')).toBeVisible();
     await expect(page).toHaveURL(/q=%231300/);
-    await page.goto(base + '/collection?q=bad-search');
+    await page.goto(base + '/collection?q=bad-search&view=album');
     await expect(page.getByRole('alert')).toContainText('doesn’t look like');
     await expect(page.locator('[data-open-card]')).toHaveCount(0);
     await page

@@ -1,4 +1,5 @@
-import { catalogLink } from '@/domain/catalog-navigation';
+import { cookies } from 'next/headers';
+import { catalogLink, type CatalogContext } from '@/domain/catalog-navigation';
 import { favoriteTokenIds } from '@/server/favorites';
 import Link from 'next/link';
 import { collectionPage } from '@/server/collections';
@@ -21,9 +22,17 @@ export async function Catalog({
   editableFavorites?: boolean;
 }) {
   const personalAlbum = path === '/collection' && collectorId === viewerId;
+  const preferenceKey = personalAlbum
+    ? 'uglydex-personal-view'
+    : 'uglydex-catalog-view';
+  const savedView = (await cookies()).get(preferenceKey)?.value;
+  const preferredView =
+    savedView && ['album', 'grid', 'compact'].includes(savedView)
+      ? savedView
+      : undefined;
   params = {
     ...params,
-    view: params.view ?? (personalAlbum ? 'album' : 'grid'),
+    view: params.view ?? preferredView ?? (personalAlbum ? 'album' : 'grid'),
     sort: params.sort ?? (personalAlbum ? 'favorites' : 'token'),
   };
   const data = await collectionPage(params, collectorId, discovered, viewerId),
@@ -54,7 +63,8 @@ export async function Catalog({
     ['min', f.min !== undefined ? `UP ≥ ${f.min}` : ''],
     ['max', f.max !== undefined ? `UP ≤ ${f.max}` : ''],
   ].filter(([, label]) => label);
-  const context = {
+  const context: CatalogContext = {
+    preferenceKey,
     path,
     params,
     view: f.view,

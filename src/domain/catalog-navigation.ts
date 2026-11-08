@@ -48,6 +48,7 @@ export function catalogLink(
   return path + (q.size ? '?' + q.toString() : '');
 }
 export type CatalogContext = {
+  preferenceKey: 'uglydex-personal-view' | 'uglydex-catalog-view';
   path: string;
   params: Record<string, string | string[] | undefined>;
   view: 'album' | 'grid' | 'compact';

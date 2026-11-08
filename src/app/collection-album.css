@@ -280,3 +280,18 @@
     scroll-behavior: auto;
   }
 }
+
+.album-turn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.8rem;
+}
+.album-turn a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--brand-cyan);
+  text-underline-offset: 4px;
+}

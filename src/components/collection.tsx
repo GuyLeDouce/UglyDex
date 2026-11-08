@@ -295,9 +295,21 @@ export function CollectionGrid({
         scroll: false,
       });
     requestAnimationFrame(() => {
-      document
-        .querySelector<HTMLButtonElement>(`[data-open-card="${token}"]`)
-        ?.focus({ preventScroll: true });
+      const button = document.querySelector<HTMLButtonElement>(
+        `[data-open-card="${token}"]`,
+      );
+      button?.focus({ preventScroll: true });
+      const album = button?.closest<HTMLElement>('.collection-grid.album');
+      const card = button?.closest<HTMLElement>('article');
+      if (album && card && album.scrollWidth > album.clientWidth) {
+        album.scrollBy({
+          left:
+            card.getBoundingClientRect().left -
+            album.getBoundingClientRect().left -
+            8,
+          behavior: 'auto',
+        });
+      }
     });
   }
   function moveCard(delta: number) {
@@ -337,6 +349,13 @@ export function CollectionGrid({
   }, []);
   function setMode(value: string) {
     if (catalog) {
+      document.cookie = `${catalog.preferenceKey}=${value}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
+      if (value !== 'album') {
+        try {
+          localStorage.setItem('uglydex-view', value);
+          window.dispatchEvent(new Event('storage'));
+        } catch {}
+      }
       router.push(
         catalogLink(catalog.path, catalog.params, { view: value, page: null }),
         { scroll: false },
@@ -389,6 +408,37 @@ export function CollectionGrid({
             <span>Album page {catalog.page} · Tap a card to inspect</span>
           )}
         </p>
+      )}
+      {catalog && mode === 'album' && catalog.pages > 1 && (
+        <nav className="album-turn" aria-label="Album pages">
+          {catalog.page > 1 ? (
+            <Link
+              href={catalogLink(catalog.path, catalog.params, {
+                page: String(catalog.page - 1),
+              })}
+              scroll={false}
+            >
+              ← Previous page
+            </Link>
+          ) : (
+            <span />
+          )}
+          <span>
+            {catalog.page} / {catalog.pages}
+          </span>
+          {catalog.page < catalog.pages ? (
+            <Link
+              href={catalogLink(catalog.path, catalog.params, {
+                page: String(catalog.page + 1),
+              })}
+              scroll={false}
+            >
+              Next page →
+            </Link>
+          ) : (
+            <span />
+          )}
+        </nav>
       )}
       {selected !== null && items[selected] && (
         <CollectionViewer
