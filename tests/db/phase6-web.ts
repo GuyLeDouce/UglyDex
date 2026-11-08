@@ -699,7 +699,10 @@ export async function phase6WebTests(
         await page.goto(base + '/collector/sharing-test');
         check(
           await page
-            .getByRole('heading', { name: 'The trophy case.', exact: true })
+            .getByRole('heading', {
+              name: 'Achievements & collection badges.',
+              exact: true,
+            })
             .isVisible(),
           'earned trophy case visible at width ' + width,
         );
