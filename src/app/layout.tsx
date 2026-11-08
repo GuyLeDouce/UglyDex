@@ -12,6 +12,7 @@ import './field-guide.css';
 import './achievement-badges.css';
 import './community.css';
 import './card-album.css';
+import './collection-album.css';
 import './interactive-card.css';
 import { currentSession } from '@/server/auth';
 import { db } from '@/server/db';

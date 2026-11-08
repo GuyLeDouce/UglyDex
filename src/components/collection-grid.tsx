@@ -5,7 +5,7 @@ import { CollectionGrid as ClientCollectionGrid } from './collection';
 export async function CollectionGrid(
   props: Omit<
     Parameters<typeof ClientCollectionGrid>[0],
-    'collectorCardTokens'
+    'collectorCardTokens' | 'viewerSignedIn'
   >,
 ) {
   const session = await currentSession();
@@ -17,6 +17,7 @@ export async function CollectionGrid(
     <ClientCollectionGrid
       {...props}
       collectorCardTokens={collectorCardTokens}
+      viewerSignedIn={!!session?.collectorId}
     />
   );
 }

@@ -1447,6 +1447,15 @@ try {
       process.argv.includes('--browser'),
     );
   }
+  if (process.argv.includes('--web')) {
+    const { collectionAlbumWebTests } =
+      await import('../tests/db/collection-album-web');
+    await collectionAlbumWebTests(
+      `http://127.0.0.1:${webPort}`,
+      check,
+      process.argv.includes('--browser'),
+    );
+  }
   await db().$disconnect();
   console.log(JSON.stringify({ event: 'test.database_passed', assertions }));
 } catch (error) {

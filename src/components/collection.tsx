@@ -1,10 +1,17 @@
 'use client';
 import { CollectorCardLink } from './collector-card-link';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import favoriteStyles from './favorite-heart.module.css';
-import { StatusIconStrip } from './status-icon-strip';
-import { SetIconStrip } from './set-icon-strip';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { CardDiscovery } from './card-discovery';
+import { CollectionViewer } from './collection-viewer';
+import { catalogLink, type CatalogContext } from '@/domain/catalog-navigation';
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+} from 'react';
 import { TradingCardFace } from './trading-card-face';
 import { CompactSquigCard } from './compact-squig-card';
 import type { SquigCardData } from '@/server/collections';
@@ -42,6 +49,8 @@ function AlbumSquigCard({
   onFavorite,
   savingFavorite = false,
   collectorCard = false,
+  onOpen,
+  viewerOwned,
 }: {
   item: SquigCardData;
   priority?: boolean;
@@ -53,6 +62,8 @@ function AlbumSquigCard({
   onFavorite?: () => void;
   savingFavorite?: boolean;
   collectorCard?: boolean;
+  onOpen?: () => void;
+  viewerOwned?: boolean;
 }) {
   return (
     <article
@@ -83,40 +94,19 @@ function AlbumSquigCard({
         item={item}
         priority={priority}
         href={`/squig/${item.tokenId}`}
+        onOpen={onOpen}
       >
-        <div className="album-progress">
-          {item.personalization && (
-            <p className="ownership-label">
-              {item.personalization.owned
-                ? 'Owned'
-                : item.personalization.discovered
-                  ? 'Discovered'
-                  : 'New discovery'}
-              {item.personalization.missingTraits > 0 && (
-                <small>
-                  Adds {item.personalization.missingTraits} missing traits
-                </small>
-              )}
-              {item.personalization.advances > 0 && (
-                <small>
-                  Advances {item.personalization.advances}{' '}
-                  {item.personalization.advances === 1 ? 'set' : 'sets'}
-                </small>
-              )}
-            </p>
-          )}
-          {!!item.statusIcons?.length && (
-            <StatusIconStrip icons={item.statusIcons} limit={4} />
-          )}
-          {!!item.personalization?.sets?.length && (
-            <SetIconStrip sets={item.personalization.sets} limit={4} advances />
-          )}
-        </div>
+        <CardDiscovery item={item} viewerOwned={viewerOwned} />
         <details className="card-details">
           <summary>
             Details {item.currentlyOwned === false ? '· Previously owned' : ''}
           </summary>
           <div className="card-body">
+            {onOpen && (
+              <Link className="text-link" href={`/squig/${item.tokenId}`}>
+                Open Squig Passport →
+              </Link>
+            )}
             {item.representation && (
               <p className="eyebrow">{item.representation}</p>
             )}
@@ -227,12 +217,16 @@ export function CollectionGrid({
   favorites: initialFavorites = [],
   editableFavorites = false,
   collectorCardTokens = [],
+  catalog,
+  viewerSignedIn = false,
 }: {
   items: SquigCardData[];
   controls?: boolean;
   favorites?: number[];
   editableFavorites?: boolean;
   collectorCardTokens?: number[];
+  catalog?: CatalogContext;
+  viewerSignedIn?: boolean;
 }) {
   const router = useRouter();
   const [favorites, setFavorites] = useState(initialFavorites);
@@ -283,7 +277,67 @@ export function CollectionGrid({
       setSaving(false);
     }
   }
-  const mode = useSyncExternalStore(subscribe, snapshot, () => 'grid');
+  const savedMode = useSyncExternalStore(subscribe, snapshot, () => 'grid');
+  const [pendingMode, setPendingMode] = useState<CatalogContext['view'] | null>(
+    null,
+  );
+  const mode = catalog ? (pendingMode ?? catalog.view) : savedMode;
+  const [selected, setSelected] = useState<number | null>(() =>
+    catalog?.inspect === 'first'
+      ? 0
+      : catalog?.inspect === 'last'
+        ? items.length - 1
+        : null,
+  );
+  const [turning, startTurning] = useTransition();
+  function closeViewer() {
+    const token = selected === null ? null : items[selected]?.tokenId;
+    setSelected(null);
+    if (catalog?.inspect)
+      router.replace(catalogLink(catalog.path, catalog.params, {}), {
+        scroll: false,
+      });
+    requestAnimationFrame(() => {
+      const button = document.querySelector<HTMLButtonElement>(
+        `[data-open-card="${token}"]`,
+      );
+      button?.focus({ preventScroll: true });
+      const album = button?.closest<HTMLElement>('.collection-grid.album');
+      const card = button?.closest<HTMLElement>('article');
+      if (album && card && album.scrollWidth > album.clientWidth) {
+        album.scrollBy({
+          left:
+            card.getBoundingClientRect().left -
+            album.getBoundingClientRect().left -
+            8,
+          behavior: 'auto',
+        });
+      }
+    });
+  }
+  function moveCard(delta: number) {
+    if (selected === null || turning) return;
+    const next = selected + delta;
+    if (next >= 0 && next < items.length) {
+      setSelected(next);
+      return;
+    }
+    if (
+      catalog &&
+      catalog.page + delta >= 1 &&
+      catalog.page + delta <= catalog.pages
+    ) {
+      startTurning(() =>
+        router.push(
+          catalogLink(catalog.path, catalog.params, {
+            page: String(catalog.page + delta),
+            inspect: delta > 0 ? 'first' : 'last',
+          }),
+          { scroll: false },
+        ),
+      );
+    }
+  }
   const market = useOpenSeaListings();
   const listings = new Map(
     market?.listings.map((listing) => [listing.tokenId, listing]),
@@ -296,7 +350,23 @@ export function CollectionGrid({
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
   }, []);
-  function setMode(value: string) {
+  function setMode(value: CatalogContext['view']) {
+    if (catalog) {
+      setSelected(null);
+      setPendingMode(value);
+      document.cookie = `${catalog.preferenceKey}=${value}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
+      if (value !== 'album') {
+        try {
+          localStorage.setItem('uglydex-view', value);
+          window.dispatchEvent(new Event('storage'));
+        } catch {}
+      }
+      router.push(
+        catalogLink(catalog.path, catalog.params, { view: value, page: null }),
+        { scroll: false },
+      );
+      return;
+    }
     try {
       localStorage.setItem('uglydex-view', value);
       window.dispatchEvent(new Event('storage'));
@@ -312,6 +382,14 @@ export function CollectionGrid({
       )}
       {controls && (
         <div className="view-controls" aria-label="Collection display">
+          {catalog && (
+            <button
+              aria-pressed={mode === 'album'}
+              onClick={() => setMode('album')}
+            >
+              ▥ Album
+            </button>
+          )}
           <button
             aria-pressed={mode === 'grid'}
             onClick={() => setMode('grid')}
@@ -326,12 +404,89 @@ export function CollectionGrid({
           </button>
         </div>
       )}
+      {catalog && (
+        <p className="album-page-caption" aria-live="polite">
+          {catalog.total
+            ? `${(catalog.page - 1) * catalog.pageSize + 1}–${Math.min(catalog.page * catalog.pageSize, catalog.total)} of ${catalog.total.toLocaleString()} Squigs`
+            : 'No matching Squigs'}
+          {mode === 'album' && (
+            <span>Album page {catalog.page} · Tap a card to inspect</span>
+          )}
+        </p>
+      )}
+      {catalog && mode === 'album' && catalog.pages > 1 && (
+        <nav className="album-turn" aria-label="Album pages">
+          {catalog.page > 1 ? (
+            <Link
+              href={catalogLink(catalog.path, catalog.params, {
+                page: String(catalog.page - 1),
+              })}
+              scroll={false}
+            >
+              ← Previous page
+            </Link>
+          ) : (
+            <span />
+          )}
+          <span>
+            {catalog.page} / {catalog.pages}
+          </span>
+          {catalog.page < catalog.pages ? (
+            <Link
+              href={catalogLink(catalog.path, catalog.params, {
+                page: String(catalog.page + 1),
+              })}
+              scroll={false}
+            >
+              Next page →
+            </Link>
+          ) : (
+            <span />
+          )}
+        </nav>
+      )}
+      {selected !== null && items[selected] && (
+        <CollectionViewer
+          item={items[selected]}
+          position={
+            (catalog ? (catalog.page - 1) * catalog.pageSize : 0) + selected + 1
+          }
+          total={catalog?.total ?? items.length}
+          onClose={closeViewer}
+          onPrevious={
+            selected > 0 || (catalog?.page ?? 1) > 1
+              ? () => moveCard(-1)
+              : undefined
+          }
+          onNext={
+            selected < items.length - 1 ||
+            (catalog && catalog.page < catalog.pages)
+              ? () => moveCard(1)
+              : undefined
+          }
+          busy={turning}
+          collectorCard={collectorCardTokens.includes(items[selected].tokenId)}
+          viewerOwned={
+            viewerSignedIn
+              ? collectorCardTokens.includes(items[selected].tokenId)
+              : undefined
+          }
+        />
+      )}
       {items.length ? (
-        <div className={`collection-grid ${controls ? mode : 'grid'}`}>
+        <div
+          className={`collection-grid ${controls ? mode : 'grid'} ${items.length === 1 ? 'single-card' : ''}`}
+        >
           {items.map((item, index) => (
             <SquigCard
               key={item.tokenId}
               item={item}
+              viewerOwned={
+                viewerSignedIn
+                  ? collectorCardTokens.includes(item.tokenId)
+                  : undefined
+              }
+              onOpen={catalog ? () => setSelected(index) : undefined}
               collectorCard={collectorCardTokens.includes(item.tokenId)}
               favorite={favorites.includes(item.tokenId)}
               onFavorite={

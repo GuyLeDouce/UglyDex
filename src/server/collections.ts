@@ -1,3 +1,4 @@
+import { tokenSearch } from '@/domain/catalog-navigation';
 import type { DerivedReadClient } from './derived-verification';
 import { favoriteTokenIds } from './favorites';
 import { collectionDiscoveries } from './dex-engine';
@@ -17,6 +18,7 @@ import {
   collectionOrder,
   filterSchema,
   PAGE_SIZE,
+  ALBUM_PAGE_SIZE,
 } from '@/domain/collection';
 import { resolveAsset } from '@/domain/assets';
 import type { Prisma } from '@/generated/prisma/client';
@@ -139,6 +141,8 @@ export async function collectionPage(
     : [];
   const filters = filterSchema.parse(params),
     addresses = collectorId ? await collectionAddresses(collectorId) : [];
+  const pageSize = filters.view === 'album' ? ALBUM_PAGE_SIZE : PAGE_SIZE;
+  const searchError = tokenSearch(params.q).invalid;
   const candidates = viewerId ? await personalizedCandidates(viewerId) : null;
   const personalizedScope: Prisma.SquigWhereInput =
     filters.dex || filters.set
@@ -165,6 +169,7 @@ export async function collectionPage(
   const where: Prisma.SquigWhereInput = {
     AND: [
       catalogScope,
+      ...(searchError ? [{ tokenId: -1 }] : []),
       scope,
       collectionWhere(filters),
       personalizedScope,
@@ -193,11 +198,22 @@ export async function collectionPage(
     });
     orderedIds = mostSetsAdvanced(matching, candidates).map((s) => s.tokenId);
   }
+  if (filters.sort === 'favorites' && viewerId) {
+    const favorites = new Set(await favoriteTokenIds(viewerId));
+    const matching = await db().squig.findMany({
+      where,
+      select: { tokenId: true },
+    });
+    orderedIds = matching
+      .sort(
+        (a, b) =>
+          Number(favorites.has(b.tokenId)) - Number(favorites.has(a.tokenId)) ||
+          a.tokenId - b.tokenId,
+      )
+      .map((r) => r.tokenId);
+  }
   const total = orderedIds?.length ?? (await db().squig.count({ where }));
-  const page = Math.min(
-    filters.page,
-    Math.max(1, Math.ceil(total / PAGE_SIZE)),
-  );
+  const page = Math.min(filters.page, Math.max(1, Math.ceil(total / pageSize)));
   let recentIds: string[] | undefined;
   if (filters.sort === 'recent' && collectorId && !discovered) {
     const rows = await db().squigOwnership.findMany({
@@ -211,8 +227,8 @@ export async function collectionPage(
         { squig: { tokenId: 'asc' } },
       ],
       select: { squigId: true },
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     });
     recentIds = rows.map((r) => r.squigId);
   }
@@ -223,7 +239,7 @@ export async function collectionPage(
             where,
             {
               tokenId: {
-                in: orderedIds.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+                in: orderedIds.slice((page - 1) * pageSize, page * pageSize),
               },
             },
           ],
@@ -235,7 +251,7 @@ export async function collectionPage(
     orderBy: collectionOrder(filters.sort),
     ...(recentIds || orderedIds
       ? {}
-      : { skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE }),
+      : { skip: (page - 1) * pageSize, take: pageSize }),
   });
   if (orderedIds) {
     const positions = new Map(orderedIds.map((id, index) => [id, index]));
@@ -371,8 +387,10 @@ export async function collectionPage(
         : {}),
     })),
     total,
+    pageSize,
+    searchError,
     page,
-    pages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+    pages: Math.max(1, Math.ceil(total / pageSize)),
     filters,
     setSortUnavailable: filters.sort === 'sets-desc' && !candidates,
     market: market

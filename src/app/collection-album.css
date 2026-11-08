@@ -1,0 +1,318 @@
+/* Catalog navigation and focused viewing. Printed and compact cards keep their
+   existing styling; only the surrounding collection experience changes. */
+.card-open {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: zoom-in;
+  border-radius: 0;
+  box-shadow: none;
+}
+.card-open:focus-visible {
+  outline: 3px solid #168bff;
+  outline-offset: 5px;
+}
+.collection-grid.album {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px 24px;
+  align-items: start;
+  padding-block: 20px 32px;
+  border-block: 1px solid var(--line);
+}
+.collection-grid.album.single-card {
+  grid-template-columns: minmax(0, 420px);
+  justify-content: center;
+}
+.album-page-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px 24px;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.album-page-caption span {
+  color: var(--brand-cyan);
+}
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.active-filters a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--brand-cyan);
+  text-underline-offset: 4px;
+}
+.active-filters a span {
+  font-size: 1.25rem;
+}
+#token-search-help {
+  font-size: 0.8rem;
+}
+.catalog-reset,
+.page-jump,
+.page-jump label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.page-jump input {
+  width: 72px;
+  min-height: 44px;
+}
+.discovery-explanation {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.discovery-explanation summary {
+  cursor: pointer;
+  padding-block: 12px;
+  font-weight: 700;
+}
+.discovery-explanation a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.discovery-explanation li {
+  margin-bottom: 12px;
+}
+.discovery-explanation li span {
+  display: block;
+  margin-top: 4px;
+}
+.discovery-explanation ul {
+  padding-left: 18px;
+}
+.album-viewer {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 24px clamp(16px, 4vw, 64px) 40px;
+  border: 0;
+  background: #101318;
+  color: #f5f4ef;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.album-viewer::backdrop {
+  background: #101318;
+}
+.album-viewer-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  max-width: 1080px;
+  margin: 0 auto 24px;
+  border-bottom: 1px solid #3e4b5d;
+  padding-bottom: 16px;
+}
+.album-viewer-header h2 {
+  margin: 4px 0;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+}
+.album-viewer-header p {
+  margin: 4px 0;
+  font-size: 0.8rem;
+}
+.album-viewer-header .eyebrow {
+  color: #35d5ff;
+}
+.album-viewer-header > button {
+  flex-shrink: 0;
+}
+.album-viewer-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 72px);
+  max-width: 980px;
+  margin: auto;
+}
+.album-viewer-card {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --light-x: 50%;
+  touch-action: pan-y pinch-zoom;
+  min-width: 0;
+  padding: 8px;
+}
+.album-viewer-card .trading-face {
+  transform: perspective(1100px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+}
+.album-viewer-card.has-motion .trading-face {
+  transition: transform 160ms ease-out;
+}
+/* Light is confined to the printed bars. Original character pixels and trait
+   text are never covered by a reflective overlay. No animation runs in grids. */
+.album-viewer-card.has-motion
+  .trading-face:is(
+    [data-finish='rare'],
+    [data-finish='epic'],
+    [data-finish='legendary']
+  )
+  :is(.trading-brand, .trading-rank) {
+  background-image: linear-gradient(
+    110deg,
+    transparent 15%,
+    #ffffff66 35%,
+    #35d5ff55 43%,
+    #ffa4f055 49%,
+    #ffe32b55 56%,
+    transparent 75%
+  );
+  background-size: 250% 100%;
+  background-position: var(--light-x) 50%;
+}
+.album-viewer-info {
+  min-width: 0;
+}
+.album-viewer-navigation {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.album-viewer-navigation .button {
+  flex: 1;
+}
+.album-viewer-info .album-progress {
+  color: #f5f4ef;
+  border-block: 1px solid #3e4b5d;
+  background: transparent;
+  padding-block: 12px;
+  margin-block: 20px;
+}
+.album-viewer-info .album-progress .ownership-label {
+  color: #ffe32b;
+}
+.album-viewer-info .album-progress small {
+  color: #aeb8c6;
+}
+.album-viewer-info .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block: 20px;
+}
+.album-viewer-info > .button {
+  margin-block: 8px;
+}
+@media (max-width: 1000px) and (min-width: 601px) {
+  .collection-grid.album {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .album-viewer-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .album-viewer-card {
+    width: min(100%, 420px);
+    margin-inline: auto;
+  }
+  .album-viewer-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg);
+    margin-bottom: 12px;
+  }
+  .album-viewer-info {
+    width: min(100%, 460px);
+    margin-inline: auto;
+  }
+}
+@media (max-width: 600px) {
+  .collection-grid.album:not(.single-card) {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 8px;
+    overscroll-behavior-x: contain;
+    padding: 16px 8px 24px;
+    scrollbar-color: #168bff #222a35;
+  }
+  .collection-grid.album:not(.single-card) > .album-card {
+    flex: 0 0 90%;
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .album-page-caption {
+    flex-direction: column;
+  }
+  .pagination:has(.page-jump) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .pagination .page-jump {
+    order: 2;
+    width: 100%;
+  }
+  .view-controls button {
+    padding-inline: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .album-viewer-card .trading-face {
+    transition: none !important;
+    transform: none;
+  }
+  .collection-grid.album {
+    scroll-behavior: auto;
+  }
+}
+
+.album-turn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.8rem;
+}
+.album-turn a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--brand-cyan);
+  text-underline-offset: 4px;
+}
+
+#collection-cards {
+  scroll-margin-top: 20px;
+}
+.page-heading:has(a[href='#collection-cards']) > .text-link {
+  margin-left: 16px;
+}
+@media (max-width: 600px) {
+  .page-heading:has(a[href='#collection-cards']) > .text-link {
+    display: block;
+    margin: 12px 0 0;
+  }
+}

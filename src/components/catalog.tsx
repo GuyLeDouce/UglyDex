@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers';
+import { catalogLink, type CatalogContext } from '@/domain/catalog-navigation';
 import { favoriteTokenIds } from '@/server/favorites';
 import Link from 'next/link';
 import { collectionPage } from '@/server/collections';
@@ -19,20 +21,67 @@ export async function Catalog({
   path?: string;
   editableFavorites?: boolean;
 }) {
+  const personalAlbum = path === '/collection' && collectorId === viewerId;
+  const preferenceKey = personalAlbum
+    ? 'uglydex-personal-view'
+    : 'uglydex-catalog-view';
+  const savedView = (await cookies()).get(preferenceKey)?.value;
+  const preferredView =
+    savedView && ['album', 'grid', 'compact'].includes(savedView)
+      ? savedView
+      : undefined;
+  params = {
+    ...params,
+    view: params.view ?? preferredView ?? (personalAlbum ? 'album' : 'grid'),
+    sort: params.sort ?? (personalAlbum ? 'favorites' : 'token'),
+  };
   const data = await collectionPage(params, collectorId, discovered, viewerId),
     f = data.filters;
   const favorites =
     editableFavorites && collectorId ? await favoriteTokenIds(collectorId) : [];
-  const link = (page: number) => {
-    const q = new URLSearchParams();
-    for (const [k, v] of Object.entries(params))
-      if (typeof v === 'string' && k !== 'page') q.set(k, v);
-    q.set('page', String(page));
-    return `${path}?${q}`;
+  const link = (page: number) =>
+    catalogLink(path, params, { page: String(page) });
+  const activeFilters = [
+    ['q', params.q ? `Search: ${params.q}` : ''],
+    [
+      'dex',
+      f.dex
+        ? {
+            advances: 'Advances my UglyDex',
+            traits: 'Missing traits',
+            undiscovered: 'New to my Dex',
+          }[f.dex]
+        : '',
+    ],
+    ['favorites', f.favorites ? 'My favorites' : ''],
+    ['rarity', f.rarity],
+    ['og', f.og ? 'OG' : ''],
+    ['legendary', f.legendary ? 'Legendary' : ''],
+    ['trait', f.trait],
+    ['value', f.value],
+    ['set', f.set ? `Set: ${f.set}` : ''],
+    ['min', f.min !== undefined ? `UP ≥ ${f.min}` : ''],
+    ['max', f.max !== undefined ? `UP ≤ ${f.max}` : ''],
+  ].filter(([, label]) => label);
+  const context: CatalogContext = {
+    preferenceKey,
+    path,
+    params,
+    view: f.view,
+    page: data.page,
+    pages: data.pages,
+    pageSize: data.pageSize,
+    total: data.total,
+    inspect: typeof params.inspect === 'string' ? params.inspect : undefined,
   };
   return (
     <>
-      <form className="filters" action={path}>
+      <form
+        key={JSON.stringify({ ...f, q: params.q ?? '' })}
+        className="filters"
+        action={path}
+      >
+        <input type="hidden" name="view" value={f.view} />
         <div className="filter-top">
           {viewerId && (
             <label>
@@ -65,15 +114,17 @@ export async function Catalog({
             Token ID
             <input
               name="q"
-              inputMode="numeric"
-              placeholder="Find a Squig…"
-              defaultValue={f.q}
-              maxLength={4}
+              aria-describedby="token-search-help"
+              aria-invalid={data.searchError || undefined}
+              placeholder="1497, #1497 or paste a Squig link"
+              defaultValue={typeof params.q === 'string' ? params.q : f.q}
+              maxLength={512}
             />
           </label>
           <label>
             Sort
             <select name="sort" aria-label="Sort" defaultValue={f.sort}>
+              {viewerId && <option value="favorites">Favorites first</option>}
               <option value="token">Token ID</option>
               {viewerId && (
                 <option value="sets-desc">Most sets advanced</option>
@@ -160,10 +211,36 @@ export async function Catalog({
           <button className="button primary" type="submit">
             Apply filters
           </button>
-          <Link href={path}>Clear</Link>
+          <Link href={catalogLink(path, {}, { view: f.view })}>Clear</Link>
           <span>{data.total.toLocaleString()} Squigs</span>
         </div>
       </form>
+      <p id="token-search-help" className="muted">
+        Search by token number, #number, UglyDex Passport link or Squigs
+        Reloaded OpenSea link.
+      </p>
+      {data.searchError && (
+        <p role="alert">
+          That doesn’t look like a Squigs Reloaded token or link. Enter a number
+          from 1–4,444, such as #1497.
+        </p>
+      )}
+      {activeFilters.length > 0 && (
+        <nav className="active-filters" aria-label="Active filters">
+          {activeFilters.map(([key, label]) => (
+            <Link
+              key={key}
+              href={catalogLink(path, params, { [key]: null, page: null })}
+              aria-label={`Remove ${label} filter`}
+            >
+              {label} <span aria-hidden>×</span>
+            </Link>
+          ))}
+          <Link href={catalogLink(path, {}, { view: f.view })}>
+            Reset all filters
+          </Link>
+        </nav>
+      )}
       {f.sort === 'sets-desc' && (
         <p className="muted" role="status">
           {data.setSortUnavailable
@@ -191,11 +268,33 @@ export async function Catalog({
             </p>
           )}
           <CollectionGrid
+            key={JSON.stringify({ ...params, inspect: undefined })}
+            catalog={context}
             items={data.items}
             favorites={favorites}
             editableFavorites={editableFavorites}
           />
         </>
+      )}
+      {!data.total && (
+        <p className="catalog-reset">
+          <Link
+            className="button"
+            href={catalogLink(path, {}, { view: f.view })}
+          >
+            Reset filters
+          </Link>
+          {collectorId && (
+            <Link
+              href={catalogLink('/squigs', params, {
+                page: null,
+                favorites: null,
+              })}
+            >
+              Search the whole collection →
+            </Link>
+          )}
+        </p>
       )}
       <nav className="pagination" aria-label="Pagination">
         {data.page > 1 ? (
@@ -205,9 +304,34 @@ export async function Catalog({
         ) : (
           <span />
         )}
-        <span>
-          Page {data.page} of {data.pages}
-        </span>
+        <form action={path} className="page-jump">
+          {Object.entries(params)
+            .filter(
+              ([key, value]) =>
+                key !== 'page' &&
+                key !== 'inspect' &&
+                typeof value === 'string',
+            )
+            .map(([key, value]) => (
+              <input key={key} type="hidden" name={key} value={String(value)} />
+            ))}
+          <label>
+            Page{' '}
+            <input
+              aria-label="Jump to page"
+              name="page"
+              type="number"
+              min={1}
+              max={data.pages}
+              defaultValue={data.page}
+              key={data.page}
+            />
+          </label>
+          <span>of {data.pages}</span>
+          <button className="button" type="submit">
+            Go
+          </button>
+        </form>
         {data.page < data.pages ? (
           <Link className="button" href={link(data.page + 1)}>
             Next →
