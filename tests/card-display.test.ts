@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { CardDiscovery } from '../src/components/card-discovery';
 import { TradingCardFace } from '../src/components/trading-card-face';
 import { SquigCard } from '../src/components/collection';
 import type { SquigCardData } from '../src/server/collections';
@@ -98,3 +99,37 @@ for (const compact of [false, true]) {
     );
   });
 }
+
+describe('integrated discovery context', () => {
+  it('uses current verified ownership ahead of a lagging snapshot', () => {
+    const html = renderToStaticMarkup(
+      createElement(CardDiscovery, { item, viewerOwned: true }),
+    );
+    expect(html).toContain('data-discovery="owned"');
+    expect(html).not.toContain('New to your Dex');
+    expect(html).toContain('Why this helps your Dex');
+    expect(html).toContain('does not necessarily complete');
+  });
+  it('does not label another collector’s holding as mine', () => {
+    const html = renderToStaticMarkup(
+      createElement(CardDiscovery, {
+        item: { ...item, currentlyOwned: true },
+        viewerOwned: false,
+      }),
+    );
+    expect(html).toContain('New to your Dex');
+    expect(html).not.toContain('data-discovery="owned"');
+  });
+  it('distinguishes a past discovery from an undiscovered token', () => {
+    const html = renderToStaticMarkup(
+      createElement(CardDiscovery, {
+        item: {
+          ...item,
+          personalization: { ...item.personalization!, discovered: true },
+        },
+        viewerOwned: false,
+      }),
+    );
+    expect(html).toContain('Previously discovered');
+  });
+});

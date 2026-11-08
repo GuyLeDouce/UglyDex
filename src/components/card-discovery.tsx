@@ -3,16 +3,22 @@ import type { SquigCardData } from '@/server/collections';
 import { StatusIconStrip } from './status-icon-strip';
 import { SetIconStrip } from './set-icon-strip';
 
-export function CardDiscovery({ item }: { item: SquigCardData }) {
+export function CardDiscovery({
+  item,
+  viewerOwned,
+}: {
+  item: SquigCardData;
+  viewerOwned?: boolean;
+}) {
   const p = item.personalization;
-  const owned = p?.owned ?? item.currentlyOwned;
+  const owned = viewerOwned ?? p?.owned ?? item.currentlyOwned;
   const label = owned
     ? 'Owned'
     : p?.discovered
       ? 'Previously discovered'
       : p
         ? 'New to your Dex'
-        : owned === false
+        : item.currentlyOwned === false
           ? 'Previously owned'
           : null;
   return (

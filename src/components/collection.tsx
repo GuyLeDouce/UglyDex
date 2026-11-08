@@ -1,5 +1,6 @@
 'use client';
 import { CollectorCardLink } from './collector-card-link';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import favoriteStyles from './favorite-heart.module.css';
 import { CardDiscovery } from './card-discovery';
@@ -49,6 +50,7 @@ function AlbumSquigCard({
   savingFavorite = false,
   collectorCard = false,
   onOpen,
+  viewerOwned,
 }: {
   item: SquigCardData;
   priority?: boolean;
@@ -61,6 +63,7 @@ function AlbumSquigCard({
   savingFavorite?: boolean;
   collectorCard?: boolean;
   onOpen?: () => void;
+  viewerOwned?: boolean;
 }) {
   return (
     <article
@@ -93,12 +96,17 @@ function AlbumSquigCard({
         href={`/squig/${item.tokenId}`}
         onOpen={onOpen}
       >
-        <CardDiscovery item={item} />
+        <CardDiscovery item={item} viewerOwned={viewerOwned} />
         <details className="card-details">
           <summary>
             Details {item.currentlyOwned === false ? '· Previously owned' : ''}
           </summary>
           <div className="card-body">
+            {onOpen && (
+              <Link className="text-link" href={`/squig/${item.tokenId}`}>
+                Open Squig Passport →
+              </Link>
+            )}
             {item.representation && (
               <p className="eyebrow">{item.representation}</p>
             )}
@@ -210,6 +218,7 @@ export function CollectionGrid({
   editableFavorites = false,
   collectorCardTokens = [],
   catalog,
+  viewerSignedIn = false,
 }: {
   items: SquigCardData[];
   controls?: boolean;
@@ -217,6 +226,7 @@ export function CollectionGrid({
   editableFavorites?: boolean;
   collectorCardTokens?: number[];
   catalog?: CatalogContext;
+  viewerSignedIn?: boolean;
 }) {
   const router = useRouter();
   const [favorites, setFavorites] = useState(initialFavorites);
@@ -401,6 +411,11 @@ export function CollectionGrid({
           }
           busy={turning}
           collectorCard={collectorCardTokens.includes(items[selected].tokenId)}
+          viewerOwned={
+            viewerSignedIn
+              ? collectorCardTokens.includes(items[selected].tokenId)
+              : undefined
+          }
         />
       )}
       {items.length ? (
@@ -411,6 +426,11 @@ export function CollectionGrid({
             <SquigCard
               key={item.tokenId}
               item={item}
+              viewerOwned={
+                viewerSignedIn
+                  ? collectorCardTokens.includes(item.tokenId)
+                  : undefined
+              }
               onOpen={catalog ? () => setSelected(index) : undefined}
               collectorCard={collectorCardTokens.includes(item.tokenId)}
               favorite={favorites.includes(item.tokenId)}

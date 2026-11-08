@@ -15,6 +15,7 @@ export function CollectionViewer({
   onNext,
   busy,
   collectorCard,
+  viewerOwned,
 }: {
   item: SquigCardData;
   position: number;
@@ -24,6 +25,7 @@ export function CollectionViewer({
   onNext?: () => void;
   busy: boolean;
   collectorCard: boolean;
+  viewerOwned?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null),
     surface = useRef<HTMLDivElement>(null);
@@ -159,7 +161,7 @@ export function CollectionViewer({
             Swipe across the card or use the arrow keys. Browsing follows your
             current search and sort.
           </p>
-          <CardDiscovery item={item} />
+          <CardDiscovery item={item} viewerOwned={viewerOwned} />
           <div className="actions">
             <Link className="button primary" href={`/squig/${item.tokenId}`}>
               View Passport →
