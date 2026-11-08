@@ -32,7 +32,7 @@ export async function Catalog({
       : undefined;
   params = {
     ...params,
-    view: params.view ?? preferredView ?? (personalAlbum ? 'album' : 'grid'),
+    view: params.view ?? preferredView ?? 'grid',
     sort: params.sort ?? (personalAlbum ? 'favorites' : 'token'),
   };
   const data = await collectionPage(params, collectorId, discovered, viewerId),
