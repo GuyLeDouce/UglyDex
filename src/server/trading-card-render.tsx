@@ -19,7 +19,7 @@ export { tradingCardPalettes } from '@/domain/trading-card-palette';
 let fonts:
   | { name: string; data: Buffer; weight: 400 | 600; style: 'normal' }[]
   | undefined;
-function cardFonts() {
+export function cardFonts() {
   return (fonts ??= [
     {
       name: 'Lilita',

@@ -12,7 +12,11 @@ export const cardFinishes: Record<
   legendary: { label: 'Legendary prism', foil: 0.62, sheen: 0.38, facets: 3 },
   unclassified: { label: 'Standard print', foil: 0, sheen: 0.07, facets: 0 },
 };
-export type CardFinish = { rarity: CardRarity; og: boolean };
+export type CardFinish = {
+  rarity: CardRarity;
+  og: boolean;
+  collector?: boolean;
+};
 export function parseCardFinish(
   rarity: string | null,
   og: string | null,

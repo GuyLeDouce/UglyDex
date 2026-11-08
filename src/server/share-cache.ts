@@ -84,9 +84,13 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
         // Only server-projected, verified assets; never request-supplied URLs.
         const [art, avatar] = await Promise.all([
           artworkBatch(card.tokens, card.tradingCard ? {} : card.variants),
-          card.collectorLayout
-            ? shareAvatar(card.collectorLayout.avatar)
-            : Promise.resolve(null),
+          card.collectorCard?.avatarTokenId
+            ? artworkBatch([card.collectorCard.avatarTokenId]).then(
+                (art) => art[card.collectorCard!.avatarTokenId!],
+              )
+            : card.collectorLayout
+              ? shareAvatar(card.collectorLayout.avatar)
+              : Promise.resolve(null),
         ]);
         if (avatar) art[0] = avatar;
         failed = Object.values(art).filter((v) => !v).length;
@@ -96,7 +100,10 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
           failed = card.tokens.length;
           status = 'FALLBACK';
         }
-        if (bytes.length < (card.tradingCard ? 8_000_000 : 2_000_000)) {
+        if (
+          bytes.length <
+          (card.tradingCard || card.collectorCard ? 8_000_000 : 2_000_000)
+        ) {
           const old = cache.get(key);
           if (old) {
             cacheBytes -= old.bytes.length;

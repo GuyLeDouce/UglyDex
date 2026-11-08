@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- ImageResponse requires native image primitives. */
 import 'server-only';
+import { renderCollectorTradingCard } from './collector-trading-card-render';
 import { renderTradingCard } from './trading-card-render';
 import { renderCollectorShare } from './collector-share-render';
 import { ImageResponse } from 'next/og';
@@ -26,6 +27,7 @@ export function renderShare(
   spec: Pick<ShareSpec, 'ratio' | 'template'>,
   art: Record<number, string | null>,
 ) {
+  if (card.collectorCard) return renderCollectorTradingCard(card, art[0]);
   if (card.tradingCard)
     return renderTradingCard(card.tradingCard, art[card.tradingCard.tokenId]);
   if (card.collectorLayout) return renderCollectorShare(card, spec, art);
@@ -354,7 +356,7 @@ export async function renderShareSafe(
   art: Record<number, string | null>,
 ) {
   // Collectible exports must never succeed with a placeholder or missing art.
-  if (card.tradingCard)
+  if (card.tradingCard || card.collectorCard)
     return {
       bytes: new Uint8Array(await renderShare(card, spec, art).arrayBuffer()),
       fallback: false,

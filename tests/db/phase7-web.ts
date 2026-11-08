@@ -301,41 +301,34 @@ export async function phase7WebTests(
       }
       await page.goto(base + '/settings/appearance');
       await page
-        .getByLabel('profile theme', { exact: true })
-        .selectOption('theme-labs');
-      await page
-        .getByLabel('share style', { exact: true })
-        .selectOption({ label: 'Intergalactic' });
-      await page.getByRole('button', { name: 'Save appearance' }).click();
-      await page
-        .getByRole('status')
-        .filter({ hasText: 'Appearance saved.' })
+        .getByRole('heading', { name: 'My Collector Card.', exact: true })
         .waitFor();
-      check(true, 'mobile appearance save end to end');
       check(
-        await page
-          .locator('[aria-label="Appearance preview"]')
-          .getAttribute('class')
-          .then((c) => c?.includes('theme-labs')),
-        'appearance live preview',
+        (await page
+          .getByRole('button', { name: 'Save appearance' })
+          .count()) === 0,
+        'legacy appearance controls removed',
       );
-      await page.getByLabel('profile theme', { exact: true }).focus();
-      await page.keyboard.press('Tab');
       check(
         await page
-          .getByLabel('profile accent', { exact: true })
-          .evaluate((element) => document.activeElement === element),
-        'appearance keyboard focus',
+          .getByRole('link', { name: 'Edit display name & Avatar Squig →' })
+          .isVisible(),
+        'collector identity editing remains accessible',
+      );
+      check(
+        (await page.getByLabel('Share format').inputValue()) ===
+          'collector-card',
+        'My Collector Card opens the branded format',
       );
       await page.screenshot({
-        path: '.data/phase7-appearance-mobile.png',
+        path: '.data/phase7-collector-card-mobile.png',
         fullPage: true,
       });
       await page.goto(base + '/collector/phase7-collector');
       await page.getByRole('button', { name: 'Share ↗', exact: true }).click();
       check(
-        (await page.getByLabel('Style').inputValue()) === 'stats',
-        'share controls initialize from saved Intergalactic preference',
+        (await page.getByLabel('Style').inputValue()) === 'clean',
+        'legacy share controls retain the saved style preference',
       );
       await mkdir('.data/share-backgrounds', { recursive: true });
       const backgrounds = new Set<string>();

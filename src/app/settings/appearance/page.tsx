@@ -1,31 +1,45 @@
-import { GALLERIES_ENABLED } from '@/domain/features';
+import { ShareControls } from '@/components/share-controls';
+import { absoluteUrl } from '@/server/sharing';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
-import { cosmeticAvailability } from '@/server/cosmetics';
-import { AppearanceEditor } from '@/components/appearance-editor';
 export default async function Page() {
   const id = await requireCollector();
-  const [preferences, unlocked] = await Promise.all([
-    db().collectorCosmeticPreference.findMany({
-      where: { collectorId: id },
-      select: { kind: true, cosmeticId: true },
-    }),
-    cosmeticAvailability(id),
-  ]);
+  const collector = await db().collector.findUniqueOrThrow({
+    where: { id },
+    select: { slug: true, isPublic: true },
+  });
   return (
     <>
-      <p className="eyebrow">PERSONAL. NEVER PAYWALLED.</p>
-      <h1>Your kind of ugly.</h1>
+      <p className="eyebrow">YOUR COLLECTION. YOUR HISTORY. YOUR LEGACY.</p>
+      <h1>My Collector Card.</h1>
       <p>
-        Free themes and accents, with frames earned from verified achievements,
-        completed sets or current OG/Legendary ownership. If eligibility
-        changes, your display safely returns to its default.
+        Your Avatar Squig, discoveries and earned progress, in one UglyDex
+        holographic card.
       </p>
-      {GALLERIES_ENABLED && (
-        <Link href="/settings/galleries">Customize your galleries ↗</Link>
-      )}
-      <AppearanceEditor preferences={preferences} unlocked={unlocked} />
+      <p>
+        <Link className="text-link" href="/settings/profile">
+          Edit display name & Avatar Squig →
+        </Link>
+      </p>
+      <ShareControls
+        spec={{
+          kind: 'collector',
+          entity: collector.slug,
+          format: 'collector-card',
+        }}
+        url={absoluteUrl(
+          '/share?' +
+            new URLSearchParams({
+              kind: 'collector',
+              entity: collector.slug,
+              format: 'collector-card',
+            }),
+        )}
+        copy="Your collection. Your history. Your legacy."
+        owner={!collector.isPublic}
+        label="My Collector Card"
+      />
     </>
   );
 }

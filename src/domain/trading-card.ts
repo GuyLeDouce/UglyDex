@@ -68,6 +68,8 @@ export function tradingCardData(row: {
   };
 }
 export function shareFilename(spec: { format?: string; entity: string }) {
+  if (spec.format === 'collector-card')
+    return `uglydex-${spec.entity}-collector-card.png`;
   return spec.format === 'trading-card'
     ? `squigs-reloaded-${spec.entity}-trading-card.png`
     : 'uglydex.png';

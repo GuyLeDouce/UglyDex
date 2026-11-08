@@ -54,6 +54,14 @@ export async function GET(request: Request) {
       headers: {
         ...headers,
         'Content-Type': 'image/png',
+        ...(card.collectorCard
+          ? {
+              'X-Card-Type': 'collector',
+              'X-Card-Description': encodeURIComponent(
+                `${card.title}. UglyDex collector card. ${card.collectorCard.completion?.toFixed(1) ?? 'Pending'} percent complete. Achievement level ${card.collectorCard.level ?? 'pending'}. ${card.collectorCard.discovered ?? 'Pending'} Squigs discovered. ${card.collectorCard.traits ?? 'Pending'} traits discovered. ${card.collectorCard.historicalSets ?? 'Pending'} historical sets. ${card.collectorCard.achievements ?? 'Pending'} achievements complete.`,
+              ),
+            }
+          : {}),
         ...(card.tradingCard
           ? {
               'X-Card-Rarity': card.tradingCard.rarity,
@@ -79,7 +87,8 @@ export async function GET(request: Request) {
           ? {
               'Content-Disposition':
                 'attachment; filename="' +
-                (spec.format === 'trading-card'
+                (spec.format === 'trading-card' ||
+                spec.format === 'collector-card'
                   ? shareFilename(spec)
                   : 'uglydex-' + spec.kind + '.png') +
                 '"',
