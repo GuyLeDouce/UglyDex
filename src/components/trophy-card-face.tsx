@@ -129,9 +129,6 @@ export function TrophyCardFace({
         style={{
           ...box(250, 385, 1000, 1000),
           objectFit: 'contain',
-          ...(card.kind === 'set' && !print
-            ? { imageRendering: 'pixelated' }
-            : {}),
         }}
       />
       <div
