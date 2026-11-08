@@ -1,3 +1,4 @@
+import { achievementTrophy, setTrophy } from '@/domain/trophy-card';
 import { collectorAvatar } from './collector-avatar';
 import { GALLERIES_ENABLED } from '@/domain/features';
 import { favoriteTokenIds } from './favorites';
@@ -392,8 +393,19 @@ export async function shareCard(
     if (selected.some((a) => !a)) return null;
     const earned = selected.filter((a) => !!a);
     const a = earned[0];
+    const avatar =
+      q.format === 'trophy-card' ? await collectorAvatar(c.id, c.avatar) : null;
+    const trophy =
+      q.format === 'trophy-card'
+        ? achievementTrophy(a, {
+            collector: name,
+            avatarTokenId: avatar?.tokenId ?? null,
+          })
+        : null;
+    if (q.format === 'trophy-card' && !trophy) return null;
     card = {
       ...card,
+      ...(trophy ? { trophyCard: trophy } : {}),
       title: earned.length === 1 ? a.name : `${name}’s achievements`,
       achievementBadges: earned.flatMap((a) =>
         a.badge.status === 'earned' ? [a.badge] : [],
@@ -408,7 +420,7 @@ export async function shareCard(
         earned.length === 1
           ? a.description
           : `${earned.length} earned milestones. Real history.`,
-      date: earned.length === 1 ? (a.at ?? undefined) : undefined,
+
       stats: [
         earned.length === 1
           ? a.tier + ' achievement'
@@ -421,6 +433,7 @@ export async function shareCard(
         shareQuery({
           kind: q.kind,
           entity: c.slug,
+          ...(q.format === 'trophy-card' ? { format: q.format } : {}),
           ...(q.achievements
             ? { achievements: q.achievements }
             : { key: q.key }),
@@ -432,12 +445,22 @@ export async function shareCard(
         ? d.cards.find((s) => s.key === q.key && s.complete && s.revealed)
         : null;
     if (!s) return null;
+    const avatar =
+      q.format === 'trophy-card' ? await collectorAvatar(c.id, c.avatar) : null;
+    const trophy =
+      q.format === 'trophy-card'
+        ? setTrophy(s, {
+            collector: name,
+            avatarTokenId: avatar?.tokenId ?? null,
+          })
+        : null;
     card = {
+      ...(trophy ? { trophyCard: trophy } : {}),
       ...card,
       title: s.name,
       eyebrow: 'COMPLETED BY ' + name,
       description: s.description,
-      date: s.completedAt ?? undefined,
+
       stats: [
         s.mode === 'CURRENT_HOLDING'
           ? 'Currently complete'
@@ -445,13 +468,21 @@ export async function shareCard(
       ],
       badges: [],
       tokens:
-        c.collectionVisibility === 'HIDDEN' && c.id !== viewerId
+        q.format === 'trophy-card'
           ? []
-          : [...new Set(s.requirements.flatMap((r) => r.tokens))]
-              .sort((a, b) => a - b)
-              .slice(0, 16),
+          : c.collectionVisibility === 'HIDDEN' && c.id !== viewerId
+            ? []
+            : [...new Set(s.requirements.flatMap((r) => r.tokens))]
+                .sort((a, b) => a - b)
+                .slice(0, 16),
       path:
-        '/share?' + shareQuery({ kind: q.kind, entity: c.slug, key: q.key }),
+        '/share?' +
+        shareQuery({
+          kind: q.kind,
+          entity: c.slug,
+          key: q.key,
+          ...(q.format === 'trophy-card' ? { format: q.format } : {}),
+        }),
     };
   } else if (q.kind === 'collage') {
     if (!permitTokens) return null;
@@ -555,7 +586,12 @@ export async function shareCard(
       stats: [],
       badges: [],
       path:
-        '/share?' + shareQuery({ kind: q.kind, entity: c.slug, key: q.key }),
+        '/share?' +
+        shareQuery({
+          kind: q.kind,
+          entity: c.slug,
+          key: q.key,
+        }),
     };
   } else if (
     q.kind === 'milestone' &&
@@ -583,7 +619,12 @@ export async function shareCard(
       stats: [],
       badges: [],
       path:
-        '/share?' + shareQuery({ kind: q.kind, entity: c.slug, key: q.key }),
+        '/share?' +
+        shareQuery({
+          kind: q.kind,
+          entity: c.slug,
+          key: q.key,
+        }),
     };
   } else if (q.kind === 'milestone') {
     if (
@@ -610,7 +651,12 @@ export async function shareCard(
       stats: [],
       badges: [],
       path:
-        '/share?' + shareQuery({ kind: q.kind, entity: c.slug, key: q.key }),
+        '/share?' +
+        shareQuery({
+          kind: q.kind,
+          entity: c.slug,
+          key: q.key,
+        }),
     };
   }
   const style = await appearance(c.id);
@@ -644,7 +690,7 @@ export async function shareMetadata(
         '/api/share?' +
           shareQuery({
             ...q,
-            format: undefined,
+            format: q.format === 'trophy-card' ? q.format : undefined,
             template: resolveShareStyle(spec.template, c.appearance?.share),
           }),
       );
@@ -660,8 +706,18 @@ export async function shareMetadata(
         images: [
           {
             url: image,
-            width: q.ratio === 'square' ? 1080 : 1200,
-            height: q.ratio === 'square' ? 1080 : 630,
+            width:
+              q.format === 'trophy-card'
+                ? 1500
+                : q.ratio === 'square'
+                  ? 1080
+                  : 1200,
+            height:
+              q.format === 'trophy-card'
+                ? 2100
+                : q.ratio === 'square'
+                  ? 1080
+                  : 630,
           },
         ],
         type: 'website',

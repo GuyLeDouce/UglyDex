@@ -95,7 +95,9 @@ export const shareSchema = z
       )
       .optional(),
     ratio: z.enum(['landscape', 'square']).default('landscape'),
-    format: z.enum(['standard', 'trading-card', 'collector-card']).optional(),
+    format: z
+      .enum(['standard', 'trading-card', 'collector-card', 'trophy-card'])
+      .optional(),
     template: z
       .enum(Object.keys(shareStyleLabels) as [ShareStyle, ...ShareStyle[]])
       .default('clean'),
@@ -116,6 +118,14 @@ export const shareSchema = z
       .default('ugly'),
   })
   .strict()
+  .refine(
+    (q) =>
+      q.format !== 'trophy-card' ||
+      ((q.kind === 'achievement' || q.kind === 'set') &&
+        !!q.key &&
+        !q.achievements),
+    'Trophy cards require one collector achievement or set',
+  )
   .refine(
     (q) => q.format !== 'collector-card' || q.kind === 'collector',
     'Collector cards require a collector profile',
@@ -140,6 +150,7 @@ export type CollectorTradingCard = {
   level: number | null;
 };
 export type ShareCard = {
+  trophyCard?: import('./trophy-card').TrophyCardData;
   collectorCard?: CollectorTradingCard;
   tradingCard?: import('./trading-card').TradingCardData;
   collectorLayout?: {

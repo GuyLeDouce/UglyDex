@@ -23,7 +23,9 @@ export function ShareControls({
   label?: string;
 }) {
   const [open, setOpen] = useState(
-      spec.format === 'trading-card' || spec.format === 'collector-card',
+      spec.format === 'trading-card' ||
+        spec.format === 'collector-card' ||
+        spec.format === 'trophy-card',
     ),
     [format, setFormat] = useState<ShareSpec['format']>(
       spec.format ?? 'standard',
@@ -34,14 +36,20 @@ export function ShareControls({
     );
   const canTrade = spec.kind === 'squig' || spec.kind === 'passport';
   const collector = spec.kind === 'collector' && format === 'collector-card';
-  const trading = collector || (canTrade && format === 'trading-card');
-  const activeFormat = collector
-    ? 'collector-card'
-    : trading
-      ? 'trading-card'
-      : spec.format
-        ? 'standard'
-        : undefined;
+  const trophy =
+    (spec.kind === 'achievement' || spec.kind === 'set') &&
+    format === 'trophy-card';
+  const trading =
+    trophy || collector || (canTrade && format === 'trading-card');
+  const activeFormat = trophy
+    ? 'trophy-card'
+    : collector
+      ? 'collector-card'
+      : trading
+        ? 'trading-card'
+        : spec.format
+          ? 'standard'
+          : undefined;
   const selectedUrl =
     (canTrade || spec.kind === 'collector') && (trading || !!spec.format)
       ? new URL(
@@ -105,11 +113,17 @@ export function ShareControls({
               profile progress; pending values remain unscored.
             </p>
           )}
-          {trading && !collector && (
+          {trading && !collector && !trophy && (
             <p>
               1500 × 2100 PNG · Original artwork · Rarity-coloured frame. Values
               reflect the indexed metadata when generated. This card does not
               certify ownership.
+            </p>
+          )}
+          {trophy && (
+            <p>
+              1500 × 2100 · Collector accomplishment card · Original badge
+              artwork.
             </p>
           )}
           {!trading && (
@@ -148,6 +162,7 @@ export function ShareControls({
             trading={trading}
             filename={shareFilename({
               entity: spec.entity,
+              key: spec.key,
               format: activeFormat,
             })}
             url={selectedUrl}

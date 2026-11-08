@@ -14,6 +14,7 @@ import './community.css';
 import './card-album.css';
 import './collection-album.css';
 import './interactive-card.css';
+import './trophy-cards.css';
 import { currentSession } from '@/server/auth';
 import { db } from '@/server/db';
 import { SiteHeader } from '@/components/site-header';

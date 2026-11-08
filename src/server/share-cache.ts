@@ -84,13 +84,17 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
         // Only server-projected, verified assets; never request-supplied URLs.
         const [art, avatar] = await Promise.all([
           artworkBatch(card.tokens, card.tradingCard ? {} : card.variants),
-          card.collectorCard?.avatarTokenId
-            ? artworkBatch([card.collectorCard.avatarTokenId]).then(
-                (art) => art[card.collectorCard!.avatarTokenId!],
+          card.trophyCard?.avatarTokenId
+            ? artworkBatch([card.trophyCard.avatarTokenId]).then(
+                (art) => art[card.trophyCard!.avatarTokenId!],
               )
-            : card.collectorLayout
-              ? shareAvatar(card.collectorLayout.avatar)
-              : Promise.resolve(null),
+            : card.collectorCard?.avatarTokenId
+              ? artworkBatch([card.collectorCard.avatarTokenId]).then(
+                  (art) => art[card.collectorCard!.avatarTokenId!],
+                )
+              : card.collectorLayout
+                ? shareAvatar(card.collectorLayout.avatar)
+                : Promise.resolve(null),
         ]);
         if (avatar) art[0] = avatar;
         failed = Object.values(art).filter((v) => !v).length;
@@ -102,7 +106,9 @@ export async function sharePng(card: ShareCard, spec: ShareSpec) {
         }
         if (
           bytes.length <
-          (card.tradingCard || card.collectorCard ? 8_000_000 : 2_000_000)
+          (card.tradingCard || card.collectorCard || card.trophyCard
+            ? 8_000_000
+            : 2_000_000)
         ) {
           const old = cache.get(key);
           if (old) {

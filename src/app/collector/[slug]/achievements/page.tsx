@@ -15,7 +15,8 @@ export async function generateMetadata({
 }
 import { db } from '@/server/db';
 import { notFound } from 'next/navigation';
-import { Progression } from '@/components/progression';
+import { TrophyAlbum } from '@/components/trophy-album';
+import { trophyAlbum } from '@/server/trophy-album';
 export default async function Page({
   params,
 }: {
@@ -27,19 +28,22 @@ export default async function Page({
       select: { id: true, isPublic: true, displayName: true },
     });
   if (!c?.isPublic) notFound();
+  const album = await trophyAlbum(c.id, true);
+  if (!album) notFound();
   return (
     <>
       <section className="page-heading">
         <p className="eyebrow">COLLECTOR ACHIEVEMENTS</p>
-        <h1>{c.displayName || slug}</h1>
+        <h1>{album.name}’s achievement cards.</h1>
+        <p>
+          Earned achievements. Completed sets. A collection of accomplishments.
+        </p>
       </section>
-      <Progression
-        subject="COLLECTOR"
-        id={c.id}
-        path={`/collector/${slug}/achievements`}
-        public
-        full
-      />
+      <p>
+        {album.level !== null ? `Level ${album.level} · ${album.xp} XP · ` : ''}
+        {album.cards.length} unlocked collector cards
+      </p>
+      <TrophyAlbum {...album} />
     </>
   );
 }

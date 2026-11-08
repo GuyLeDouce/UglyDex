@@ -106,6 +106,34 @@ export async function achievementBadgeWebTests(
       !JSON.stringify(p).includes('furniture.png'),
     'secret metadata and image omitted from public projection',
   );
+  const trophy = await shareCard({
+    kind: 'achievement',
+    entity: c.slug,
+    key: 'collector-wins-25',
+    format: 'trophy-card',
+  });
+  check(
+    trophy?.trophyCard?.rarity === 'epic' && !trophy.date,
+    'collector trophy preserves existing Epic tier and omits dates',
+  );
+  check(
+    !(await shareCard({
+      kind: 'achievement',
+      entity: c.slug,
+      key: 'collector-systems-7',
+      format: 'trophy-card',
+    })),
+    'locked secret trophy cannot be exported',
+  );
+  check(
+    !(await shareCard({
+      kind: 'achievement',
+      entity: c.slug,
+      key: 'squig-duels-1',
+      format: 'trophy-card',
+    })),
+    'Squig achievement cannot be exported as collector trophy',
+  );
   const summary = (await squigBadgeSummaries([s.id])).get(s.id)!;
   for (const [kind, entity] of [
     ['collector', c.slug],
@@ -229,6 +257,29 @@ export async function achievementBadgeWebTests(
     data: { isPublic: false },
   });
   check(
+    !(await shareCard({
+      kind: 'achievement',
+      entity: c.slug,
+      key: 'collector-wins-25',
+      format: 'trophy-card',
+    })),
+    'private collector trophy is not public',
+  );
+  check(
+    !!(
+      await shareCard(
+        {
+          kind: 'achievement',
+          entity: c.slug,
+          key: 'collector-wins-25',
+          format: 'trophy-card',
+        },
+        c.id,
+      )
+    )?.trophyCard,
+    'private owner can still export their earned trophy',
+  );
+  check(
     (await fetch(secretUrl)).status === 404,
     'secret image revoked after profile becomes private',
   );
@@ -326,6 +377,106 @@ export async function achievementBadgeWebTests(
         // External NFT artwork may keep requests open. Wait for the tested
         // content explicitly; badge decoding is checked below for every image.
         await page.goto(base + path, { waitUntil: 'domcontentloaded' });
+        if (name === 'achievements' || name === 'collector-achievements') {
+          const cards = page.locator('.trophy-album-card');
+          check(
+            (await cards.count()) === 5,
+            'collector album contains only five earned cards',
+          );
+          check(
+            !(await page.locator('.trophy-album-grid').innerText()).match(
+              /Qualified|Earned on|Completed on|2026/,
+            ),
+            'trophy previews omit earned dates',
+          );
+          await page
+            .getByLabel('Collection', { exact: true })
+            .selectOption('achievement');
+          await page.getByLabel('Rarity / difficulty').selectOption('Epic');
+          check(
+            (await cards.count()) === 1,
+            'rarity filter returns the existing Epic achievement',
+          );
+          await page.getByLabel('Rarity / difficulty').selectOption('');
+          await page.locator('.trophy-locked summary').click();
+          check(
+            (await page.locator('.trophy-locked-grid article').count()) === 38,
+            'remaining collector catalogue remains available separately',
+          );
+          check(
+            !(await page.locator('body').innerText()).includes(
+              'Part of the Furniture',
+            ),
+            'album keeps locked secrets hidden',
+          );
+          await page.locator('.trophy-locked summary').click();
+          await page.evaluate(async () => {
+            await document.fonts.ready;
+            await Promise.all(
+              Array.from(
+                document.querySelectorAll<HTMLImageElement>(
+                  '.trophy-card-face img',
+                ),
+              ).map((i) => i.decode()),
+            );
+          });
+          check(
+            await page.evaluate(
+              () => document.documentElement.scrollWidth <= window.innerWidth,
+            ),
+            'collector album has no mobile overflow',
+          );
+          await mkdir('.data/design', { recursive: true });
+          await page.screenshot({
+            path: `.data/design/trophy-album-${name}-${width}.png`,
+            fullPage: true,
+          });
+          if (width === 390 && name === 'achievements') {
+            await page
+              .getByRole('button', {
+                name: 'Inspect Certified Menace collector card',
+              })
+              .click();
+            await page
+              .getByRole('button', { name: 'Download PNG', exact: true })
+              .waitFor();
+            await page.waitForFunction(
+              () =>
+                !document.querySelector<HTMLButtonElement>(
+                  '.trophy-dialog button.primary:disabled',
+                ),
+            );
+            check(
+              await page
+                .getByRole('button', { name: 'Download PNG', exact: true })
+                .isEnabled(),
+              'earned trophy PNG prepared successfully',
+            );
+            const download = page.waitForEvent('download');
+            await page
+              .getByRole('button', { name: 'Download PNG', exact: true })
+              .click();
+            await (
+              await download
+            ).saveAs('.data/design/trophy-earned-download.png');
+            const metadata = await sharp(
+              '.data/design/trophy-earned-download.png',
+            ).metadata();
+            check(
+              metadata.width === 1500 && metadata.height === 2100,
+              'downloaded trophy is a valid full-resolution PNG',
+            );
+            await page
+              .getByRole('button', { name: 'Close card ×', exact: true })
+              .click();
+            check(
+              (await page.locator('.trophy-dialog').getAttribute('open')) ===
+                null,
+              'collector card dialog closes',
+            );
+          }
+          continue;
+        }
         if (name === 'squig-detail') {
           check(
             await page.locator('#achievements').isVisible(),
@@ -505,11 +656,6 @@ export async function achievementBadgeWebTests(
             .locator('.squig-card')
             .filter({ has: page.locator('a[href="/squig/4398"]') })
             .screenshot({ path: '.data/badges/squig-card-closeup.png' });
-        if (width === 1440 && name === 'achievements')
-          await page
-            .locator('.achievement-grid')
-            .nth(1)
-            .screenshot({ path: '.data/badges/achievement-grid-closeup.png' });
         console.log(JSON.stringify({ event: 'test.badges.page', path, width }));
         evidence.push({
           path,

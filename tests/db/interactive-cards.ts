@@ -1,3 +1,8 @@
+import {
+  seedProgression,
+  rebuildSubject,
+} from '../../src/server/progression-engine';
+import { RULESET } from '../../src/domain/progression';
 import { db } from '../../src/server/db';
 import { SQUIGS_CONTRACT } from '../../src/domain/validation';
 import catalog from '../../data/squigs.json';
@@ -87,6 +92,23 @@ export async function interactiveCardTests(
       isCurrent: true,
     },
   });
+  await seedProgression();
+  await rebuildSubject('COLLECTOR', collector.id);
+  // Disposable fixture award exercises the full trophy PNG and animated pipeline.
+  await db().collectorAchievement.update({
+    where: {
+      collectorId_achievementId: {
+        collectorId: collector.id,
+        achievementId: RULESET + ':collector-wins-25',
+      },
+    },
+    data: {
+      awardedAt: new Date('2026-01-01'),
+      revokedAt: null,
+      gateSatisfied: true,
+      progress: 25,
+    },
+  });
   const evidence: unknown[] = [];
   for (const [engine, type] of [
     ['chromium', chromium],
@@ -102,17 +124,30 @@ export async function interactiveCardTests(
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
       const cases = (engine === 'chromium' ? records : [records[2]]).map(
-        (record) => ({ record, collectorCard: false }),
+        (record) => ({ record, collectorCard: false, trophyCard: false }),
       );
-      cases.push({ record: records[2], collectorCard: true });
-      for (const { record, collectorCard } of cases) {
-        const name = collectorCard
-          ? `${engine}-collector`
-          : `${engine}-${record.rarityTier}${record.og ? '-og' : ''}`;
+      cases.push({
+        record: records[2],
+        collectorCard: true,
+        trophyCard: false,
+      });
+      cases.push({
+        record: records[2],
+        collectorCard: false,
+        trophyCard: true,
+      });
+      for (const { record, collectorCard, trophyCard } of cases) {
+        const name = trophyCard
+          ? `${engine}-trophy`
+          : collectorCard
+            ? `${engine}-collector`
+            : `${engine}-${record.rarityTier}${record.og ? '-og' : ''}`;
         await page.goto(
-          collectorCard
-            ? `${base}/share?kind=collector&entity=card-fixture&format=collector-card`
-            : `${base}/share?kind=passport&entity=${record.tokenId}&format=trading-card`,
+          trophyCard
+            ? `${base}/share?kind=achievement&entity=card-fixture&key=collector-wins-25&format=trophy-card`
+            : collectorCard
+              ? `${base}/share?kind=collector&entity=card-fixture&format=collector-card`
+              : `${base}/share?kind=passport&entity=${record.tokenId}&format=trading-card`,
         );
         await page
           .locator('.share-preview')
@@ -268,6 +303,7 @@ export async function interactiveCardTests(
           engine,
           browserVersion: browser.version(),
           collectorCard,
+          trophyCard,
           tokenId: record.tokenId,
           rarity: record.rarityTier,
           og: record.og,

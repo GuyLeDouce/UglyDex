@@ -1,0 +1,123 @@
+.trophy-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+  padding: 20px 0;
+  border-block: 1px solid var(--line, #34404e);
+}
+.trophy-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.trophy-filters label:first-child {
+  flex: 1;
+  min-width: 220px;
+}
+.trophy-filters input,
+.trophy-filters select {
+  min-height: 44px;
+  max-width: 100%;
+}
+.trophy-album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 300px);
+  gap: 32px 24px;
+  justify-content: center;
+  margin: 32px 0 48px;
+}
+.trophy-album-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text, #f5f4ef);
+  cursor: pointer;
+  text-align: left;
+  border-radius: 16px;
+}
+.trophy-album-card .trophy-card-face {
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.trophy-album-card:hover .trophy-card-face {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px #0005;
+}
+.trophy-album-card:focus-visible {
+  outline: 3px solid #ffe32b;
+  outline-offset: 6px;
+}
+.trophy-card-action {
+  font-size: 0.75rem;
+  padding: 12px 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.trophy-locked {
+  border-top: 1px solid #34404e;
+  padding: 24px 0;
+}
+.trophy-locked summary {
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 44px;
+}
+.trophy-locked-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 24px;
+}
+.trophy-locked-grid article {
+  padding: 20px 0;
+  border-bottom: 1px solid #34404e;
+}
+.trophy-dialog {
+  width: min(94vw, 860px);
+  max-height: 92dvh;
+  overflow: auto;
+  background: #101318;
+  color: #f5f4ef;
+  padding: 24px;
+  border: 1px solid #536175;
+  border-radius: 16px;
+}
+.trophy-dialog::backdrop {
+  background: #000c;
+}
+.trophy-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  z-index: 2;
+}
+.trophy-dialog h2 {
+  padding-top: 12px;
+  clear: both;
+}
+.trophy-dialog .share-panel {
+  border: 0;
+  padding: 16px 0;
+  background: transparent;
+}
+@media (max-width: 359px) {
+  .trophy-album-grid {
+    grid-template-columns: 280px;
+  }
+  .trophy-album-card .trophy-card-face {
+    zoom: 0.933333;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trophy-album-card .trophy-card-face {
+    transition: none;
+  }
+  .trophy-album-card:hover .trophy-card-face {
+    transform: none;
+  }
+}
