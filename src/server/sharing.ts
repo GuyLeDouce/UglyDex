@@ -212,6 +212,33 @@ export async function shareCard(
     progressionView('COLLECTOR', c.id, publicView),
     dexView(c.id, publicView),
   ]);
+  if (q.format === 'collector-card') {
+    const avatar = await collectorAvatar(c.id, c.avatar);
+    return {
+      ...generic,
+      title: name,
+      eyebrow: 'UGLYDEX · COLLECTOR CARD',
+      description: 'Your collection. Your history. Your legacy.',
+      indexable: c.isPublic,
+      path:
+        '/share?' +
+        shareQuery({
+          kind: 'collector',
+          entity: c.slug,
+          format: 'collector-card',
+        }),
+      collectorCard: {
+        avatar: avatar?.url ?? null,
+        avatarTokenId: avatar?.tokenId ?? null,
+        completion: d?.status === 'ready' ? d.score.overall : null,
+        discovered: d?.status === 'ready' ? d.discovered : null,
+        traits: d?.status === 'ready' ? d.traits : null,
+        historicalSets: d?.status === 'ready' ? d.historicalSets : null,
+        achievements: p?.status === 'ready' ? p.count : null,
+        level: p?.status === 'ready' ? p.level : null,
+      },
+    };
+  }
   const owned = await eligibleGalleryTokens(c.id, 'CURRENT_COLLECTION');
   const permitTokens = c.id === viewerId || c.collectionVisibility !== 'HIDDEN';
   const featured = permitTokens ? await favoriteTokenIds(c.id) : [];

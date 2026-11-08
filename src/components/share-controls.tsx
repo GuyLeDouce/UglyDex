@@ -22,7 +22,9 @@ export function ShareControls({
   owner?: boolean;
   label?: string;
 }) {
-  const [open, setOpen] = useState(spec.format === 'trading-card'),
+  const [open, setOpen] = useState(
+      spec.format === 'trading-card' || spec.format === 'collector-card',
+    ),
     [format, setFormat] = useState<ShareSpec['format']>(
       spec.format ?? 'standard',
     ),
@@ -31,20 +33,23 @@ export function ShareControls({
       spec.template ?? 'clean',
     );
   const canTrade = spec.kind === 'squig' || spec.kind === 'passport';
-  const trading = canTrade && format === 'trading-card';
-  const activeFormat = trading
-    ? 'trading-card'
-    : spec.format
-      ? 'standard'
-      : undefined;
+  const collector = spec.kind === 'collector' && format === 'collector-card';
+  const trading = collector || (canTrade && format === 'trading-card');
+  const activeFormat = collector
+    ? 'collector-card'
+    : trading
+      ? 'trading-card'
+      : spec.format
+        ? 'standard'
+        : undefined;
   const selectedUrl =
-    canTrade && (trading || spec.format === 'trading-card')
+    (canTrade || spec.kind === 'collector') && (trading || !!spec.format)
       ? new URL(
           '/share?' +
             shareQuery({
-              kind: 'passport',
+              kind: spec.kind === 'collector' ? 'collector' : 'passport',
               entity: spec.entity,
-              ...(trading ? { format: 'trading-card' } : {}),
+              ...(trading ? { format: activeFormat } : {}),
             }),
           url,
         ).href
@@ -73,7 +78,7 @@ export function ShareControls({
               contents visible to your recipients.
             </p>
           )}
-          {canTrade && (
+          {(canTrade || spec.kind === 'collector') && (
             <label className="share-format">
               Format
               <select
@@ -84,13 +89,23 @@ export function ShareControls({
                 }
               >
                 <option value="standard">Passport / social image</option>
-                <option value="trading-card">
-                  Squigs Reloaded Trading Card
-                </option>
+                {canTrade ? (
+                  <option value="trading-card">
+                    Squigs Reloaded Trading Card
+                  </option>
+                ) : (
+                  <option value="collector-card">UglyDex Collector Card</option>
+                )}
               </select>
             </label>
           )}
-          {trading && (
+          {collector && (
+            <p>
+              1500 × 2100 · Blue & yellow holographic collector card. Confirmed
+              profile progress; pending values remain unscored.
+            </p>
+          )}
+          {trading && !collector && (
             <p>
               1500 × 2100 PNG · Original artwork · Rarity-coloured frame. Values
               reflect the indexed metadata when generated. This card does not
@@ -210,10 +225,15 @@ function ShareImage({
             response.headers.get('X-Card-Description') ??
               'Squigs Reloaded collector card',
           ),
-          finish: parseCardFinish(
-            response.headers.get('X-Card-Rarity'),
-            response.headers.get('X-Card-OG'),
-          ),
+          finish: {
+            ...parseCardFinish(
+              response.headers.get('X-Card-Rarity'),
+              response.headers.get('X-Card-OG'),
+            ),
+            ...(response.headers.get('X-Card-Type') === 'collector'
+              ? { collector: true }
+              : {}),
+          },
           file: new File([blob], filename, { type: 'image/png' }),
         });
         setMessage('Image ready.');
@@ -285,11 +305,7 @@ function ShareImage({
           }
           src={asset.url}
           data-source={image}
-          alt={
-            trading
-              ? 'Squigs Reloaded trading card preview'
-              : 'UglyDex share card preview'
-          }
+          alt={trading ? 'Trading card preview' : 'UglyDex share card preview'}
         />
       )}
       {asset && trading && (

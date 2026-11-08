@@ -51,6 +51,42 @@ export async function interactiveCardTests(
         update: { value },
       });
   }
+  const collector = await db().collector.create({
+    data: {
+      slug: 'card-fixture',
+      displayName: 'Collector Fixture',
+      isPublic: true,
+    },
+  });
+  const wallet = '0x' + 'e'.repeat(40);
+  await db().collectorWallet.create({
+    data: {
+      collectorId: collector.id,
+      chainId: 1,
+      walletAddress: wallet,
+      source: 'SIWE',
+      verifiedAt: new Date(),
+      isPrimary: true,
+    },
+  });
+  const avatar = await db().squig.findFirstOrThrow({
+    where: {
+      chainId: 1,
+      contractAddress: SQUIGS_CONTRACT,
+      tokenId: records[2].tokenId,
+    },
+  });
+  await db().squigOwnership.create({
+    data: {
+      squigId: avatar.id,
+      walletAddress: wallet,
+      sourceKey: 'collector-card-fixture',
+      source: 'fixture',
+      blockNumber: 1n,
+      blockHash: '0x' + '1'.repeat(64),
+      isCurrent: true,
+    },
+  });
   const evidence: unknown[] = [];
   for (const [engine, type] of [
     ['chromium', chromium],
@@ -65,10 +101,18 @@ export async function interactiveCardTests(
       });
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
-      for (const record of engine === 'chromium' ? records : [records[2]]) {
-        const name = `${engine}-${record.rarityTier}${record.og ? '-og' : ''}`;
+      const cases = (engine === 'chromium' ? records : [records[2]]).map(
+        (record) => ({ record, collectorCard: false }),
+      );
+      cases.push({ record: records[2], collectorCard: true });
+      for (const { record, collectorCard } of cases) {
+        const name = collectorCard
+          ? `${engine}-collector`
+          : `${engine}-${record.rarityTier}${record.og ? '-og' : ''}`;
         await page.goto(
-          `${base}/share?kind=passport&entity=${record.tokenId}&format=trading-card`,
+          collectorCard
+            ? `${base}/share?kind=collector&entity=card-fixture&format=collector-card`
+            : `${base}/share?kind=passport&entity=${record.tokenId}&format=trading-card`,
         );
         await page
           .locator('.share-preview')
@@ -96,6 +140,13 @@ export async function interactiveCardTests(
           await viewer.getByRole('button', { name: 'Motion off' }).isVisible(),
           'reduced-motion starts static',
         );
+        if (collectorCard)
+          check(
+            await viewer
+              .getByRole('heading', { name: 'Blue & gold holographic' })
+              .isVisible(),
+            'collector viewer has branded finish, not NFT rarity',
+          );
         await viewer.screenshot({
           path: `.data/interactive-cards/${name}-desktop.png`,
         });
@@ -216,6 +267,7 @@ export async function interactiveCardTests(
         evidence.push({
           engine,
           browserVersion: browser.version(),
+          collectorCard,
           tokenId: record.tokenId,
           rarity: record.rarityTier,
           og: record.og,

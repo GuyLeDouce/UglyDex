@@ -11,7 +11,7 @@ const accountLinks = [
   ['/settings/sharing', 'Share studio'],
   ['/settings/wallets', 'Linked wallets'],
   ['/settings/profile', 'Profile settings'],
-  ['/settings/appearance', 'Appearance'],
+  ['/settings/appearance', 'My Collector Card'],
   ['/settings/galleries', 'My galleries'],
 ] as const;
 

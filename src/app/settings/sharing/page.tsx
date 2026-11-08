@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { highestFamilyBadges } from '@/server/achievement-badges';
 import { requireCollector } from '@/server/session';
 import { db } from '@/server/db';
@@ -38,6 +39,11 @@ export default async function Page() {
           A curated card. A favourite freak. Your whole strange field guide.
         </p>
       </section>
+      <p>
+        <Link className="button primary" href="/settings/appearance">
+          My Collector Card →
+        </Link>
+      </p>
       <ShareStudio
         template={style.share}
         slug={c.slug}

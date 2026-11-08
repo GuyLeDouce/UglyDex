@@ -188,9 +188,13 @@ export function InteractiveCard({
         >
           <header className="card-viewer-header">
             <div>
-              <p className="eyebrow">SQUIGS RELOADED</p>
+              <p className="eyebrow">
+                {finish.collector ? 'UGLYDEX COLLECTOR' : 'SQUIGS RELOADED'}
+              </p>
               <h2 id="card-viewer-title">
-                {cardFinishes[finish.rarity].label}
+                {finish.collector
+                  ? 'Blue & gold holographic'
+                  : cardFinishes[finish.rarity].label}
                 {finish.og ? ' · OG' : ''}
               </h2>
             </div>
