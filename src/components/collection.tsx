@@ -97,6 +97,18 @@ function AlbumSquigCard({
         onOpen={onOpen}
       >
         <CardDiscovery item={item} viewerOwned={viewerOwned} />
+        <nav
+          className="card-record-links"
+          aria-label={`Squig #${item.tokenId} records`}
+        >
+          <Link href={`/squig/${item.tokenId}#achievements`}>
+            {item.achievements && (
+              <AchievementStrip summary={item.achievements} subject="SQUIG" />
+            )}
+            Achievements & badges →
+          </Link>
+          <Link href={`/squig/${item.tokenId}#passport`}>History →</Link>
+        </nav>
         <details className="card-details">
           <summary>
             Details {item.currentlyOwned === false ? '· Previously owned' : ''}
@@ -137,9 +149,6 @@ function AlbumSquigCard({
                   </span>
                 ))}
             </div>
-            {item.achievements && (
-              <AchievementStrip summary={item.achievements} subject="SQUIG" />
-            )}
             {item.currentlyOwned !== undefined && (
               <p className="ownership-label">
                 {item.currentlyOwned ? 'Currently Owned' : 'Previously Owned'}

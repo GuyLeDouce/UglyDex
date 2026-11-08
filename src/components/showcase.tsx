@@ -4,6 +4,7 @@ import { Artwork } from './artwork';
 import { dexView } from '@/server/dex';
 import { progressionView } from '@/server/progression';
 import { activityPage, ecosystemSummary } from '@/server/activity';
+import { EcosystemSummary } from './activity';
 import { Timeline } from './timeline';
 import { AchievementBadge } from './achievement-badge';
 import { AchievementStrip } from './achievement-strip';
@@ -23,17 +24,14 @@ export async function CollectorHighlights({
       {p?.status === 'ready' && (
         <div className="showcase-level">
           <Link href={'/collector/' + slug + '/achievements'}>
-            Level {p.level}
+            Level {p.level} · {p.count} achievements
           </Link>
           {p.title && <span>{p.title}</span>}
           <Link
             href={'/collector/' + slug + '/achievements'}
             aria-label="View all Collector achievements"
           >
-            <AchievementStrip
-              summary={p.recentBadgeSummary}
-              subject="COLLECTOR"
-            />
+            <AchievementStrip summary={p.badgeSummary} subject="COLLECTOR" />
           </Link>
         </div>
       )}
@@ -103,21 +101,17 @@ export async function CollectorActivityPreview({
       <div className="section-heading inline">
         <div>
           <p className="eyebrow">TRACKED ECOSYSTEM HISTORY</p>
-          <h2>A little life beyond the collection.</h2>
+          <h2>Survival, Duels & ecosystem history.</h2>
         </div>
         <Link href={'/collector/' + slug + '/activity'}>
           Explore activity →
         </Link>
       </div>
-      <div className="showcase-activity-stats">
-        {summary.categories.slice(0, 4).map((c) => (
-          <span key={c.category}>
-            <strong>{c.events}</strong>{' '}
-            {c.category.toLowerCase().replaceAll('_', ' ')} records
-          </span>
-        ))}
-      </div>
-      <small>Confirmed public records tracked by UglyDex.</small>
+      <EcosystemSummary
+        collectorId={id}
+        public
+        path={'/collector/' + slug + '/activity'}
+      />
       {recent.entries.length > 0 && (
         <Timeline entries={recent.entries.slice(0, 3)} />
       )}
@@ -180,14 +174,35 @@ export async function TrophyCase({ id, slug }: { id: string; slug: string }) {
   ]);
   const badges =
       p?.status === 'ready'
-        ? p.cards.filter((c) => c.unlocked && p.featured.includes(c.name))
+        ? p.cards
+            .filter((c) => c.unlocked)
+            .sort(
+              (a, b) =>
+                Number(p.featured.includes(b.name)) -
+                Number(p.featured.includes(a.name)),
+            )
+            .slice(0, 8)
         : [],
-    sets = d?.status === 'ready' ? d.cards.filter((c) => c.featured) : [];
+    sets =
+      d?.status === 'ready'
+        ? d.cards
+            .filter((c) => c.complete && c.revealed)
+            .sort((a, b) => Number(b.featured) - Number(a.featured))
+            .slice(0, 4)
+        : [];
   if (!badges.length && !sets.length) return null;
   return (
     <section className="trophy-case">
       <p className="eyebrow">EARNED. DISCOVERED. DISPLAYED.</p>
-      <h2>The trophy case.</h2>
+      <h2>Achievements & collection badges.</h2>
+      <nav className="anchor-nav" aria-label="Collector accomplishments">
+        <Link href={'/collector/' + slug + '/achievements'}>
+          All achievements →
+        </Link>
+        <Link href={'/collector/' + slug + '/sets'}>
+          Completed sets & progress →
+        </Link>
+      </nav>
       <div className="trophy-grid">
         {badges.map((b) => (
           <Link

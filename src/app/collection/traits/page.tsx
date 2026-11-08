@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
 import { traitView } from '@/server/dex';
-import { DexNav } from '@/components/dex';
+import { DexNav, DiscoveryActions } from '@/components/dex';
 import { TRAIT_TYPES, traitPath } from '@/domain/dex';
 import type { SearchParams } from '@/components/catalog';
 export default async function Page({
@@ -26,13 +26,14 @@ export default async function Page({
   return (
     <>
       <section className="page-heading">
-        <p className="eyebrow">345 DETAILS WORTH NOTICING</p>
+        <p className="eyebrow">EVERY TRAIT IS A DISCOVERY</p>
         <h1>The Trait Dex.</h1>
         <p>
           Eight canonical categories. A growing record of everything you have
           encountered.
         </p>
       </section>
+      <DiscoveryActions />
       <DexNav />
       {data.status === 'pending' && (
         <p className="panel">

@@ -148,16 +148,28 @@ export default async function Squig({
               <strong>{s.mawRank ?? '—'}</strong>
               <span>Maw Rank</span>
             </div>
+            <div>
+              <strong>{r.transferCount}</strong>
+              <span>Indexed transfers</span>
+            </div>
+            {history.summary?.complete && (
+              <div>
+                <strong>{history.summary.uniqueWallets}</strong>
+                <span>Unique holder wallets</span>
+              </div>
+            )}
           </div>
           <p>
             One of 4,444 creatures from another world, come to observe and
             imitate humans.
           </p>
           <nav className="anchor-nav" aria-label="Squig sections">
+            <a href="#achievements">Achievements & badges</a>
+            <a href="#ecosystem">Duels & activity</a>
             <a href="#traits">Traits</a>
             <a href="#points">UglyPoints</a>
             <a href="#ownership">Ownership</a>
-            <a href="#passport">Passport</a>
+            <a href="#passport">Transactions & holders</a>
           </nav>
           <div className="specimen-sets">
             <p className="eyebrow">Status & history</p>
@@ -183,6 +195,12 @@ export default async function Squig({
           <SquigMarket tokenId={s.tokenId} />
         </div>
       </section>
+      <Progression
+        subject="SQUIG"
+        id={r.squigId}
+        path={`/squig/${s.tokenId}/achievements`}
+        public
+      />
       <section id="traits" className="section-heading">
         <p className="eyebrow">THE ANATOMY OF UGLY</p>
         <h2>Every little detail.</h2>
@@ -309,13 +327,6 @@ export default async function Squig({
           </div>
         </section>
       )}
-      <Progression
-        subject="SQUIG"
-        id={r.squigId}
-        path={`/squig/${s.tokenId}/achievements`}
-        public
-        full
-      />
       <EcosystemSummary
         squigId={r.squigId}
         public

@@ -316,3 +316,37 @@
     margin: 12px 0 0;
   }
 }
+
+/* History remains visible alongside the collectible, outside Details. */
+.card-record-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.card-record-links a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.discovery-actions {
+  margin: 24px 0;
+  padding: 20px 0;
+  border-block: 1px solid var(--line);
+}
+.discovery-actions .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+#achievements,
+#ecosystem,
+#passport {
+  scroll-margin-top: 100px;
+}

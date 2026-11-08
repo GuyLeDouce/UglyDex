@@ -1,6 +1,6 @@
 import { requireCollector } from '@/server/session';
 import { dexView } from '@/server/dex';
-import { DexNav, DexScore, SetGrid } from '@/components/dex';
+import { DexNav, DexScore, SetGrid, DiscoveryActions } from '@/components/dex';
 import { collectionSets } from '@/domain/dex-catalog';
 import { SetPreferences } from '@/components/set-preferences';
 import type { SearchParams } from '@/components/catalog';
@@ -20,11 +20,13 @@ export default async function Page({
       (!p.visibility ||
         (p.visibility === 'hidden' ? !c.revealed : c.revealed)) &&
       (!p.state ||
-        (p.state === 'complete'
-          ? c.complete
-          : p.state === 'progress'
-            ? !c.complete && c.progress > 0
-            : !c.progress)),
+        (p.state === 'incomplete'
+          ? !c.complete && c.revealed
+          : p.state === 'complete'
+            ? c.complete
+            : p.state === 'progress'
+              ? !c.complete && c.progress > 0
+              : !c.progress)),
   );
   return (
     <>
@@ -35,12 +37,17 @@ export default async function Page({
           Historical discoveries endure. Current collections live in the moment.
         </p>
       </section>
+      <DiscoveryActions />
       <DexNav />
       {view?.status !== 'ready' && <DexScore view={view} />}
       <form className="filters">
         <div className="filter-top">
           {[
-            ['state', 'State', ['complete', 'progress', 'not-started']],
+            [
+              'state',
+              'State',
+              ['incomplete', 'complete', 'progress', 'not-started'],
+            ],
             ['mode', 'Mode', ['HISTORICAL_DISCOVERY', 'CURRENT_HOLDING']],
             [
               'category',

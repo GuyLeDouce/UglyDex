@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import type { SquigCardData } from '@/server/collections';
 import { TradingCardFace } from './trading-card-face';
+import { AchievementStrip } from './achievement-strip';
 import { CardDiscovery } from './card-discovery';
 import { CollectorCardLink } from './collector-card-link';
 
@@ -162,6 +163,23 @@ export function CollectionViewer({
             current search and sort.
           </p>
           <CardDiscovery item={item} viewerOwned={viewerOwned} />
+          <nav
+            className="card-record-links"
+            aria-label="Squig history and achievements"
+          >
+            <Link href={`/squig/${item.tokenId}#achievements`}>
+              {item.achievements && (
+                <AchievementStrip summary={item.achievements} subject="SQUIG" />
+              )}
+              Achievements & badges →
+            </Link>
+            <Link href={`/squig/${item.tokenId}#ecosystem`}>
+              Duels & activity →
+            </Link>
+            <Link href={`/squig/${item.tokenId}#passport`}>
+              Transactions & holders →
+            </Link>
+          </nav>
           <div className="actions">
             <Link className="button primary" href={`/squig/${item.tokenId}`}>
               View Passport →

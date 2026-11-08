@@ -144,7 +144,7 @@ export async function ActivityView({
     historyFreshness(),
   ]);
   const query = (category: string, after?: string) =>
-    `${path}?${new URLSearchParams({ category, order: page.filters.order, ...(after ? { after } : {}) })}`;
+    `${path}?${new URLSearchParams({ category, order: page.filters.order, ...(after ? { after } : {}) })}#ecosystem`;
   return (
     <section className="passport" id="ecosystem">
       <div className="section-heading">
