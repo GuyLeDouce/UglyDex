@@ -71,7 +71,7 @@ it('never turns locked, pending, hidden or Squig awards into collector cards', (
     ),
   ).toBeNull();
 });
-it('preserves set difficulty and completion mode without inventing rarity', () => {
+it('maps set difficulty to card finish while preserving completion mode', () => {
   const set = {
     key: 'og-curious',
     name: 'OG Curious',
@@ -83,7 +83,14 @@ it('preserves set difficulty and completion mode without inventing rarity', () =
   };
   const card = setTrophy(set, identity)!;
   expect(card.classification).toBe('Easy');
-  expect(card.rarity).toBe('unclassified');
+  expect(card.rarity).toBe('common');
+  for (const [difficulty, rarity] of Object.entries({
+    Easy: 'common',
+    Medium: 'rare',
+    Hard: 'epic',
+    Insane: 'legendary',
+  }))
+    expect(setTrophy({ ...set, difficulty }, identity)?.rarity).toBe(rarity);
   expect(card.status).toBe('HISTORICAL SET COMPLETE');
   expect(setTrophy({ ...set, complete: false }, identity)).toBeNull();
   expect(setTrophy({ ...set, revealed: false }, identity)).toBeNull();
@@ -100,7 +107,7 @@ it('renders every existing rarity to a real, full-resolution PNG with no earned 
     expect(html).toContain('Certified Menace');
     expect(html).toContain('GuyLeDouce');
     expect(html).not.toMatch(/Qualified|Earned on|Completed on|2026/);
-    const png = Buffer.from(await renderTrophyCard(card).arrayBuffer());
+    const png = Buffer.from(await (await renderTrophyCard(card)).arrayBuffer());
     const metadata = await sharp(png).metadata();
     expect(metadata.width).toBe(1500);
     expect(metadata.height).toBe(2100);
@@ -109,21 +116,39 @@ it('renders every existing rarity to a real, full-resolution PNG with no earned 
   }
 }, 60000);
 
-it('renders completed sets with their own official icon and collector identity', async () => {
-  const card = setTrophy(
-    {
-      key: 'og-curious',
-      name: 'OG Curious',
-      description: 'Discover an original Squig.',
-      difficulty: 'Easy',
-      complete: true,
-      revealed: true,
-      mode: 'HISTORICAL_DISCOVERY',
-    },
-    identity,
-  )!;
-  expect(card.setIcon).toBe('/icons/sets/og-curious.png');
-  const png = Buffer.from(await renderTrophyCard(card).arrayBuffer());
-  expect((await sharp(png).metadata()).height).toBe(2100);
-  writeFileSync('.data/design/trophy-set.png', png);
-});
+it('renders set icons as the main artwork in every difficulty finish', async () => {
+  for (const [difficulty, key] of Object.entries({
+    Easy: 'og-curious',
+    Medium: 'elf-research',
+    Hard: 'portal-tour',
+    Insane: 'legend-lore',
+  })) {
+    const card = setTrophy(
+      {
+        key,
+        name: 'Completed ' + difficulty + ' Set',
+        description: 'A confirmed collector accomplishment.',
+        difficulty,
+        complete: true,
+        revealed: true,
+        mode: 'HISTORICAL_DISCOVERY',
+      },
+      identity,
+    )!;
+    expect(card.badgeUrl).toBe('/icons/sets/' + key + '.png');
+    const html = renderToStaticMarkup(createElement(TrophyCardFace, { card }));
+    expect(html).toContain(card.badgeUrl);
+    expect(html).not.toContain('deep-in-the-dex.png');
+    expect(html).not.toContain('Set emblem');
+    expect(html).not.toMatch(/Earned on|Completed on|2026/);
+    const png = Buffer.from(await (await renderTrophyCard(card)).arrayBuffer());
+    expect(await sharp(png).metadata()).toMatchObject({
+      width: 1500,
+      height: 2100,
+    });
+    writeFileSync(
+      '.data/design/trophy-set-' + difficulty.toLowerCase() + '.png',
+      png,
+    );
+  }
+}, 60000);

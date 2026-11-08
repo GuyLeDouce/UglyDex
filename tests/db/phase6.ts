@@ -467,7 +467,7 @@ export async function phase6DatabaseTests(
   );
   check(broken.bytes.length > 100, 'corrupt artwork cannot crash card');
   for (const ratio of ['landscape', 'square'] as const) {
-    const response = renderShare(
+    const response = await renderShare(
         card,
         shareSchema.parse({ entity: c.slug, ratio }),
         {},
@@ -491,7 +491,7 @@ export async function phase6DatabaseTests(
   }
   for (const count of [4, 9, 16])
     for (const template of ['clean', 'ugly', 'stats'] as const) {
-      const rendered = renderShare(
+      const rendered = await renderShare(
         {
           ...card,
           title: 'A beautifully strange collection 🎨',

@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Link href="/settings/profile">Profile & privacy</Link>
         <Link href="/settings/appearance">My Collector Card</Link>
         {GALLERIES_ENABLED && <Link href="/settings/galleries">Galleries</Link>}
-        <Link href="/settings/sharing">Sharing</Link>
+        <Link href="/settings/sharing">Share Studio</Link>
       </nav>
       {children}
     </>

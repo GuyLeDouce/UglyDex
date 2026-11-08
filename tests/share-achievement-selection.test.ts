@@ -40,7 +40,7 @@ it('renders all eight icons at both supported card sizes', async () => {
     })),
   };
   for (const ratio of ['landscape', 'square'] as const) {
-    const response = renderShare(card, { ratio, template: 'clean' }, {});
+    const response = await renderShare(card, { ratio, template: 'clean' }, {});
     const png = Buffer.from(await response.arrayBuffer());
     expect(await sharp(png).metadata()).toMatchObject({
       width: ratio === 'square' ? 1080 : 1200,

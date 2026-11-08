@@ -1,34 +1,71 @@
 'use client';
-import { GALLERIES_ENABLED } from '@/domain/features';
 import Image from 'next/image';
 import { SquigsIcon } from './squigs-icon';
 import Link from 'next/link';
 
-const accountLinks = [
-  ['/me', 'Profile & progress'],
-  ['/me/achievements', 'Achievement Cards'],
-  ['/thread', 'Community'],
+const uglyDexLinks = [
+  ['/collection', 'Collection'],
+  ['/me/achievements', 'Achievements'],
+  ['/me', 'Progress'],
   ['/charm', '$CHARM'],
-  ['/settings/sharing', 'Share studio'],
-  ['/settings/wallets', 'Linked wallets'],
-  ['/settings/profile', 'Profile settings'],
+  ['/thread', 'Community'],
   ['/settings/appearance', 'My Collector Card'],
-  ['/settings/galleries', 'My galleries'],
 ] as const;
 
-function AccountLinks({ slug, isPublic }: { slug: string; isPublic: boolean }) {
+function NavigationLinks({
+  slug,
+  isPublic,
+}: {
+  slug: string | null;
+  isPublic: boolean;
+}) {
   return (
     <>
-      <Link href={isPublic ? `/collector/${slug}` : '/settings/profile'}>
-        {isPublic ? 'View public profile' : 'Profile settings'}
-      </Link>
-      {accountLinks
-        .filter(([href]) => GALLERIES_ENABLED || href !== '/settings/galleries')
-        .map(([href, label]) => (
-          <Link href={href} key={href}>
-            {label}
-          </Link>
-        ))}
+      {slug ? (
+        <details className="account-menu nav-group">
+          <summary>
+            <SquigsIcon name="currently-owned" size={20} />
+            My UglyDex{' '}
+            <span className="menu-chevron" aria-hidden>
+              ⌄
+            </span>
+          </summary>
+          <nav aria-label="My UglyDex">
+            {uglyDexLinks.map(([href, label]) => (
+              <Link href={href} key={href}>
+                {label}
+              </Link>
+            ))}
+            {isPublic && (
+              <Link href={`/collector/${slug}`}>View Public Profile</Link>
+            )}
+          </nav>
+        </details>
+      ) : (
+        <Link href="/">Home</Link>
+      )}
+      <Link href="/squigs">Explore Squigs</Link>
+      <Link href="/editions">Customs</Link>
+      <Link href="/collectors">Top Collectors</Link>
+      {slug ? (
+        <>
+          <details className="account-menu nav-group">
+            <summary>
+              Share Studio{' '}
+              <span className="menu-chevron" aria-hidden>
+                ⌄
+              </span>
+            </summary>
+            <nav aria-label="Share Studio">
+              <Link href="/settings/sharing">Open Share Studio</Link>
+              <Link href="/settings/appearance">My Collector Card</Link>
+            </nav>
+          </details>
+          <Link href="/settings/profile">Settings</Link>
+        </>
+      ) : (
+        <Link href="/thread">Community</Link>
+      )}
     </>
   );
 }
@@ -40,7 +77,6 @@ export function SiteHeader({
   slug: string | null;
   isPublic: boolean;
 }) {
-  const homeHref = slug ? '/collection' : '/';
   return (
     <header
       className="site-header"
@@ -75,11 +111,7 @@ export function SiteHeader({
         />
       </Link>
       <nav className="primary-nav" aria-label="Primary navigation">
-        <Link href={homeHref}>{slug ? 'My Collection' : 'Home'}</Link>
-        <Link href="/squigs">Explore</Link>
-        <Link href="/collectors">Collectors</Link>
-        <Link href="/thread">History</Link>
-        {slug && <Link href="/me">Profile</Link>}
+        <NavigationLinks slug={slug} isPublic={isPublic} />
       </nav>
       {slug && (
         <form
@@ -90,26 +122,13 @@ export function SiteHeader({
           <button type="submit">Sign out</button>
         </form>
       )}
-      <div className="header-account">
-        {slug ? (
-          <details className="account-menu">
-            <summary>
-              <SquigsIcon name="currently-owned" size={24} />
-              <span>My account</span>
-              <span className="menu-chevron" aria-hidden>
-                ⌄
-              </span>
-            </summary>
-            <nav aria-label="Account navigation">
-              <AccountLinks slug={slug} isPublic={isPublic} />
-            </nav>
-          </details>
-        ) : (
+      {!slug && (
+        <div className="header-account">
           <Link className="button primary header-connect" href="/connect">
             Sign in <span aria-hidden>↗</span>
           </Link>
-        )}
-      </div>
+        </div>
+      )}
       <details className="mobile-menu">
         <summary aria-label="Toggle site navigation">
           <span>Menu</span>
@@ -118,24 +137,7 @@ export function SiteHeader({
           </span>
         </summary>
         <nav aria-label="Mobile navigation">
-          <Link className="mobile-primary-link" href={homeHref}>
-            {slug ? 'My Collection' : 'Home'}
-          </Link>
-          <Link className="mobile-primary-link" href="/squigs">
-            Explore Squigs
-          </Link>
-          <Link className="mobile-primary-link" href="/editions">
-            Customs
-          </Link>
-          <Link className="mobile-primary-link" href="/collectors">
-            Top Collectors
-          </Link>
-          {!slug && (
-            <Link className="mobile-primary-link" href="/thread">
-              Collector thread
-            </Link>
-          )}
-          {slug && <AccountLinks slug={slug} isPublic={isPublic} />}
+          <NavigationLinks slug={slug} isPublic={isPublic} />
           {!slug && (
             <Link className="button primary" href="/connect">
               Sign in
