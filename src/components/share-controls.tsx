@@ -305,7 +305,13 @@ function ShareImage({
           }
           src={asset.url}
           data-source={image}
-          alt={trading ? 'Trading card preview' : 'UglyDex share card preview'}
+          alt={
+            trading
+              ? asset.finish.collector
+                ? 'UglyDex collector trading card preview'
+                : 'Squigs Reloaded trading card preview'
+              : 'UglyDex share card preview'
+          }
         />
       )}
       {asset && trading && (
