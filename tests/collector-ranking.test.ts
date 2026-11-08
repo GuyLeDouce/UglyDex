@@ -134,3 +134,7 @@ it('removes an unclaimed former holder and restores it when current holdings ret
     collectors: [{ owned: 1, discovered: 3, rank: 1 }],
   });
 });
+
+vi.mock('../src/server/collector-avatar', () => ({
+  collectorAvatar: async () => null,
+}));

@@ -7,7 +7,8 @@ type Values = {
   slug: string;
   displayName: string;
   bio: string;
-  avatar: string;
+  avatarSquigId: number | null;
+  defaultAvatarSquigId: number | null;
   collectionVisibility: 'FULL' | 'FEATURED_ONLY' | 'HIDDEN';
   showUsername: boolean;
   isPublic: boolean;
@@ -30,7 +31,9 @@ export function ProfileForm({ initial }: { initial: Values }) {
         slug: f.get('slug'),
         displayName: f.get('displayName'),
         bio: f.get('bio'),
-        avatar: f.get('avatar'),
+        avatarSquigId: String(f.get('avatarSquigId') || '').trim()
+          ? Number(f.get('avatarSquigId'))
+          : null,
         collectionVisibility: f.get('collectionVisibility'),
         showUsername: f.has('showUsername'),
         isPublic: f.has('isPublic'),
@@ -113,13 +116,24 @@ export function ProfileForm({ initial }: { initial: Values }) {
         />
       </label>
       <label>
-        Avatar URL
+        Avatar Squig ID
         <input
-          name="avatar"
-          type="url"
-          placeholder="https://…"
-          defaultValue={initial.avatar}
+          name="avatarSquigId"
+          type="number"
+          min={1}
+          max={4444}
+          step={1}
+          placeholder={
+            initial.defaultAvatarSquigId
+              ? `Automatic: #${initial.defaultAvatarSquigId}`
+              : 'Automatic'
+          }
+          defaultValue={initial.avatarSquigId ?? ''}
         />
+        <small>
+          Choose a currently owned Squig. Leave blank to use your lowest Maw
+          Rank (rank #1 first), across all linked wallets.
+        </small>
       </label>
       <label>
         Favorite Squigs

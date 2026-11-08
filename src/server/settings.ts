@@ -1,3 +1,4 @@
+import { squigAvatarUrl } from './collector-avatar';
 import 'server-only';
 import { db } from './db';
 import { profileSchema, hasCollectorUsername } from '@/domain/profile';
@@ -6,6 +7,16 @@ import { markWalletDirty } from '@/sync/provenance';
 export async function saveProfile(collectorId: string, input: unknown) {
   const data = profileSchema.parse(input);
   const addresses = await activeAddresses(collectorId);
+  const { avatarSquigId, avatar: legacyAvatar, ...profileData } = data;
+  if (
+    avatarSquigId != null &&
+    !(await db().squig.count({
+      where: {
+        AND: [catalogScope, ownedScope(addresses), { tokenId: avatarSquigId }],
+      },
+    }))
+  )
+    throw new Error('AVATAR_NOT_OWNED');
   if (
     data.featuredTokenIds.length &&
     (await db().squig.count({
@@ -35,7 +46,16 @@ export async function saveProfile(collectorId: string, input: unknown) {
       throw new Error('USERNAME_REQUIRED');
     return tx.collector.update({
       where: { id: collectorId },
-      data: { ...data, slug, avatar: data.avatar || null },
+      data: {
+        ...profileData,
+        slug,
+        avatar:
+          avatarSquigId === undefined
+            ? legacyAvatar || null
+            : avatarSquigId === null
+              ? null
+              : squigAvatarUrl(avatarSquigId),
+      },
       select: { slug: true },
     });
   });

@@ -21,13 +21,15 @@ export async function POST(request: Request) {
             ? 'Check the profile fields.'
             : code === 'USERNAME_REQUIRED'
               ? 'Choose a username before linking multiple wallets or enabling username display.'
-              : code === 'FEATURED_NOT_OWNED'
-                ? 'Featured Squigs must be currently owned.'
-                : code === 'ORIGIN_REJECTED'
-                  ? 'Request origin rejected.'
-                  : code === 'RATE_LIMITED'
-                    ? 'Please wait before saving again.'
-                    : 'Unable to save. That username may already be taken.',
+              : code === 'AVATAR_NOT_OWNED'
+                ? 'Avatar Squig must be currently owned.'
+                : code === 'FEATURED_NOT_OWNED'
+                  ? 'Featured Squigs must be currently owned.'
+                  : code === 'ORIGIN_REJECTED'
+                    ? 'Request origin rejected.'
+                    : code === 'RATE_LIMITED'
+                      ? 'Please wait before saving again.'
+                      : 'Unable to save. That username may already be taken.',
       },
       { status: 400 },
     );

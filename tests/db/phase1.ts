@@ -1,3 +1,7 @@
+import {
+  collectorAvatar,
+  squigAvatarUrl,
+} from '../../src/server/collector-avatar';
 import assert from 'node:assert/strict';
 import { db } from '../../src/server/db';
 import { observe } from '../../src/sync/blockchain';
@@ -148,6 +152,50 @@ export async function phase1DatabaseTests(
     featuredTokenIds: [801],
   };
   await saveProfile(c.id, base);
+  check(
+    (await collectorAvatar(c.id, null))?.tokenId === 801,
+    'avatar defaults to a currently owned Squig',
+  );
+  await saveProfile(c.id, { ...base, avatarSquigId: 801 });
+  check(
+    (await db().collector.findUniqueOrThrow({ where: { id: c.id } })).avatar ===
+      squigAvatarUrl(801),
+    'avatar ID saves canonical artwork URL',
+  );
+  await assert.rejects(
+    () => saveProfile(c.id, { ...base, avatarSquigId: 800 }),
+    /AVATAR_NOT_OWNED/,
+  );
+  check(true, 'avatar cannot select sold or unowned Squigs');
+  check(
+    (await collectorAvatar(c.id, squigAvatarUrl(800)))?.tokenId === 801,
+    'sold avatar falls back to current holdings',
+  );
+  await saveProfile(c.id, { ...base, avatarSquigId: null });
+  check(
+    (await db().collector.findUniqueOrThrow({ where: { id: c.id } })).avatar ===
+      null,
+    'blank avatar restores automatic mode',
+  );
+  const rankRows = await db().squig.findMany({
+    where: { tokenId: { in: [800, 802] } },
+    select: { id: true, tokenId: true, mawRank: true },
+  });
+  for (const row of rankRows)
+    await db().squig.update({
+      where: { id: row.id },
+      data: { mawRank: row.tokenId === 802 ? 1 : 2 },
+    });
+  check(
+    (await collectorAvatar(other.id, null))?.tokenId === 802,
+    'automatic avatar chooses rank one ahead of lower token ID',
+  );
+  for (const row of rankRows)
+    await db().squig.update({
+      where: { id: row.id },
+      data: { mawRank: row.mawRank },
+    });
+
   const publicProfile = await collectorProfile('PHASE1-ALICE');
   check(
     publicProfile.status === 'ready' &&
