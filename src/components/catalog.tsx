@@ -76,7 +76,11 @@ export async function Catalog({
   };
   return (
     <>
-      <form key={JSON.stringify(f)} className="filters" action={path}>
+      <form
+        key={JSON.stringify({ ...f, q: params.q ?? '' })}
+        className="filters"
+        action={path}
+      >
         <input type="hidden" name="view" value={f.view} />
         <div className="filter-top">
           {viewerId && (

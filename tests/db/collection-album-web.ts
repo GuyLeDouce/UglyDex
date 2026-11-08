@@ -241,6 +241,9 @@ export async function collectionAlbumWebTests(
       })
       .click();
     await expect(page.locator('[data-open-card]')).toHaveCount(6);
+    await expect(
+      page.getByRole('textbox', { name: 'Token ID', exact: true }),
+    ).toHaveValue('');
     await page
       .getByRole('textbox', { name: 'Token ID', exact: true })
       .fill(`https://opensea.io/assets/ethereum/${SQUIGS_CONTRACT}/1300`);
