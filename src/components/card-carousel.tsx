@@ -76,6 +76,7 @@ export function CardCarousel({ children }: { children: ReactNode }) {
         <span>Every card opens a story.</span>
         <div className="actions">
           <button
+            className="button"
             type="button"
             aria-label="Previous Squig card"
             aria-controls={id}
@@ -85,6 +86,7 @@ export function CardCarousel({ children }: { children: ReactNode }) {
             ←
           </button>
           <button
+            className="button"
             type="button"
             aria-label="Next Squig card"
             aria-controls={id}

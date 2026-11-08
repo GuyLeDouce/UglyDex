@@ -36,6 +36,7 @@
   display: flex;
   gap: 16px;
   overflow-x: auto;
+  align-items: start;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 3px;
   scrollbar-width: thin;
@@ -48,7 +49,51 @@
   scroll-snap-align: start;
 }
 .hero-card-slide .trading-face {
-  height: 100%;
+  padding: 4px;
+  border-radius: 15px;
+}
+.hero-card-slide .trading-face-inner {
+  padding: 8px;
+  border-width: 2px;
+  border-radius: 11px;
+}
+.hero-card-slide .trading-brand {
+  padding: 4px 2px;
+  margin: -3px auto 6px !important;
+  font-size: 8px;
+}
+.hero-card-slide .trading-title {
+  margin-bottom: 6px;
+}
+.hero-card-slide .trading-identity {
+  padding: 5px 0;
+  gap: 3px;
+  font-size: 7px;
+}
+.hero-card-slide .trading-og,
+.hero-card-slide .trading-rarity {
+  padding: 2px 3px;
+}
+.hero-card-slide .trading-rank {
+  padding: 3px;
+  margin-top: 4px;
+  font-size: 8px;
+  gap: 5px;
+}
+.hero-card-slide .trading-traits {
+  min-height: 0;
+  grid-auto-rows: minmax(22px, auto);
+  gap: 3px 8px;
+  padding: 6px 0;
+  font-size: 8px;
+}
+.hero-card-slide .trading-traits small {
+  font-size: 6px;
+}
+.hero-card-slide .trading-footer {
+  margin-top: 5px;
+  padding: 4px;
+  font-size: 6px;
 }
 .hero-card-controls {
   display: flex;
