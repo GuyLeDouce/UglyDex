@@ -143,6 +143,22 @@ export async function collectionAlbumWebTests(
     page.on('pageerror', (e) => errors.push(e.message));
     await stubArtwork(page);
     await mkdir('.data/design', { recursive: true });
+    const artworkReady = async () => {
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForFunction(() =>
+        Array.from(document.querySelectorAll<HTMLImageElement>('.artwork img'))
+          .filter((img) => {
+            const r = img.getBoundingClientRect();
+            return (
+              r.bottom > 0 &&
+              r.top < innerHeight &&
+              r.right > 0 &&
+              r.left < innerWidth
+            );
+          })
+          .every((img) => img.complete && img.naturalWidth > 0),
+      );
+    };
     await page.goto(base + '/collection');
     await expect(
       page.locator('.collection-grid.album .album-card'),
@@ -152,7 +168,7 @@ export async function collectionAlbumWebTests(
       '1300',
     );
     await page.locator('.view-controls').scrollIntoViewIfNeeded();
-    await page.evaluate(() => document.fonts.ready);
+    await artworkReady();
     await page.screenshot({ path: '.data/design/album-desktop.png' });
     await page.locator('[data-open-card]').first().click();
     const viewer = page.getByRole('dialog');
@@ -181,7 +197,7 @@ export async function collectionAlbumWebTests(
       await page.setViewportSize({ width, height: 900 });
       await page.goto(base + '/collection?view=album&sort=token');
       await page.locator('.view-controls').scrollIntoViewIfNeeded();
-      await page.evaluate(() => document.fonts.ready);
+      await artworkReady();
       assert(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,

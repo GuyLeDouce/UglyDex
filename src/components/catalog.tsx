@@ -281,7 +281,14 @@ export async function Catalog({
             Reset filters
           </Link>
           {collectorId && (
-            <Link href="/squigs">Search the whole collection →</Link>
+            <Link
+              href={catalogLink('/squigs', params, {
+                page: null,
+                favorites: null,
+              })}
+            >
+              Search the whole collection →
+            </Link>
           )}
         </p>
       )}

@@ -116,6 +116,10 @@
   background: #101318;
 }
 .album-viewer-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -230,6 +234,10 @@
     margin-inline: auto;
   }
   .album-viewer-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg);
     margin-bottom: 12px;
   }
   .album-viewer-info {
@@ -294,4 +302,17 @@
   min-height: 44px;
   color: var(--brand-cyan);
   text-underline-offset: 4px;
+}
+
+#collection-cards {
+  scroll-margin-top: 20px;
+}
+.page-heading:has(a[href='#collection-cards']) > .text-link {
+  margin-left: 16px;
+}
+@media (max-width: 600px) {
+  .page-heading:has(a[href='#collection-cards']) > .text-link {
+    display: block;
+    margin: 12px 0 0;
+  }
 }

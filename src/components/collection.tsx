@@ -278,7 +278,10 @@ export function CollectionGrid({
     }
   }
   const savedMode = useSyncExternalStore(subscribe, snapshot, () => 'grid');
-  const mode = catalog?.view ?? savedMode;
+  const [pendingMode, setPendingMode] = useState<CatalogContext['view'] | null>(
+    null,
+  );
+  const mode = catalog ? (pendingMode ?? catalog.view) : savedMode;
   const [selected, setSelected] = useState<number | null>(() =>
     catalog?.inspect === 'first'
       ? 0
@@ -347,8 +350,10 @@ export function CollectionGrid({
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
   }, []);
-  function setMode(value: string) {
+  function setMode(value: CatalogContext['view']) {
     if (catalog) {
+      setSelected(null);
+      setPendingMode(value);
       document.cookie = `${catalog.preferenceKey}=${value}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
       if (value !== 'album') {
         try {

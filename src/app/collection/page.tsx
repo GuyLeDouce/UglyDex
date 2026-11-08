@@ -29,6 +29,9 @@ export default async function CollectionPage({
         <p>
           Every active, verified wallet. One beautifully strange collection.
         </p>
+        <a className="button primary" href="#collection-cards">
+          Browse my cards ↓
+        </a>
         <Link className="text-link" href="/collection/discovered">
           Open your discoveries →
         </Link>
@@ -45,13 +48,15 @@ export default async function CollectionPage({
         <Link href="/squigs">Search all Squigs</Link>
       </nav>
       <Refresh initial={status} />
-      <Catalog
-        params={await searchParams}
-        collectorId={id}
-        viewerId={id}
-        path="/collection"
-        editableFavorites
-      />
+      <section id="collection-cards" aria-label="Your Squig cards">
+        <Catalog
+          params={await searchParams}
+          collectorId={id}
+          viewerId={id}
+          path="/collection"
+          editableFavorites
+        />
+      </section>
       <details className="collection-extras">
         <summary>More collection details</summary>
         <section className="section-heading">
