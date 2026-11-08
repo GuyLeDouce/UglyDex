@@ -23,11 +23,13 @@ jobs:
       - run: npm ci
       - name: Generate 1500x1500 PNG files from existing approved art
         run: node scripts/upscale-approved-set-artwork.mjs
+      - name: Format asset generation code and tests
+        run: npx prettier --write scripts/upscale-approved-set-artwork.mjs .github/workflows/upscale-approved-set-artwork.yml tests/set-icon-artwork-resolution.test.ts tests/status-icons.test.ts tests/collector-share.test.ts src/server/collector-share-render.tsx
       - name: Commit generated assets back to the feature branch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/icons/sets/
+          git add public/icons/sets/ public/icons/sets-preview/ scripts/upscale-approved-set-artwork.mjs .github/workflows/upscale-approved-set-artwork.yml tests/set-icon-artwork-resolution.test.ts tests/status-icons.test.ts tests/collector-share.test.ts src/server/collector-share-render.tsx
           if ! git diff --cached --quiet; then
             git commit -m "Upgrade all 52 approved set icons to 1500x1500 PNG"
             git push origin HEAD:feat/approved-set-icons-1500

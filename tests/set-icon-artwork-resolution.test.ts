@@ -12,6 +12,9 @@ describe('approved collection set card artwork', () => {
       expect(png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))).toBe(true);
       expect(png.readUInt32BE(16), filename).toBe(1500);
       expect(png.readUInt32BE(20), filename).toBe(1500);
+      const preview = readFileSync(join(process.cwd(), 'public/icons/sets-preview', filename));
+      expect(preview.readUInt32BE(16), filename).toBe(128);
+      expect(preview.readUInt32BE(20), filename).toBe(128);
     }
   });
 });

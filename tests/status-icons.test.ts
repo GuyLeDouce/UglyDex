@@ -19,14 +19,15 @@ const candidate = {
   sets: ['first-specimen', 'field-notes'],
 };
 describe('approved artwork and status indicators', () => {
-  it('ships all 66 original PNGs with a unique mapping', () => {
+  it('ships 52 full-size set illustrations and 14 compact status PNGs with unique mappings', () => {
     expect(approved).toHaveLength(66);
     expect(new Set(approved.map((a) => a.path)).size).toBe(66);
     for (const icon of approved) {
       const png = readFileSync(`public${icon.path}`);
       expect(png.subarray(1, 4).toString()).toBe('PNG');
-      expect(png.readUInt32BE(16)).toBe(64);
-      expect(png.readUInt32BE(20)).toBe(64);
+      const expectedSize = icon.path.startsWith('/icons/sets/') ? 1500 : 64;
+      expect(png.readUInt32BE(16)).toBe(expectedSize);
+      expect(png.readUInt32BE(20)).toBe(expectedSize);
     }
     for (const icon of matchingSetIcons(token, collectionSets))
       expect(
