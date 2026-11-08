@@ -301,6 +301,14 @@ export async function phase7WebTests(
       }
       await page.goto(base + '/settings/appearance');
       await page
+        .getByRole('heading', { name: 'My Collector Card.', exact: true })
+        .waitFor();
+      await page
+        .getByText('Profile appearance & existing share styles', {
+          exact: true,
+        })
+        .click();
+      await page
         .getByLabel('profile theme', { exact: true })
         .selectOption('theme-labs');
       await page
