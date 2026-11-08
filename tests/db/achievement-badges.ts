@@ -308,7 +308,7 @@ export async function achievementBadgeWebTests(
     page.on('pageerror', (e) => errors.push(e.message));
     const paths = [
       ['/me/achievements', 'achievements', 43],
-      ['/squig/4398', 'squig-detail', 22],
+      ['/squig/4398', 'squig-detail', 0],
       ['/squig/4398/achievements', 'squig-achievements', 22],
       ['/collector/badge-review', 'collector-card', 0],
       ['/collector/badge-review/achievements', 'collector-achievements', 43],
@@ -326,6 +326,24 @@ export async function achievementBadgeWebTests(
         // External NFT artwork may keep requests open. Wait for the tested
         // content explicitly; badge decoding is checked below for every image.
         await page.goto(base + path, { waitUntil: 'domcontentloaded' });
+        if (name === 'squig-detail') {
+          check(
+            await page.locator('#achievements').isVisible(),
+            'Squig earned progression is visible on its Passport',
+          );
+          check(
+            (await page
+              .getByRole('link', { name: 'View achievements →', exact: true })
+              .getAttribute('href')) === '/squig/4398/achievements',
+            'complete Squig achievement catalogue remains one click away',
+          );
+        }
+        if (name === 'collector-card') {
+          check(
+            (await page.locator('.trophy-case .achievement-badge').count()) > 0,
+            'earned trophies appear without manual featuring',
+          );
+        }
         if (name === 'squig-card') {
           const card = page.locator('.album-card').first();
           await card.waitFor();
@@ -344,6 +362,12 @@ export async function achievementBadgeWebTests(
           check(
             (await card.locator('a a, a button, a summary').count()) === 0,
             'card actions do not nest inside navigation links',
+          );
+          check(
+            await card
+              .locator('.card-record-links .achievement-strip')
+              .isVisible(),
+            'earned badges remain visible while Details is collapsed',
           );
           await card.screenshot({ path: `.data/mobile-card-${width}.png` });
         }
@@ -570,6 +594,28 @@ export async function achievementBadgeWebTests(
             'advanced trait filters remain accessible',
           );
           await filters.locator('summary').click();
+        }
+        if (name === 'passport' || name === 'collector') {
+          const record = page.locator(
+            name === 'passport' ? '#achievements' : '.trophy-case',
+          );
+          await record.scrollIntoViewIfNeeded();
+          await page.waitForFunction(() =>
+            Array.from(
+              document.querySelectorAll<HTMLImageElement>(
+                '.achievement-badge img',
+              ),
+            )
+              .filter((img) => {
+                const r = img.getBoundingClientRect();
+                return r.top < innerHeight && r.bottom > 0;
+              })
+              .every((img) => img.complete && img.naturalWidth > 0),
+          );
+          await page.screenshot({
+            path: `.data/design/history-${name}-${width}.png`,
+          });
+          await page.evaluate(() => window.scrollTo(0, 0));
         }
         await page.screenshot({
           path: `.data/design/${name}-${width}.png`,
