@@ -198,7 +198,7 @@ export async function TrophyCase({ id, slug }: { id: string; slug: string }) {
       <h2>Achievements & collection badges.</h2>
       <nav className="anchor-nav" aria-label="Collector accomplishments">
         <Link href={'/collector/' + slug + '/achievements'}>
-          All achievements →
+          View Achievement Cards →
         </Link>
         <Link href={'/collector/' + slug + '/sets'}>
           Completed sets & progress →
@@ -208,7 +208,13 @@ export async function TrophyCase({ id, slug }: { id: string; slug: string }) {
         {badges.map((b) => (
           <Link
             key={b.key}
-            href={'/share?kind=achievement&entity=' + slug + '&key=' + b.key}
+            href={
+              '/share?kind=achievement&entity=' +
+              slug +
+              '&key=' +
+              b.key +
+              '&format=trophy-card'
+            }
           >
             <small>ACHIEVEMENT · {b.tier}</small>
             <AchievementBadge badge={b.badge} size="xl" />
@@ -219,7 +225,13 @@ export async function TrophyCase({ id, slug }: { id: string; slug: string }) {
         {sets.map((s) => (
           <Link
             key={s.key}
-            href={'/share?kind=set&entity=' + slug + '&key=' + s.key}
+            href={
+              '/share?kind=set&entity=' +
+              slug +
+              '&key=' +
+              s.key +
+              '&format=trophy-card'
+            }
           >
             <small>COLLECTION SET</small>
             <h3>✓ {s.name}</h3>

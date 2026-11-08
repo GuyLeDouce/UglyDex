@@ -1223,6 +1223,9 @@ try {
         });
         await page.goto(`${base}/me/achievements`);
         await page
+          .getByText('Featured badges & collector title', { exact: true })
+          .click();
+        await page
           .getByLabel('Profile title', { exact: true })
           .selectOption('collector-survivalWins-1');
         await page

@@ -67,7 +67,13 @@ export function tradingCardData(row: {
     metadataUpdatedAt: row.metadataUpdatedAt?.toISOString() ?? null,
   };
 }
-export function shareFilename(spec: { format?: string; entity: string }) {
+export function shareFilename(spec: {
+  format?: string;
+  entity: string;
+  key?: string;
+}) {
+  if (spec.format === 'trophy-card')
+    return `uglydex-${spec.entity}-${spec.key ?? 'achievement'}-card.png`;
   if (spec.format === 'collector-card')
     return `uglydex-${spec.entity}-collector-card.png`;
   return spec.format === 'trading-card'

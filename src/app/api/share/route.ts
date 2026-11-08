@@ -54,6 +54,15 @@ export async function GET(request: Request) {
       headers: {
         ...headers,
         'Content-Type': 'image/png',
+        ...(card.trophyCard
+          ? {
+              'X-Card-Type': 'trophy',
+              'X-Card-Rarity': card.trophyCard.rarity,
+              'X-Card-Description': encodeURIComponent(
+                `${card.trophyCard.name}. ${card.trophyCard.classification}. ${card.trophyCard.description} Collected by ${card.trophyCard.collector}.`,
+              ),
+            }
+          : {}),
         ...(card.collectorCard
           ? {
               'X-Card-Type': 'collector',
@@ -88,7 +97,8 @@ export async function GET(request: Request) {
               'Content-Disposition':
                 'attachment; filename="' +
                 (spec.format === 'trading-card' ||
-                spec.format === 'collector-card'
+                spec.format === 'collector-card' ||
+                spec.format === 'trophy-card'
                   ? shareFilename(spec)
                   : 'uglydex-' + spec.kind + '.png') +
                 '"',
