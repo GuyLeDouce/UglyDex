@@ -1045,6 +1045,49 @@ try {
           await page.reload();
           await page.evaluate(() => window.scrollTo(0, 0));
         }
+        if (process.argv.includes('--catalog')) {
+          await page.locator('.hero-card-track img').first().waitFor();
+          await page.waitForFunction(() =>
+            Array.from(
+              document.querySelectorAll<HTMLImageElement>(
+                '.hero-card-track img',
+              ),
+            )
+              .slice(0, 2)
+              .every((img) => img.complete && img.naturalWidth > 0),
+          );
+          await page
+            .getByRole('button', { name: 'Next Squig card', exact: true })
+            .click();
+          await page.waitForFunction(
+            () =>
+              (document.querySelector('.hero-card-track')?.scrollLeft ?? 0) >
+              100,
+          );
+          check(true, 'home carousel next arrow advances real collector cards');
+          await page
+            .getByRole('button', { name: 'Previous Squig card', exact: true })
+            .click();
+          await page.waitForFunction(
+            () =>
+              (document.querySelector('.hero-card-track')?.scrollLeft ?? 999) <=
+              4,
+          );
+          check(true, 'home carousel previous arrow returns to the first card');
+          for (const width of [360, 390, 430, 768, 1440]) {
+            await page.setViewportSize({ width, height: 1000 });
+            check(
+              await page.evaluate(
+                () => document.documentElement.scrollWidth <= window.innerWidth,
+              ),
+              `home carousel fits ${width}px`,
+            );
+            await page.screenshot({
+              path: `.data/uglydex-carousel-${width}.png`,
+              fullPage: true,
+            });
+          }
+        }
         await page.screenshot({
           path: '.data/uglydex-desktop.png',
           fullPage: true,

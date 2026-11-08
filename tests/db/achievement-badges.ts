@@ -587,7 +587,12 @@ export async function achievementBadgeWebTests(
           Array.from(document.images)
             .filter((img) => {
               const rect = img.getBoundingClientRect();
-              return rect.top < innerHeight && rect.bottom > 0;
+              return (
+                rect.top < innerHeight &&
+                rect.bottom > 0 &&
+                rect.left < innerWidth &&
+                rect.right > 0
+              );
             })
             .every((img) => img.complete),
         { timeout: 30000 },

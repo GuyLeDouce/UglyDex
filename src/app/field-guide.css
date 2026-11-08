@@ -28,58 +28,100 @@
 .field-hero .text-link {
   margin: 0;
 }
+/* A native scrolling shelf keeps touch, keyboard and no-JS browsing available. */
 .field-hero-art {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  align-items: center;
-  padding: 24px 0;
-}
-.field-hero-art::before {
-  content: '';
-  position: absolute;
-  width: 38px;
-  height: 62px;
-  top: 5%;
-  left: 16%;
-  background: var(--brand-yellow);
-  clip-path: polygon(52% 0, 95% 0, 65% 38%, 92% 38%, 20% 100%, 37% 55%, 8% 55%);
-  transform: rotate(12deg);
-  pointer-events: none;
-}
-.field-specimen {
   min-width: 0;
-  display: block;
 }
-.field-specimen-0 {
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  transform: rotate(-5deg);
+.hero-card-track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  align-items: start;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 3px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-blue) transparent;
+  padding: 10px 3px 16px;
 }
-.field-specimen-1 {
-  transform: rotate(5deg);
+.hero-card-slide {
+  flex: 0 0 230px;
+  min-width: 0;
+  scroll-snap-align: start;
 }
-.field-specimen-2 {
-  transform: rotate(-2deg);
-  width: 78%;
-  margin-left: 8%;
+.hero-card-slide .trading-face {
+  padding: 4px;
+  border-radius: 15px;
 }
-.field-specimen .artwork {
-  border: 2px solid var(--ugly-ink);
-  border-radius: 48% 48% 3px 3px;
-  background: var(--ugly-yellow);
+.hero-card-slide .trading-face-inner {
+  padding: 8px;
+  border-width: 2px;
+  border-radius: 11px;
 }
-.field-specimen .artwork img {
-  padding: 0;
+.hero-card-slide .trading-brand {
+  padding: 4px 2px;
+  margin: -3px auto 6px !important;
+  font-size: 8px;
 }
-.field-specimen span {
-  color: var(--brand-cyan);
-  display: block;
-  margin-top: 10px;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  font-weight: 800;
+.hero-card-slide .trading-title {
+  margin-bottom: 6px;
+}
+.hero-card-slide .trading-identity {
+  padding: 5px 0;
+  gap: 3px;
+  font-size: 7px;
+}
+.hero-card-slide .trading-og,
+.hero-card-slide .trading-rarity {
+  padding: 2px 3px;
+}
+.hero-card-slide .trading-rank {
+  padding: 3px;
+  margin-top: 4px;
+  font-size: 8px;
+  gap: 5px;
+}
+.hero-card-slide .trading-traits {
+  min-height: 0;
+  grid-auto-rows: minmax(22px, auto);
+  gap: 3px 8px;
+  padding: 6px 0;
+  font-size: 8px;
+}
+.hero-card-slide .trading-traits small {
+  font-size: 6px;
+}
+.hero-card-slide .trading-footer {
+  margin-top: 5px;
+  padding: 4px;
+  font-size: 6px;
+}
+.hero-card-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+.hero-card-controls > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.hero-card-controls .actions {
+  margin: 0;
+  gap: 8px;
+}
+.hero-card-controls button {
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 20px;
+  padding: 6px 12px;
+}
+.hero-card-controls button:disabled {
+  opacity: 0.35;
+}
+.hero-card-track:focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: 3px;
 }
 .field-masthead {
   display: flex;
@@ -280,9 +322,6 @@ footer {
   .field-hero {
     gap: 24px;
   }
-  .field-hero-art {
-    gap: 10px;
-  }
   .field-chapters {
     gap: 20px;
   }
@@ -325,20 +364,8 @@ footer {
     margin-top: 20px;
     gap: 16px;
   }
-  .field-hero-art {
-    max-width: 430px;
-    grid-template-columns: 1.1fr 1fr;
-    padding: 16px 8px;
-    gap: 14px;
-  }
-  .field-hero-art::before {
-    display: none;
-  }
-  .field-specimen-0 {
-    grid-row: auto;
-  }
-  .field-specimen-2 {
-    display: none;
+  .hero-card-slide {
+    flex-basis: 210px;
   }
   .field-masthead {
     font-size: 9px;
@@ -484,9 +511,6 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-  .field-specimen {
-    transition: none;
   }
 }
 .context-help {
