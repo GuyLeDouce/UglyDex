@@ -64,3 +64,7 @@ it('honors explicitly empty badge selections in captions', async () => {
   expect(card?.achievementBadges).toEqual([]);
   expect(card?.badges).toEqual([]);
 });
+
+vi.mock('../src/server/collector-avatar', () => ({
+  collectorAvatar: async () => null,
+}));
