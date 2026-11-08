@@ -137,7 +137,8 @@ it('renders set icons as the main artwork in every difficulty finish', async () 
     )!;
     expect(card.badgeUrl).toBe('/icons/sets/' + key + '.png');
     const html = renderToStaticMarkup(createElement(TrophyCardFace, { card }));
-    expect(html).toContain(card.badgeUrl);
+    expect(html).toContain(card.badgeUrl.replace('/icons/sets/', '/icons/sets-card/'));
+    expect(html).not.toContain('image-rendering:pixelated');
     expect(html).not.toContain('deep-in-the-dex.png');
     expect(html).not.toContain('Set emblem');
     expect(html).not.toMatch(/Earned on|Completed on|2026/);
