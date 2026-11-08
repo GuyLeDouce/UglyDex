@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 const accountLinks = [
   ['/me', 'Profile & progress'],
+  ['/me/achievements', 'Achievement Cards'],
   ['/thread', 'Community'],
   ['/charm', '$CHARM'],
   ['/settings/sharing', 'Share studio'],
