@@ -9,6 +9,12 @@ import { achievementBadgeFile } from './achievement-badge-assets';
 import { shareBackground } from './share-backgrounds';
 const png = (file: string) =>
   'data:image/png;base64,' + readFileSync(file).toString('base64');
+const shareSetIconPath = (icon: string) =>
+  join(
+    process.cwd(),
+    'public',
+    icon.replace('/icons/sets/', '/icons/sets-preview/'),
+  );
 export function renderCollectorShare(
   card: ShareCard,
   spec: Pick<ShareSpec, 'ratio' | 'template'>,
@@ -292,7 +298,7 @@ export function renderCollectorShare(
                   }}
                 >
                   <img
-                    src={png(join(process.cwd(), 'public', s.icon))}
+                    src={png(shareSetIconPath(s.icon))}
                     width={48}
                     height={48}
                     alt={s.name}

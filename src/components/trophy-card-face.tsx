@@ -44,6 +44,10 @@ export function TrophyCardFace({
     borderRadius: 22 * scale,
     border: `${3 * scale}px solid ${p.dark}`,
   };
+  const displayBadge =
+    !print && card.kind === 'set' && badge.startsWith('/icons/sets/')
+      ? badge.replace('/icons/sets/', '/icons/sets-card/')
+      : badge;
   const portrait =
     avatar ?? (card.avatarTokenId ? artworkUrl(card.avatarTokenId, 96) : null);
   return (
@@ -122,16 +126,13 @@ export function TrophyCardFace({
       />
       <img
         loading={print ? undefined : 'lazy'}
-        src={badge}
+        src={displayBadge}
         alt={card.name + (card.kind === 'set' ? ' set icon' : ' badge')}
         width={1000 * scale}
         height={1000 * scale}
         style={{
           ...box(250, 385, 1000, 1000),
           objectFit: 'contain',
-          ...(card.kind === 'set' && !print
-            ? { imageRendering: 'pixelated' }
-            : {}),
         }}
       />
       <div

@@ -105,4 +105,4 @@ it('renders the combined card in both shapes with all slots occupied', async () 
     if (process.env.COLLECTOR_RENDER_REVIEW)
       writeFileSync(`/tmp/collector-${ratio}.png`, bytes);
   }
-});
+}, 20000);

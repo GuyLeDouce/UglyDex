@@ -1,0 +1,36 @@
+name: Upgrade approved set artwork to 1500px
+on:
+  push:
+    branches:
+      - feat/approved-set-icons-1500
+    paths:
+      - scripts/upscale-approved-set-artwork.mjs
+      - .github/workflows/upscale-approved-set-artwork.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  upscale-approved-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Generate 1500x1500 PNG files from existing approved art
+        run: node scripts/upscale-approved-set-artwork.mjs
+      - name: Format asset generation code and tests
+        run: npx prettier --write scripts/upscale-approved-set-artwork.mjs .github/workflows/upscale-approved-set-artwork.yml tests/set-icon-artwork-resolution.test.ts tests/status-icons.test.ts tests/collector-share.test.ts src/server/collector-share-render.tsx src/components/trophy-card-face.tsx
+      - name: Commit generated assets back to the feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/icons/sets/ public/icons/sets-preview/ public/icons/sets-card/ scripts/upscale-approved-set-artwork.mjs .github/workflows/upscale-approved-set-artwork.yml tests/set-icon-artwork-resolution.test.ts tests/status-icons.test.ts tests/collector-share.test.ts src/server/collector-share-render.tsx
+          if ! git diff --cached --quiet; then
+            git commit -m "Upgrade all 52 approved set icons to 1500x1500 PNG"
+            git push origin HEAD:feat/approved-set-icons-1500
+          fi
