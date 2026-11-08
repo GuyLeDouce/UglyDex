@@ -410,6 +410,8 @@ export async function achievementBadgeWebTests(
             'album keeps locked secrets hidden',
           );
           await page.locator('.trophy-locked summary').click();
+          for (const image of await page.locator('.trophy-card-face img').all())
+            await image.scrollIntoViewIfNeeded();
           await page.evaluate(async () => {
             await document.fonts.ready;
             await Promise.all(
@@ -427,6 +429,7 @@ export async function achievementBadgeWebTests(
             'collector album has no mobile overflow',
           );
           await mkdir('.data/design', { recursive: true });
+          await page.evaluate(() => window.scrollTo(0, 0));
           await page.screenshot({
             path: `.data/design/trophy-album-${name}-${width}.png`,
             fullPage: true,

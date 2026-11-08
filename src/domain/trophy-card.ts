@@ -1,3 +1,4 @@
+import { setIcons } from './set-icons';
 import type { CardRarity } from './trading-card';
 import type { AchievementBadgePresentation } from './achievement-badges';
 export const achievementTiers = [
@@ -15,6 +16,7 @@ export type TrophyCardData = {
   rarity: CardRarity;
   classification: string;
   badgeUrl: string;
+  setIcon?: string;
   collector: string;
   avatarTokenId: number | null;
   status: string;
@@ -78,6 +80,7 @@ export function setTrophy(
     rarity: 'unclassified',
     classification: s.difficulty,
     badgeUrl: '/achievements/collector/deep-in-the-dex.png',
+    setIcon: setIcons[s.key],
     status:
       s.mode === 'CURRENT_HOLDING'
         ? 'CURRENT HOLDING COMPLETE'

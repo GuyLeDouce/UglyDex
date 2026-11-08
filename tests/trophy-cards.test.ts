@@ -108,3 +108,22 @@ it('renders every existing rarity to a real, full-resolution PNG with no earned 
     writeFileSync(`.data/design/trophy-${tier.toLowerCase()}.png`, png);
   }
 }, 60000);
+
+it('renders completed sets with their own official icon and collector identity', async () => {
+  const card = setTrophy(
+    {
+      key: 'og-curious',
+      name: 'OG Curious',
+      description: 'Discover an original Squig.',
+      difficulty: 'Easy',
+      complete: true,
+      revealed: true,
+      mode: 'HISTORICAL_DISCOVERY',
+    },
+    identity,
+  )!;
+  expect(card.setIcon).toBe('/icons/sets/og-curious.png');
+  const png = Buffer.from(await renderTrophyCard(card).arrayBuffer());
+  expect((await sharp(png).metadata()).height).toBe(2100);
+  writeFileSync('.data/design/trophy-set.png', png);
+});

@@ -14,12 +14,14 @@ export function TrophyCardFace({
   width = 300,
   badge = card.badgeUrl,
   avatar,
+  setIcon = card.setIcon,
   print = false,
 }: {
   card: TrophyCardData;
   width?: number;
   badge?: string;
   avatar?: string | null;
+  setIcon?: string;
   print?: boolean;
 }) {
   const scale = width / 1500;
@@ -124,12 +126,33 @@ export function TrophyCardFace({
         }}
       />
       <img
+        loading={print ? undefined : 'lazy'}
         src={badge}
         alt={card.name + ' badge'}
         width={1000 * scale}
         height={1000 * scale}
         style={{ ...box(250, 385, 1000, 1000), objectFit: 'contain' }}
       />
+      {setIcon && (
+        <div
+          style={{
+            ...box(1110, 320, 190, 190),
+            background: '#faf3dc',
+            border: `${3 * scale}px solid ${p.mid}`,
+            borderRadius: 32 * scale,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <img
+            src={setIcon}
+            alt="Set emblem"
+            width={145 * scale}
+            height={145 * scale}
+            style={{ objectFit: 'contain' }}
+          />
+        </div>
+      )}
       <div
         style={{
           ...box(120, 1514, 1260, 70),
@@ -167,6 +190,7 @@ export function TrophyCardFace({
       </div>
       {portrait && (
         <img
+          loading={print ? undefined : 'lazy'}
           src={portrait}
           alt=""
           width={105 * scale}
