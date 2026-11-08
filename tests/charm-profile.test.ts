@@ -68,3 +68,7 @@ describe('public CHARM profile boundary', () => {
     );
   });
 });
+
+vi.mock('../src/server/collector-avatar', () => ({
+  collectorAvatar: async () => null,
+}));
