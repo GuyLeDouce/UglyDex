@@ -65,7 +65,12 @@ for (const name of files) {
   await writeFile(path.join(previewDirectory, name), preview);
 
   const cardPreview = await sharp(large)
-    .resize({ width: 512, height: 512, fit: 'fill', kernel: sharp.kernel.lanczos3 })
+    .resize({
+      width: 512,
+      height: 512,
+      fit: 'fill',
+      kernel: sharp.kernel.lanczos3,
+    })
     .png({ compressionLevel: 9 })
     .toBuffer();
   await writeFile(path.join(cardDirectory, name), cardPreview);

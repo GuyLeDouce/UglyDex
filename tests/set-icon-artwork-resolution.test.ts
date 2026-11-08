@@ -23,7 +23,9 @@ describe('approved collection set card artwork', () => {
       );
       expect(preview.readUInt32BE(16), filename).toBe(128);
       expect(preview.readUInt32BE(20), filename).toBe(128);
-      const cardPreview = readFileSync(join(process.cwd(), 'public/icons/sets-card', filename));
+      const cardPreview = readFileSync(
+        join(process.cwd(), 'public/icons/sets-card', filename),
+      );
       expect(cardPreview.readUInt32BE(16), filename).toBe(512);
       expect(cardPreview.readUInt32BE(20), filename).toBe(512);
     }
