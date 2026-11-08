@@ -6,6 +6,10 @@ import sharp from 'sharp';
 const artworkDirectory = fileURLToPath(
   new URL('../public/icons/sets/', import.meta.url),
 );
+const cardDirectory = fileURLToPath(
+  new URL('../public/icons/sets-card/', import.meta.url),
+);
+await mkdir(cardDirectory, { recursive: true });
 const previewDirectory = fileURLToPath(
   new URL('../public/icons/sets-preview/', import.meta.url),
 );
@@ -59,8 +63,14 @@ for (const name of files) {
     .png({ compressionLevel: 9 })
     .toBuffer();
   await writeFile(path.join(previewDirectory, name), preview);
+
+  const cardPreview = await sharp(large)
+    .resize({ width: 512, height: 512, fit: 'fill', kernel: sharp.kernel.lanczos3 })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+  await writeFile(path.join(cardDirectory, name), cardPreview);
 }
 
 console.log(
-  `Approved set artwork: ${files.length} full-size 1500px files; ${files.length} compact previews; newly upscaled: ${updated}`,
+  `Approved set artwork: ${files.length} full-size 1500px files; ${files.length} compact previews; ${files.length} album card previews; newly upscaled: ${updated}`,
 );

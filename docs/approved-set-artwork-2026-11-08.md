@@ -6,9 +6,10 @@ or the 14 utility/status icons, which are separate catalogs.
 
 - `public/icons/sets/*.png`: all 52 approved set illustrations, 1500 x 1500.
 - `public/icons/sets-preview/*.png`: 128 x 128 previews for compact collector share slots.
+- `public/icons/sets-card/*.png`: 512 x 512 artwork for efficient on-screen trophy albums.
 - Set-to-icon mapping: unchanged in `src/domain/set-icons.ts`.
 - Completed-set card finish: Easy/Common, Medium/Rare, Hard/Epic, Insane/Legendary.
-- Trophy card artwork is rendered smoothly, without the former pixelation override.
+- Trophy card artwork is rendered smoothly, without the former pixelation override. Album cards use 512px images; print exports retain full-size 1500px artwork.
 - Share cards use the previews to avoid embedding 1500px files at 48px.
 - `tests/set-icon-artwork-resolution.test.ts` and `tests/status-icons.test.ts`
   enforce the respective icon dimensions.
