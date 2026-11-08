@@ -34,13 +34,16 @@ export const profileSchema = z.object({
   slug: z.union([z.literal(''), slugSchema]),
   displayName: z.string().trim().max(60),
   bio: z.string().trim().max(500),
-  avatar: z.union([
-    z.literal(''),
-    z.url().refine((s) => {
-      const u = new URL(s);
-      return u.protocol === 'https:' && !u.username && !u.password;
-    }, 'Use a public HTTPS image URL.'),
-  ]),
+  avatarSquigId: z.number().int().min(1).max(4444).nullable().optional(),
+  avatar: z
+    .union([
+      z.literal(''),
+      z.url().refine((s) => {
+        const u = new URL(s);
+        return u.protocol === 'https:' && !u.username && !u.password;
+      }, 'Use a public HTTPS image URL.'),
+    ])
+    .optional(),
   collectionVisibility: z.enum(['FULL', 'FEATURED_ONLY', 'HIDDEN']).optional(),
   showUsername: z.boolean().optional(),
   isPublic: z.boolean(),

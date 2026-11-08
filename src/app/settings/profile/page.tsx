@@ -1,3 +1,4 @@
+import { avatarSquigId, collectorAvatar } from '@/server/collector-avatar';
 import { GALLERIES_ENABLED } from '@/domain/features';
 import Link from 'next/link';
 import { requireCollector } from '@/server/session';
@@ -6,6 +7,7 @@ import { ProfileForm } from '@/components/profile-form';
 export default async function Settings() {
   const id = await requireCollector({ allowIncomplete: true }),
     c = await db().collector.findUniqueOrThrow({ where: { id } });
+  const defaultAvatar = await collectorAvatar(id, null);
   return (
     <>
       <section className="page-heading">
@@ -35,7 +37,8 @@ export default async function Settings() {
           showUsername: c.showUsername,
           displayName: c.displayName ?? '',
           bio: c.bio ?? '',
-          avatar: c.avatar ?? '',
+          avatarSquigId: avatarSquigId(c.avatar),
+          defaultAvatarSquigId: defaultAvatar?.tokenId ?? null,
           collectionVisibility: c.collectionVisibility,
           isPublic: c.walletBlockPublicPreference ?? c.isPublic,
           showWallets: c.showWallets,

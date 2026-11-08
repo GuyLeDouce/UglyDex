@@ -1,3 +1,4 @@
+import { collectorAvatar } from './collector-avatar';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { db } from './db';
@@ -48,6 +49,7 @@ export async function collectorProfile(slug: string) {
       }),
     ]);
     const identity = publicIdentity(c);
+    identity.avatar = (await collectorAvatar(c.id, c.avatar))?.url ?? null;
     const chainHistory = identity.unclaimed
       ? await db().walletOwnershipPeriod.findMany({
           where: {

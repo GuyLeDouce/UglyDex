@@ -1,3 +1,4 @@
+import { collectorAvatar } from './collector-avatar';
 import { publicWalletEvidence } from './wallet-field-guide';
 import {
   walletFieldGuide,
@@ -54,15 +55,17 @@ async function collectorListing(page: number, includeDiscovered: boolean) {
         skip: (page - 1) * 24,
       });
       return {
-        users: users.map((c) => {
-          const p = publicIdentity(c);
-          return {
-            slug: p.slug,
-            displayName: p.displayName,
-            avatar: p.avatar,
-            unclaimed: p.unclaimed,
-          };
-        }),
+        users: await Promise.all(
+          users.map(async (c) => {
+            const p = publicIdentity(c);
+            return {
+              slug: p.slug,
+              displayName: p.displayName,
+              avatar: (await collectorAvatar(c.id, c.avatar))?.url ?? null,
+              unclaimed: p.unclaimed,
+            };
+          }),
+        ),
         page,
         pages,
       };
@@ -321,17 +324,19 @@ export async function topCollectors(page = 1) {
         total: ranked.length,
         pending: ranked.filter((c) => c.pending).length,
         unclaimed: ranked.filter((c) => c.unclaimed).length,
-        collectors: selected.map((c) => ({
-          slug: c.slug,
-          avatar: c.avatar,
-          owned: c.owned,
-          overall: c.overall,
-          discovered: c.discovered,
-          rank: c.rank,
-          pending: c.pending,
-          unclaimed: c.unclaimed,
-          displayName: names.get(c.slug) || 'Collector',
-        })),
+        collectors: await Promise.all(
+          selected.map(async (c) => ({
+            slug: c.slug,
+            avatar: (await collectorAvatar(c.id, c.avatar))?.url ?? null,
+            owned: c.owned,
+            overall: c.overall,
+            discovered: c.discovered,
+            rank: c.rank,
+            pending: c.pending,
+            unclaimed: c.unclaimed,
+            displayName: names.get(c.slug) || 'Collector',
+          })),
+        ),
       };
     },
     { isolationLevel: 'RepeatableRead', timeout: 15000 },

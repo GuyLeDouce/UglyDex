@@ -1,3 +1,4 @@
+import { collectorAvatar } from './collector-avatar';
 import { GALLERIES_ENABLED } from '@/domain/features';
 import { favoriteTokenIds } from './favorites';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
@@ -287,7 +288,7 @@ export async function shareCard(
       ]),
     ];
     card.collectorLayout = {
-      avatar: c.avatar,
+      avatar: (await collectorAvatar(c.id, c.avatar))?.url ?? null,
       level: p?.status === 'ready' ? p.level : null,
       completion: d?.status === 'ready' ? d.score.overall : null,
       squigs: await db().squig.count({
