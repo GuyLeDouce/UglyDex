@@ -23,7 +23,8 @@ export async function renderTrophyCard(
       ? await sharp(source)
           .resize(1000, 1000, {
             fit: 'contain',
-            kernel: 'nearest',
+            kernel: 'lanczos3',
+            withoutEnlargement: true,
             background: '#0000',
           })
           .png()

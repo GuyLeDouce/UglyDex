@@ -1,8 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { createHash } from 'node:crypto';
+import provenance from '../public/icons/set-artwork-provenance.json';
 
 describe('approved collection set card artwork', () => {
+  it('preserves the SHA-256 of all 52 approved ZIP originals', () => {
+    expect(provenance.assets).toHaveLength(52);
+    expect(new Set(provenance.assets.map((asset) => asset.source)).size).toBe(
+      52,
+    );
+    for (const asset of provenance.assets) {
+      expect(asset.destination).toBe(`public/icons/sets/${asset.key}.png`);
+      expect(
+        createHash('sha256')
+          .update(readFileSync(asset.destination))
+          .digest('hex'),
+        asset.source,
+      ).toBe(asset.sha256);
+    }
+  });
   it('ships all 52 approved icons as full-size 1500x1500 PNGs', () => {
     const folder = join(process.cwd(), 'public/icons/sets');
     const filenames = readdirSync(folder).filter((name) =>
