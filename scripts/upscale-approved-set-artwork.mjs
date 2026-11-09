@@ -24,7 +24,6 @@ if (files.length !== 52) {
   );
 }
 
-let updated = 0;
 for (const name of files) {
   const imagePath = path.join(artworkDirectory, name);
   const original = await readFile(imagePath);
@@ -35,41 +34,31 @@ for (const name of files) {
     );
   }
 
-  let large = original;
   if (before.width !== 1500 || before.height !== 1500) {
-    if (before.width > 1500 || before.height > 1500) {
-      throw new Error(`Refusing to shrink approved artwork ${name}`);
-    }
-    large = await sharp(original)
-      .resize({
-        width: 1500,
-        height: 1500,
-        fit: 'fill',
-        kernel: sharp.kernel.lanczos3,
-      })
-      .png({ compressionLevel: 9, palette: false })
-      .toBuffer();
-    await writeFile(imagePath, large);
-    updated += 1;
+    throw new Error(
+      `Expected approved 1500x1500 original for ${name}; originals are never resized or overwritten.`,
+    );
   }
 
-  const preview = await sharp(large)
+  const preview = await sharp(original)
     .resize({
       width: 128,
       height: 128,
       fit: 'fill',
       kernel: sharp.kernel.lanczos3,
+      withoutEnlargement: true,
     })
     .png({ compressionLevel: 9 })
     .toBuffer();
   await writeFile(path.join(previewDirectory, name), preview);
 
-  const cardPreview = await sharp(large)
+  const cardPreview = await sharp(original)
     .resize({
       width: 512,
       height: 512,
       fit: 'fill',
       kernel: sharp.kernel.lanczos3,
+      withoutEnlargement: true,
     })
     .png({ compressionLevel: 9 })
     .toBuffer();
@@ -77,5 +66,5 @@ for (const name of files) {
 }
 
 console.log(
-  `Approved set artwork: ${files.length} full-size 1500px files; ${files.length} compact previews; ${files.length} album card previews; newly upscaled: ${updated}`,
+  `Approved set artwork: ${files.length} untouched 1500px originals; ${files.length} compact previews; ${files.length} album card previews`,
 );

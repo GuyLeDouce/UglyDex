@@ -1,6 +1,6 @@
 import { evaluateRequirement, type DexToken, type SetDefinition } from './dex';
 
-// Approved artwork extracted byte-for-byte from UglyDex_Icon_Tables.html.
+// Approved ZIP originals; source filenames and hashes: public/icons/set-artwork-provenance.json.
 export const setIcons: Record<string, string> = {
   'first-specimen': '/icons/sets/first-specimen.png',
   'field-notes': '/icons/sets/field-notes.png',

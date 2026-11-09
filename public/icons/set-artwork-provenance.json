@@ -1,0 +1,323 @@
+{
+  "archive": "UglyDex_Badges_1500x1500.zip",
+  "archiveSha256": "d63c020dce538455a8269811370ba1ba210a754b6d6330e5da78fbb80b1ddfb8",
+  "originalDimensions": [1500, 1500],
+  "derivatives": {
+    "public/icons/sets-card": [512, 512],
+    "public/icons/sets-preview": [128, 128]
+  },
+  "assets": [
+    {
+      "key": "first-specimen",
+      "source": "01-first-specimen.png",
+      "destination": "public/icons/sets/first-specimen.png",
+      "sha256": "e749839293a19103a1bd343e7fda74db56e3bc098530efe48c84adec62074f4d"
+    },
+    {
+      "key": "field-notes",
+      "source": "02-field-notes.png",
+      "destination": "public/icons/sets/field-notes.png",
+      "sha256": "17abb21059921ea30be8481b02f2711da89508316611a03b947a562727a6691b"
+    },
+    {
+      "key": "strange-company",
+      "source": "03-strange-company.png",
+      "destination": "public/icons/sets/strange-company.png",
+      "sha256": "d552dd188f06b6737d72d0e13d06fb5cd3421c835bb3f0994d4d50efd431d3cd"
+    },
+    {
+      "key": "deep-archive",
+      "source": "04-deep-archive.png",
+      "destination": "public/icons/sets/deep-archive.png",
+      "sha256": "a43bc5e8246b6571d9b06375c31f9abe41d234142b89f587d292a265743447ab"
+    },
+    {
+      "key": "living-library",
+      "source": "05-living-library.png",
+      "destination": "public/icons/sets/living-library.png",
+      "sha256": "92ec09241b3fef9f977f4ac2ea0d6725d0fdf70266a58a9043de99c8fb925744"
+    },
+    {
+      "key": "og-curious",
+      "source": "06-og-curious.png",
+      "destination": "public/icons/sets/og-curious.png",
+      "sha256": "3cb157e9670798d7a31eb42367f266c2c0e5ace21d1f0de3cdc5618198cc9f53"
+    },
+    {
+      "key": "og-problem",
+      "source": "07-og-problem.png",
+      "destination": "public/icons/sets/og-problem.png",
+      "sha256": "ee8a8658c8b97ed9aebdb78a6664cb9e253df8b5562cbe9131e8ed33db723d56"
+    },
+    {
+      "key": "original-archive",
+      "source": "08-original-archive.png",
+      "destination": "public/icons/sets/original-archive.png",
+      "sha256": "75fb5cda0cbdb321ce7eb3ba23462dc2f2083fb0879af7657b6991adddfd2ad0"
+    },
+    {
+      "key": "legendary-encounter",
+      "source": "09-legendary-encounter.png",
+      "destination": "public/icons/sets/legendary-encounter.png",
+      "sha256": "f3ceeaf32f7349d2fa3f89c61c34850fd645f96da12dca0332459f4a2fb7e44f"
+    },
+    {
+      "key": "legend-lore",
+      "source": "10-legend-lore.png",
+      "destination": "public/icons/sets/legend-lore.png",
+      "sha256": "e013fdf3dcbd50c3cb69ba7b7dbfb5af600ddd92eca50c77e2c30a6ea73a650f"
+    },
+    {
+      "key": "purple-people",
+      "source": "11-purple-people-eater.png",
+      "destination": "public/icons/sets/purple-people.png",
+      "sha256": "a349c3ad88352ccb088e93ac70482f458a9736fe9125323057905bb93bfe0a08"
+    },
+    {
+      "key": "elf-research",
+      "source": "12-elf-research.png",
+      "destination": "public/icons/sets/elf-research.png",
+      "sha256": "f4b753ed564bc3255ab5aa3086b1f0dfb1206ccda126a0597b2e3590db309053"
+    },
+    {
+      "key": "amphibian-atlas",
+      "source": "13-amphibian-atlas.png",
+      "destination": "public/icons/sets/amphibian-atlas.png",
+      "sha256": "9689a7d81ff32675da33a0b38d4060504ff2598965963087a46a0ff3c3cbfbec"
+    },
+    {
+      "key": "machine-learning",
+      "source": "14-machine-learning.png",
+      "destination": "public/icons/sets/machine-learning.png",
+      "sha256": "d7e2677ed34fa602f17b4950f4096d6d7d03f290e832109206f9b35c1991526b"
+    },
+    {
+      "key": "afterlife",
+      "source": "15-afterlife-studies.png",
+      "destination": "public/icons/sets/afterlife.png",
+      "sha256": "929a5171e6def475ecc649e0d3b499adf42f735c7f018836894d36b6b6c991ed"
+    },
+    {
+      "key": "crystal-clear",
+      "source": "16-crystal-clear.png",
+      "destination": "public/icons/sets/crystal-clear.png",
+      "sha256": "b5a7e5fea924a39cdfa16782a30560834551baf5575e86368bc45c57de67e1df"
+    },
+    {
+      "key": "suit-yourself",
+      "source": "17-suit-yourself.png",
+      "destination": "public/icons/sets/suit-yourself.png",
+      "sha256": "e76b6539ecec9730abfd4d460e17ff098ea971f514ce4ab2b8729c475fb3b758"
+    },
+    {
+      "key": "space-program",
+      "source": "18-ugly-space-program.png",
+      "destination": "public/icons/sets/space-program.png",
+      "sha256": "d60c3f98fdbd59cc1f39b62947e4d9474433891010ddfed5de8820164a4b47e3"
+    },
+    {
+      "key": "splash-notes",
+      "source": "19-splash-notes.png",
+      "destination": "public/icons/sets/splash-notes.png",
+      "sha256": "624c177808d970ee474353caf5af3531b844c89dc7a6c5259451f039c9532e2e"
+    },
+    {
+      "key": "portal-tour",
+      "source": "20-portal-tour.png",
+      "destination": "public/icons/sets/portal-tour.png",
+      "sha256": "4e5aac3f897c9c23ed870046421d9c267b814bfb69cac385e3353334aa0ea227"
+    },
+    {
+      "key": "eyes-wide",
+      "source": "21-eyes-wide-ugly.png",
+      "destination": "public/icons/sets/eyes-wide.png",
+      "sha256": "b4e270fedd5feed7e539afad39b03f6cd88f383fd43c6ceb101fee300b48d537"
+    },
+    {
+      "key": "many-faces",
+      "source": "22-many-faces.png",
+      "destination": "public/icons/sets/many-faces.png",
+      "sha256": "3a703c20562372f1822578baefcb5de7aa36afbe07107bb82a1d3dbe32f4e3b4"
+    },
+    {
+      "key": "wardrobe-malfunction",
+      "source": "23-wardrobe-malfunction.png",
+      "destination": "public/icons/sets/wardrobe-malfunction.png",
+      "sha256": "80cfae899c252a555d9a6a7e9fce5e112f17760d3b01ae3e40c15b115ad743fa"
+    },
+    {
+      "key": "hat-lab",
+      "source": "24-hat-laboratory.png",
+      "destination": "public/icons/sets/hat-lab.png",
+      "sha256": "fdfcd75331763a8dfc475f9d1312264c73158d70219a67efeb770b0a564bd96a"
+    },
+    {
+      "key": "species-survey",
+      "source": "25-species-survey.png",
+      "destination": "public/icons/sets/species-survey.png",
+      "sha256": "7bc1f290aad056cfccaa21b863f52c4f692f123a27a1175c59991781e72dbc27"
+    },
+    {
+      "key": "skin-deep",
+      "source": "26-skin-deep.png",
+      "destination": "public/icons/sets/skin-deep.png",
+      "sha256": "d123895c30e0273472d256ace2c8c8bd2fdc33183533b42dc8c103a4c038645e"
+    },
+    {
+      "key": "background-check",
+      "source": "27-background-check.png",
+      "destination": "public/icons/sets/background-check.png",
+      "sha256": "1446b4c200857cd026daaef1d4ee8b66b4094953e21422b378d713d85f30da4f"
+    },
+    {
+      "key": "special-interest",
+      "source": "28-special-interest.png",
+      "destination": "public/icons/sets/special-interest.png",
+      "sha256": "3ae4f2c709fe5c0162e24fdb29f556faf536ba4328dd7b8b9f3451b91f75e5b3"
+    },
+    {
+      "key": "triple-vision",
+      "source": "29-triple-vision.png",
+      "destination": "public/icons/sets/triple-vision.png",
+      "sha256": "fcb5ac84c11a87ade3fde6281307862e7e308a8034e101125b48810e8441aea3"
+    },
+    {
+      "key": "laser-lab",
+      "source": "30-laser-laboratory.png",
+      "destination": "public/icons/sets/laser-lab.png",
+      "sha256": "e959fbc2a13a68bf6b498b2559bd777251c859c5c141e9e7f43d89979210ec22"
+    },
+    {
+      "key": "pet-project",
+      "source": "31-pet-project.png",
+      "destination": "public/icons/sets/pet-project.png",
+      "sha256": "50a7dcb08a62dcc1eb5780fa4733561ba4f3f83ac2e4a08f82a00f0c57ff26e3"
+    },
+    {
+      "key": "mood-board",
+      "source": "32-mood-board.png",
+      "destination": "public/icons/sets/mood-board.png",
+      "sha256": "71fb5b209596c6b0d29d14f3edcd15b7e03d9e7af11f3703d28612adfe440f27"
+    },
+    {
+      "key": "rainy-day",
+      "source": "33-rainy-day-research.png",
+      "destination": "public/icons/sets/rainy-day.png",
+      "sha256": "4760cfbd46905f9bfb56f58e349acd09994b765b0a63d1aab45dec171fed70de"
+    },
+    {
+      "key": "gold-standard",
+      "source": "34-gold-standard.png",
+      "destination": "public/icons/sets/gold-standard.png",
+      "sha256": "f3abab1b7e611b7dc3a2cc98577d3e048b5cb048ae704217b6eac2a23d129886"
+    },
+    {
+      "key": "eyes-master",
+      "source": "35-eye-encyclopedia.png",
+      "destination": "public/icons/sets/eyes-master.png",
+      "sha256": "1cbeec9d6941edbc7d504fbbce56be33f02cedaaef9c92ca86532d9d97144941"
+    },
+    {
+      "key": "body-master",
+      "source": "36-wardrobe-archive.png",
+      "destination": "public/icons/sets/body-master.png",
+      "sha256": "ba5dcf0180490852f1c6d8512306c8fc83393c3d428dc7a71042500afc2faf80"
+    },
+    {
+      "key": "head-master",
+      "source": "37-head-office.png",
+      "destination": "public/icons/sets/head-master.png",
+      "sha256": "58eea726e0e296829148d047ffb85ac2660e4adf43f8aaa4146857ee8f5a5c6c"
+    },
+    {
+      "key": "static-signal",
+      "source": "38-static-signal-hidden.png",
+      "destination": "public/icons/sets/static-signal.png",
+      "sha256": "e66b45730129086388b33502762a9e6e5a86e04dd3400d0e5fb68620475da9a3"
+    },
+    {
+      "key": "late-night",
+      "source": "39-late-night-television-hidden.png",
+      "destination": "public/icons/sets/late-night.png",
+      "sha256": "fe1cbcd65e5931f336cd5748ce8207bf2364037f1730a0d66af353c4aa5ce02e"
+    },
+    {
+      "key": "room-for-one",
+      "source": "40-room-for-one.png",
+      "destination": "public/icons/sets/room-for-one.png",
+      "sha256": "e4e6e6c952eb47c6eb6ac230ffdbf8d809522196a108ddaf11ec110b40f16c03"
+    },
+    {
+      "key": "crowded-lab",
+      "source": "41-crowded-laboratory.png",
+      "destination": "public/icons/sets/crowded-lab.png",
+      "sha256": "8c8ff6530ad06d597f15fb4cec2d00bb8e46c92f3a0d79836dce75d074924dbe"
+    },
+    {
+      "key": "hoarder-rack",
+      "source": "42-hoarder-rack.png",
+      "destination": "public/icons/sets/hoarder-rack.png",
+      "sha256": "110e6ae47eb5ab732f98282b0df94333232ce83ce429bd10f56c010ed683ae70"
+    },
+    {
+      "key": "specimen-wing",
+      "source": "43-specimen-wing.png",
+      "destination": "public/icons/sets/specimen-wing.png",
+      "sha256": "24c031191e921b49a250234645b4cc4a1405375e5ff6cf140424e2c56a326a0a"
+    },
+    {
+      "key": "ugly-rainbow",
+      "source": "44-ugly-rainbow.png",
+      "destination": "public/icons/sets/ugly-rainbow.png",
+      "sha256": "171033718dca712f60de0d23b20317b546260ac97792cd2b2c2fbe0eb7f0dc26"
+    },
+    {
+      "key": "suit-rack",
+      "source": "45-suit-rack.png",
+      "destination": "public/icons/sets/suit-rack.png",
+      "sha256": "5eadaffb450a60726fa7831a85f9d18cc59d7309180ef43ac8f7fc22204d2cd7"
+    },
+    {
+      "key": "three-eyed-army",
+      "source": "46-three-eyed-army.png",
+      "destination": "public/icons/sets/three-eyed-army.png",
+      "sha256": "439fce993b954b24faad4f8c9e7490e82e43c460383346c982f704ed6a1efe6a"
+    },
+    {
+      "key": "old-guard",
+      "source": "47-old-guard.png",
+      "destination": "public/icons/sets/old-guard.png",
+      "sha256": "2c0a7f1405f88d0d65e3179619a0545528a958cc54c743c6a806ed76e491b7ae"
+    },
+    {
+      "key": "legend-in-residence",
+      "source": "48-legend-in-residence.png",
+      "destination": "public/icons/sets/legend-in-residence.png",
+      "sha256": "ad0bd87c2ec03a50edc99f0797af388c4580aae8b4d801f0b2a956e2a21b5c85"
+    },
+    {
+      "key": "five-species",
+      "source": "49-five-species-one-home.png",
+      "destination": "public/icons/sets/five-species.png",
+      "sha256": "f4a658e3ee2cc0f956c35196698e3507134b8b5fec2d3e0b0f2ea36d796f9a9d"
+    },
+    {
+      "key": "purple-wardrobe",
+      "source": "50-purple-wardrobe.png",
+      "destination": "public/icons/sets/purple-wardrobe.png",
+      "sha256": "978e779805e5d56684840490256227ecd9ec5098432cc03f75e36dd00cd290f6"
+    },
+    {
+      "key": "colour-clash",
+      "source": "51-colour-clash.png",
+      "destination": "public/icons/sets/colour-clash.png",
+      "sha256": "ff2040da530f2cd13099a83b1568b2258329f0e189487e2a0f68c6f5ec986a9b"
+    },
+    {
+      "key": "quiet-room",
+      "source": "52-the-quiet-room-hidden.png",
+      "destination": "public/icons/sets/quiet-room.png",
+      "sha256": "70237b9880564080f1edf787c8a78d0a3522b2535af7c309f56841c6b7be467e"
+    }
+  ]
+}
