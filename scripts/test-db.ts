@@ -1306,9 +1306,10 @@ try {
           fullPage: false,
         });
         await page.goto(base + '/collection/sets?mode=CURRENT_HOLDING');
+        const { collectionSets } = await import('../src/domain/dex-catalog');
         check(
-          (await page.locator('.set-tile').count()) === 13,
-          'current set filter',
+          (await page.locator('.set-tile').count()) === collectionSets.length,
+          'current set filter includes every approved Set Card design',
         );
         await page
           .getByRole('button', { name: 'Save featured sets', exact: true })
