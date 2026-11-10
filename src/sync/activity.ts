@@ -67,15 +67,17 @@ export async function enrich(feed: Feed, rows: ExternalRow[]) {
     }
   }
   if (feed === 'survival') {
-    const games = await readSourceQuery<{ id: string; started_at: Date }>(
-      'survivalParents',
-      [rows.map((r) => r.game_id)],
-    );
+    const games = await readSourceQuery<{
+      id: string;
+      started_at: Date;
+      completed: boolean;
+    }>('survivalParents', [rows.map((r) => r.game_id)]);
     if (!games.ok) throw new Error('PARENT_UNAVAILABLE');
-    for (const r of rows)
-      r.started_at = games.data.find(
-        (g) => String(g.id) === String(r.game_id),
-      )?.started_at;
+    for (const r of rows) {
+      const game = games.data.find((g) => String(g.id) === String(r.game_id));
+      r.started_at = game?.started_at;
+      r.completed = game?.completed === true;
+    }
   }
   if (feed === 'duels') {
     const rounds = await readSourceQuery<{ duel_id: string; rounds: number }>(

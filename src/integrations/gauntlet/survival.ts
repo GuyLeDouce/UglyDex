@@ -52,12 +52,18 @@ export function gauntletEvents(feed: string, row: ExternalRow) {
       row.user_id,
       {
         placement: row.placement == null ? null : Number(row.placement),
+        completed: row.completed === true,
         eliminations: Number(row.eliminations),
         deaths: Number(row.deaths),
         imagesUsed: Number(row.images_used),
         timeBasis: 'game_started_at',
       },
-      { visibility: row.placement != null ? 'PUBLIC' : 'PRIVATE' },
+      {
+        visibility:
+          row.completed === true || row.placement != null
+            ? 'PUBLIC'
+            : 'PRIVATE',
+      },
     ),
   ];
 }

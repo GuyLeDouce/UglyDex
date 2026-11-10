@@ -56,7 +56,10 @@ export function qualifies(f: Fact, m: Metric): boolean {
     case 'wins':
       return t === 'DUEL_COMPLETED' && d.outcome === 'WIN';
     case 'survival':
-      return t === 'SURVIVAL_PLAYED' && Number(d.placement) >= 1;
+      return (
+        t === 'SURVIVAL_PLAYED' &&
+        (d.completed === true || Number(d.placement) >= 1)
+      );
     case 'podiums':
       return t === 'SURVIVAL_PLAYED' && [1, 2, 3].includes(Number(d.placement));
     case 'survivalWins':
