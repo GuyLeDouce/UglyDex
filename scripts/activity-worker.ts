@@ -4,18 +4,55 @@ import { closeExternalPools } from '../src/integrations/read-only';
 import { db } from '../src/server/db';
 import { runWorker } from '../src/server/worker-runtime';
 import { syncDripDue } from '../src/server/drip-sync';
+import { log } from '../src/server/log';
 let nextSourcePoll = 0;
+async function reportSources() {
+  const sources = await db().integrationSource.findMany({
+    select: {
+      id: true,
+      state: true,
+      warning: true,
+      schemaValid: true,
+      lastSuccessAt: true,
+      lastAttemptAt: true,
+      backfillFinishedAt: true,
+      importedThrough: true,
+    },
+  });
+  for (const source of sources)
+    log('ecosystem.source_status', {
+      source: source.id,
+      state: source.state,
+      warning: source.warning,
+      schemaValid: source.schemaValid,
+      lastSuccessAt: source.lastSuccessAt?.toISOString() ?? null,
+      lastAttemptAt: source.lastAttemptAt?.toISOString() ?? null,
+      backfillFinishedAt: source.backfillFinishedAt?.toISOString() ?? null,
+      importedThrough: source.importedThrough?.toISOString() ?? null,
+    });
+}
 try {
+  const control = await db().workerControl.findUnique({
+    where: { service: 'ecosystem' },
+  });
+  log('ecosystem.control', { mode: control?.mode ?? 'DISABLED' });
+  await reportSources();
   await runWorker(
     'ecosystem',
-    async (signal) => {
+    async (signal, mode) => {
       if (Date.now() >= nextSourcePoll) {
-        await activityCycle({ maxPages: 2 }, () => signal.aborted);
+        await activityCycle(
+          { maxPages: 2, workerMode: mode === 'LIVE' ? 'LIVE' : 'HISTORICAL' },
+          () => signal.aborted,
+        );
         nextSourcePoll = Date.now() + 300000;
+        await reportSources();
       }
       if (!signal.aborted) await syncDripDue().catch(() => {});
       return {
-        failed: await db().integrationSource.count({
+        // Feed failures are isolated and retried on the next poll. Reserve the
+        // worker circuit breaker for scheduler/database failures.
+        sourceErrors: await db().integrationSource.count({
           where: { state: 'ERROR' },
         }),
       };

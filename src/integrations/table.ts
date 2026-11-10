@@ -33,9 +33,10 @@ export async function readPage(
   filters: Record<string, unknown> = {},
   limit = 200,
   since?: { column: string; value: Date },
+  direction: 'asc' | 'desc' = 'asc',
 ): Promise<IntegrationResult<ExternalRow[]>> {
   if (!bridgeConfigured(spec.integration))
-    return readDirectPage(spec, after, filters, limit, since);
+    return readDirectPage(spec, after, filters, limit, since, direction);
   const feed = feedKey(spec),
     scope: Record<string, unknown> = {};
   for (const [column, value] of Object.entries(filters)) {
@@ -52,6 +53,7 @@ export async function readPage(
     limit,
     since: since?.value.toISOString(),
     scope,
+    direction,
   });
   const expected = effectivePage(feed, input);
   if (
@@ -71,7 +73,10 @@ export async function readDirectPage(
   filters: Record<string, unknown> = {},
   limit = 200,
   since?: { column: string; value: Date },
+  direction: 'asc' | 'desc' = 'asc',
 ): Promise<IntegrationResult<ExternalRow[]>> {
+  if (!['asc', 'desc'].includes(direction))
+    throw new Error('INVALID_DIRECTION');
   if (!Number.isInteger(limit) || limit < 1 || limit > 500)
     throw new Error('INVALID_PAGE_SIZE');
   const found = await tableColumns(spec, true);
@@ -104,7 +109,7 @@ export async function readDirectPage(
     const offset = values.length;
     values.push(...after);
     predicates.push(
-      `(${spec.keys.map(identifier).join(',')}) > (${after.map((_, i) => `$${offset + i + 1}`).join(',')})`,
+      `(${spec.keys.map(identifier).join(',')}) ${direction === 'desc' ? '<' : '>'} (${after.map((_, i) => `$${offset + i + 1}`).join(',')})`,
     );
   }
   for (const [key, value] of Object.entries(filters)) {
@@ -116,7 +121,7 @@ export async function readDirectPage(
   values.push(limit);
   return readExternal(
     spec.integration,
-    `SELECT ${selection} FROM public.${identifier(spec.table)} ${predicates.length ? `WHERE ${predicates.join(' AND ')}` : ''} ORDER BY ${spec.keys.map(identifier).join(',')} LIMIT $${values.length}`,
+    `SELECT ${selection} FROM public.${identifier(spec.table)} ${predicates.length ? `WHERE ${predicates.join(' AND ')}` : ''} ORDER BY ${spec.keys.map((key) => `${identifier(key)} ${direction.toUpperCase()}`).join(',')} LIMIT $${values.length}`,
     values,
   );
 }

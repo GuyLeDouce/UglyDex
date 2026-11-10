@@ -262,24 +262,23 @@ describe('LIVE worker readiness against completed independent launch evidence', 
     { schemaValid: false },
     { state: 'ERROR', warning: 'IMPORT_FAILED' },
     { state: 'UNAVAILABLE', warning: 'PERMISSIONS_UNAVAILABLE' },
-  ])('blocks broken available source %j', async (patch) => {
-    const sources = await mocks.sources();
-    Object.assign(sources[0], patch);
-    expect(await workerReadiness('ecosystem', 'LIVE')).toBe(
-      'WAITING_SOURCE_VALIDATION',
-    );
-  });
-  it('blocks available history with no completed backfill', async () => {
+  ])(
+    'keeps the scheduler available to retry a broken source %j',
+    async (patch) => {
+      const sources = await mocks.sources();
+      Object.assign(sources[0], patch);
+      expect(await workerReadiness('ecosystem', 'LIVE')).toBe('READY');
+    },
+  );
+  it('leaves historical admission to the individual feed', async () => {
     const sources = await mocks.sources();
     sources[0].backfillFinishedAt = null;
-    expect(await workerReadiness('ecosystem', 'LIVE')).toBe('WAITING_BACKFILL');
+    expect(await workerReadiness('ecosystem', 'LIVE')).toBe('READY');
   });
-  it('blocks unexpected failure of an optional source', async () => {
+  it('keeps retrying after unexpected optional-source failures', async () => {
     const sources = await mocks.sources();
     sources[1].state = 'ERROR';
     sources[1].warning = 'IMPORT_FAILED';
-    expect(await workerReadiness('ecosystem', 'LIVE')).toBe(
-      'WAITING_SOURCE_VALIDATION',
-    );
+    expect(await workerReadiness('ecosystem', 'LIVE')).toBe('READY');
   });
 });

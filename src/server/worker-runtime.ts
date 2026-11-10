@@ -1,5 +1,4 @@
 import { integrationConfigured } from '@/integrations/bridge-config';
-import { unavailableSource } from '@/integrations/availability';
 import 'server-only';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -203,32 +202,9 @@ export async function workerReadiness(service: Service, mode: WorkerMode) {
       integrationConfigured(tables[f].integration),
     );
     if (!configured.length) return 'WAITING_CONFIGURATION';
-    const sources = await db().integrationSource.findMany({
-      where: { id: { in: configured } },
-    });
-    const available = configured.filter(
-      (f) => !unavailableSource(sources.find((s) => s.id === f)),
-    );
-    if (!available.length) return 'WAITING_CONFIGURATION';
-    if (
-      available.some((f) => {
-        const source = sources.find((s) => s.id === f);
-        return (
-          !source?.schemaValid ||
-          source.state === 'ERROR' ||
-          source.warning === 'ROLE_HAS_WRITE_PRIVILEGES' ||
-          source.warning === 'PERMISSIONS_UNAVAILABLE'
-        );
-      })
-    )
-      return 'WAITING_SOURCE_VALIDATION';
-    if (
-      mode === 'LIVE' &&
-      available.some(
-        (f) => !sources.find((s) => s.id === f)?.backfillFinishedAt,
-      )
-    )
-      return 'WAITING_BACKFILL';
+    // The scheduler must run to revalidate failed connections. Admission is
+    // checked independently for each feed after validation in activityCycle.
+    // A source outage must not stop healthy feeds or prevent its own recovery.
   }
   return 'READY';
 }
@@ -237,6 +213,7 @@ export async function runWorker(
   service: Service,
   task: (
     signal: AbortSignal,
+    mode: WorkerMode,
   ) => Promise<Record<string, number | string | boolean | null>>,
   options: { once?: boolean; intervalMs?: number } = {},
 ) {
@@ -314,7 +291,7 @@ export async function runWorker(
             runId = randomUUID();
             state = 'RUNNING';
             await heartbeat();
-            const counts = await task(stop.signal);
+            const counts = await task(stop.signal, mode);
             if (typeof counts.failed === 'number' && counts.failed > 0)
               throw new Error('TASK_REPORTED_FAILURE');
             lastSuccessAt = new Date();

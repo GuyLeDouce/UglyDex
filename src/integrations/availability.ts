@@ -12,3 +12,24 @@ export function unavailableSource(
     source.schemaValid === false
   );
 }
+
+export function activityFeedReadiness(
+  source: {
+    state: string;
+    warning: string | null;
+    schemaValid: boolean | null;
+    backfillFinishedAt: Date | null;
+  } | null,
+  mode: 'HISTORICAL' | 'LIVE',
+) {
+  if (unavailableSource(source)) return 'UNAVAILABLE';
+  if (
+    !source?.schemaValid ||
+    source.state === 'ERROR' ||
+    source.warning === 'ROLE_HAS_WRITE_PRIVILEGES' ||
+    source.warning === 'PERMISSIONS_UNAVAILABLE'
+  )
+    return 'WAITING_SOURCE_VALIDATION';
+  if (mode === 'LIVE' && !source.backfillFinishedAt) return 'WAITING_BACKFILL';
+  return 'READY';
+}

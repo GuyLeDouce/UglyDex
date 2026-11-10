@@ -4,6 +4,7 @@ export type SourceFeed = keyof typeof tables;
 export const pageInput = z
   .object({
     order: z.enum(['key', 'updated']).default('key'),
+    direction: z.enum(['asc', 'desc']).default('asc'),
     after: z
       .array(
         z.union([

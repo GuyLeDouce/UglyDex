@@ -1,5 +1,9 @@
 import { integrationConfigured } from '@/integrations/bridge-config';
-import { unavailableSource } from '@/integrations/availability';
+import {
+  activityFeedReadiness,
+  unavailableSource,
+} from '@/integrations/availability';
+import { validateIntegrations } from '@/integrations/validate';
 import 'server-only';
 import { Pool } from 'pg';
 import { db } from '@/server/db';
@@ -9,7 +13,7 @@ import { tables, sourceTimestamp } from '@/integrations/registry';
 import { sourceSchemaFingerprint } from '@/integrations/source-schema';
 import { readSourceQuery } from '@/integrations/queries';
 import { eventKey } from '@/domain/events';
-import { log } from '@/server/log';
+import { log, errorCode } from '@/server/log';
 import { feeds, normalizeRow, type Feed } from './normalize';
 import { importRecord, reattributePending } from './import-event';
 const mutable = new Set<Feed>([
@@ -21,11 +25,23 @@ const mutable = new Set<Feed>([
   'madlibPublications',
   'madlibOperations',
 ]);
+// These rows can change after creation without an updated_at column. Refresh
+// their newest rows every poll as well as reconciling older history in batches.
+const recentMutable = new Set<Feed>([
+  'survival',
+  'submissions',
+  'bountyResults',
+  'purchases',
+  'liveImages',
+  'bountyEntries',
+]);
 export type ImportOptions = {
   maxPages?: number;
   since?: Date;
   replay?: boolean;
   reconcile?: boolean;
+  recent?: boolean;
+  workerMode?: 'HISTORICAL' | 'LIVE';
 };
 export async function enrich(feed: Feed, rows: ExternalRow[]) {
   if (feed === 'bountyResults') {
@@ -156,6 +172,7 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
     }
     const timestamp =
       !options.reconcile &&
+      !options.recent &&
       mutable.has(feed) &&
       columns.data.some((c) => c.column_name === 'updated_at')
         ? 'updated_at'
@@ -169,11 +186,12 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
         }
       : spec;
     let after =
-      options.replay || options.since
+      options.replay || options.since || options.recent
         ? undefined
         : ((state.cursor as unknown[] | null) ?? undefined);
-    const rotating =
-      options.reconcile || (!timestamp && !!state.backfillFinishedAt);
+    // Always advance the head, including append-only sources without updated_at.
+    // Reconciliation has its own cursor so historical rescans cannot delay new rows.
+    const rotating = !!options.reconcile;
     if (rotating && !options.replay && !options.since)
       after = (state.reconcileCursor as unknown[] | null) ?? undefined;
     if (after?.length === 0) after = undefined;
@@ -190,6 +208,7 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
         options.since && timeColumn
           ? { column: timeColumn, value: options.since }
           : undefined,
+        options.recent ? 'desc' : 'asc',
       );
       if (!result.ok) throw new Error(result.reason);
       if (!result.data.length) {
@@ -272,7 +291,7 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
         const v = result.data.at(-1)![k];
         return v instanceof Date ? v.toISOString() : v;
       });
-      if (!options.since)
+      if (!options.since && !options.recent)
         await db().integrationSource.update({
           where: { id: feed },
           data: rotating
@@ -322,7 +341,7 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
           latest && (!state.importedThrough || latest > state.importedThrough)
             ? latest
             : state.importedThrough,
-        ...(exhausted && !options.since
+        ...(exhausted && !options.since && !options.recent
           ? { backfillFinishedAt: new Date() }
           : {}),
         ...(exhausted && rotating ? { reconcileCursor: [] } : {}),
@@ -342,7 +361,20 @@ export async function runActivityFeed(feed: Feed, options: ImportOptions = {}) {
         finishedAt: new Date(),
       },
     });
-  } catch {
+  } catch (error) {
+    const reason =
+      error instanceof Error &&
+      [
+        'unavailable',
+        'schema_mismatch',
+        'invalid_data',
+        'unconfigured',
+        'INVALID_CURSOR',
+        'PARENT_UNAVAILABLE',
+      ].includes(error.message)
+        ? error.message.toUpperCase()
+        : errorCode(error);
+    log('activity.import_failed', { source: feed, code: reason });
     counts.failed++;
     await db().integrationSource.updateMany({
       where: { id: feed },
@@ -378,6 +410,7 @@ export async function activityCycle(
   options: ImportOptions = { maxPages: 2 },
   stopped = () => false,
 ) {
+  if (options.workerMode) await validateIntegrations();
   await reattributePending();
   for (const feed of feeds)
     if (!stopped() && integrationConfigured(tables[feed].integration)) {
@@ -386,8 +419,17 @@ export async function activityCycle(
           where: { id: feed },
         });
         if (unavailableSource(source)) continue;
+        if (options.workerMode) {
+          const readiness = activityFeedReadiness(source, options.workerMode);
+          if (readiness !== 'READY') {
+            log('activity.source_blocked', { source: feed, state: readiness });
+            continue;
+          }
+        }
         await runActivityFeed(feed, options);
-        if (mutable.has(feed))
+        if (source?.backfillFinishedAt && recentMutable.has(feed))
+          await runActivityFeed(feed, { maxPages: 2, recent: true });
+        if (source?.backfillFinishedAt || mutable.has(feed))
           await runActivityFeed(feed, { maxPages: 1, reconcile: true });
       } catch {
         log('activity.source_failed', { source: feed });

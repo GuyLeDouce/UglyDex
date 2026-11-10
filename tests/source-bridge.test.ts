@@ -169,6 +169,15 @@ describe('bridge authentication and bounded API', () => {
     expect(
       effectivePage('duels', pageInput.parse({ order: 'key' })).spec.keys,
     ).toEqual(['id']));
+  it('allows bounded newest-first reconciliation but rejects arbitrary sorting', () => {
+    expect(pageInput.parse({ direction: 'desc', limit: 200 }).direction).toBe(
+      'desc',
+    );
+    expect(
+      pageInput.safeParse({ direction: 'desc; DROP TABLE squig_duels' })
+        .success,
+    ).toBe(false);
+  });
   it('validates cursor arity and supported scopes', () => {
     expect(() =>
       effectivePage('duels', pageInput.parse({ after: ['a', 'b'] })),

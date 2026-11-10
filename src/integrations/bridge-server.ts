@@ -96,6 +96,7 @@ export async function dispatchBridge(
           effective.filters,
           options.limit,
           effective.since,
+          options.direction,
         )
       : await sourceStats(feed!, true);
   return json(
