@@ -60,51 +60,48 @@ export function DexScore({ view }: { view: DexView }) {
       </div>
       <div className="dex-breakdown">
         {[
-          [
-            'Traits Discovered — 45% Weight',
-            view.traits,
-            view.traitTotal,
-            view.score.trait,
-          ],
-          [
-            'Historical Sets — 35% Weight',
-            view.historicalSets,
-            view.historicalTotal,
-            view.score.sets,
-          ],
-          [
-            'Current Collection — 10% Weight',
-            view.owned,
-            100,
-            view.score.holdings,
-          ],
-          [
-            'Historical Discoveries — 10% Weight',
-            view.discovered,
-            250,
-            view.score.squig,
-          ],
-        ].map(([label, n, total, percent]) => (
+          {
+            label: 'Traits Discovered',
+            count: view.traits,
+            total: view.traitTotal,
+          },
+          {
+            label: 'Historical Sets',
+            count: view.historicalSets,
+            total: view.historicalTotal,
+          },
+          { label: 'Current Collection', count: view.owned, total: null },
+          {
+            label: 'Historical Discoveries',
+            count: view.discovered,
+            total: 4444,
+          },
+        ].map(({ label, count, total }) => (
           <div key={label}>
             <div className="inline">
               <strong>{label}</strong>
               <span>
-                {n} / {total} · {Number(percent).toFixed(1)}%
+                {count.toLocaleString('en-US')}
+                {total !== null && ` / ${total.toLocaleString('en-US')}`}
               </span>
             </div>
-            <progress max={100} value={percent} aria-label={String(label)} />
+            {total !== null && (
+              <progress max={total || 1} value={count} aria-label={label} />
+            )}
           </div>
         ))}
         <small>
-          45% Traits + 35% Historical Sets + 10% Holdings + 10% Discoveries
-          <br />
-          Holdings reach full credit at 100; discoveries at 250. Actual counts
-          remain visible. Mastery can decrease after a sale; earned milestones
-          remain.
-          <br />
           Current holding sets are tracked separately: {view.currentSets}{' '}
           complete.
         </small>
+        <details>
+          <summary>How mastery is calculated</summary>
+          <p>
+            45% Traits + 35% Historical Sets + 10% Holdings + 10% Discoveries.
+            Holdings reach full credit at 100; discoveries at 250. Mastery can
+            decrease after a sale; earned milestones remain.
+          </p>
+        </details>
       </div>
     </section>
   );
