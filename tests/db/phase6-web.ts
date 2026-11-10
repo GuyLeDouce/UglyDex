@@ -700,7 +700,7 @@ export async function phase6WebTests(
         check(
           await page
             .getByRole('heading', {
-              name: 'Achievements & collection badges.',
+              name: 'Achievements & current Set Cards.',
               exact: true,
             })
             .isVisible(),
