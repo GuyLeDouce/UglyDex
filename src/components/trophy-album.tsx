@@ -74,9 +74,9 @@ export function TrophyAlbum({
               setTier('');
             }}
           >
-            <option value="">All unlocked cards</option>
+            <option value="">All available cards</option>
             <option value="achievement">Achievements</option>
-            <option value="set">Completed sets</option>
+            <option value="set">Current Set Cards</option>
           </select>
         </label>
         <label>
@@ -99,7 +99,7 @@ export function TrophyAlbum({
         </label>
       </form>
       <p className="muted" role="status">
-        {filtered.length} of {cards.length} unlocked cards
+        {filtered.length} of {cards.length} available cards
       </p>
       {pendingAchievements && (
         <p>
@@ -107,6 +107,10 @@ export function TrophyAlbum({
           processing finishes.
         </p>
       )}
+      <p className="muted">
+        Set Cards reflect currently held collections. Sets Achieved are kept
+        separately in your Field Guide history.
+      </p>
       {pendingSets && (
         <p>
           Set evaluation is pending. Confirmed completions will appear when
@@ -115,7 +119,7 @@ export function TrophyAlbum({
       )}
       <section
         className="trophy-album-grid"
-        aria-label="Unlocked collector cards"
+        aria-label="Available collector cards"
       >
         {filtered.map((card) => (
           <button

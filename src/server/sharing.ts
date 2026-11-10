@@ -1,4 +1,8 @@
-import { achievementTrophy, setTrophy } from '@/domain/trophy-card';
+import {
+  achievementTrophy,
+  isCurrentSetCard,
+  setTrophy,
+} from '@/domain/trophy-card';
 import { collectorAvatar } from './collector-avatar';
 import { GALLERIES_ENABLED } from '@/domain/features';
 import { favoriteTokenIds } from './favorites';
@@ -297,9 +301,7 @@ export async function shareCard(
       ? badgeKeys.map((key) => available.find((a) => a.key === key)!)
       : rankedShareAchievements(available, capacity.achievements);
     const completed =
-      d?.status === 'ready'
-        ? d.cards.filter((s) => s.complete && s.revealed)
-        : [];
+      d?.status === 'ready' ? d.cards.filter(isCurrentSetCard) : [];
     const setKeys = q.sets?.split(',').filter(Boolean);
     if (setKeys?.some((key) => !completed.some((s) => s.key === key)))
       return null;
@@ -364,7 +366,7 @@ export async function shareCard(
         d.score.overall.toFixed(1) + '% MASTERY',
         d.discovered + ' / 4,444 Squigs',
         d.traits + ' / ' + d.traitTotal + ' traits',
-        d.historicalSets + ' / ' + d.historicalTotal + ' historical sets',
+        d.historicalSets + ' / ' + d.historicalTotal + ' sets achieved',
       ],
       badges: [],
       path: '/share?' + shareQuery({ kind: q.kind, entity: c.slug }),
@@ -376,7 +378,9 @@ export async function shareCard(
       badges: [
         ...card.badges,
         ...(d?.status === 'ready'
-          ? d.cards.filter((s) => s.featured).map((s) => s.name)
+          ? d.cards
+              .filter((s) => s.featured && isCurrentSetCard(s))
+              .map((s) => s.name)
           : []),
       ].slice(0, 7),
       path: '/share?' + shareQuery({ kind: q.kind, entity: c.slug }),
@@ -442,7 +446,7 @@ export async function shareCard(
   } else if (q.kind === 'set') {
     const s =
       d?.status === 'ready'
-        ? d.cards.find((s) => s.key === q.key && s.complete && s.revealed)
+        ? d.cards.find((s) => s.key === q.key && isCurrentSetCard(s))
         : null;
     if (!s) return null;
     const avatar =

@@ -232,7 +232,7 @@ export async function communityTests(
   await db().progressionJob.create({
     data: { subjectType: 'COLLECTOR', subjectId: pending.id },
   });
-  const set = collectionSets.find((s) => s.key === 'first-specimen')!;
+  const set = collectionSets.find((s) => s.key === 'room-for-one')!;
   await db().collectorSetProgress.create({
     data: {
       collectorId: winner.id,

@@ -79,7 +79,7 @@ it('maps set difficulty to card finish while preserving completion mode', () => 
     difficulty: 'Easy',
     complete: true,
     revealed: true,
-    mode: 'HISTORICAL_DISCOVERY',
+    mode: 'CURRENT_HOLDING',
   };
   const card = setTrophy(set, identity)!;
   expect(card.classification).toBe('Easy');
@@ -91,7 +91,10 @@ it('maps set difficulty to card finish while preserving completion mode', () => 
     Insane: 'legendary',
   }))
     expect(setTrophy({ ...set, difficulty }, identity)?.rarity).toBe(rarity);
-  expect(card.status).toBe('HISTORICAL SET COMPLETE');
+  expect(card.status).toBe('CURRENT HOLDING COMPLETE');
+  expect(
+    setTrophy({ ...set, mode: 'HISTORICAL_DISCOVERY' }, identity),
+  ).toBeNull();
   expect(setTrophy({ ...set, complete: false }, identity)).toBeNull();
   expect(setTrophy({ ...set, revealed: false }, identity)).toBeNull();
   expect(setTrophy({ ...set, mode: 'CURRENT_HOLDING' }, identity)?.status).toBe(
@@ -131,7 +134,7 @@ it('renders set icons as the main artwork in every difficulty finish', async () 
         difficulty,
         complete: true,
         revealed: true,
-        mode: 'HISTORICAL_DISCOVERY',
+        mode: 'CURRENT_HOLDING',
       },
       identity,
     )!;

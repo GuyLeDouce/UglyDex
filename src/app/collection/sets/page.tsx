@@ -1,6 +1,12 @@
 import { requireCollector } from '@/server/session';
 import { dexView } from '@/server/dex';
-import { DexNav, DexScore, SetGrid, DiscoveryActions } from '@/components/dex';
+import {
+  DexNav,
+  DexScore,
+  SetGrid,
+  SetHistory,
+  DiscoveryActions,
+} from '@/components/dex';
 import { collectionSets } from '@/domain/dex-catalog';
 import { SetPreferences } from '@/components/set-preferences';
 import type { SearchParams } from '@/components/catalog';
@@ -34,7 +40,8 @@ export default async function Page({
         <p className="eyebrow">CURATED COLLECTION GOALS</p>
         <h1>Find your kind of obsessive.</h1>
         <p>
-          Historical discoveries endure. Current collections live in the moment.
+          Set Cards reflect your current holdings. Sets Achieved remain in your
+          history and contribute to mastery.
         </p>
       </section>
       <DiscoveryActions />
@@ -79,11 +86,23 @@ export default async function Page({
           </button>
         </div>
       </form>
-      <SetGrid cards={filtered} />
+      <h2>Current holding sets.</h2>
+      <SetGrid cards={filtered.filter((c) => c.mode === 'CURRENT_HOLDING')} />
+      <h2>Sets Achieved & discovery progress.</h2>
+      <SetHistory
+        cards={filtered.filter((c) => c.mode === 'HISTORICAL_DISCOVERY')}
+      />
+      <h2>Previously completed holding sets.</h2>
+      <SetHistory
+        cards={cards.filter(
+          (c) =>
+            c.mode === 'CURRENT_HOLDING' && !c.complete && c.firstCompletedAt,
+        )}
+      />
       {view?.status === 'ready' && (
         <SetPreferences
           cards={cards
-            .filter((c) => c.complete)
+            .filter((c) => c.mode === 'CURRENT_HOLDING' && c.complete)
             .map((c) => ({ key: c.key, name: c.name, featured: c.featured }))}
         />
       )}

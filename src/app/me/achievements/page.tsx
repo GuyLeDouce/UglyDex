@@ -14,7 +14,10 @@ export default async function Page() {
       <section className="page-heading">
         <p className="eyebrow">THE EVIDENCE OF UGLY</p>
         <h1>Your achievement cards.</h1>
-        <p>Earned through participation. Kept through history.</p>
+        <p>
+          Achievement Cards preserve your history. Set Cards reflect your
+          current collection.
+        </p>
       </section>
       {album && (
         <>
@@ -22,7 +25,7 @@ export default async function Page() {
             {album.level !== null
               ? `Level ${album.level} · ${album.xp} XP · `
               : ''}
-            {album.cards.length} unlocked collector cards
+            {album.cards.length} available collector cards
           </p>
           {p?.status === 'ready' && (
             <details>

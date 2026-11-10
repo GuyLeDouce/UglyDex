@@ -205,10 +205,10 @@ describe('evidence and sets', () => {
 describe('completion and privacy', () => {
   it('zero data yields zero', () =>
     expect(completion(0, 0, 345, 0, 37, 0).overall).toBe(0));
-  it('uses the requested weighted example with display rounding', () => {
+  it('uses the weighted example with full current-holder credit and display rounding', () => {
     const s = completion(125, 80, 100, 75, 100, 60);
-    expect(s.overall).toBe(73.25);
-    expect(s.overall.toFixed(1)).toBe('73.3');
+    expect(s.overall).toBe(77.25);
+    expect(s.overall.toFixed(1)).toBe('77.3');
   });
   it('reaches full mastery at the milestones', () => {
     expect(completion(250, 345, 345, 37, 37, 100).overall).toBe(100);
@@ -221,7 +221,12 @@ describe('completion and privacy', () => {
     expect(completion(0, 0, 345, 0, 37, 100).overall).toBe(10);
   });
   it('preserves precision for one held and one discovered', () =>
-    expect(completion(1, 0, 345, 0, 37, 1).overall).toBeCloseTo(0.14, 12));
+    expect(completion(1, 0, 345, 0, 37, 1).overall).toBeCloseTo(10.04, 12));
+  it('gives every current holder equal credit, including one Squig', () => {
+    expect(completion(250, 345, 345, 37, 37, 1).overall).toBe(100);
+    expect(completion(250, 345, 345, 37, 37, 100).overall).toBe(100);
+    expect(completion(250, 345, 345, 37, 37, 0).overall).toBe(90);
+  });
   it('handles missing totals and invalid input without NaN', () => {
     expect(completion(NaN, -1, 0, Infinity, 0, -5).overall).toBe(0);
   });

@@ -11,8 +11,8 @@ export function SetPreferences({
     <form action={action} className="panel">
       <h2>Your trophy case.</h2>
       <p>
-        Feature up to three completed sets. A current set leaves your showcase
-        if its holdings are lost.
+        Feature up to three current Set Cards. A card leaves your showcase if
+        its holdings are lost; its completion remains in your history.
       </p>
       <div className="set-choices">
         {cards.map((c) => (

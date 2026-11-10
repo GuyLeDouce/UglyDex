@@ -37,7 +37,7 @@ export function renderCollectorTradingCard(
   const stats = [
     ['SQUIGS DISCOVERED', number(c.discovered)],
     ['TRAITS DISCOVERED', number(c.traits)],
-    ['HISTORICAL SETS', number(c.historicalSets)],
+    ['SETS ACHIEVED', number(c.historicalSets)],
     ['ACHIEVEMENTS COMPLETE', number(c.achievements)],
   ];
   return new ImageResponse(

@@ -67,7 +67,7 @@ export async function GET(request: Request) {
           ? {
               'X-Card-Type': 'collector',
               'X-Card-Description': encodeURIComponent(
-                `${card.title}. UglyDex collector card. ${card.collectorCard.completion?.toFixed(1) ?? 'Pending'} percent Field Guide Mastery. Achievement level ${card.collectorCard.level ?? 'pending'}. ${card.collectorCard.discovered ?? 'Pending'} Squigs discovered. ${card.collectorCard.traits ?? 'Pending'} traits discovered. ${card.collectorCard.historicalSets ?? 'Pending'} historical sets. ${card.collectorCard.achievements ?? 'Pending'} achievements complete.`,
+                `${card.title}. UglyDex collector card. ${card.collectorCard.completion?.toFixed(1) ?? 'Pending'} percent Field Guide Mastery. Achievement level ${card.collectorCard.level ?? 'pending'}. ${card.collectorCard.discovered ?? 'Pending'} Squigs discovered. ${card.collectorCard.traits ?? 'Pending'} traits discovered. ${card.collectorCard.historicalSets ?? 'Pending'} sets achieved. ${card.collectorCard.achievements ?? 'Pending'} achievements complete.`,
               ),
             }
           : {}),

@@ -160,12 +160,12 @@ export function evaluateSet(set: SetDefinition, tokens: DexToken[]) {
 }
 // Scoring is versioned independently from immutable discovery/set semantics.
 export const FIELD_GUIDE_MASTERY = {
-  version: 'field-guide-mastery-v1',
+  version: 'field-guide-mastery-v2',
   traitWeight: 45,
   historicalSetWeight: 35,
   currentHoldingWeight: 10,
   historicalDiscoveryWeight: 10,
-  holdingMilestone: 100,
+  holdingMilestone: 1,
   discoveryMilestone: 250,
 } as const;
 export const MASTERY_THRESHOLDS = [1, 5, 10, 25, 50, 75, 90, 100] as const;

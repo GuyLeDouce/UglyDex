@@ -124,8 +124,8 @@ export function ShareStudio({
         <fieldset>
           <legend>Completed sets · {selectedSets.length}/9 selected</legend>
           <p>
-            Choose up to nine completed-set icons. Favourite Squigs come from
-            your profile (up to six).
+            Choose up to nine currently held Set Card icons. Favourite Squigs
+            come from your profile (up to six).
           </p>
           {sets.map((s) => (
             <label className="check" key={s.key}>

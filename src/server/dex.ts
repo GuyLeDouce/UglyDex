@@ -125,6 +125,7 @@ export async function dexView(id: string, isPublic = false) {
           historicalSets: observed.historicalSets,
           historicalTotal: observed.historicalTotal,
           currentSets: observed.currentSets,
+          currentTotal: observed.currentTotal,
           cards: observed.sets.map(({ definition, result }) =>
             setProjection(
               definition,
@@ -179,7 +180,9 @@ export async function dexView(id: string, isPublic = false) {
             : null,
           completionCount: card.revealed ? (row?.completionCount ?? 0) : 0,
           featured:
-            card.complete && collector.featuredSetIds.includes(`${R}:${s.key}`),
+            card.mode === 'CURRENT_HOLDING' &&
+            card.complete &&
+            collector.featuredSetIds.includes(`${R}:${s.key}`),
         };
       });
       const historicalTotal = collectionSets.filter(
@@ -204,6 +207,8 @@ export async function dexView(id: string, isPublic = false) {
         historicalSets: snapshot.historicalSets,
         historicalTotal,
         currentSets: snapshot.currentSets,
+        currentTotal: collectionSets.filter((s) => s.mode === 'CURRENT_HOLDING')
+          .length,
         cards,
         updatedAt: snapshot.calculatedAt.toISOString(),
         traitDiscoveries: !isPublic
@@ -277,7 +282,7 @@ export async function saveFeaturedSets(id: string, input: unknown) {
             collectorId: id,
             setId: { in: ids },
             currentlyComplete: true,
-            set: { ruleset: R },
+            set: { ruleset: R, mode: 'CURRENT_HOLDING' },
           },
         });
       if (count !== ids.length) throw new Error('SET_NOT_COMPLETE');

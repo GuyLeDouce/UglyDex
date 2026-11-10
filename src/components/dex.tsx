@@ -66,9 +66,9 @@ export function DexScore({ view }: { view: DexView }) {
             total: view.traitTotal,
           },
           {
-            label: 'Historical Sets',
-            count: view.historicalSets,
-            total: view.historicalTotal,
+            label: 'Current Sets',
+            count: view.currentSets,
+            total: view.currentTotal,
           },
           { label: 'Current Collection', count: view.owned, total: null },
           {
@@ -91,15 +91,18 @@ export function DexScore({ view }: { view: DexView }) {
           </div>
         ))}
         <small>
-          Current holding sets are tracked separately: {view.currentSets}{' '}
-          complete.
+          Set Cards reflect current holdings. Sets Achieved remain in your
+          history.
         </small>
         <details>
           <summary>How mastery is calculated</summary>
           <p>
-            45% Traits + 35% Historical Sets + 10% Holdings + 10% Discoveries.
-            Holdings reach full credit at 100; discoveries at 250. Mastery can
-            decrease after a sale; earned milestones remain.
+            45% Traits + 35% Sets Achieved + 10% Current Holder + 10%
+            Discoveries. Holding one or more Squigs earns the full holder
+            credit; discoveries reach full credit at 250. Your discovery sets
+            achieved: {view.historicalSets} / {view.historicalTotal}. Selling
+            your last Squig removes the holder credit. Valid discoveries, Sets
+            Achieved, and earned milestones remain.
           </p>
         </details>
       </div>
@@ -151,13 +154,58 @@ export function SetTile({ card }: { card: SetCard }) {
     </Link>
   );
 }
-export function SetGrid({ cards }: { cards: SetCard[] }) {
+export function SetHistory({ cards }: { cards: SetCard[] }) {
   return cards.length ? (
-    <div className="set-grid">
-      {cards.map((c) => (
-        <SetTile key={c.key} card={c} />
-      ))}
+    <div className="panel table-scroll">
+      <table aria-label="Set achievement history">
+        <thead>
+          <tr>
+            <th>Set</th>
+            <th>Status</th>
+            <th>Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cards.map((card) => (
+            <tr key={card.key}>
+              <td>
+                <Link href={`/sets/${card.key}`}>{card.name}</Link>
+              </td>
+              <td>
+                {card.complete
+                  ? 'Achieved'
+                  : card.firstCompletedAt
+                    ? 'Previously achieved'
+                    : card.revealed
+                      ? 'In progress'
+                      : 'Undiscovered'}
+              </td>
+              <td>
+                {card.revealed ? `${card.progress} / ${card.required}` : '—'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
+  ) : (
+    <p className="panel">No set history matches this view.</p>
+  );
+}
+export function SetGrid({ cards }: { cards: SetCard[] }) {
+  const current = cards.filter((c) => c.mode === 'CURRENT_HOLDING');
+  const history = cards.filter((c) => c.mode === 'HISTORICAL_DISCOVERY');
+  return cards.length ? (
+    <>
+      {!!history.length && <SetHistory cards={history} />}
+      {!!current.length && (
+        <div className="set-grid">
+          {current.map((c) => (
+            <SetTile key={c.key} card={c} />
+          ))}
+        </div>
+      )}
+    </>
   ) : (
     <p className="panel">No sets match this view.</p>
   );

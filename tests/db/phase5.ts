@@ -1,3 +1,4 @@
+import { shareCard } from '../../src/server/sharing';
 import { migrateMasteryScores } from '../../src/server/mastery-migration';
 import { FIELD_GUIDE_MASTERY } from '../../src/domain/dex';
 import { Prisma } from '../../src/generated/prisma/client';
@@ -147,6 +148,26 @@ export async function phase5DatabaseTests(
       view.cards.find((s) => s.key === 'room-for-one')?.complete,
     'current ownership completes set',
   );
+  check(
+    !!(
+      await shareCard({
+        kind: 'set',
+        entity: c.slug,
+        key: 'room-for-one',
+        format: 'trophy-card',
+      })
+    )?.trophyCard,
+    'current qualifying holding set issues a Set Card',
+  );
+  check(
+    !(await shareCard({
+      kind: 'set',
+      entity: c.slug,
+      key: 'first-specimen',
+      format: 'trophy-card',
+    })),
+    'historical achievement cannot issue a Set Card',
+  );
   const auditCount = await db().collectionAudit.count({
     where: { collectorId: c.id },
   });
@@ -162,7 +183,7 @@ export async function phase5DatabaseTests(
   });
   await db().collectionSnapshot.update({
     where: { ruleset_collectorId: { ruleset: R, collectorId: c.id } },
-    data: { overall: 99, scoringPolicy: 'legacy-completion-v1' },
+    data: { overall: 99, scoringPolicy: 'field-guide-mastery-v1' },
   });
   await migrateMasteryScores();
   const migrated = await db().collectionSnapshot.findUniqueOrThrow({
@@ -203,11 +224,11 @@ export async function phase5DatabaseTests(
       ),
     'mastery thresholds use observation dates rather than backdating holdings',
   );
-  await saveFeaturedSets(c.id, ['first-specimen', 'room-for-one']);
+  await saveFeaturedSets(c.id, ['room-for-one']);
   view = await dexView(c.id, true);
   check(
     view?.status === 'ready' &&
-      view.cards.filter((s) => s.featured).length === 2,
+      view.cards.filter((s) => s.featured).length === 1,
     'completed sets can be featured',
   );
   check(
@@ -274,7 +295,7 @@ export async function phase5DatabaseTests(
   check(
     view?.status === 'ready' &&
       before?.status === 'ready' &&
-      view.score.overall < before.score.overall &&
+      Math.abs(before.score.overall - view.score.overall - 10) < 1e-10 &&
       view.discovered === before.discovered,
     'sale reduces holdings mastery while preserving discovery',
   );
@@ -282,6 +303,15 @@ export async function phase5DatabaseTests(
     view?.status === 'ready' &&
       !!view.cards.find((s) => s.key === 'room-for-one')?.firstCompletedAt,
     'first current completion survives loss',
+  );
+  check(
+    !(await shareCard({
+      kind: 'set',
+      entity: c.slug,
+      key: 'room-for-one',
+      format: 'trophy-card',
+    })),
+    'selling qualifying holdings removes Set Card export eligibility',
   );
   check(
     view?.status === 'ready' &&

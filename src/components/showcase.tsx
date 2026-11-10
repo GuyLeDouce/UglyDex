@@ -1,3 +1,4 @@
+import { isCurrentSetCard } from '@/domain/trophy-card';
 import Link from 'next/link';
 import { galleryList, galleryView } from '@/server/galleries';
 import { Artwork } from './artwork';
@@ -76,7 +77,13 @@ export async function CollectorHighlights({
               </dd>
             </div>
             <div>
-              <dt>Historical sets</dt>
+              <dt>Current Sets</dt>
+              <dd>
+                {d.currentSets} / {d.currentTotal}
+              </dd>
+            </div>
+            <div>
+              <dt>Sets Achieved</dt>
               <dd>
                 {d.historicalSets} / {d.historicalTotal}
               </dd>
@@ -191,7 +198,7 @@ export async function TrophyCase({ id, slug }: { id: string; slug: string }) {
     sets =
       d?.status === 'ready'
         ? d.cards
-            .filter((c) => c.complete && c.revealed)
+            .filter(isCurrentSetCard)
             .sort((a, b) => Number(b.featured) - Number(a.featured))
             .slice(0, 4)
         : [];
@@ -199,7 +206,7 @@ export async function TrophyCase({ id, slug }: { id: string; slug: string }) {
   return (
     <section className="trophy-case">
       <p className="eyebrow">EARNED. DISCOVERED. DISPLAYED.</p>
-      <h2>Achievements & collection badges.</h2>
+      <h2>Achievements & current Set Cards.</h2>
       <nav className="anchor-nav" aria-label="Collector accomplishments">
         <Link href={'/collector/' + slug + '/achievements'}>
           View Achievement Cards →

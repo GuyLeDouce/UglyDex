@@ -1,3 +1,4 @@
+import { isCurrentSetCard } from '@/domain/trophy-card';
 import Link from 'next/link';
 import { highestFamilyBadges } from '@/server/achievement-badges';
 import { requireCollector } from '@/server/session';
@@ -71,7 +72,7 @@ export default async function Page() {
         sets={
           d?.status === 'ready'
             ? d.cards
-                .filter((s) => s.complete && s.revealed)
+                .filter(isCurrentSetCard)
                 .map((s) => ({ key: s.key, name: s.name }))
             : []
         }

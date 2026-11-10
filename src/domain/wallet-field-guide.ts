@@ -34,6 +34,8 @@ export function walletFieldGuide(currentIds: number[], historyIds: number[]) {
     traitTotal: traitCatalog.length,
     historicalSets,
     historicalTotal,
+    currentTotal: collectionSets.filter((s) => s.mode === 'CURRENT_HOLDING')
+      .length,
     currentSets: sets.filter(
       (s) => s.definition.mode === 'CURRENT_HOLDING' && s.result.complete,
     ).length,

@@ -36,12 +36,13 @@ export default async function Page({
         <p className="eyebrow">COLLECTOR ACHIEVEMENTS</p>
         <h1>{album.name}’s achievement cards.</h1>
         <p>
-          Earned achievements. Completed sets. A collection of accomplishments.
+          Earned achievements and current Set Cards. Sets Achieved remain in
+          your Field Guide history.
         </p>
       </section>
       <p>
         {album.level !== null ? `Level ${album.level} · ${album.xp} XP · ` : ''}
-        {album.cards.length} unlocked collector cards
+        {album.cards.length} available collector cards
       </p>
       <TrophyAlbum {...album} />
     </>

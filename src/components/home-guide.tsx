@@ -163,9 +163,10 @@ export function HomeCardGuide({ sample }: { sample?: SquigCardData }) {
           <div>
             <dt>Sets & completion</dt>
             <dd>
-              Current sets use current holdings. Historical sets use eligible
-              discoveries. Field Guide Mastery brings collection progress
-              together; it is not a count of Squigs currently owned.
+              Set Cards represent currently complete holding sets. Sets Achieved
+              are a separate discovery record that remains after selling and
+              contributes to Field Guide Mastery. Holding one or more Squigs
+              earns the full current-holder credit.
             </dd>
           </div>
           <div>

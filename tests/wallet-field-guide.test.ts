@@ -16,7 +16,7 @@ it('transfers change current sets without deleting historical wallet progress', 
   expect(before.owned).toBe(1);
   expect(after.owned).toBe(0);
   expect(after.discovered).toBe(1);
-  expect(before.score.overall - after.score.overall).toBeCloseTo(0.1, 12);
+  expect(before.score.overall - after.score.overall).toBeCloseTo(10, 12);
   expect(after.score.trait).toBe(before.score.trait);
   expect(after.score.squig).toBe(before.score.squig);
   expect(

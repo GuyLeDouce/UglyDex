@@ -246,7 +246,7 @@ export async function phase6DatabaseTests(
   for (const kind of ['collector', 'completion', 'trophy', 'collage'])
     check(!!(await get(kind)), 'share projection ' + kind);
   check(!!(await get('gallery', g.slug)), 'gallery card');
-  check(!!(await get('set', 'first-specimen')), 'completed set card');
+  check(!!(await get('set', 'room-for-one')), 'completed set card');
   check(!(await get('set', 'living-library')), 'unearned set rejected');
   check(
     !(await get('achievement', 'does-not-exist')),
@@ -274,7 +274,7 @@ export async function phase6DatabaseTests(
     'featured discovery remains shareable',
   );
   check(
-    (await get('set', 'first-specimen'))?.tokens.length === 0,
+    (await get('set', 'room-for-one'))?.tokens.length === 0,
     'featured-only set hides qualifying token evidence',
   );
   check(
@@ -367,7 +367,7 @@ export async function phase6DatabaseTests(
   check(
     (
       await shareCard(
-        { kind: 'set', entity: c.slug, key: 'first-specimen' },
+        { kind: 'set', entity: c.slug, key: 'room-for-one' },
         c.id,
       )
     )?.tokens.length,

@@ -8,7 +8,7 @@ export const achievementTiers = [
   'Epic',
   'Legendary',
 ] as const;
-// Presentation only: existing set difficulty and completion rules stay intact.
+// Set Cards represent a qualifying current collection. Historical records remain separate.
 export const setFinishes: Record<string, CardRarity> = {
   Easy: 'common',
   Medium: 'rare',
@@ -64,6 +64,13 @@ export function achievementTrophy(
     status: 'ACHIEVEMENT UNLOCKED',
   };
 }
+export function isCurrentSetCard(s: {
+  mode: string;
+  complete: boolean;
+  revealed: boolean;
+}) {
+  return s.mode === 'CURRENT_HOLDING' && s.complete && s.revealed;
+}
 export function setTrophy(
   s: {
     key: string;
@@ -76,7 +83,7 @@ export function setTrophy(
   },
   identity: TrophyIdentity,
 ): TrophyCardData | null {
-  if (!s.complete || !s.revealed) return null;
+  if (!isCurrentSetCard(s)) return null;
   return {
     ...identity,
     key: s.key,
@@ -86,9 +93,6 @@ export function setTrophy(
     rarity: setFinishes[s.difficulty] ?? 'unclassified',
     classification: s.difficulty,
     badgeUrl: setIcons[s.key] ?? '/icons/sets/first-specimen.png',
-    status:
-      s.mode === 'CURRENT_HOLDING'
-        ? 'CURRENT HOLDING COMPLETE'
-        : 'HISTORICAL SET COMPLETE',
+    status: 'CURRENT HOLDING COMPLETE',
   };
 }
