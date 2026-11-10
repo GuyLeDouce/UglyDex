@@ -1,5 +1,8 @@
 import { publicWalletEvidence } from './wallet-field-guide';
-import { walletFieldGuide } from '@/domain/wallet-field-guide';
+import {
+  currentHoldingSets,
+  walletFieldGuide,
+} from '@/domain/wallet-field-guide';
 import { publicNameSelect, publicCollectorName } from './public-collector-name';
 import 'server-only';
 import { db } from './db';
@@ -113,6 +116,15 @@ export async function dexView(id: string, isPublic = false) {
           evidence?.currentIds ?? [],
           evidence?.historyIds ?? [],
         );
+        const holdingCards = currentHoldingSets(evidence?.currentIds ?? []).map(
+          ({ definition, result }) =>
+            setProjection(
+              definition,
+              result,
+              collector.showWallets &&
+                collector.collectionVisibility === 'FULL',
+            ),
+        );
         return {
           status: 'ready' as const,
           basis: 'wallet' as const,
@@ -124,8 +136,9 @@ export async function dexView(id: string, isPublic = false) {
           traitTotal: observed.traitTotal,
           historicalSets: observed.historicalSets,
           historicalTotal: observed.historicalTotal,
-          currentSets: observed.currentSets,
-          currentTotal: observed.currentTotal,
+          currentSets: holdingCards.filter((c) => c.complete).length,
+          currentTotal: holdingCards.length,
+          holdingCards,
           cards: observed.sets.map(({ definition, result }) =>
             setProjection(
               definition,
@@ -188,6 +201,23 @@ export async function dexView(id: string, isPublic = false) {
       const historicalTotal = collectionSets.filter(
         (s) => s.mode === 'HISTORICAL_DISCOVERY' && !s.hidden,
       ).length;
+      const holdingCards = currentHoldingSets(snapshot.currentTokenIds).map(
+        ({ definition, result }) => {
+          const card = setProjection(
+            definition,
+            result,
+            !isPublic ||
+              (collector.showWallets &&
+                collector.collectionVisibility === 'FULL'),
+          );
+          return {
+            ...card,
+            featured:
+              card.complete &&
+              collector.featuredSetIds.includes(`${R}:${card.key}`),
+          };
+        },
+      );
       return {
         status: 'ready' as const,
         basis: 'personal' as const,
@@ -206,9 +236,9 @@ export async function dexView(id: string, isPublic = false) {
         traitTotal: traitCatalog.length,
         historicalSets: snapshot.historicalSets,
         historicalTotal,
-        currentSets: snapshot.currentSets,
-        currentTotal: collectionSets.filter((s) => s.mode === 'CURRENT_HOLDING')
-          .length,
+        currentSets: holdingCards.filter((c) => c.complete).length,
+        currentTotal: holdingCards.length,
+        holdingCards,
         cards,
         updatedAt: snapshot.calculatedAt.toISOString(),
         traitDiscoveries: !isPublic
@@ -276,16 +306,17 @@ export async function saveFeaturedSets(id: string, input: unknown) {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`collections:${id}`},0))`;
       if (await tx.collectionJob.findUnique({ where: { collectorId: id } }))
         throw new Error('COLLECTIONS_PENDING');
-      const ids = keys.map((k) => `${R}:${k}`),
-        count = await tx.collectorSetProgress.count({
-          where: {
-            collectorId: id,
-            setId: { in: ids },
-            currentlyComplete: true,
-            set: { ruleset: R, mode: 'CURRENT_HOLDING' },
-          },
-        });
-      if (count !== ids.length) throw new Error('SET_NOT_COMPLETE');
+      const ids = keys.map((k) => `${R}:${k}`);
+      const snapshot = await tx.collectionSnapshot.findUnique({
+        where: { ruleset_collectorId: { ruleset: R, collectorId: id } },
+      });
+      const eligible = new Set(
+        currentHoldingSets(snapshot?.currentTokenIds ?? [])
+          .filter((s) => s.result.complete)
+          .map((s) => s.definition.key),
+      );
+      if (keys.some((key) => !eligible.has(key)))
+        throw new Error('SET_NOT_COMPLETE');
       await tx.collector.update({
         where: { id },
         data: { featuredSetIds: ids },

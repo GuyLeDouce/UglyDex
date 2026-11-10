@@ -301,7 +301,7 @@ export async function shareCard(
       ? badgeKeys.map((key) => available.find((a) => a.key === key)!)
       : rankedShareAchievements(available, capacity.achievements);
     const completed =
-      d?.status === 'ready' ? d.cards.filter(isCurrentSetCard) : [];
+      d?.status === 'ready' ? d.holdingCards.filter(isCurrentSetCard) : [];
     const setKeys = q.sets?.split(',').filter(Boolean);
     if (setKeys?.some((key) => !completed.some((s) => s.key === key)))
       return null;
@@ -378,7 +378,7 @@ export async function shareCard(
       badges: [
         ...card.badges,
         ...(d?.status === 'ready'
-          ? d.cards
+          ? d.holdingCards
               .filter((s) => s.featured && isCurrentSetCard(s))
               .map((s) => s.name)
           : []),
@@ -446,7 +446,7 @@ export async function shareCard(
   } else if (q.kind === 'set') {
     const s =
       d?.status === 'ready'
-        ? d.cards.find((s) => s.key === q.key && isCurrentSetCard(s))
+        ? d.holdingCards.find((s) => s.key === q.key && isCurrentSetCard(s))
         : null;
     if (!s) return null;
     const avatar =

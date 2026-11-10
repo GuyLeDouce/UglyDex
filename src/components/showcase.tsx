@@ -197,7 +197,7 @@ export async function TrophyCase({ id, slug }: { id: string; slug: string }) {
         : [],
     sets =
       d?.status === 'ready'
-        ? d.cards
+        ? d.holdingCards
             .filter(isCurrentSetCard)
             .sort((a, b) => Number(b.featured) - Number(a.featured))
             .slice(0, 4)

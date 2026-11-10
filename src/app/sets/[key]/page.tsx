@@ -1,3 +1,4 @@
+import { currentSetDefinition } from '@/domain/wallet-field-guide';
 import { absoluteUrl } from '@/server/sharing';
 export async function generateMetadata({
   params,
@@ -10,7 +11,7 @@ export async function generateMetadata({
     return { title: 'UglyDex collection set', robots: { index: false } };
   return {
     title: s.name + ' | UglyDex',
-    description: s.description,
+    description: currentSetDefinition(s).description,
     alternates: { canonical: absoluteUrl('/sets/' + s.key) },
   };
 }
@@ -18,7 +19,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { collectionSets } from '@/domain/dex-catalog';
 import { currentSession } from '@/server/auth';
-import { dexView, setProjection, completionCount } from '@/server/dex';
+import { dexView, setProjection } from '@/server/dex';
 export default async function Page({
   params,
 }: {
@@ -31,9 +32,8 @@ export default async function Page({
     view = session ? await dexView(session.collectorId) : null,
     card =
       view?.status === 'ready'
-        ? view.cards.find((c) => c.key === key)!
-        : setProjection(set, undefined, false);
-  const count = card.revealed ? await completionCount(key) : null;
+        ? view.holdingCards.find((c) => c.key === key)!
+        : setProjection(currentSetDefinition(set), undefined, false);
   return (
     <>
       <section className="page-heading">
@@ -102,8 +102,8 @@ export default async function Page({
             </p>
           )}
           <p>
-            {count} public UglyDex Collectors currently complete this set. This
-            is not a count of all NFT holders.
+            Set Cards require a qualifying current collection. Lifetime
+            discovery progress is recorded separately under Sets Achieved.
           </p>
           <p className="muted">
             {card.mode === 'CURRENT_HOLDING'

@@ -33,7 +33,7 @@ export async function trophyAlbum(id: string, isPublic = false) {
         })
       : []),
     ...(d?.status === 'ready'
-      ? d.cards.flatMap((s) => {
+      ? d.holdingCards.flatMap((s) => {
           const card = setTrophy(s, identity);
           return card ? [card] : [];
         })

@@ -160,13 +160,15 @@ export async function phase5DatabaseTests(
     'current qualifying holding set issues a Set Card',
   );
   check(
-    !(await shareCard({
-      kind: 'set',
-      entity: c.slug,
-      key: 'first-specimen',
-      format: 'trophy-card',
-    })),
-    'historical achievement cannot issue a Set Card',
+    !!(
+      await shareCard({
+        kind: 'set',
+        entity: c.slug,
+        key: 'first-specimen',
+        format: 'trophy-card',
+      })
+    )?.trophyCard,
+    'existing discovery-set design issues a card with qualifying current holdings',
   );
   const auditCount = await db().collectionAudit.count({
     where: { collectorId: c.id },
@@ -224,11 +226,11 @@ export async function phase5DatabaseTests(
       ),
     'mastery thresholds use observation dates rather than backdating holdings',
   );
-  await saveFeaturedSets(c.id, ['room-for-one']);
+  await saveFeaturedSets(c.id, ['first-specimen', 'room-for-one']);
   view = await dexView(c.id, true);
   check(
     view?.status === 'ready' &&
-      view.cards.filter((s) => s.featured).length === 1,
+      view.holdingCards.filter((s) => s.featured).length === 2,
     'completed sets can be featured',
   );
   check(
@@ -312,6 +314,15 @@ export async function phase5DatabaseTests(
       format: 'trophy-card',
     })),
     'selling qualifying holdings removes Set Card export eligibility',
+  );
+  check(
+    !(await shareCard({
+      kind: 'set',
+      entity: c.slug,
+      key: 'first-specimen',
+      format: 'trophy-card',
+    })),
+    'historical discovery achievement alone cannot issue a current Set Card',
   );
   check(
     view?.status === 'ready' &&

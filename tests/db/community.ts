@@ -86,7 +86,7 @@ export async function communityTests(
       traitCatalog.length,
       historicalTotal,
       historicalTotal,
-      0,
+      1,
     ).overall;
     await db().collectionSnapshot.create({
       data: {
@@ -98,7 +98,7 @@ export async function communityTests(
         currentSets: 0,
         overall,
         discoveredTokenIds: [],
-        currentTokenIds: [],
+        currentTokenIds: [tokenId],
         candidates: {},
       },
     });

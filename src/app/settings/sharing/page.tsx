@@ -71,7 +71,7 @@ export default async function Page() {
         }
         sets={
           d?.status === 'ready'
-            ? d.cards
+            ? d.holdingCards
                 .filter(isCurrentSetCard)
                 .map((s) => ({ key: s.key, name: s.name }))
             : []

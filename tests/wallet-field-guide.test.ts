@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   walletFieldGuide,
+  currentHoldingSets,
   rankCollectorRows,
 } from '../src/domain/wallet-field-guide';
 it('deduplicates current and historical tokens and ignores noncanonical IDs', () => {
@@ -42,4 +43,22 @@ it('keeps equal scores tied, slug order stable, and missing evaluations visible'
     ['c', 2],
     ['pending', null],
   ]);
+});
+
+it('keeps every existing Set Card design and qualifies it from current holdings only', () => {
+  const holding = currentHoldingSets([1, 1]);
+  const empty = currentHoldingSets([]);
+  expect(holding).toHaveLength(52);
+  expect(holding.every((s) => s.definition.mode === 'CURRENT_HOLDING')).toBe(
+    true,
+  );
+  expect(
+    holding.find((s) => s.definition.key === 'first-specimen')?.result.complete,
+  ).toBe(true);
+  expect(
+    holding.find((s) => s.definition.key === 'room-for-one')?.result.complete,
+  ).toBe(true);
+  expect(empty.every((s) => !s.result.complete)).toBe(true);
+  expect(holding.every((s) => s.result.at === null)).toBe(true);
+  expect(walletFieldGuide([], [1]).historicalSets).toBeGreaterThan(0);
 });

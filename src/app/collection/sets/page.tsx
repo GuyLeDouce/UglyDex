@@ -18,22 +18,26 @@ export default async function Page({
   const view = await dexView(await requireCollector()),
     p = await searchParams;
   const cards = view?.status === 'ready' ? view.cards : [];
-  const filtered = cards.filter(
-    (c) =>
-      (!p.mode || p.mode === c.mode) &&
-      (!p.category || p.category === c.category) &&
-      (!p.difficulty || p.difficulty === c.difficulty) &&
-      (!p.visibility ||
-        (p.visibility === 'hidden' ? !c.revealed : c.revealed)) &&
-      (!p.state ||
-        (p.state === 'incomplete'
-          ? !c.complete && c.revealed
-          : p.state === 'complete'
-            ? c.complete
-            : p.state === 'progress'
-              ? !c.complete && c.progress > 0
-              : !c.progress)),
-  );
+  const holdingCards = view?.status === 'ready' ? view.holdingCards : [];
+  const filter = (items: typeof cards) =>
+    items.filter(
+      (c) =>
+        (!p.mode || p.mode === c.mode) &&
+        (!p.category || p.category === c.category) &&
+        (!p.difficulty || p.difficulty === c.difficulty) &&
+        (!p.visibility ||
+          (p.visibility === 'hidden' ? !c.revealed : c.revealed)) &&
+        (!p.state ||
+          (p.state === 'incomplete'
+            ? !c.complete && c.revealed
+            : p.state === 'complete'
+              ? c.complete
+              : p.state === 'progress'
+                ? !c.complete && c.progress > 0
+                : !c.progress)),
+    );
+  const filtered = filter(cards);
+  const holdingFiltered = filter(holdingCards);
   return (
     <>
       <section className="page-heading">
@@ -87,7 +91,7 @@ export default async function Page({
         </div>
       </form>
       <h2>Current holding sets.</h2>
-      <SetGrid cards={filtered.filter((c) => c.mode === 'CURRENT_HOLDING')} />
+      <SetGrid cards={holdingFiltered} />
       <h2>Sets Achieved & discovery progress.</h2>
       <SetHistory
         cards={filtered.filter((c) => c.mode === 'HISTORICAL_DISCOVERY')}
@@ -101,7 +105,7 @@ export default async function Page({
       />
       {view?.status === 'ready' && (
         <SetPreferences
-          cards={cards
+          cards={holdingCards
             .filter((c) => c.mode === 'CURRENT_HOLDING' && c.complete)
             .map((c) => ({ key: c.key, name: c.name, featured: c.featured }))}
         />

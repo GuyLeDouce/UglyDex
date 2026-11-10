@@ -4,7 +4,7 @@ import { dexView } from '@/server/dex';
 import { DexNav, DexScore, SetGrid } from '@/components/dex';
 export default async function Page() {
   const view = await dexView(await requireCollector());
-  const cards = view?.status === 'ready' ? view.cards : [];
+  const cards = view?.status === 'ready' ? view.holdingCards : [];
   const closest = cards
     .filter((c) => c.revealed && !c.complete && c.progress > 0)
     .sort(

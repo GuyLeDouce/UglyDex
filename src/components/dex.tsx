@@ -227,10 +227,10 @@ export async function DexSummary({
       <Link className="text-link" href={path}>
         Open collection field guide →
       </Link>
-      {view.status === 'ready' && view.cards.some((c) => c.featured) && (
+      {view.status === 'ready' && view.holdingCards.some((c) => c.featured) && (
         <>
           <h2>Featured collections.</h2>
-          <SetGrid cards={view.cards.filter((c) => c.featured)} />
+          <SetGrid cards={view.holdingCards.filter((c) => c.featured)} />
         </>
       )}
     </section>

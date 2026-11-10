@@ -1,7 +1,37 @@
-import { completion, evaluateSet, tokenTraits } from './dex';
-import { canonicalTokens, collectionSets, traitCatalog } from './dex-catalog';
+import {
+  completion,
+  evaluateSet,
+  tokenTraits,
+  type SetDefinition,
+} from './dex';
+import {
+  canonicalTokens,
+  collectionSets,
+  traitCatalog,
+  requirementLabel,
+} from './dex-catalog';
 
 const byId = new Map(canonicalTokens.map((token) => [token.tokenId, token]));
+/** Every existing Set Card uses simultaneous current holdings, independently
+ * of its original discovery/history definition. No dates or awards are inferred.
+ */
+export function currentSetDefinition(set: SetDefinition): SetDefinition {
+  return {
+    ...set,
+    mode: 'CURRENT_HOLDING',
+    description:
+      'Currently hold ' +
+      set.requirements.map(requirementLabel).join(' and ') +
+      ', simultaneously.',
+  };
+}
+export function currentHoldingSets(currentIds: number[]) {
+  const current = [...new Set(currentIds)].flatMap((id) => byId.get(id) ?? []);
+  return collectionSets.map((set) => ({
+    definition: currentSetDefinition(set),
+    result: evaluateSet(set, current),
+  }));
+}
 /** Observation-only projection. Never creates personal discoveries or awards. */
 export function walletFieldGuide(currentIds: number[], historyIds: number[]) {
   const current = [...new Set(currentIds)].flatMap((id) => byId.get(id) ?? []);

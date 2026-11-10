@@ -35,15 +35,13 @@ export default async function Page({
       {view?.status === 'ready' && (
         <>
           <h2>Featured collections.</h2>
-          <SetGrid cards={view.cards.filter((c) => c.featured)} />
+          <SetGrid cards={view.holdingCards.filter((c) => c.featured)} />
           <h2>Current holding sets.</h2>
           <p>
             Set Cards are available while your collection qualifies. Selling a
             required Squig removes the card from your current collection.
           </p>
-          <SetGrid
-            cards={view.cards.filter((c) => c.mode === 'CURRENT_HOLDING')}
-          />
+          <SetGrid cards={view.holdingCards} />
           <h2>Sets Achieved.</h2>
           <p>
             {view.historicalSets} / {view.historicalTotal} visible discovery
