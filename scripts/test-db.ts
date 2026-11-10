@@ -237,7 +237,14 @@ try {
   );
   const { runFeed } = await import('../src/sync/run');
   check((await runFeed('duels')).inserted === 1, 'adapter-to-import pipeline');
-  check((await runFeed('duels')).skipped === 1, 'pipeline replay');
+  check(
+    (await runFeed('duels')).scanned === 0,
+    'incremental pipeline stays at head',
+  );
+  check(
+    (await runFeed('duels', { replay: true })).skipped === 1,
+    'pipeline replay',
+  );
   if (process.argv.includes('--catalog')) {
     const { syncSquigs } = await import('../src/sync/squigs');
     const first = await syncSquigs();
