@@ -77,6 +77,24 @@ describe('confirmed semantics', () => {
       normalizeRow('survival', { ...fixtures.survival, placement: null })[0]
         .visibility,
     ).toBe('PRIVATE'));
+  it('counts a completed non-podium game without inventing a placement', () => {
+    const event = normalizeRow('survival', {
+      ...fixtures.survival,
+      placement: null,
+      completed: true,
+    })[0];
+    expect(event.visibility).toBe('PUBLIC');
+    expect(event.metadata.completed).toBe(true);
+    expect(event.metadata.placement).toBeNull();
+    expect(eventKey(event)).toBe(
+      eventKey(
+        normalizeRow('survival', {
+          ...fixtures.survival,
+          placement: null,
+        })[0],
+      ),
+    );
+  });
   it('donated external token is not a Squig', () =>
     expect(
       normalizeRow('bounty', fixtures.bounty)[0].squigTokenId,

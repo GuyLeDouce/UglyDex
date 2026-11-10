@@ -28,6 +28,29 @@ const fact = (
   metadata,
 });
 describe('versioned evidence progression', () => {
+  it('credits completed non-podium Survival participation without a win or podium', () => {
+    const completed = fact('SURVIVAL_PLAYED', 0, {
+      completed: true,
+      placement: null,
+    });
+    expect(matching([completed], 'survival')).toHaveLength(1);
+    expect(matching([completed], 'survivalWins')).toHaveLength(0);
+    expect(matching([completed], 'podiums')).toHaveLength(0);
+    expect(
+      matching(
+        [fact('SURVIVAL_PLAYED', 1, { completed: false, placement: null })],
+        'survival',
+      ),
+    ).toHaveLength(0);
+    const result = evaluate('COLLECTOR', [completed], gates);
+    expect(
+      result.awards.find((a) => a.definition.key === 'collector-survival-1')
+        ?.unlocked,
+    ).toBe(true);
+    expect(
+      result.grants.filter((g) => g.rule === 'collector-survival'),
+    ).toHaveLength(1);
+  });
   it('replays multiple level jumps with historical crossing dates', () => {
     const facts = Array.from({ length: 120 }, (_, i) =>
       fact('DUEL_COMPLETED', i, { outcome: 'WIN' }),

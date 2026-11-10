@@ -49,7 +49,9 @@ export const sourceQueries = {
   survivalParents: {
     integration: 'survival',
     input: z.tuple([ids]),
-    sql: 'SELECT id,started_at FROM public.squig_survival_games WHERE id = ANY($1::bigint[])',
+    // The bot stores only podium placements. A winner proves that standings
+    // were finalized, including participants whose own placement stays null.
+    sql: 'SELECT g.id,g.started_at,EXISTS(SELECT 1 FROM public.squig_survival_game_players p WHERE p.game_id=g.id AND p.placement=1) AS completed FROM public.squig_survival_games g WHERE g.id = ANY($1::bigint[])',
   },
   duelRounds: {
     integration: 'uglybot',
