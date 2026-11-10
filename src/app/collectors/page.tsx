@@ -36,10 +36,10 @@ export default async function TopCollectors({
         <Link href="/collectors/directory">
           Browse all collectors and unclaimed holders →
         </Link>
-        <p>Ranked by overall Field Guide completion. Every discovery counts.</p>
+        <p>Ranked by overall Field Guide Mastery. Every discovery counts.</p>
         <small>
           Public collectors and tracked wallets holding at least one Squig ·
-          Equal completion shares a rank.
+          Equal mastery shares a rank.
         </small>
       </section>
       <p>
@@ -57,7 +57,7 @@ export default async function TopCollectors({
       )}
       <ol
         className="collector-leaderboard"
-        aria-label="Field Guide completion leaderboard"
+        aria-label="Field Guide Mastery leaderboard"
       >
         {result.collectors.map((c) => (
           <li key={c.slug}>
@@ -83,7 +83,7 @@ export default async function TopCollectors({
                   {c.overall === null ? 'Updating' : c.overall.toFixed(1) + '%'}
                 </strong>
                 <span>
-                  {c.unclaimed ? 'Wallet Field Guide' : 'Field Guide complete'}
+                  {c.unclaimed ? 'Wallet Field Guide' : 'Field Guide Mastery'}
                 </span>
                 {c.pending && (
                   <small>
@@ -96,7 +96,7 @@ export default async function TopCollectors({
                 <progress
                   max={100}
                   value={c.overall ?? undefined}
-                  aria-label={`${c.displayName || c.slug} Field Guide completion`}
+                  aria-label={`${c.displayName || c.slug} Field Guide Mastery`}
                 />
               </div>
             </Link>

@@ -203,24 +203,28 @@ describe('evidence and sets', () => {
   });
 });
 describe('completion and privacy', () => {
-  it('zero state has zero score', () =>
-    expect(completion(0, 0, 345, 0, 37).overall).toBe(0));
-  it('full components equal 100', () =>
-    expect(completion(4444, 345, 345, 37, 37).overall).toBe(100));
-  it('uses explicit weights', () => {
-    expect(completion(4444, 0, 345, 0, 37).overall).toBe(40);
-    expect(completion(0, 345, 345, 0, 37).overall).toBe(35);
-    expect(completion(0, 0, 345, 37, 37).overall).toBe(25);
+  it('zero data yields zero', () =>
+    expect(completion(0, 0, 345, 0, 37, 0).overall).toBe(0));
+  it('uses the requested weighted example with display rounding', () => {
+    const s = completion(125, 80, 100, 75, 100, 60);
+    expect(s.overall).toBe(73.25);
+    expect(s.overall.toFixed(1)).toBe('73.3');
   });
-  it('caps and rounds deterministically', () =>
-    expect(completion(1, 1, 345, 1, 37).overall).toBe(0.7861));
-  it('current sets have no score argument', () =>
-    expect(completion(0, 0, 345, 0, 37)).toEqual({
-      squig: 0,
-      trait: 0,
-      sets: 0,
-      overall: 0,
-    }));
+  it('reaches full mastery at the milestones', () => {
+    expect(completion(250, 345, 345, 37, 37, 100).overall).toBe(100);
+    expect(completion(5000, 999, 345, 99, 37, 5000).overall).toBe(100);
+  });
+  it('weights each component independently', () => {
+    expect(completion(250, 0, 345, 0, 37, 0).overall).toBe(10);
+    expect(completion(0, 345, 345, 0, 37, 0).overall).toBe(45);
+    expect(completion(0, 0, 345, 37, 37, 0).overall).toBe(35);
+    expect(completion(0, 0, 345, 0, 37, 100).overall).toBe(10);
+  });
+  it('preserves precision for one held and one discovered', () =>
+    expect(completion(1, 0, 345, 0, 37, 1).overall).toBeCloseTo(0.14, 12));
+  it('handles missing totals and invalid input without NaN', () => {
+    expect(completion(NaN, -1, 0, Infinity, 0, -5).overall).toBe(0);
+  });
   it('hidden projections redact rules names counts and evidence', () => {
     const s = collectionSets.find((s) => s.hidden)!;
     const p = setProjection(s, undefined, true);

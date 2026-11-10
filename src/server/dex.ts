@@ -196,6 +196,7 @@ export async function dexView(id: string, isPublic = false) {
           traitCatalog.length,
           snapshot.historicalSets,
           historicalTotal,
+          snapshot.currentTokenIds.length,
         ),
         discovered: snapshot.discovered,
         traits: snapshot.traits,

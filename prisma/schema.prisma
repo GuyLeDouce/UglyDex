@@ -868,6 +868,7 @@ model CollectionSnapshot {
  historicalSets Int
  currentSets Int
  overall Float
+ scoringPolicy String @default("legacy-completion-v1")
  discoveredTokenIds Int[]
  currentTokenIds Int[]
  traitCounts Json @default("{}")

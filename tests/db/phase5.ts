@@ -1,3 +1,5 @@
+import { migrateMasteryScores } from '../../src/server/mastery-migration';
+import { FIELD_GUIDE_MASTERY } from '../../src/domain/dex';
 import { Prisma } from '../../src/generated/prisma/client';
 import { db } from '../../src/server/db';
 import {
@@ -120,6 +122,16 @@ export async function phase5DatabaseTests(
     (await dexView(c.id))?.status === 'pending',
     'pending state withholds completion',
   );
+  const legacyDate = new Date('2026-02-03');
+  await db().collectionMilestone.create({
+    data: {
+      collectorId: c.id,
+      ruleset: R,
+      key: 'completion:25',
+      reachedAt: legacyDate,
+      timeBasis: 'HISTORICAL_EVIDENCE',
+    },
+  });
   const first = await rebuildCollection(c.id);
   check(
     first.traits > 0 && first.discovered === 1,
@@ -144,6 +156,52 @@ export async function phase5DatabaseTests(
       (await db().collectionAudit.count({ where: { collectorId: c.id } })) ===
         auditCount,
     'identical replay has zero new audit transitions',
+  );
+  const baseline = await db().collectionSnapshot.findUniqueOrThrow({
+    where: { ruleset_collectorId: { ruleset: R, collectorId: c.id } },
+  });
+  await db().collectionSnapshot.update({
+    where: { ruleset_collectorId: { ruleset: R, collectorId: c.id } },
+    data: { overall: 99, scoringPolicy: 'legacy-completion-v1' },
+  });
+  await migrateMasteryScores();
+  const migrated = await db().collectionSnapshot.findUniqueOrThrow({
+    where: { ruleset_collectorId: { ruleset: R, collectorId: c.id } },
+  });
+  check(
+    migrated.overall === baseline.overall &&
+      migrated.scoringPolicy === FIELD_GUIDE_MASTERY.version &&
+      +migrated.calculatedAt === +baseline.calculatedAt &&
+      JSON.stringify(migrated.discoveredTokenIds) ===
+        JSON.stringify(baseline.discoveredTokenIds),
+    'score migration preserves snapshot evidence and evaluation date',
+  );
+  check(
+    (await migrateMasteryScores()).updated === 0,
+    'score migration is idempotent',
+  );
+  const legacy = await db().collectionMilestone.findUniqueOrThrow({
+    where: {
+      ruleset_collectorId_key: {
+        ruleset: R,
+        collectorId: c.id,
+        key: 'completion:25',
+      },
+    },
+  });
+  check(
+    +legacy.reachedAt === +legacyDate && !legacy.revokedAt,
+    'legacy award dates survive migration and new evaluation',
+  );
+  const mastery = await db().collectionMilestone.findMany({
+    where: { collectorId: c.id, ruleset: R, key: { startsWith: 'mastery:' } },
+  });
+  check(
+    mastery.length > 0 &&
+      mastery.every(
+        (m) => +m.reachedAt > +at && m.timeBasis === 'MASTERY_FIRST_OBSERVED',
+      ),
+    'mastery thresholds use observation dates rather than backdating holdings',
   );
   await saveFeaturedSets(c.id, ['first-specimen', 'room-for-one']);
   view = await dexView(c.id, true);
@@ -216,8 +274,9 @@ export async function phase5DatabaseTests(
   check(
     view?.status === 'ready' &&
       before?.status === 'ready' &&
-      view.score.overall === before.score.overall,
-    'sale does not reduce permanent completion',
+      view.score.overall < before.score.overall &&
+      view.discovered === before.discovered,
+    'sale reduces holdings mastery while preserving discovery',
   );
   check(
     view?.status === 'ready' &&

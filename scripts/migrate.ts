@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { safeOperationalCode } from '../src/domain/operations';
 import { readEnv } from '../src/server/env';
 import { db } from '../src/server/db';
+import { migrateMasteryScores } from '../src/server/mastery-migration';
 import { importInitialCustoms } from '../src/server/customs-bootstrap';
 // Validates own-vs-external database separation before invoking Prisma.
 readEnv();
@@ -17,12 +18,21 @@ if (process.exitCode === 0) {
   try {
     console.log(
       JSON.stringify({
+        event: 'collections.mastery_migration',
+        ...(await migrateMasteryScores()),
+      }),
+    );
+    console.log(
+      JSON.stringify({
         event: 'customs.initial_import',
         ...(await importInitialCustoms()),
       }),
     );
   } catch (error) {
-    console.error('CUSTOMS_INITIAL_IMPORT_FAILED', safeOperationalCode(error));
+    console.error(
+      'POST_MIGRATION_BOOTSTRAP_FAILED',
+      safeOperationalCode(error),
+    );
     process.exitCode = 1;
   } finally {
     await db().$disconnect();

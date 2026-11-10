@@ -86,6 +86,7 @@ export async function communityTests(
       traitCatalog.length,
       historicalTotal,
       historicalTotal,
+      0,
     ).overall;
     await db().collectionSnapshot.create({
       data: {
@@ -114,7 +115,7 @@ export async function communityTests(
   };
   const winner = await create('community-first', 4444);
   const tied = await create('community-second', 4444);
-  const lower = await create('community-third', 1000);
+  const lower = await create('community-third', 125);
   const privateC = await create('community-private', 4444, false);
   const pending = await create('community-pending', 4444);
   await db().collectionJob.create({ data: { collectorId: pending.id } });

@@ -41,22 +41,26 @@ export async function CollectorHighlights({
             <p className="eyebrow">
               {d.basis === 'wallet'
                 ? 'WALLET FIELD GUIDE · UNCLAIMED'
-                : 'THE FIELD GUIDE'}
+                : 'FIELD GUIDE MASTERY'}
             </p>
             <h2>
               {d.score.overall.toFixed(1)}
-              <span>% complete</span>
+              <span>% mastery</span>
             </h2>
             <progress
               value={d.score.overall}
               max={100}
-              aria-label="Overall UglyDex completion"
+              aria-label="Field Guide Mastery"
             />
             <Link href={'/share?kind=completion&entity=' + slug}>
               Share this UglyDex ↗
             </Link>
           </div>
           <dl>
+            <div>
+              <dt>Squigs currently held</dt>
+              <dd>{d.owned}</dd>
+            </div>
             <div>
               <dt>
                 {d.basis === 'wallet'

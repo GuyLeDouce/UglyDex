@@ -48,7 +48,7 @@ try {
         errors.push(`${s.key}:NONDETERMINISTIC`);
     }
     if (
-      completion(4444, traitCatalog.length, traitCatalog.length, 1, 1)
+      completion(250, traitCatalog.length, traitCatalog.length, 1, 1, 100)
         .overall !== 100
     )
       errors.push('DENOMINATOR');

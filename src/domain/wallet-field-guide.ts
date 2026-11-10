@@ -43,6 +43,7 @@ export function walletFieldGuide(currentIds: number[], historyIds: number[]) {
       traitCatalog.length,
       historicalSets,
       historicalTotal,
+      current.length,
     ),
     sets,
   };

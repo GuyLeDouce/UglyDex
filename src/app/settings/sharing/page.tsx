@@ -23,7 +23,10 @@ export default async function Page() {
       where: {
         collectorId: id,
         ruleset: COLLECTION_RULESET,
-        key: { startsWith: 'completion:' },
+        OR: [
+          { key: { startsWith: 'completion:' } },
+          { key: { startsWith: 'mastery:' } },
+        ],
         revokedAt: null,
       },
       select: { key: true },

@@ -158,23 +158,49 @@ export function evaluateSet(set: SetDefinition, tokens: DexToken[]) {
         : null,
   };
 }
+// Scoring is versioned independently from immutable discovery/set semantics.
+export const FIELD_GUIDE_MASTERY = {
+  version: 'field-guide-mastery-v1',
+  traitWeight: 45,
+  historicalSetWeight: 35,
+  currentHoldingWeight: 10,
+  historicalDiscoveryWeight: 10,
+  holdingMilestone: 100,
+  discoveryMilestone: 250,
+} as const;
+export const MASTERY_THRESHOLDS = [1, 5, 10, 25, 50, 75, 90, 100] as const;
+export const safeRatio = (count: number, total: number) =>
+  Number.isFinite(count) && Number.isFinite(total) && total > 0
+    ? Math.min(1, Math.max(0, count / total))
+    : 0;
 export function completion(
   discovered: number,
   traits: number,
   traitTotal: number,
   historical: number,
   historicalTotal: number,
+  held: number,
 ) {
-  const ratio = (n: number, d: number) =>
-    d ? Math.min(1, Math.max(0, n / d)) : 0;
-  const squig = ratio(discovered, 4444),
-    trait = ratio(traits, traitTotal),
-    sets = ratio(historical, historicalTotal);
+  const p = FIELD_GUIDE_MASTERY;
+  const squig = safeRatio(discovered, p.discoveryMilestone),
+    trait = safeRatio(traits, traitTotal),
+    sets = safeRatio(historical, historicalTotal),
+    holdings = safeRatio(held, p.holdingMilestone);
   return {
     squig: squig * 100,
     trait: trait * 100,
     sets: sets * 100,
-    overall: Math.round((40 * squig + 35 * trait + 25 * sets) * 10000) / 10000,
+    holdings: holdings * 100,
+    overall: Math.min(
+      100,
+      Math.max(
+        0,
+        trait * p.traitWeight +
+          sets * p.historicalSetWeight +
+          holdings * p.currentHoldingWeight +
+          squig * p.historicalDiscoveryWeight,
+      ),
+    ),
   };
 }
 export function discoverTraits(tokens: DexToken[]) {

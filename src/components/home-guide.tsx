@@ -23,7 +23,7 @@ const destinations = [
     href: '/collectors/directory',
     label: 'Meet the collectors',
     description:
-      'Explore public collector profiles and their collections. A personal Field Guide tracks unique discoveries, traits, and sets; Top Collectors ranks overall Field Guide completion.',
+      'Explore public collector profiles and their collections. A personal Field Guide tracks unique discoveries, traits, and sets; Top Collectors ranks overall Field Guide Mastery.',
   },
   {
     title: 'Collector Thread',
@@ -164,7 +164,7 @@ export function HomeCardGuide({ sample }: { sample?: SquigCardData }) {
             <dt>Sets & completion</dt>
             <dd>
               Current sets use current holdings. Historical sets use eligible
-              discoveries. Field Guide completion brings collection progress
+              discoveries. Field Guide Mastery brings collection progress
               together; it is not a count of Squigs currently owned.
             </dd>
           </div>

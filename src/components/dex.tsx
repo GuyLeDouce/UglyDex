@@ -18,7 +18,7 @@ export function DexScore({ view }: { view: DexView }) {
   if (view.status === 'pending')
     return (
       <section className="panel">
-        <p className="eyebrow">UGLYDEX COMPLETION</p>
+        <p className="eyebrow">FIELD GUIDE MASTERY</p>
         <h2>Your field notes are updating.</h2>
         <p>
           Confirmed history is being evaluated. Browse the catalog while your
@@ -29,7 +29,7 @@ export function DexScore({ view }: { view: DexView }) {
   return (
     <section className="dex-score">
       <div>
-        <p className="eyebrow">UGLYDEX COMPLETION · V3</p>
+        <p className="eyebrow">FIELD GUIDE MASTERY</p>
         <h2>
           {view.score.overall.toFixed(1)}
           <span>%</span>
@@ -61,33 +61,46 @@ export function DexScore({ view }: { view: DexView }) {
       <div className="dex-breakdown">
         {[
           [
-            view.basis === 'wallet'
-              ? 'Squigs tracked in wallet history'
-              : 'Squigs discovered',
-            view.discovered,
-            4444,
-            view.score.squig,
+            'Traits Discovered — 45% Weight',
+            view.traits,
+            view.traitTotal,
+            view.score.trait,
           ],
-          ['Traits discovered', view.traits, view.traitTotal, view.score.trait],
           [
-            'Historical sets',
+            'Historical Sets — 35% Weight',
             view.historicalSets,
             view.historicalTotal,
             view.score.sets,
+          ],
+          [
+            'Current Collection — 10% Weight',
+            view.owned,
+            100,
+            view.score.holdings,
+          ],
+          [
+            'Historical Discoveries — 10% Weight',
+            view.discovered,
+            250,
+            view.score.squig,
           ],
         ].map(([label, n, total, percent]) => (
           <div key={label}>
             <div className="inline">
               <strong>{label}</strong>
               <span>
-                {n} / {total}
+                {n} / {total} · {Number(percent).toFixed(1)}%
               </span>
             </div>
             <progress max={100} value={percent} aria-label={String(label)} />
           </div>
         ))}
         <small>
-          40% Squigs + 35% traits + 25% visible historical sets.
+          45% Traits + 35% Historical Sets + 10% Holdings + 10% Discoveries
+          <br />
+          Holdings reach full credit at 100; discoveries at 250. Actual counts
+          remain visible. Mastery can decrease after a sale; earned milestones
+          remain.
           <br />
           Current holding sets are tracked separately: {view.currentSets}{' '}
           complete.

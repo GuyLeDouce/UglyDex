@@ -125,7 +125,9 @@ export function renderCollectorTradingCard(
         <span style={{ ...display, fontSize: 70 }}>
           {c.completion === null ? '—' : c.completion.toFixed(1) + '%'}
         </span>
-        <span style={{ fontSize: 22, letterSpacing: 2 }}>UGLYDEX COMPLETE</span>
+        <span style={{ fontSize: 22, letterSpacing: 2 }}>
+          FIELD GUIDE MASTERY
+        </span>
       </div>
       <div
         style={{

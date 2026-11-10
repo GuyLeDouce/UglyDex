@@ -1,3 +1,5 @@
+import { completion } from '@/domain/dex';
+import { traitCatalog, collectionSets } from '@/domain/dex-catalog';
 import { collectorAvatar } from './collector-avatar';
 import { publicWalletEvidence } from './wallet-field-guide';
 import {
@@ -149,7 +151,7 @@ export async function collectorThread(page = 1, collectorSlug?: string) {
       SELECT m."collectorId", 'milestone' AS kind, m.key, m."reachedAt" AS at, NULL::integer AS "tokenId"
       FROM "CollectionMilestone" m
       JOIN "CollectionSnapshot" p ON p."collectorId"=m."collectorId" AND p.ruleset=${COLLECTION_RULESET}
-      WHERE m.ruleset=${COLLECTION_RULESET} AND m."revokedAt" IS NULL AND m.key LIKE 'completion:%'
+      WHERE m.ruleset=${COLLECTION_RULESET} AND m."revokedAt" IS NULL AND (m.key LIKE 'completion:%' OR m.key LIKE 'mastery:%')
         AND NOT EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=m."collectorId")
       UNION ALL
       SELECT NULL::uuid AS "collectorId", 'transfer' AS kind, t.id AS key, t."eventAt" AS at, t."tokenId"
@@ -269,12 +271,15 @@ export async function topCollectors(page = 1) {
           avatar: string | null;
           overall: number | null;
           discovered: number | null;
+          traits: number | null;
+          historicalSets: number | null;
+          currentTokenIds: number[] | null;
           unclaimed: boolean;
           walletTracked: boolean;
           pending: boolean;
         }[]
       >(Prisma.sql`
-      SELECT c.id, c.slug, c.avatar, s.overall, s.discovered,
+      SELECT c.id, c.slug, c.avatar, s.overall, s.discovered, s.traits, s."historicalSets", s."currentTokenIds",
         EXISTS (SELECT 1 FROM "DiscoveredWallet" w WHERE w."collectorId"=c.id AND w."chainId"=1) AS "walletTracked",
         (c."claimedAt" IS NULL
           AND NOT EXISTS (SELECT 1 FROM "CollectorWallet" w WHERE w."collectorId"=c.id AND w.status='ACTIVE' AND w."revokedAt" IS NULL)
@@ -298,7 +303,20 @@ export async function topCollectors(page = 1) {
             return {
               ...row,
               owned: e?.currentIds.length ?? 0,
-              overall: observed?.score.overall ?? row.overall,
+              overall:
+                observed?.score.overall ??
+                (row.discovered === null
+                  ? null
+                  : completion(
+                      row.discovered,
+                      row.traits ?? 0,
+                      traitCatalog.length,
+                      row.historicalSets ?? 0,
+                      collectionSets.filter(
+                        (s) => s.mode === 'HISTORICAL_DISCOVERY' && !s.hidden,
+                      ).length,
+                      row.currentTokenIds?.length ?? 0,
+                    ).overall),
               discovered: observed?.discovered ?? row.discovered,
               pending: !observed && row.pending,
             };

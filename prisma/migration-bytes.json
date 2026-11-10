@@ -83,5 +83,10 @@
     "source": "392d68aa7c86cbf19466de6df36f6fd29d407d412ffae6d5283c307b9b958a2e",
     "production": "392d68aa7c86cbf19466de6df36f6fd29d407d412ffae6d5283c307b9b958a2e",
     "staging": "392d68aa7c86cbf19466de6df36f6fd29d407d412ffae6d5283c307b9b958a2e"
+  },
+  "202611100001_field_guide_mastery": {
+    "source": "4f242599bcab3caabb837d18f68aee68d44455905924d66de804c611e7a471e3",
+    "production": "4f242599bcab3caabb837d18f68aee68d44455905924d66de804c611e7a471e3",
+    "staging": "4f242599bcab3caabb837d18f68aee68d44455905924d66de804c611e7a471e3"
   }
 }

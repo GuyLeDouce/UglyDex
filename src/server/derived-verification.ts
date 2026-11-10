@@ -210,7 +210,6 @@ export async function verifyDerived(tx: DerivedReadClient): Promise<Check[]> {
             });
             let historical = 0;
             let currentCount = 0;
-            const setTimes: { at: string }[] = [];
             const expectedMilestones = new Map<
               string,
               { at: string; basis: string }
@@ -232,7 +231,6 @@ export async function verifyDerived(tx: DerivedReadClient): Promise<Check[]> {
                 !s.hidden
               ) {
                 historical++;
-                if (result.at) setTimes.push({ at: result.at });
               }
               const stored = sets.find((v) => v.setId === `${R}:${s.key}`);
               if (result.complete && s.mode === 'CURRENT_HOLDING')
@@ -284,33 +282,8 @@ export async function verifyDerived(tx: DerivedReadClient): Promise<Check[]> {
               collectionSets.filter(
                 (s) => s.mode === 'HISTORICAL_DISCOVERY' && !s.hidden,
               ).length,
+              e.current.length,
             );
-            const dates = [
-              ...new Set([
-                ...e.historical.map((t) => t.at!),
-                ...setTimes.map((t) => t.at),
-              ]),
-            ].sort();
-            for (const threshold of [1, 5, 10, 25, 50, 75, 90, 100]) {
-              if (score.overall < threshold) continue;
-              const at = dates.find(
-                (at) =>
-                  completion(
-                    e.historical.filter((t) => t.at! <= at).length,
-                    [...traits.values()].filter((t) => t.at <= at).length,
-                    traitCatalog.length,
-                    setTimes.filter((t) => t.at <= at).length,
-                    collectionSets.filter(
-                      (s) => s.mode === 'HISTORICAL_DISCOVERY' && !s.hidden,
-                    ).length,
-                  ).overall >= threshold,
-              );
-              if (at)
-                expectedMilestones.set(`completion:${threshold}`, {
-                  at,
-                  basis: 'HISTORICAL_EVIDENCE',
-                });
-            }
             const collectionMilestones = await tx.collectionMilestone.findMany({
               where: { collectorId: id, ruleset: R, revokedAt: null },
             });
@@ -325,6 +298,12 @@ export async function verifyDerived(tx: DerivedReadClient): Promise<Check[]> {
             }
             for (const m of collectionMilestones) {
               if (expectedMilestones.has(m.key)) continue;
+              if (m.key.startsWith('completion:')) continue; // Archived policy.
+              if (
+                m.key.startsWith('mastery:') &&
+                m.timeBasis === 'MASTERY_FIRST_OBSERVED'
+              )
+                continue;
               const set = collectionSets.find(
                 (s) => m.key === `set:${s.key}` && s.mode === 'CURRENT_HOLDING',
               );

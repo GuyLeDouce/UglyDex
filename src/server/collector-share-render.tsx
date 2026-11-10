@@ -266,6 +266,9 @@ export function renderCollectorShare(
               {layout.completion === null ? '—' : layout.completion.toFixed(1)}%
             </div>
             <div style={{ display: 'flex', fontSize: 18 }}>
+              Field Guide Mastery
+            </div>
+            <div style={{ display: 'flex', fontSize: 18 }}>
               {layout.squigs} Squigs owned
             </div>
             <div style={{ display: 'flex', fontSize: 18 }}>

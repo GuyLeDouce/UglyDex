@@ -298,12 +298,12 @@ export async function phase6DatabaseTests(
     },
   });
   check(
-    !!(await get('milestone', 'completion:1')) ===
+    !!(await get('milestone', 'mastery:1')) ===
       process.argv.includes('--catalog'),
-    'completion milestone requires enough indexed discovery evidence',
+    'mastery milestone requires an observed evaluation',
   );
   check(
-    !(await get('milestone', 'completion:100')),
+    !(await get('milestone', 'mastery:100')),
     'unearned completion milestone rejected',
   );
   check(!!(await get('milestone', 'level:2')), 'durable level milestone card');

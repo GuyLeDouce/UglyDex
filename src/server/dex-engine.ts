@@ -9,6 +9,8 @@ import { SQUIGS_CONTRACT } from '@/domain/validation';
 import {
   COLLECTION_RULESET as R,
   completion,
+  FIELD_GUIDE_MASTERY,
+  MASTERY_THRESHOLDS,
   discoverTraits,
   evaluateSet,
   evaluateRequirement,
@@ -427,7 +429,6 @@ export async function rebuildCollection(id: string) {
         });
         let historicalCount = 0,
           currentCount = 0;
-        const setTimes: { at: string }[] = [];
         for (const s of collectionSets) {
           const historicalMode = s.mode === 'HISTORICAL_DISCOVERY',
             result = evaluateSet(s, historicalMode ? historical : current),
@@ -445,7 +446,6 @@ export async function rebuildCollection(id: string) {
             counts.completed++;
             if (historicalMode && !s.hidden) {
               historicalCount++;
-              if (result.at) setTimes.push({ at: result.at });
             }
             if (!historicalMode) currentCount++;
           }
@@ -515,35 +515,22 @@ export async function rebuildCollection(id: string) {
           traitCatalog.length,
           historicalCount,
           historicalSets.length,
+          current.length,
         );
-        // Threshold dates are reconstructed from qualifying evidence, not replay time.
-        const dates = [
-          ...new Set([
-            ...historical.map((t) => t.at!),
-            ...setTimes.map((t) => t.at),
-          ]),
-        ].sort();
-        for (const threshold of [1, 5, 10, 25, 50, 75, 90, 100]) {
-          if (score.overall < threshold) continue;
-          const at = dates.find(
-            (at) =>
-              completion(
-                historical.filter((t) => t.at! <= at).length,
-                [...traits.values()].filter((t) => t.at <= at).length,
-                traitCatalog.length,
-                setTimes.filter((t) => t.at <= at).length,
-                historicalSets.length,
-              ).overall >= threshold,
-          );
-          if (at)
-            desiredMilestones.set(`completion:${threshold}`, {
-              at: new Date(at),
-              basis: 'HISTORICAL_EVIDENCE',
-            });
-        }
         const milestones = await tx.collectionMilestone.findMany({
           where: { ruleset: R, collectorId: id },
         });
+        // Legacy completion awards are frozen with their original dates. Mastery
+        // includes live holdings, so new thresholds use first observation only.
+        for (const threshold of MASTERY_THRESHOLDS) {
+          const key = `mastery:${threshold}`;
+          const old = milestones.find((m) => m.key === key);
+          if (score.overall >= threshold && !old)
+            desiredMilestones.set(key, {
+              at: now,
+              basis: 'MASTERY_FIRST_OBSERVED',
+            });
+        }
         for (const [key, m] of desiredMilestones) {
           const old = milestones.find((x) => x.key === key);
           if (!old || old.revokedAt || +old.reachedAt !== +m.at)
@@ -567,6 +554,12 @@ export async function rebuildCollection(id: string) {
         }
         for (const old of milestones)
           if (!old.revokedAt && !desiredMilestones.has(old.key)) {
+            // Completion/mastery awards are durable; sales cannot rewrite history.
+            if (
+              old.key.startsWith('completion:') ||
+              old.key.startsWith('mastery:')
+            )
+              continue;
             // Current first-completion history is retained even after a sale.
             if (old.timeBasis === 'FIRST_OBSERVED_COMPLETE') continue;
             await tx.collectionMilestone.update({
@@ -601,6 +594,7 @@ export async function rebuildCollection(id: string) {
           historicalSets: historicalCount,
           currentSets: currentCount,
           overall: score.overall,
+          scoringPolicy: FIELD_GUIDE_MASTERY.version,
           discoveredTokenIds: historical
             .map((t) => t.tokenId)
             .sort((a, b) => a - b),

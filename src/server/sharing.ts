@@ -262,7 +262,7 @@ export async function shareCard(
       ...(p?.status === 'ready' ? ['Level ' + p.level] : []),
       ...(d?.status === 'ready'
         ? [
-            d.score.overall.toFixed(1) + '% UglyDex complete',
+            d.score.overall.toFixed(1) + '% Field Guide Mastery',
             d.discovered +
               (d.basis === 'wallet'
                 ? ' Squigs tracked in wallet history'
@@ -361,7 +361,7 @@ export async function shareCard(
       eyebrow: 'THE FIELD GUIDE',
       title: name + '’s UglyDex',
       stats: [
-        d.score.overall.toFixed(1) + '% COMPLETE',
+        d.score.overall.toFixed(1) + '% MASTERY',
         d.discovered + ' / 4,444 Squigs',
         d.traits + ' / ' + d.traitTotal + ' traits',
         d.historicalSets + ' / ' + d.historicalTotal + ' historical sets',
@@ -629,7 +629,7 @@ export async function shareCard(
   } else if (q.kind === 'milestone') {
     if (
       d?.status !== 'ready' ||
-      !/^completion:(1|5|10|25|50|75|90|100)$/.test(q.key ?? '')
+      !/^(completion|mastery):(1|5|10|25|50|75|90|100)$/.test(q.key ?? '')
     )
       return null;
     const m = await db().collectionMilestone.findUnique({
@@ -644,7 +644,11 @@ export async function shareCard(
     if (!m || m.revokedAt) return null;
     card = {
       ...card,
-      title: q.key!.split(':')[1] + '% UglyDex',
+      title:
+        q.key!.split(':')[1] +
+        (q.key!.startsWith('mastery:')
+          ? '% Field Guide Mastery'
+          : '% UglyDex (legacy)'),
       eyebrow: 'MILESTONE BY ' + name,
       description: 'A field guide built from real discoveries.',
       date: m.reachedAt.toISOString(),
