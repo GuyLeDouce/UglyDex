@@ -1,0 +1,7 @@
+CREATE TABLE "CollectorSupport" (
+  "collectorId" UUID PRIMARY KEY REFERENCES "Collector"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+  "status" TEXT NOT NULL DEFAULT 'ACTIVE' CHECK ("status" IN ('ACTIVE', 'ERROR', 'UPDATING')),
+  "notes" TEXT NOT NULL DEFAULT '',
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  "updatedBy" TEXT NOT NULL
+);

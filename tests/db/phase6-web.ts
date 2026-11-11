@@ -764,6 +764,8 @@ export async function phase6WebTests(
   await db().authSession.create({
     data: {
       tokenHash: authHash(adminToken),
+      authMethod: 'DISCORD_OAUTH',
+      credentialFingerprint: authHash('DISCORD_OAUTH:333333333333333333'),
       collectorId: admin.collectorId,
       expiresAt: new Date(Date.now() + 60000),
     },

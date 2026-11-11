@@ -22,7 +22,17 @@ enum ReconciliationStatus {
   REJECTED
 }
 
+model CollectorSupport {
+  collectorId String @id @db.Uuid
+  collector Collector @relation(fields: [collectorId], references: [id])
+  status String @default("ACTIVE")
+  notes String @default("")
+  updatedAt DateTime @updatedAt
+  updatedBy String
+}
+
 model Collector {
+  support CollectorSupport?
   id           String                 @id @default(uuid()) @db.Uuid
   slug         String                 @unique
   claimedAt DateTime?

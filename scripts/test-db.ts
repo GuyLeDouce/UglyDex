@@ -101,6 +101,7 @@ process.env.PUBLIC_BASE_URL = `https://localhost:${webPort}`;
 process.env.AUTH_SECRET = randomBytes(32).toString('hex');
 process.env.ADMIN_DIAGNOSTICS_TOKEN = randomBytes(32).toString('hex');
 process.env.ADMIN_DISCORD_IDS = '333333333333333333';
+process.env.ADMIN_OWNER_DISCORD_ID = '';
 let web: ChildProcess | undefined;
 let assertions = 0;
 const phase12Only = process.argv.includes('--phase12-only');
@@ -531,9 +532,26 @@ try {
       sessionCookie,
     );
     check(
-      onboarding.ok && (await onboarding.json()).next === '/settings/profile',
-      'wallet-only onboarding completes before dashboard access',
+      onboarding.ok && (await onboarding.json()).next === '/onboarding',
+      'wallet-only sign-in still requires the profile walkthrough',
     );
+    const setupCollector = await db().collector.findUniqueOrThrow({
+      where: { slug: profile.slug },
+    });
+    for (const step of [
+      { action: 'name', name: 'HTTP Wallet Fixture' },
+      { action: 'avatar', tokenId: null },
+      { action: 'sharing', share: false },
+    ])
+      check(
+        (await post('/api/onboarding/profile', step, sessionCookie)).ok,
+        `wallet-only walkthrough saves ${step.action}`,
+      );
+    profile.slug = (
+      await db().collector.findUniqueOrThrow({
+        where: { id: setupCollector.id },
+      })
+    ).slug;
     const ownBody = await (
       await fetch(`${base}/me`, {
         headers: { Cookie: sessionCookie },
@@ -752,6 +770,14 @@ try {
         provider: 'DISCORD',
         externalId: '333333333333333333',
         authenticatedAt: new Date(),
+      },
+    });
+    const { authHash } = await import('../src/server/auth');
+    await db().authSession.updateMany({
+      where: { collectorId: signedCollector.id },
+      data: {
+        authMethod: 'DISCORD_OAUTH',
+        credentialFingerprint: authHash('DISCORD_OAUTH:333333333333333333'),
       },
     });
     for (const path of [
