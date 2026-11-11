@@ -36,7 +36,7 @@ export async function adminCharmDiagnostics(ids: string[]) {
       db().dripSyncState.findUnique({ where: { realmId } }),
       db().workerControl.findUnique({ where: { service: 'ecosystem' } }),
       db().workerHeartbeat.findFirst({
-        where: { service: 'ecosystem', lockHeld: true },
+        where: { service: 'ecosystem' },
         orderBy: { lastHeartbeat: 'desc' },
       }),
     ]);

@@ -126,7 +126,7 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
               'Saved balance':
                 profile.charm.savedBalance ??
                 'Unavailable — no balance recorded',
-              'Balance freshness': `${profile.charm.balanceStatus} · ${profile.charm.stale ? 'stale / unverified' : 'current'}`,
+              'Balance freshness': `${profile.charm.stale ? 'Outdated / unverified' : 'Current'} (stored read status: ${profile.charm.balanceStatus})`,
               'Balance observed (UTC)': profile.charm.observedAt ?? 'Never',
               'Successful balance read (UTC)':
                 profile.charm.lastApiSuccessAt ?? 'Never',

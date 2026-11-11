@@ -1,3 +1,4 @@
+import { priorDripBindings } from './drip-alignment-revalidation';
 import 'server-only';
 import { setTimeout as delay } from 'node:timers/promises';
 import { z } from 'zod';
@@ -213,6 +214,7 @@ async function checkDripAlignment(bots: {
       alignmentHash: hash(evidence),
       alignmentAt: new Date(),
       alignmentCommit: launchContext().commit,
+      errorCode: null,
     },
   });
   return evidence;
@@ -300,7 +302,8 @@ export async function syncDripDue() {
     return await syncDripBatch();
   } catch (e) {
     const code =
-      e instanceof Error && /^DRIP_[A-Z0-9_]+$/.test(e.message)
+      e instanceof Error &&
+      /^(DRIP_[A-Z0-9_]+|CHARM_ECONOMY_MISMATCH)$/.test(e.message)
         ? e.message
         : 'DRIP_SYNC_FAILED';
     if (code !== 'DRIP_BUDGET_WAIT') {
@@ -327,9 +330,36 @@ async function syncDripBatch() {
     return { status: 'UNCONFIGURED' };
   const c = dripConfig(),
     s = await state();
-  if (!s.alignmentHash || s.alignmentCommit !== launchContext().commit)
-    return { status: 'ALIGNMENT_REQUIRED' };
   if (s.nextRequestAt > new Date()) return { status: 'NOT_DUE' };
+  if (!s.alignmentHash || s.alignmentCommit !== launchContext().commit) {
+    const bindings = priorDripBindings(s, {
+      realm: c.DRIP_REALM_ID,
+      currency: c.DRIP_REALM_POINT_ID,
+    });
+    if (!bindings) return { status: 'ALIGNMENT_REQUIRED' };
+    // A normal release may reuse reviewed bot bindings, but must obtain a fresh
+    // live Realm/currency proof before any member synchronization resumes.
+    // The worker lock and dripRead budget serialize and rate-limit these reads.
+    try {
+      await checkDripAlignment(bindings);
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'CHARM_ECONOMY_MISMATCH'
+      ) {
+        await db().dripSyncState.update({
+          where: { realmId: s.realmId },
+          data: {
+            alignmentHash: null,
+            alignmentCommit: null,
+            errorCode: 'CHARM_ECONOMY_MISMATCH',
+          },
+        });
+      }
+      throw error;
+    }
+    return { status: 'ALIGNMENT_REVALIDATED' };
+  }
   const requests = await db().charmRefreshRequest.findMany({
     where: { realmId: s.realmId, pending: true },
     orderBy: { requestedAt: 'asc' },
