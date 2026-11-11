@@ -532,9 +532,26 @@ try {
       sessionCookie,
     );
     check(
-      onboarding.ok && (await onboarding.json()).next === '/settings/profile',
-      'wallet-only onboarding completes before dashboard access',
+      onboarding.ok && (await onboarding.json()).next === '/onboarding',
+      'wallet-only sign-in still requires the profile walkthrough',
     );
+    const setupCollector = await db().collector.findUniqueOrThrow({
+      where: { slug: profile.slug },
+    });
+    for (const step of [
+      { action: 'name', name: 'HTTP Wallet Fixture' },
+      { action: 'avatar', tokenId: null },
+      { action: 'sharing', share: false },
+    ])
+      check(
+        (await post('/api/onboarding/profile', step, sessionCookie)).ok,
+        `wallet-only walkthrough saves ${step.action}`,
+      );
+    profile.slug = (
+      await db().collector.findUniqueOrThrow({
+        where: { id: setupCollector.id },
+      })
+    ).slug;
     const ownBody = await (
       await fetch(`${base}/me`, {
         headers: { Cookie: sessionCookie },
