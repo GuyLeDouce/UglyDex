@@ -3,6 +3,8 @@ import { db } from './db';
 import { readEnv } from './env';
 import {
   jobHealth,
+  pendingCharmHealth,
+  discordProofSatisfied,
   profileHealth,
   type HealthSignal,
 } from '@/domain/admin-health';
@@ -23,6 +25,18 @@ export async function adminProfileHealth() {
           dripIdentities: {
             where: { realmId: realmId ?? '__unconfigured__' },
             select: { status: true, dripMemberId: true },
+          },
+          charmBalances: {
+            where: {
+              realmId: realmId ?? '__unconfigured__',
+              currencyId: process.env.DRIP_REALM_POINT_ID ?? '__unconfigured__',
+            },
+            select: {
+              status: true,
+              balance: true,
+              observedAt: true,
+              lastApiSuccessAt: true,
+            },
           },
           refreshRequest: true,
         },
@@ -47,15 +61,18 @@ export async function adminProfileHealth() {
     add(j.collectorId, jobHealth('Sets and collection', j, now));
   for (const j of progression)
     add(j.subjectId, jobHealth('Achievements and progression', j, now));
-  for (const j of charm)
-    add(
-      j.collectorId,
-      jobHealth(
-        '$CHARM refresh',
-        { queuedAt: j.requestedAt, attempts: 0, errorCode: null },
-        now,
-      ),
+  const byId = new Map(collectors.map((c) => [c.id, c]));
+  for (const j of charm) {
+    const collector = byId.get(j.collectorId);
+    if (!collector) continue;
+    const signal = pendingCharmHealth(
+      j,
+      collector.charmBalances,
+      collector.discordTrackingConsent === true,
+      now,
     );
+    if (signal) add(j.collectorId, signal);
+  }
   for (const c of collectors) {
     if (c.claimedAt && !c.onboardingCompletedAt)
       add(c.id, {
@@ -133,11 +150,20 @@ export async function adminProfileHealth() {
         )
         .map(([, value]) => value as string),
     );
-    for (const id of ids)
+    for (const id of ids) {
+      const collector = byId.get(id);
+      if (
+        review.reason === 'DISCORD_PROOF_REQUIRED' &&
+        collector &&
+        (collector.discordTrackingConsent === false ||
+          discordProofSatisfied(evidence, collector.identities))
+      )
+        continue;
       add(id, {
         error: true,
         message: `Pending identity review: ${review.reason}. Opened ${review.createdAt.toISOString()}.`,
       });
+    }
   }
   return new Map([...signals].map(([id, items]) => [id, profileHealth(items)]));
 }

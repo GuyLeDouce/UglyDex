@@ -238,10 +238,12 @@ export async function queueCharmRefresh(collectorId: string, user = false) {
       create: {
         realmId: c.DRIP_REALM_ID,
         collectorId,
+        requestedAt: now,
         nextUserRequestAt: new Date(+now + 120000),
       },
       update: {
         pending: true,
+        ...(!prior?.pending ? { requestedAt: now } : {}),
         ...(user ? { nextUserRequestAt: new Date(+now + 120000) } : {}),
         generation: { increment: 1 },
       },
