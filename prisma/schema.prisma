@@ -30,6 +30,7 @@ model Collector {
   communityWelcomeAt DateTime?
   communityEvents CommunityFeedEvent[]
   onboardingCompletedAt DateTime?
+  profileSetupStep Int @default(0)
   discordTrackingConsent Boolean?
   discordTrackingConsentAt DateTime?
   showUsername Boolean @default(false)

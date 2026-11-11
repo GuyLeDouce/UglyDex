@@ -36,17 +36,8 @@ export async function onboardingState(
 }
 
 export async function nextAfterAuthentication(collectorId: string) {
-  return db().$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${collectorId}, 0))`;
-    const state = await onboardingState(collectorId, tx);
-    if (state.step === 'COMPLETE') return '/collection';
-    if (state.step !== 'READY') return '/onboarding';
-    await tx.collector.update({
-      where: { id: collectorId },
-      data: { onboardingCompletedAt: new Date() },
-    });
-    return '/settings/profile';
-  });
+  const state = await onboardingState(collectorId);
+  return state.step === 'COMPLETE' ? '/collection' : '/onboarding';
 }
 
 export async function setDiscordTracking(

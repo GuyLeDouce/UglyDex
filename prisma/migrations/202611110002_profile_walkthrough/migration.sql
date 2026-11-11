@@ -1,0 +1,1 @@
+ALTER TABLE "Collector" ADD COLUMN "profileSetupStep" INTEGER NOT NULL DEFAULT 0;

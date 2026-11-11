@@ -2,7 +2,15 @@ import { redirect } from 'next/navigation';
 import { currentSession } from '@/server/auth';
 import { onboardingState } from '@/server/onboarding';
 import { Connect } from '@/components/connect';
-import { CharmDripLink } from '@/components/charm-drip-link';
+import { ProfileWalkthrough } from '@/components/profile-walkthrough';
+import { walkthroughStep } from '@/domain/profile-walkthrough';
+import { db } from '@/server/db';
+import { collectorAvatar } from '@/server/collector-avatar';
+import {
+  activeAddresses,
+  catalogScope,
+  ownedScope,
+} from '@/server/collections';
 import { OnboardingChoice } from '@/components/onboarding-choice';
 export const dynamic = 'force-dynamic';
 export default async function Onboarding({
@@ -15,6 +23,40 @@ export default async function Onboarding({
   const state = await onboardingState(session.collectorId);
   if (state.step === 'COMPLETE') redirect('/me');
   const { error } = await searchParams;
+  if (state.step === 'DRIP' || state.step === 'READY') {
+    const c = await db().collector.findUniqueOrThrow({
+      where: { id: session.collectorId },
+    });
+    const step = walkthroughStep(
+      c.profileSetupStep,
+      state.dripVerified || state.discordTrackingConsent === false,
+    );
+    const avatar = await collectorAvatar(
+      c.id,
+      step === 'AVATAR' ? null : c.avatar,
+    );
+    const addresses = await activeAddresses(c.id);
+    const squigs =
+      step === 'AVATAR'
+        ? await db().squig.findMany({
+            where: { AND: [catalogScope, ownedScope(addresses)] },
+            orderBy: [
+              { mawRank: { sort: 'asc', nulls: 'last' } },
+              { tokenId: 'asc' },
+            ],
+            select: { tokenId: true, mawRank: true },
+          })
+        : [];
+    return (
+      <ProfileWalkthrough
+        key={step}
+        step={step}
+        name={c.displayName ?? ''}
+        avatarId={avatar?.tokenId ?? null}
+        squigs={squigs}
+      />
+    );
+  }
   return (
     <section className="panel">
       <p className="eyebrow">ONE COLLECTOR. ALL YOUR CONNECTIONS.</p>
@@ -65,8 +107,7 @@ export default async function Onboarding({
           )}
         </>
       )}
-      {state.step === 'DRIP' && <CharmDripLink onboarding />}
-      {(state.step === 'DISCORD' || state.step === 'DRIP') && (
+      {state.step === 'DISCORD' && (
         <>
           <OnboardingChoice action="decline">
             Decline and opt out of Discord activity tracking
@@ -76,11 +117,6 @@ export default async function Onboarding({
             history remain available.
           </p>
         </>
-      )}
-      {state.step === 'READY' && (
-        <OnboardingChoice action="complete">
-          Continue to Profile Settings
-        </OnboardingChoice>
       )}
     </section>
   );

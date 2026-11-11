@@ -135,8 +135,8 @@ export async function collectorIdentityWebTests(
     session,
   );
   check(
-    declined.ok && (await declined.json()).next === '/settings/profile',
-    'HTTP opt-out completes wallet-only onboarding',
+    declined.ok && (await declined.json()).next === '/onboarding',
+    'HTTP opt-out continues to profile walkthrough',
   );
   check(
     (
@@ -212,6 +212,20 @@ export async function collectorIdentityWebTests(
       !addedWallet.isPrimary,
     'second signed wallet contributes to same UUID without replacing primary',
   );
+  const setupSession = added.headers
+    .getSetCookie()
+    .find((c) => c.startsWith('uglydex_session='))!
+    .split(';')[0];
+  for (const answer of [
+    { action: 'name', name: 'Identity Owner' },
+    { action: 'avatar', tokenId: null },
+    { action: 'sharing', share: false },
+  ]) {
+    check(
+      (await post('/api/onboarding/profile', answer, setupSession)).ok,
+      'HTTP walkthrough saves each required step',
+    );
+  }
   for (const account of [owner, other]) {
     const freshNonce = await post('/api/auth/wallet/nonce', {
       address: account.address,

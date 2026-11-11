@@ -5,6 +5,7 @@ import {
   nextAfterAuthentication,
   setDiscordTracking,
 } from '../../src/server/onboarding';
+import { saveWalkthrough } from '../../src/server/profile-walkthrough';
 import { importEvent } from '../../src/sync/import-event';
 
 export async function onboardingDatabaseTests(
@@ -38,8 +39,42 @@ export async function onboardingDatabaseTests(
   await assert.rejects(setDiscordTracking(c.id, true), /DISCORD_REQUIRED/);
   await setDiscordTracking(c.id, false);
   check(
-    (await nextAfterAuthentication(c.id)) === '/settings/profile',
-    'wallet-only completion opens Profile Settings',
+    (await nextAfterAuthentication(c.id)) === '/onboarding',
+    'wallet-only consent still requires profile walkthrough',
+  );
+  await assert.rejects(
+    saveWalkthrough(c.id, { action: 'sharing', share: true }),
+    /SETUP_STEP_CHANGED/,
+  );
+  await saveWalkthrough(c.id, { action: 'name', name: 'New Ugly Collector' });
+  check(
+    (await db().collector.findUniqueOrThrow({ where: { id: c.id } }))
+      .displayName === 'New Ugly Collector',
+    'name persists before leaving setup',
+  );
+  await assert.rejects(
+    saveWalkthrough(c.id, { action: 'avatar', tokenId: 4444 }),
+    /AVATAR_NOT_OWNED/,
+  );
+  await saveWalkthrough(c.id, { action: 'avatar', tokenId: null });
+  await saveWalkthrough(c.id, { action: 'sharing', share: false });
+  const finished = await db().collector.findUniqueOrThrow({
+    where: { id: c.id },
+  });
+  check(
+    finished.isPublic &&
+      !finished.showUsername &&
+      finished.collectionVisibility === 'HIDDEN' &&
+      finished.showWallets &&
+      finished.showDiscord &&
+      finished.showCommunityActivity,
+    'No uses the requested privacy mapping',
+  );
+  await saveWalkthrough(c.id, { action: 'sharing', share: true });
+  check(
+    !(await db().collector.findUniqueOrThrow({ where: { id: c.id } }))
+      .showUsername,
+    'replayed completion does not overwrite privacy',
   );
   check(
     (await nextAfterAuthentication(c.id)) === '/collection',
@@ -70,14 +105,19 @@ export async function onboardingDatabaseTests(
     (await onboardingState(c.id)).step === 'DRIP',
     'unresolved DRIP ID cannot complete onboarding',
   );
+  await assert.rejects(
+    saveWalkthrough(c.id, { action: 'sharing', share: true }),
+    /SETUP_STEP_CHANGED/,
+  );
   await db().dripIdentity.updateMany({
     where: { collectorId: c.id },
     data: { status: 'RESOLVED' },
   });
   check(
-    (await nextAfterAuthentication(c.id)) === '/settings/profile',
-    'verified three-step setup opens Profile Settings',
+    (await nextAfterAuthentication(c.id)) === '/onboarding',
+    'verified DRIP does not automatically finish profile setup',
   );
+  await saveWalkthrough(c.id, { action: 'sharing', share: true });
   const event = {
     sourceSystem: 'uglybot',
     sourceType: 'onboarding-fixture',

@@ -643,3 +643,69 @@ footer {
   overflow-wrap: anywhere;
   font-weight: 700;
 }
+
+/* Focused first-visit profile setup. */
+.profile-walkthrough {
+  width: min(100%, 680px);
+  margin: 2rem auto;
+  padding: clamp(1.25rem, 4vw, 3rem);
+}
+.profile-walkthrough h1 {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  line-height: 1.15;
+}
+.profile-walkthrough form {
+  display: grid;
+  gap: 1rem;
+}
+.profile-walkthrough .actions {
+  flex-wrap: wrap;
+}
+.walkthrough-progress {
+  display: flex;
+  gap: 0.4rem;
+  margin: 1rem 0 2rem;
+}
+.walkthrough-progress span {
+  height: 4px;
+  flex: 1;
+  border-radius: 2px;
+  background: #343844;
+}
+.walkthrough-progress .active {
+  background: #f3cf4b;
+}
+.walkthrough-avatar {
+  width: 180px;
+  max-width: 100%;
+  margin: 1.5rem auto;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.walkthrough-squigs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 0.4rem;
+  max-height: 420px;
+  overflow-y: auto;
+  margin: 1rem 0;
+  padding: 0.25rem;
+}
+.walkthrough-squig {
+  min-width: 0;
+  padding: 0.2rem;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.walkthrough-squig[aria-pressed='true'] {
+  border-color: #f3cf4b;
+  background: #393421;
+}
+.walkthrough-squig:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+.walkthrough-squig span {
+  font-size: 0.75rem;
+}

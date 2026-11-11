@@ -115,6 +115,9 @@ try {
   const { collectorIdentityWebTests } =
     await import('../tests/db/collector-identity-web');
   await collectorIdentityWebTests(base, check);
+  const { profileWalkthroughWebTests } =
+    await import('../tests/db/profile-walkthrough-web');
+  await profileWalkthroughWebTests(base, check);
   console.log(JSON.stringify({ event: 'identity.all_passed', assertions }));
 } finally {
   if (web && web.exitCode === null && web.signalCode === null) {
