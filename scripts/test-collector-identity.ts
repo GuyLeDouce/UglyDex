@@ -68,6 +68,9 @@ try {
   await adminProfileTests(check);
   const { adminHealthTests } = await import('../tests/db/admin-health');
   await adminHealthTests(check);
+  const { dripRevalidationTests } =
+    await import('../tests/db/drip-revalidation');
+  await dripRevalidationTests(check);
   const { onboardingDatabaseTests } = await import('../tests/db/onboarding');
   await onboardingDatabaseTests(check);
   const { collectorIdentityTests } =

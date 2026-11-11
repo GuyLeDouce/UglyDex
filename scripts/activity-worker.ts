@@ -6,6 +6,8 @@ import { runWorker } from '../src/server/worker-runtime';
 import { syncDripDue } from '../src/server/drip-sync';
 import { log } from '../src/server/log';
 let nextSourcePoll = 0;
+let nextDripReport = 0;
+let lastDripStatus = '';
 async function reportSources() {
   const sources = await db().integrationSource.findMany({
     select: {
@@ -48,7 +50,19 @@ try {
         nextSourcePoll = Date.now() + 300000;
         await reportSources();
       }
-      if (!signal.aborted) await syncDripDue().catch(() => {});
+      if (!signal.aborted) {
+        const result = await syncDripDue();
+        if (result.status !== lastDripStatus || Date.now() >= nextDripReport) {
+          log('drip.sync', {
+            status: result.status,
+            ...('balances' in result && typeof result.balances === 'number'
+              ? { balances: result.balances }
+              : {}),
+          });
+          lastDripStatus = result.status;
+          nextDripReport = Date.now() + 60000;
+        }
+      }
       return {
         // Feed failures are isolated and retried on the next poll. Reserve the
         // worker circuit breaker for scheduler/database failures.

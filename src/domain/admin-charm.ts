@@ -82,7 +82,7 @@ export function adminCharmDiagnostic(
   else if (!s?.alignmentHash || s.alignmentCommit !== input.commit)
     block(
       'DRIP alignment has not been verified for this deployment.',
-      'Revalidate the DRIP Realm and currency against UglyBot and The Gauntlet for the deployed revision.',
+      'The worker will automatically revalidate unchanged, previously verified DRIP settings. If this persists, check shared DRIP errors; new or changed settings require operator verification.',
     );
   else if (s.errorCode) {
     state = 'FAILED';
