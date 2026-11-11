@@ -24,6 +24,8 @@ export async function phase8WebTests(
   await db().authSession.create({
     data: {
       collectorId: admin.collectorId,
+      authMethod: 'DISCORD_OAUTH',
+      credentialFingerprint: authHash('DISCORD_OAUTH:333333333333333333'),
       tokenHash: authHash(token),
       expiresAt: new Date(Date.now() + 3600000),
     },
