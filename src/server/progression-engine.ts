@@ -1,3 +1,7 @@
+import {
+  publicationBaseline,
+  publishCommunityCard,
+} from './community-publication';
 import { recalculationErrorCode } from './recalculation-error';
 import 'server-only';
 import { db } from './db';
@@ -308,6 +312,18 @@ export async function rebuildSubject(subject: Subject, id: string) {
           });
           counts.created++;
         }
+        const feedSince =
+          subject === 'COLLECTOR'
+            ? await publicationBaseline(
+                tx,
+                id,
+                (
+                  await tx.collectorProgress.findUnique({
+                    where: { collectorId: id },
+                  })
+                )?.calculatedAt,
+              )
+            : null;
         for (const a of result.awards) {
           const achievementId = `${RULESET}:${a.definition.key}`;
           const old =
@@ -326,6 +342,23 @@ export async function rebuildSubject(subject: Subject, id: string) {
                   },
                 });
           const active = !!old && !old.revokedAt;
+          if (
+            subject === 'COLLECTOR' &&
+            feedSince &&
+            old &&
+            !active &&
+            a.unlocked &&
+            a.at &&
+            new Date(a.at) > feedSince
+          )
+            await publishCommunityCard(
+              tx,
+              id,
+              'achievement',
+              achievementId,
+              new Date(a.at),
+            );
+
           const evidence = json({
             keys: a.evidence.slice(0, a.definition.threshold),
             count: a.progress,

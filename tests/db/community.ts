@@ -36,6 +36,12 @@ export async function communityTests(
         displayName: slug + ' Collector',
         showUsername: true,
         isPublic,
+        ...(unclaimed
+          ? {}
+          : {
+              claimedAt: new Date('2020-01-01'),
+              onboardingCompletedAt: new Date('2020-01-01'),
+            }),
       },
     });
     const walletAddress = unclaimed
@@ -219,6 +225,14 @@ export async function communityTests(
     .slice(0, 2);
   for (const c of [winner, privateC, pending])
     for (const [i, a] of awards.entries()) {
+      await db().communityFeedEvent.create({
+        data: {
+          collectorId: c.id,
+          kind: 'achievement',
+          key: `${RULESET}:${a.key}`,
+          at: new Date(`2030-01-0${i + 1}T12:00:00Z`),
+        },
+      });
       await db().collectorAchievement.create({
         data: {
           collectorId: c.id,
@@ -245,6 +259,14 @@ export async function communityTests(
         progress: 1,
         requirements: [{ count: 1, tokens: [1] }],
       },
+    },
+  });
+  await db().communityFeedEvent.create({
+    data: {
+      collectorId: winner.id,
+      kind: 'set',
+      key: `${COLLECTION_RULESET}:${set.key}`,
+      at: new Date('2030-01-03T12:00:00Z'),
     },
   });
   let thread = await collectorThread();
@@ -294,7 +316,7 @@ export async function communityTests(
     'thread withholds private and pending collector details',
   );
   check(
-    own[0].kind !== 'transfer' && !own[0].card.tokens.length,
+    !!own[0].card && !own[0].card.tokens.length,
     'sharing card privacy withholds set token evidence when wallets are hidden',
   );
   await db().collectorAchievement.update({

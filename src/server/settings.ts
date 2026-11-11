@@ -1,3 +1,4 @@
+import { publishCommunityCard } from './community-publication';
 import { squigAvatarUrl } from './collector-avatar';
 import 'server-only';
 import { db } from './db';
@@ -44,10 +45,25 @@ export async function saveProfile(collectorId: string, input: unknown) {
       !hasCollectorUsername(slug)
     )
       throw new Error('USERNAME_REQUIRED');
+    const welcome =
+      !current.communityWelcomeAt &&
+      !!current.onboardingCompletedAt &&
+      !!current.claimedAt &&
+      data.isPublic &&
+      data.showCommunityActivity;
+    if (welcome)
+      await publishCommunityCard(
+        tx,
+        collectorId,
+        'welcome',
+        'joined',
+        new Date(),
+      );
     return tx.collector.update({
       where: { id: collectorId },
       data: {
         ...profileData,
+        ...(welcome ? { communityWelcomeAt: new Date() } : {}),
         slug,
         avatar:
           avatarSquigId === undefined

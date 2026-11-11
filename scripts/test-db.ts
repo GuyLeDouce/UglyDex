@@ -1451,6 +1451,9 @@ try {
       check,
       process.argv.includes('--browser'),
     );
+    const { communityEventTests } =
+      await import('../tests/db/community-events');
+    await communityEventTests(check);
     const { communityTests } = await import('../tests/db/community');
     await communityTests(
       `http://127.0.0.1:${webPort}`,
