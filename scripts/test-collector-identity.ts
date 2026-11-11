@@ -66,6 +66,8 @@ try {
   check(migration.status === 0, 'identity fixture migrations apply');
   const { adminProfileTests } = await import('../tests/db/admin-profiles');
   await adminProfileTests(check);
+  const { adminHealthTests } = await import('../tests/db/admin-health');
+  await adminHealthTests(check);
   const { onboardingDatabaseTests } = await import('../tests/db/onboarding');
   await onboardingDatabaseTests(check);
   const { collectorIdentityTests } =
