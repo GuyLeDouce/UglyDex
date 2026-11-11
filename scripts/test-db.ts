@@ -101,6 +101,7 @@ process.env.PUBLIC_BASE_URL = `https://localhost:${webPort}`;
 process.env.AUTH_SECRET = randomBytes(32).toString('hex');
 process.env.ADMIN_DIAGNOSTICS_TOKEN = randomBytes(32).toString('hex');
 process.env.ADMIN_DISCORD_IDS = '333333333333333333';
+process.env.ADMIN_OWNER_DISCORD_ID = '';
 let web: ChildProcess | undefined;
 let assertions = 0;
 const phase12Only = process.argv.includes('--phase12-only');
@@ -752,6 +753,14 @@ try {
         provider: 'DISCORD',
         externalId: '333333333333333333',
         authenticatedAt: new Date(),
+      },
+    });
+    const { authHash } = await import('../src/server/auth');
+    await db().authSession.updateMany({
+      where: { collectorId: signedCollector.id },
+      data: {
+        authMethod: 'DISCORD_OAUTH',
+        credentialFingerprint: authHash('DISCORD_OAUTH:333333333333333333'),
       },
     });
     for (const path of [

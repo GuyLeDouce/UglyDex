@@ -50,6 +50,8 @@ export const environmentSchema = z
     RPC_RETRIES: z.coerce.number().int().min(0).max(8).default(4),
     RPC_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(15000),
     REORG_REWIND_BLOCKS: z.coerce.number().int().min(1).max(10000).default(128),
+    DRIP_REALM_ID: optional(z.string().regex(/^[a-f0-9]{24}$/i)),
+    ADMIN_OWNER_DISCORD_ID: optional(z.string().regex(/^\d{17,20}$/)),
     ADMIN_DISCORD_IDS: z
       .string()
       .regex(/^(\d{17,20}(,\d{17,20})*)?$/)

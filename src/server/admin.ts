@@ -1,18 +1,27 @@
 import 'server-only';
-import { currentSession } from './auth';
+import { currentSession, authHash } from './auth';
+import { configuredAdminOwner } from '@/domain/admin-profiles';
 import { db } from './db';
 import { readEnv } from './env';
 export async function adminActor() {
-  if (process.env.NODE_ENV === 'development') return 'local-development';
-  const ids = readEnv().ADMIN_DISCORD_IDS.split(',').filter(Boolean);
-  if (!ids.length) return null;
+  const env = readEnv();
+  const owner = configuredAdminOwner(
+    env.ADMIN_OWNER_DISCORD_ID,
+    env.ADMIN_DISCORD_IDS,
+  );
+  if (!owner) return null;
   const s = await currentSession();
-  if (!s) return null;
+  if (
+    !s ||
+    s.authMethod !== 'DISCORD_OAUTH' ||
+    s.credentialFingerprint !== authHash(`DISCORD_OAUTH:${owner}`)
+  )
+    return null;
   const identity = await db().externalIdentity.findFirst({
     where: {
       collectorId: s.collectorId,
       provider: 'DISCORD',
-      externalId: { in: ids },
+      externalId: owner,
       authenticatedAt: { not: null },
     },
   });

@@ -31,6 +31,9 @@ Object.assign(process.env, {
   APP_ENV: 'development',
   DATABASE_URL: `postgresql://identity_test:${randomBytes(24).toString('hex')}@127.0.0.1:${port}/identity_test`,
   AUTH_SECRET: randomBytes(32).toString('hex'),
+  ADMIN_DISCORD_IDS: '333333333333333333',
+  ADMIN_OWNER_DISCORD_ID: '',
+  DRIP_REALM_ID: 'a'.repeat(24),
   PUBLIC_BASE_URL: `https://localhost:${webPort}`,
 });
 const EmbeddedPostgres = await fixturePostgres(directory);
@@ -61,6 +64,8 @@ try {
     { env: process.env, encoding: 'utf8' },
   );
   check(migration.status === 0, 'identity fixture migrations apply');
+  const { adminProfileTests } = await import('../tests/db/admin-profiles');
+  await adminProfileTests(check);
   const { onboardingDatabaseTests } = await import('../tests/db/onboarding');
   await onboardingDatabaseTests(check);
   const { collectorIdentityTests } =
@@ -112,6 +117,9 @@ try {
     await new Promise((r) => setTimeout(r, 250));
   }
   check(ready, 'identity fixture production server healthy');
+  const { adminProfileWebTests } =
+    await import('../tests/db/admin-profiles-web');
+  await adminProfileWebTests(base, check);
   const { collectorIdentityWebTests } =
     await import('../tests/db/collector-identity-web');
   await collectorIdentityWebTests(base, check);
