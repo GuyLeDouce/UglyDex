@@ -79,13 +79,16 @@ export async function communityEventTests(
   );
   await db().collectorActivity.updateMany({
     where: { sourceId: { startsWith: '900001:' } },
-    data: { metadata: { completed: true, placement: 1 } },
+    data: { updatedAt: eventAt, metadata: { completed: true, placement: 1 } },
   });
   // Restore distinct placements after finishing the game.
   for (const [i, c] of [first, second, third].entries())
     await db().collectorActivity.updateMany({
       where: { collectorId: c.id, eventType: 'SURVIVAL_PLAYED' },
-      data: { metadata: { completed: true, placement: i + 1 } },
+      data: {
+        updatedAt: eventAt,
+        metadata: { completed: true, placement: i + 1 },
+      },
     });
   const thread = await collectorThread();
   const podium = thread.cards.find(
