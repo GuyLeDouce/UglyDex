@@ -32,17 +32,10 @@ export const adminProfileInput = z
         .regex(/^[a-f0-9]{24}$/i)
         .transform((v) => v.toLowerCase()),
     ]),
-    status: z.enum(supportStatuses),
     notes: z.string().trim().max(2000),
     reason: z.string().trim().min(3).max(500),
   })
   .superRefine((v, ctx) => {
-    if (v.status !== 'ACTIVE' && !v.notes)
-      ctx.addIssue({
-        code: 'custom',
-        path: ['notes'],
-        message: 'Explain the error or update.',
-      });
     if (
       new Set(v.wallets).size !== v.wallets.length ||
       new Set(v.discordIds).size !== v.discordIds.length

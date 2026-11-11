@@ -56,16 +56,30 @@ export async function adminProfileWebTests(
       'non-owner-OAuth cannot edit admin',
     );
   }
+  const target = await db().collector.findUniqueOrThrow({
+    where: { slug: 'admin-fixture-first' },
+  });
+  await db().collectionJob.upsert({
+    where: { collectorId: target.id },
+    create: { collectorId: target.id, errorCode: 'SUPPORT_WEB_FAILURE' },
+    update: { errorCode: 'SUPPORT_WEB_FAILURE' },
+  });
   const response = await fetch(
-    base + '/admin?status=UPDATING&q=admin-fixture-first',
+    base + '/admin?status=ERROR&q=admin-fixture-first',
     { headers: { Cookie: ownerCookie } },
   );
   const html = await response.text();
   check(
     response.ok &&
       html.includes('Awaiting verification') &&
+      html.includes('SUPPORT_WEB_FAILURE') &&
       html.includes('Edit profile'),
-    'owner can search status and inspect support details',
+    'owner can filter automatic status and inspect separate support notes',
+  );
+  check(
+    !html.includes('name="status" defaultValue') &&
+      !html.includes('Support status'),
+    'manual status editor is absent',
   );
   const crossOrigin = await fetch(base + '/api/admin/profiles', {
     method: 'POST',

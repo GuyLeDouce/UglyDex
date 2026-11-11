@@ -169,4 +169,39 @@ export async function adminProfileTests(
     })) === 2,
     'successful edits audited atomically',
   );
+  await db().collectorSupport.update({
+    where: { collectorId: first.id },
+    data: { status: 'ERROR' },
+  });
+  const { adminProfileHealth } = await import('../../src/server/admin-health');
+  await db().collector.update({
+    where: { id: first.id },
+    data: { onboardingCompletedAt: new Date(), discordTrackingConsent: false },
+  });
+  await db().collectionJob.deleteMany({ where: { collectorId: first.id } });
+  await db().progressionJob.deleteMany({ where: { subjectId: first.id } });
+  check(
+    (await adminProfileHealth()).get(first.id)?.status === 'ACTIVE',
+    'legacy manual status and optional identity links do not override detected health',
+  );
+  await db().collectionJob.create({
+    data: { collectorId: first.id, errorCode: 'FIXTURE_FAILURE' },
+  });
+  check(
+    (await adminProfileHealth()).get(first.id)?.status === 'ERROR',
+    'collector job failure automatically sets ERROR',
+  );
+  await db().collectionJob.update({
+    where: { collectorId: first.id },
+    data: { errorCode: null },
+  });
+  check(
+    (await adminProfileHealth()).get(first.id)?.status === 'UPDATING',
+    'retry automatically changes ERROR to UPDATING',
+  );
+  await db().collectionJob.delete({ where: { collectorId: first.id } });
+  check(
+    (await adminProfileHealth()).get(first.id)?.status === 'ACTIVE',
+    'completed work automatically restores ACTIVE',
+  );
 }

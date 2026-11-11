@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     return Response.json(
       {
         error: invalid
-          ? 'Check the fields. Use valid IDs, unique addresses, a reason, and notes for ERROR or UPDATING.'
+          ? 'Check the fields. Use valid IDs, unique addresses, and a reason.'
           : (messages[code] ??
             (conflict
               ? 'A linked record changed or conflicts. Reload and retry.'
