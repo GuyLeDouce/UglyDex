@@ -26,6 +26,9 @@ model Collector {
   id           String                 @id @default(uuid()) @db.Uuid
   slug         String                 @unique
   claimedAt DateTime?
+  communityFeedSince DateTime @default(now())
+  communityWelcomeAt DateTime?
+  communityEvents CommunityFeedEvent[]
   onboardingCompletedAt DateTime?
   discordTrackingConsent Boolean?
   discordTrackingConsentAt DateTime?
@@ -1313,4 +1316,16 @@ model BlockedWallet {
   createdAt DateTime @default(now())
   @@id([chainId, walletAddress])
   @@index([createdAt])
+}
+
+// Publication records are separate from earned projections. Unique keys make
+// retries/rebuilds silent; privacy and current entitlement are checked at read.
+model CommunityFeedEvent {
+  collectorId String @db.Uuid
+  collector Collector @relation(fields: [collectorId], references: [id])
+  kind String
+  key String
+  at DateTime @default(now())
+  @@id([collectorId, kind, key])
+  @@index([at])
 }

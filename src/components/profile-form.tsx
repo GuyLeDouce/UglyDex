@@ -208,9 +208,11 @@ export function ProfileForm({ initial }: { initial: Values }) {
           Share my achievements and completed sets in the collector thread
         </label>
         <p id="community-activity-help" className="hint">
-          Automatically shows earned sharing cards while your profile is public.
-          Turn this off to remove your cards from the thread. Private profiles
-          never appear.
+          Shows new earned cards and your welcome Collector Card while your
+          profile is public. If Discord sharing is also enabled, includes
+          Survival podiums, Marketplace purchases, and Gauntlet runs. Turn this
+          off to remove your activity. Setup and wallet links do not announce
+          old cards.
         </p>
         <p className="hint">
           A public collection can be correlated with public blockchain records,

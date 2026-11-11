@@ -1,3 +1,5 @@
+import { TrophyCardFace } from './trophy-card-face';
+import { CollectorCardFace } from './collector-card-face';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Artwork } from './artwork';
@@ -51,10 +53,10 @@ export async function CollectorThread({
       </div>
       <p>
         {collectorSlug === undefined
-          ? 'Achievements, completed sets, milestones, and confirmed Squig transfers from across the community.'
-          : 'This collector’s achievements, completed sets, milestones, and public wallet transfers.'}{' '}
-        Updates every 30 seconds while this page is visible; transfers appear
-        after indexing.
+          ? 'Fresh collector cards, Survival podiums, Marketplace purchases, Gauntlet runs, and confirmed Squig transfers.'
+          : 'This collector’s fresh cards, community results, purchases, and public wallet transfers.'}{' '}
+        Refreshes every 30 seconds while visible. Discord events appear after
+        the next source sync. Only public, shared activity is included.
       </p>
       <div className="community-cards">
         {result.cards.map((c) => (
@@ -137,6 +139,46 @@ export async function CollectorThread({
                 />
               )}
             </div>
+            {'players' in c && c.kind === 'survival' && c.players && (
+              <ol className="thread-podium" aria-label="Survival podium">
+                {c.players.map((p) => (
+                  <li key={p.placement} value={p.placement}>
+                    <span aria-hidden="true">
+                      {['🥇', '🥈', '🥉'][p.placement - 1]}
+                    </span>{' '}
+                    <Link href={p.path}>{p.name}</Link>
+                  </li>
+                ))}
+              </ol>
+            )}
+            {'detail' in c && c.detail && (
+              <p className="thread-detail">{c.detail}</p>
+            )}
+            {c.card?.trophyCard && (
+              <Link
+                href={c.path}
+                className="thread-card-preview"
+                aria-label={`View ${c.card.trophyCard.name} card`}
+              >
+                <TrophyCardFace card={c.card.trophyCard} width={260} />
+              </Link>
+            )}
+            {c.kind === 'welcome' && c.card?.collectorCard && (
+              <Link
+                href={c.path}
+                className="thread-card-preview"
+                aria-label={`View ${c.name}'s profile`}
+              >
+                <div className="thread-collector-card">
+                  <div>
+                    <CollectorCardFace
+                      card={c.card}
+                      artwork={c.card.collectorCard.avatar}
+                    />
+                  </div>
+                </div>
+              </Link>
+            )}
           </article>
         ))}
       </div>
@@ -148,9 +190,9 @@ export async function CollectorThread({
               : 'No public updates yet.'}
           </h3>
           <p>
-            Achievements, completed sets, and indexed transfers appear here
-            automatically. Public collector milestones respect their sharing
-            settings.
+            New shared activity appears here automatically. Profile setup,
+            wallet links, and historical imports do not publish old achievement
+            or set cards.
           </p>
         </div>
       )}

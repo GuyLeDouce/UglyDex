@@ -4,9 +4,21 @@ import { achievements } from './progression';
 // Reuse the approved mini artwork; achievements without specific artwork use
 // the general milestone icon rather than inventing another badge.
 export function threadIcon(
-  kind: 'set' | 'achievement' | 'transfer' | 'milestone',
+  kind:
+    | 'set'
+    | 'achievement'
+    | 'transfer'
+    | 'milestone'
+    | 'welcome'
+    | 'survival'
+    | 'marketplace'
+    | 'gauntlet',
   key: string,
 ) {
+  if (kind === 'survival') return '/icons/status/recorded-victory.png';
+  if (kind === 'marketplace') return '/icons/status/provenance.png';
+  if (kind === 'gauntlet') return '/icons/status/duel-history.png';
+  if (kind === 'welcome') return '/icons/status/new-discovery.png';
   if (kind === 'set') return setIcons[key] ?? '/icons/status/completes-set.png';
   if (kind === 'milestone') return '/icons/status/advances-set.png';
   if (kind === 'transfer') return '/icons/status/provenance.png';

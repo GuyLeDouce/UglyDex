@@ -171,3 +171,50 @@ it('does not treat an empty collector scope as the global feed', async () => {
   await collectorThread(1, '');
   expect(mocks.query.mock.calls[0][0].sql).toContain('AND (c.slug =');
 });
+
+it('uses the finished trophy card format for new achievements', async () => {
+  mocks.query.mockResolvedValue([
+    {
+      kind: 'achievement',
+      key: `${RULESET}:collector-wins-1`,
+      slug: 'friend',
+      at: new Date(),
+    },
+  ]);
+  mocks.visible.mockResolvedValue({ id: 'friend' });
+  mocks.share.mockResolvedValue({
+    title: 'Win',
+    path: '/share',
+    trophyCard: { name: 'First Win' },
+  });
+  const result = await collectorThread();
+  expect(mocks.share).toHaveBeenCalledWith({
+    kind: 'achievement',
+    entity: 'friend',
+    key: 'collector-wins-1',
+    format: 'trophy-card',
+  });
+  expect(result.cards[0].card?.trophyCard?.name).toBe('First Win');
+});
+
+it('welcomes a new sharing profile with its Collector Card and profile destination', async () => {
+  mocks.query.mockResolvedValue([
+    { kind: 'welcome', key: 'joined', slug: 'friend', at: new Date() },
+  ]);
+  mocks.visible.mockResolvedValue({ id: 'friend' });
+  mocks.share.mockResolvedValue({
+    title: 'Friend',
+    path: '/share',
+    collectorCard: { discovered: 3 },
+  });
+  const result = await collectorThread();
+  expect(mocks.share).toHaveBeenCalledWith({
+    kind: 'collector',
+    entity: 'friend',
+    format: 'collector-card',
+  });
+  expect(result.cards[0]).toMatchObject({
+    kind: 'welcome',
+    path: '/collector/friend',
+  });
+});

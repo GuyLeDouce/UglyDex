@@ -1,3 +1,7 @@
+import {
+  publicationBaseline,
+  publishCommunityCard,
+} from './community-publication';
 import { recalculationErrorCode } from './recalculation-error';
 import 'server-only';
 import { db } from './db';
@@ -424,6 +428,15 @@ export async function rebuildCollection(id: string) {
             });
             await audit('TRAIT_INVALIDATED', old.traitKey, old, null);
           }
+        const feedSince = await publicationBaseline(
+          tx,
+          id,
+          (
+            await tx.collectionSnapshot.findUnique({
+              where: { ruleset_collectorId: { ruleset: R, collectorId: id } },
+            })
+          )?.calculatedAt,
+        );
         const priorSets = await tx.collectorSetProgress.findMany({
           where: { collectorId: id, set: { ruleset: R } },
         });
@@ -442,6 +455,45 @@ export async function rebuildCollection(id: string) {
                 : now
               : null);
           const transition = result.complete && !old?.currentlyComplete;
+          if (
+            feedSince &&
+            old &&
+            transition &&
+            s.mode === 'CURRENT_HOLDING' &&
+            !s.hidden
+          ) {
+            // A new incoming transfer of a qualifying token proves this is live
+            // collecting, rather than importing an old wallet's existing sets.
+            const incoming = await tx.nftTransfer.findFirst({
+              where: {
+                finalized: true,
+                tokenId: { in: result.requirements.flatMap((r) => r.tokens) },
+                eventAt: { gt: feedSince },
+                toAddress: {
+                  in: (
+                    await tx.collectorWallet.findMany({
+                      where: {
+                        collectorId: id,
+                        status: 'ACTIVE',
+                        revokedAt: null,
+                      },
+                      select: { walletAddress: true },
+                    })
+                  ).map((w) => w.walletAddress),
+                },
+              },
+              orderBy: { eventAt: 'desc' },
+            });
+            if (incoming)
+              await publishCommunityCard(
+                tx,
+                id,
+                'set',
+                setId,
+                incoming.eventAt,
+              );
+          }
+
           if (result.complete) {
             counts.completed++;
             if (historicalMode && !s.hidden) {
