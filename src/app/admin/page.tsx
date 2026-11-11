@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { adminCharmDiagnostics } from '@/server/admin-charm';
 import { adminProfileHealth } from '@/server/admin-health';
 import { notFound } from 'next/navigation';
 import { adminActor } from '@/server/admin';
@@ -89,6 +90,7 @@ export default async function AdminPage({
     }),
     db().collector.count({ where }),
   ]);
+  const charm = await adminCharmDiagnostics(profiles.map((p) => p.id));
   const realmId = readEnv().DRIP_REALM_ID;
   const url = (p: number) =>
     `/admin?${new URLSearchParams({ q, status, page: String(p) })}`;
@@ -142,6 +144,7 @@ export default async function AdminPage({
           <AdminProfileEditor
             key={p.id}
             profile={{
+              charm: charm.get(p.id),
               id: p.id,
               revision: adminProfileRevision(p),
               updatedAt: p.updatedAt.toISOString(),
