@@ -239,10 +239,10 @@ export async function communityEventTests(
   );
   await db().collectorActivity.update({
     where: { id: ongoing.id },
-    data: { eventAt: new Date('2030-01-01') },
+    data: { eventAt: new Date('2030-01-01'), updatedAt: eventAt },
   });
   check(
-    !(await collectorThread()).cards.some(
+    !(await collectorThread(1, first.slug)).cards.some(
       (c) => c.kind === 'survival' && c.key === '900002',
     ),
     'an old completed game import stays silent',
@@ -257,7 +257,7 @@ export async function communityEventTests(
     },
   });
   check(
-    (await collectorThread()).cards.some(
+    (await collectorThread(1, first.slug)).cards.some(
       (c) => c.kind === 'survival' && c.key === '900002',
     ),
     'a game started before rollout publishes when it newly finishes',
@@ -267,7 +267,7 @@ export async function communityEventTests(
   });
   await db().collectorActivity.update({
     where: { id: pendingPurchase.id },
-    data: { eventAt: new Date('2030-01-01') },
+    data: { eventAt: new Date('2030-01-01'), updatedAt: eventAt },
   });
   await db().activityCorrection.create({
     data: {
@@ -279,7 +279,7 @@ export async function communityEventTests(
     },
   });
   check(
-    (await collectorThread()).cards.some(
+    (await collectorThread(1, first.slug)).cards.some(
       (c) => c.kind === 'marketplace' && c.key === pendingPurchase.id,
     ),
     'an existing pending purchase publishes on a fresh confirmation',
