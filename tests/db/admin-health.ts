@@ -1,3 +1,4 @@
+import { adminCharmDiagnostics } from '../../src/server/admin-charm';
 import { db } from '../../src/server/db';
 import { adminProfileHealth } from '../../src/server/admin-health';
 import { queueCharmRefresh } from '../../src/server/drip-sync';
@@ -129,6 +130,30 @@ export async function adminHealthTests(
         (s) => s.includes('$CHARM refresh') && s.includes('more than one hour'),
       ),
       'unfulfilled old request still reports an issue',
+    );
+    const before = await db().charmRefreshRequest.findUniqueOrThrow({ where });
+    const diagnostics = await adminCharmDiagnostics([c.id]);
+    const diagnostic = diagnostics.get(c.id);
+    check(
+      diagnostic?.savedBalance === '0',
+      'admin diagnostics preserve a real zero balance',
+    );
+    check(
+      diagnostic?.stale === true,
+      'admin diagnostics identify stale cached balances',
+    );
+    check(
+      diagnostic?.lastApiSuccessAt === new Date(+old - 1000).toISOString(),
+      'admin diagnostics expose the profile successful-read timestamp',
+    );
+    check(
+      diagnostics.size === 1,
+      'admin diagnostics return only the requested profiles',
+    );
+    const after = await db().charmRefreshRequest.findUniqueOrThrow({ where });
+    check(
+      JSON.stringify(before) === JSON.stringify(after),
+      'viewing diagnostics does not enqueue or mutate refresh requests',
     );
   } finally {
     if (previousKey === undefined) delete process.env.DRIP_READ_API_KEY;

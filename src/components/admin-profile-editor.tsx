@@ -1,7 +1,9 @@
 'use client';
+import type { AdminCharmDiagnostic } from '@/domain/admin-charm';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 export type AdminProfile = {
+  charm?: AdminCharmDiagnostic;
   id: string;
   revision: string;
   updatedAt: string;
@@ -107,6 +109,55 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
         <dt>DRIP ID</dt>
         <dd>{profile.dripId || 'Not linked'}</dd>
       </dl>
+      {profile.charm && (
+        <details style={{ margin: '16px 0' }}>
+          <summary style={{ cursor: 'pointer' }}>
+            $CHARM diagnostics — {profile.charm.holderBalance ?? 'Unavailable'}{' '}
+            · {profile.charm.state}
+          </summary>
+          <p>{profile.charm.reason}</p>
+          <p>
+            <strong>Next action:</strong> {profile.charm.action}
+          </p>
+          <dl style={{ overflowWrap: 'anywhere' }}>
+            {Object.entries({
+              'Holder-facing balance':
+                profile.charm.holderBalance ?? 'Unavailable',
+              'Saved balance':
+                profile.charm.savedBalance ??
+                'Unavailable — no balance recorded',
+              'Balance freshness': `${profile.charm.balanceStatus} · ${profile.charm.stale ? 'stale / unverified' : 'current'}`,
+              'Balance observed (UTC)': profile.charm.observedAt ?? 'Never',
+              'Successful balance read (UTC)':
+                profile.charm.lastApiSuccessAt ?? 'Never',
+              'Refresh requested (UTC)':
+                profile.charm.queuedAt ?? 'No request recorded',
+              'Queue record': profile.charm.requestPending
+                ? 'Pending'
+                : 'Not pending',
+              'Shared DRIP last success (UTC)':
+                profile.charm.sharedLastSuccessAt ?? 'Never recorded',
+              'Shared DRIP next eligible read (UTC)':
+                profile.charm.sharedNextRequestAt ?? 'Not recorded',
+              'Shared DRIP error': profile.charm.sharedError ?? 'None recorded',
+              'Ecosystem worker mode': profile.charm.workerMode,
+              'Worker heartbeat (UTC)':
+                profile.charm.workerHeartbeat ?? 'None recorded',
+              'Snapshot checked (UTC)': profile.charm.checkedAt,
+            }).map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <small>
+            Read-only snapshot of the same stored balance used by UglyDex.
+            Shared worker activity does not confirm this profile is processing.
+            Viewing this panel does not request a refresh.
+          </small>
+        </details>
+      )}
       <button
         type="button"
         className="button"
