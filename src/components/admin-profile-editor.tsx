@@ -21,6 +21,28 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  async function refreshAccount() {
+    setBusy(true);
+    setMessage('');
+    try {
+      const response = await fetch('/api/admin/profiles/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: profile.id }),
+      });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.error || 'Unable to request refresh.');
+      setMessage(result.messages.join('\n'));
+      router.refresh();
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : 'Unable to request refresh.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -166,6 +188,21 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
       >
         {editing ? 'Cancel' : 'Edit profile'}
       </button>
+      <button
+        type="button"
+        className="button"
+        disabled={busy || editing}
+        onClick={refreshAccount}
+        style={{ marginLeft: 12 }}
+      >
+        {busy && !editing ? 'Requesting refresh…' : 'Refresh account'}
+      </button>
+      <p>
+        <small>
+          Queues ownership, sets, achievements and $CHARM updates. Existing
+          verification blocks and cooldowns still apply.
+        </small>
+      </p>
       {editing && (
         <form
           data-profile-editing="true"
@@ -241,7 +278,11 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
           </button>
         </form>
       )}
-      {message && <p role="status">{message}</p>}
+      {message && (
+        <p role="status" style={{ whiteSpace: 'pre-wrap' }}>
+          {message}
+        </p>
+      )}
     </article>
   );
 }

@@ -94,4 +94,74 @@ export async function adminProfileWebTests(
     crossOrigin.status === 403,
     'admin support mutation rejects foreign origin',
   );
+  const refresh = (
+    cookie: string,
+    id: string,
+    origin = process.env.PUBLIC_BASE_URL!,
+  ) =>
+    fetch(base + '/api/admin/profiles/refresh', {
+      method: 'POST',
+      headers: {
+        Cookie: cookie,
+        Origin: origin,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id }),
+    });
+  for (const cookie of ['', walletCookie, wrongDiscord])
+    check(
+      (await refresh(cookie, target.id)).status === 404,
+      'only owner Discord OAuth may refresh an account',
+    );
+  check(
+    (await refresh(ownerCookie, target.id, 'https://untrusted.test')).status ===
+      403,
+    'admin refresh rejects foreign origins',
+  );
+  check(
+    (await refresh(ownerCookie, 'invalid')).status === 400,
+    'admin refresh validates target IDs',
+  );
+  check(
+    html.includes('Refresh account'),
+    'owner profile displays manual refresh button',
+  );
+  const before = await db().collectionJob.findUniqueOrThrow({
+    where: { collectorId: target.id },
+  });
+  const refreshed = await refresh(ownerCookie, target.id);
+  const report = await refreshed.json();
+  check(
+    refreshed.status === 202 &&
+      report.messages.some((m: string) => m.startsWith('$CHARM:')),
+    'admin refresh reports partial queue results',
+  );
+  const after = await db().collectionJob.findUniqueOrThrow({
+    where: { collectorId: target.id },
+  });
+  check(
+    after.generation === before.generation + 1 && after.errorCode === null,
+    'manual refresh queues a new generation for the selected collector',
+  );
+  check(
+    !!(await db().progressionJob.findUnique({
+      where: {
+        subjectType_subjectId: {
+          subjectType: 'COLLECTOR',
+          subjectId: target.id,
+        },
+      },
+    })),
+    'manual refresh queues collector achievements',
+  );
+  check(
+    (await refresh(ownerCookie, target.id)).status === 429,
+    'repeated manual refresh is throttled',
+  );
+  check(
+    (await db().operationalAudit.count({
+      where: { action: 'ADMIN_ACCOUNT_REFRESH', subject: target.id },
+    })) === 1,
+    'manual refresh is audited once',
+  );
 }
