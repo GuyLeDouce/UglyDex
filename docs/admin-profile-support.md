@@ -1,6 +1,8 @@
 # Collector support
 
-`/admin` lists connected profiles, including private profiles and their linked Ethereum wallets, Discord IDs and the configured realm's DRIP ID. Search by any of these identifiers and filter manual support status. ERROR and UPDATING expand to show private support notes. These flags are not automatic sync health indicators.
+`/admin` lists connected profiles, including private profiles and their linked Ethereum wallets, Discord IDs and the configured realm's DRIP ID. Search by any of these identifiers and filter automatic profile status. ERROR and UPDATING expand to show detected causes. Private support notes remain separate and cannot set the status. The page refreshes every 30 seconds while visible, except during an open edit.
+
+Status is derived from collector collection/progression jobs, pending $CHARM refreshes, explicitly requested ownership scans, setup completion, Discord/DRIP verification and pending identity reviews referencing the collector. Errors take precedence over updates. Jobs pending for over one hour report ERROR with the queue timestamp; this is an attention threshold, not proof the worker has failed. Once detected issues clear and jobs finish, status returns to ACTIVE. ACTIVE means no issue found by these checks; it does not certify every external system. Missing optional Discord/DRIP links after opting out are not errors. Old manually saved flags are ignored.
 
 All admin pages and mutations require a session established by Discord OAuth for exactly one owner ID, plus that authenticated identity still linked to the session's collector. Wallet sessions, legacy sessions without proof, another Discord account linked to the same collector, and development-mode bypasses are denied.
 

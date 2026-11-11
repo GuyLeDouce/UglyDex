@@ -1,7 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supportStatuses } from '@/domain/admin-profiles';
 export type AdminProfile = {
   id: string;
   revision: string;
@@ -13,7 +12,7 @@ export type AdminProfile = {
   dripId: string;
   status: 'ACTIVE' | 'ERROR' | 'UPDATING';
   notes: string;
-  statusUpdatedAt: string | null;
+  details: string[];
 };
 export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
   const router = useRouter();
@@ -40,7 +39,6 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
           wallets: lines('wallets'),
           discordIds: lines('discordIds'),
           dripId: String(form.get('dripId') ?? '').trim(),
-          status: form.get('status'),
           notes: form.get('notes'),
           reason: form.get('reason'),
         }),
@@ -83,17 +81,20 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
             >
               <strong>● {profile.status}</strong> — details
             </summary>
-            <p style={{ whiteSpace: 'pre-wrap', maxWidth: 600 }}>
-              {profile.notes || 'No support note recorded.'}
-            </p>
-            {profile.statusUpdatedAt && (
-              <small>
-                Updated {new Date(profile.statusUpdatedAt).toISOString()}
-              </small>
-            )}
+            <ul>
+              {profile.details.map((detail) => (
+                <li key={detail}>{detail}</li>
+              ))}
+            </ul>
           </details>
         )}
       </div>
+      {profile.notes && (
+        <details>
+          <summary>Support notes</summary>
+          <p style={{ whiteSpace: 'pre-wrap' }}>{profile.notes}</p>
+        </details>
+      )}
       <dl style={{ overflowWrap: 'anywhere' }}>
         <dt>Wallet addresses (Ethereum)</dt>
         <dd>
@@ -116,6 +117,7 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
       </button>
       {editing && (
         <form
+          data-profile-editing="true"
           className="review-form"
           onSubmit={save}
           style={{ display: 'grid', gap: 12, marginTop: 16 }}
@@ -170,21 +172,13 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
             verified again.
           </small>
           <label>
-            Support status
-            <select name="status" defaultValue={profile.status}>
-              {supportStatuses.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Status details
+            Private support notes
             <textarea
               name="notes"
               maxLength={2000}
               defaultValue={profile.notes}
               rows={3}
-              placeholder="Required for ERROR or UPDATING"
+              placeholder="Optional notes; these do not control the automatic status"
             />
           </label>
           <label>
@@ -199,4 +193,19 @@ export function AdminProfileEditor({ profile }: { profile: AdminProfile }) {
       {message && <p role="status">{message}</p>}
     </article>
   );
+}
+
+export function AdminHealthRefresh() {
+  const router = useRouter();
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (
+        document.visibilityState === 'visible' &&
+        !document.querySelector('[data-profile-editing]')
+      )
+        router.refresh();
+    }, 30000);
+    return () => clearInterval(timer);
+  }, [router]);
+  return null;
 }

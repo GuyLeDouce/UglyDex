@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { adminProfileHealth } from '@/server/admin-health';
 import { notFound } from 'next/navigation';
 import { adminActor } from '@/server/admin';
 import { db } from '@/server/db';
@@ -7,7 +8,10 @@ import {
   adminProfileInclude,
   adminProfileRevision,
 } from '@/server/admin-profiles';
-import { AdminProfileEditor } from '@/components/admin-profile-editor';
+import {
+  AdminProfileEditor,
+  AdminHealthRefresh,
+} from '@/components/admin-profile-editor';
 import { supportStatuses } from '@/domain/admin-profiles';
 import type { Prisma } from '@/generated/prisma/client';
 export const dynamic = 'force-dynamic';
@@ -66,13 +70,15 @@ export default async function AdminPage({
             },
           ]
         : []),
-      ...(status === 'ACTIVE'
-        ? [{ OR: [{ support: { is: null } }, { support: { is: { status } } }] }]
-        : status
-          ? [{ support: { is: { status } } }]
-          : []),
     ],
   };
+  const health = await adminProfileHealth();
+  if (status)
+    where.id = {
+      in: [...health]
+        .filter(([, value]) => value.status === status)
+        .map(([id]) => id),
+    };
   const [profiles, count] = await Promise.all([
     db().collector.findMany({
       where,
@@ -88,6 +94,7 @@ export default async function AdminPage({
     `/admin?${new URLSearchParams({ q, status, page: String(p) })}`;
   return (
     <>
+      <AdminHealthRefresh />
       <section className="page-heading">
         <h1>Collector support</h1>
         <p>
@@ -95,8 +102,9 @@ export default async function AdminPage({
           Discord login.
         </p>
         <p>
-          Status flags are manual support notes, not live sync health. Click
-          ERROR or UPDATING for details.
+          Status is detected automatically from update jobs, setup and identity
+          checks. Click ERROR or UPDATING for details. ACTIVE means no issue
+          detected in these checks.
         </p>
         <Link href="/admin/collectors">Collector diagnostics</Link> ·{' '}
         <Link href="/admin/blockwallet">Blocked wallets</Link> ·{' '}
@@ -144,10 +152,9 @@ export default async function AdminPage({
               dripId:
                 p.dripIdentities.find((d) => d.realmId === realmId)
                   ?.dripMemberId ?? '',
-              status: (p.support?.status ??
-                'ACTIVE') as (typeof supportStatuses)[number],
+              status: health.get(p.id)?.status ?? 'ACTIVE',
+              details: health.get(p.id)?.details ?? [],
               notes: p.support?.notes ?? '',
-              statusUpdatedAt: p.support?.updatedAt.toISOString() ?? null,
             }}
           />
         ))}

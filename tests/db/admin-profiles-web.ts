@@ -57,7 +57,7 @@ export async function adminProfileWebTests(
     );
   }
   const response = await fetch(
-    base + '/admin?status=UPDATING&q=admin-fixture-first',
+    base + '/admin?status=ACTIVE&q=admin-fixture-first',
     { headers: { Cookie: ownerCookie } },
   );
   const html = await response.text();
@@ -65,7 +65,12 @@ export async function adminProfileWebTests(
     response.ok &&
       html.includes('Awaiting verification') &&
       html.includes('Edit profile'),
-    'owner can search status and inspect support details',
+    'owner can filter automatic status and inspect separate support notes',
+  );
+  check(
+    !html.includes('name="status" defaultValue') &&
+      !html.includes('Support status'),
+    'manual status editor is absent',
   );
   const crossOrigin = await fetch(base + '/api/admin/profiles', {
     method: 'POST',

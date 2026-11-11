@@ -264,11 +264,10 @@ export async function updateAdminProfile(actor: string, raw: unknown) {
         where: { collectorId: old.id },
         create: {
           collectorId: old.id,
-          status: input.status,
           notes: input.notes,
           updatedBy: actor,
         },
-        update: { status: input.status, notes: input.notes, updatedBy: actor },
+        update: { notes: input.notes, updatedBy: actor },
       });
       await tx.operationalAudit.create({
         data: {
@@ -283,7 +282,6 @@ export async function updateAdminProfile(actor: string, raw: unknown) {
               wallets: oldWallets,
               discordIds: oldDiscord,
               dripId: priorDrip?.dripMemberId ?? '',
-              status: old.support?.status ?? 'ACTIVE',
               notes: old.support?.notes ?? '',
             },
             after: {
@@ -292,7 +290,6 @@ export async function updateAdminProfile(actor: string, raw: unknown) {
               wallets: input.wallets,
               discordIds: input.discordIds,
               dripId: input.dripId,
-              status: input.status,
               notes: input.notes,
             },
             sessionsRevoked: identityChanged,
