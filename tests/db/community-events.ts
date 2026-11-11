@@ -225,6 +225,65 @@ export async function communityEventTests(
     })) === 1,
     'retries do not duplicate welcome cards',
   );
+  // Games/purchases already underway at rollout still publish when completion
+  // is observed. Historical imports/corrections without that transition stay silent.
+  await db().collector.update({
+    where: { id: first.id },
+    data: { communityFeedSince: new Date('2034-01-01') },
+  });
+  const ongoing = await activity(
+    first.id,
+    'SURVIVAL_PLAYED',
+    '900002:111111111111111111',
+    { completed: true, placement: 1 },
+  );
+  await db().collectorActivity.update({
+    where: { id: ongoing.id },
+    data: { eventAt: new Date('2030-01-01') },
+  });
+  check(
+    !(await collectorThread()).cards.some(
+      (c) => c.kind === 'survival' && c.key === '900002',
+    ),
+    'an old completed game import stays silent',
+  );
+  await db().activityCorrection.create({
+    data: {
+      activityId: ongoing.id,
+      reason: 'SOURCE_CORRECTION',
+      before: { collectorId: first.id, metadata: { completed: false } },
+      afterHash: 'fixture',
+      createdAt: eventAt,
+    },
+  });
+  check(
+    (await collectorThread()).cards.some(
+      (c) => c.kind === 'survival' && c.key === '900002',
+    ),
+    'a game started before rollout publishes when it newly finishes',
+  );
+  const pendingPurchase = await db().collectorActivity.findFirstOrThrow({
+    where: { sourceId: 'purchase-test' },
+  });
+  await db().collectorActivity.update({
+    where: { id: pendingPurchase.id },
+    data: { eventAt: new Date('2030-01-01') },
+  });
+  await db().activityCorrection.create({
+    data: {
+      activityId: pendingPurchase.id,
+      reason: 'SOURCE_CORRECTION',
+      before: { collectorId: first.id, metadata: { confirmed: false } },
+      afterHash: 'fixture',
+      createdAt: eventAt,
+    },
+  });
+  check(
+    (await collectorThread()).cards.some(
+      (c) => c.kind === 'marketplace' && c.key === pendingPurchase.id,
+    ),
+    'an existing pending purchase publishes on a fresh confirmation',
+  );
   // Keep the original integration/browser fixture isolated from these records.
   await db().collector.updateMany({
     where: { id: { in: [first.id, second.id, third.id] } },

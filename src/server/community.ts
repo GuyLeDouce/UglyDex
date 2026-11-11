@@ -162,7 +162,16 @@ export async function collectorThread(page = 1, collectorSlug?: string) {
       SELECT a.*, c.slug FROM "CollectorActivity" a JOIN eligible c ON c.id=a."collectorId"
       WHERE a."recordStatus"='ACTIVE' AND a.visibility='PUBLIC' AND a."attributionStatus"='DISCORD'
         AND c."showDiscord" AND c."discordTrackingConsent" IS TRUE
-        AND a."eventAt">c.since
+        AND (a."eventAt">c.since OR EXISTS (
+          SELECT 1 FROM "ActivityCorrection" correction
+          WHERE correction."activityId"=a.id AND correction."createdAt">c.since
+            AND correction.reason='SOURCE_CORRECTION'
+            AND correction.before->>'collectorId'=c.id::text
+            AND ((a."eventType"='SURVIVAL_PLAYED' AND a.metadata->>'completed'='true'
+              AND correction.before->'metadata'->>'completed'='false')
+              OR (a."eventType"='MARKETPLACE_PURCHASE' AND a.metadata->>'confirmed'='true'
+                AND correction.before->'metadata'->>'confirmed'='false'))
+        ))
         AND a."sourceSystem" IN ('uglybot','gauntlet')
     ), podium AS (
       SELECT a."collectorId", a.slug, split_part(a."sourceId", ':', 1) AS game,
@@ -215,7 +224,10 @@ export async function collectorThread(page = 1, collectorSlug?: string) {
       WHERE m.ruleset=${COLLECTION_RULESET} AND m."revokedAt" IS NULL AND (m.key LIKE 'completion:%' OR m.key LIKE 'mastery:%')
         AND NOT EXISTS (SELECT 1 FROM "CollectionJob" j WHERE j."collectorId"=m."collectorId")
       UNION ALL
-      SELECT a."collectorId", 'marketplace', a.id::text, a."eventAt", NULL::integer,
+      SELECT a."collectorId", 'marketplace', a.id::text,
+        COALESCE((SELECT min(correction."createdAt") FROM "ActivityCorrection" correction
+          WHERE correction."activityId"=a.id AND correction.reason='SOURCE_CORRECTION'
+            AND correction.before->'metadata'->>'confirmed'='false'), a."eventAt"), NULL::integer,
         jsonb_build_object('item',a.metadata->>'item','quantity',a.metadata->'quantity','status',a.metadata->>'status')
       FROM public_activity a WHERE a."eventType"='MARKETPLACE_PURCHASE' AND a.metadata->>'confirmed'='true'
         AND NOT EXISTS (SELECT 1 FROM "CollectorActivity" refund WHERE refund."sourceSystem"=a."sourceSystem"
