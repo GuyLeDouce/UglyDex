@@ -72,10 +72,13 @@ export default async function RootLayout({
               height={32}
               alt=""
             />
-            <span>squigs.io</span>
           </a>
-          <span aria-hidden="true">/</span>
-          <span>Holder Zone</span>
+          <a href="https://squigs.io/collection.html">Collection</a>
+          <a href="https://squigs.io/studio.html">Studio</a>
+          <a href="https://squigs.io/studio.html">UglyBoard</a>
+          <a href="https://imagesubmit-production.up.railway.app/">
+            Image Factory
+          </a>
         </nav>
         <SiteHeader slug={slug} isPublic={isPublic} />
         <main id="main">{children}</main>
