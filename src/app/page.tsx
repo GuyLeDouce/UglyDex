@@ -46,15 +46,15 @@ export default async function Home() {
     <div className="field-home">
       <section className="field-hero">
         <div className="field-hero-copy">
-          <p className="eyebrow">UGLY LABS / THE SQUIGS FIELD GUIDE</p>
+          <p className="eyebrow">UGLYDEX · SQUIGS HOLDER ZONE</p>
           <h1>
             Every Squig
             <br />
             has a <em>story.</em>
           </h1>
           <p>
-            Watchers from a distant planet. Strangers through a portal. Meet the
-            beautifully malformed—and the history they leave behind.
+            Open your field guide to see your Squigs, discoveries, and sets.
+            Visiting for the first time? Explore any Squig’s story.
           </p>
           <div className="actions">
             <Link className="button primary" href="/squigs">
