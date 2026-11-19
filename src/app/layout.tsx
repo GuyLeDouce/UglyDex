@@ -75,7 +75,7 @@ export default async function RootLayout({
           </a>
           <a href="https://squigs.io/collection.html">Collection</a>
           <a href="https://squigs.io/studio.html">Studio</a>
-          <a href="https://squigs.io/studio.html">UglyBoard</a>
+          <a href="https://squigs.io/uglyboard.html">UglyBoard</a>
           <a href="https://imagesubmit-production.up.railway.app/">
             Image Factory
           </a>
