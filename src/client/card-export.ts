@@ -48,31 +48,57 @@ export async function animatedCard(
   progress: (value: number) => void,
 ): Promise<File> {
   signal.throwIfAborted();
-  const {
-    Output,
-    Mp4OutputFormat,
-    WebMOutputFormat,
-    BufferTarget,
-    CanvasSource,
-    canEncodeVideo,
-  } = await import('mediabunny');
+  const { canEncodeVideo } = await import('mediabunny');
   const options = {
     width: 900,
     height: 1260,
     bitrate: 6_000_000,
     frameRate: 30,
   };
-  const codec = (await canEncodeVideo('avc', options))
-    ? 'avc'
-    : (await canEncodeVideo('vp9', options))
-      ? 'vp9'
-      : (await canEncodeVideo('vp8', options))
-        ? 'vp8'
-        : null;
-  if (!codec)
-    throw new Error(
-      'Animated export is unavailable in this browser. Try a current Chrome or Safari, or download PNG.',
+  let playbackError: Error | undefined;
+  for (const codec of ['avc', 'vp9', 'vp8'] as const) {
+    signal.throwIfAborted();
+    if (!(await canEncodeVideo(codec, options))) continue;
+    signal.throwIfAborted();
+    const blob = await encodeCard(base, finish, codec, signal, progress);
+    signal.throwIfAborted();
+    try {
+      await validateVideo(blob, signal);
+    } catch (error) {
+      signal.throwIfAborted();
+      if (!(error instanceof Error)) throw error;
+      playbackError = error;
+      continue;
+    }
+    progress(100);
+    return new File(
+      [blob],
+      name.replace(/\.png$/, codec === 'avc' ? '.mp4' : '.webm'),
+      { type: blob.type },
     );
+  }
+  throw (
+    playbackError ??
+    new Error(
+      'Animated export is unavailable in this browser. Try a current Chrome or Safari, or download PNG.',
+    )
+  );
+}
+
+async function encodeCard(
+  base: HTMLImageElement,
+  finish: CardFinish,
+  codec: 'avc' | 'vp9' | 'vp8',
+  signal: AbortSignal,
+  progress: (value: number) => void,
+): Promise<Blob> {
+  const {
+    Output,
+    Mp4OutputFormat,
+    WebMOutputFormat,
+    BufferTarget,
+    CanvasSource,
+  } = await import('mediabunny');
   signal.throwIfAborted();
   const face = canvas(900, 1260),
     scene = canvas(900, 1260);
@@ -112,14 +138,7 @@ export async function animatedCard(
     if (!target.buffer || target.buffer.byteLength < 1024)
       throw new Error('No usable video was generated. Please retry.');
     const type = codec === 'avc' ? 'video/mp4' : 'video/webm';
-    const blob = new Blob([target.buffer], { type });
-    await validateVideo(blob, signal);
-    progress(100);
-    return new File(
-      [blob],
-      name.replace(/\.png$/, codec === 'avc' ? '.mp4' : '.webm'),
-      { type },
-    );
+    return new Blob([target.buffer], { type });
   } finally {
     clearTimeout(timeout);
     signal.removeEventListener('abort', abort);
@@ -171,6 +190,8 @@ async function validateVideo(blob: Blob, signal: AbortSignal) {
       video.src = url;
     });
   } finally {
+    video.onloadeddata = null;
+    video.onerror = null;
     video.removeAttribute('src');
     video.load();
     URL.revokeObjectURL(url);
