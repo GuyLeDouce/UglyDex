@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import './legal.css';
 import { Lilita_One, Montserrat } from 'next/font/google';
 import './globals.css';
@@ -35,7 +36,7 @@ export const viewport: Viewport = {
   colorScheme: 'dark',
 };
 export const metadata: Metadata = {
-  title: 'UglyDex — Every Squig has a story',
+  title: 'UglyDex — Squigs Holder Zone',
   description:
     'A living field guide to Squigs Reloaded. Every Squig has a story.',
 };
@@ -63,6 +64,19 @@ export default async function RootLayout({
         <a className="skip" href="#main">
           Skip to content
         </a>
+        <nav className="holder-zone-bar" aria-label="Squigs ecosystem">
+          <a href="https://squigs.io/" aria-label="Back to squigs.io">
+            <Image
+              src="/brand/squigs-reloaded.webp"
+              width={55}
+              height={32}
+              alt=""
+            />
+            <span>squigs.io</span>
+          </a>
+          <span aria-hidden="true">/</span>
+          <span>Holder Zone</span>
+        </nav>
         <SiteHeader slug={slug} isPublic={isPublic} />
         <main id="main">{children}</main>
         <footer>
