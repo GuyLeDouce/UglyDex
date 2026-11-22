@@ -99,6 +99,9 @@ export default async function AdminPage({
       <AdminHealthRefresh />
       <section className="page-heading">
         <h1>Collector support</h1>
+        <Link href="/admin/collection">
+          Squig card downloads and Work access
+        </Link>
         <p>
           Manage connected profiles and linked identities. Private to your
           Discord login.

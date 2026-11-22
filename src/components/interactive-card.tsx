@@ -1,4 +1,5 @@
 'use client';
+import { cardDecks, type CardDeck } from '@/domain/card-decks';
 import { useEffect, useRef, useState } from 'react';
 import {
   cardFinishes,
@@ -20,11 +21,17 @@ export function InteractiveCard({
   finish,
   filename,
   description,
+  deck,
+  allowed = true,
+  exportUrl,
 }: {
   image: string;
   finish: CardFinish;
   filename: string;
   description: string;
+  deck?: CardDeck;
+  allowed?: boolean;
+  exportUrl?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null),
     surface = useRef<HTMLCanvasElement>(null);
@@ -43,6 +50,26 @@ export function InteractiveCard({
   const [message, setMessage] = useState(''),
     [progress, setProgress] = useState<number | null>(null),
     [video, setVideo] = useState<{ file: File; url: string } | null>(null);
+  const [selected, setSelected] = useState(deck);
+  const [reverse, setReverse] = useState<HTMLImageElement | null>(null);
+  const holographic = !!selected && cardDecks.indexOf(selected) >= 2;
+  useEffect(() => {
+    if (!open || !selected) return;
+    let live = true;
+    const img = new Image();
+    img.src = '/card-backs/' + selected + '.webp';
+    img
+      .decode()
+      .then(() => {
+        if (live) setReverse(img);
+      })
+      .catch(() => {
+        if (live) setMessage('Card back unavailable. Reopen to retry.');
+      });
+    return () => {
+      live = false;
+    };
+  }, [open, selected]);
   const isExporting = progress !== null;
   useEffect(() => {
     const media = matchMedia('(prefers-reduced-motion: reduce)');
@@ -108,7 +135,18 @@ export function InteractiveCard({
           y: current.y + (goal.y - current.y) * 0.13,
         };
         paintCard(face.ctx, base.current, finish, current);
-        paintScene(target, face.element, current);
+        const angle =
+          !motion || isExporting
+            ? 0
+            : active.current
+              ? pose.current.x * Math.PI
+              : ((now - start) / 10000) * Math.PI * 2;
+        paintScene(
+          target,
+          face.element,
+          current,
+          reverse ? { angle, back: reverse, holographic } : undefined,
+        );
         last = now;
       }
       if (motion && !isExporting) raf = requestAnimationFrame(draw);
@@ -119,7 +157,7 @@ export function InteractiveCard({
       disposeScene(target.canvas);
       face.element.width = 1;
     };
-  }, [open, ready, motion, finish, isExporting]);
+  }, [open, ready, motion, finish, isExporting, reverse, holographic]);
   function close() {
     exporting.current?.abort();
     dialog.current?.close();
@@ -128,7 +166,7 @@ export function InteractiveCard({
     active.current = false;
   }
   async function exportCard(animated: boolean) {
-    if (!base.current || exporting.current) return;
+    if (!allowed || !base.current || exporting.current) return;
     const controller = new AbortController();
     exporting.current = controller;
     setProgress(0);
@@ -137,16 +175,31 @@ export function InteractiveCard({
         ? 'Rendering 180 frames of motion…'
         : 'Preparing high-resolution PNG…',
     );
+    let resource: string | undefined;
     try {
+      let front = base.current;
+      if (exportUrl) {
+        const response = await fetch(exportUrl, {
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+        if (!response.ok)
+          throw new Error('Current holder or admin access required.');
+        resource = URL.createObjectURL(await response.blob());
+        front = new Image();
+        front.src = resource;
+        await front.decode();
+      }
       const file = animated
         ? await animatedCard(
-            base.current,
+            front,
             finish,
             filename,
             controller.signal,
             setProgress,
+            reverse ? { back: reverse, holographic } : undefined,
           )
-        : await staticCard(base.current, finish, filename);
+        : await staticCard(front, finish, filename);
       if (controller.signal.aborted) return;
       if (animated) {
         setVideo({ file, url: URL.createObjectURL(file) });
@@ -160,6 +213,7 @@ export function InteractiveCard({
         error instanceof Error ? error.message : 'Export failed. Please retry.',
       );
     } finally {
+      if (resource) URL.revokeObjectURL(resource);
       exporting.current = null;
       setProgress(null);
     }
@@ -276,6 +330,26 @@ export function InteractiveCard({
               }}
             />
             <aside className="card-viewer-tools">
+              {deck && (
+                <label>
+                  Deck back{' '}
+                  <select
+                    value={selected}
+                    onChange={(e) => {
+                      setReverse(null);
+                      setSelected(e.target.value as CardDeck);
+                    }}
+                  >
+                    {cardDecks
+                      .slice(0, cardDecks.indexOf(deck) + 1)
+                      .map((d) => (
+                        <option key={d} value={d}>
+                          {d}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              )}
               <details className="card-viewer-details">
                 <summary>Card details</summary>
                 <p>{description}</p>
@@ -309,7 +383,12 @@ export function InteractiveCard({
               <button
                 type="button"
                 className="button primary"
-                disabled={!ready || progress !== null}
+                disabled={
+                  !allowed ||
+                  !ready ||
+                  (!!deck && !reverse) ||
+                  progress !== null
+                }
                 onClick={() => exportCard(false)}
               >
                 Download finished PNG
@@ -317,7 +396,12 @@ export function InteractiveCard({
               <button
                 type="button"
                 className="button primary"
-                disabled={!ready || progress !== null}
+                disabled={
+                  !allowed ||
+                  !ready ||
+                  (!!deck && !reverse) ||
+                  progress !== null
+                }
                 onClick={() => exportCard(true)}
               >
                 Download Animated Card

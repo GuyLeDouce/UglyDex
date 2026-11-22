@@ -1,4 +1,5 @@
 'use client';
+import { cardDecks, type CardDeck } from '@/domain/card-decks';
 import dynamic from 'next/dynamic';
 import { parseCardFinish, type CardFinish } from '@/domain/card-finish';
 const InteractiveCard = dynamic(
@@ -194,6 +195,8 @@ function ShareImage({
   const [asset, setAsset] = useState<{
       url: string;
       file: File;
+      deck?: CardDeck;
+      allowed: boolean;
       finish: CardFinish;
       description: string;
     } | null>(null),
@@ -236,6 +239,10 @@ function ShareImage({
         objectUrl = URL.createObjectURL(blob);
         setAsset({
           url: objectUrl,
+          deck: cardDecks.find(
+            (d) => d === response.headers.get('X-Card-Deck'),
+          ),
+          allowed: response.headers.get('X-Card-Export') !== '0',
           description: decodeURIComponent(
             response.headers.get('X-Card-Description') ??
               'Squigs Reloaded collector card',
@@ -270,10 +277,20 @@ function ShareImage({
   }, [image, attempt, filename, trading]);
 
   async function download(native = false) {
-    if (!asset || busy) return;
+    if (!asset || !asset.allowed || busy) return;
     setBusy(true);
     try {
-      if (native && navigator.canShare?.({ files: [asset.file] })) {
+      let file = asset.file;
+      if (asset.deck && !(native && prepared)) {
+        const response = await fetch(image + '&download=1', {
+          cache: 'no-store',
+        });
+        if (!response.ok) throw new Error('Export denied or unavailable.');
+        file = new File([await response.blob()], filename, {
+          type: 'image/png',
+        });
+      }
+      if (native && navigator.canShare?.({ files: [file] })) {
         if (!prepared) {
           setPrepared(true);
           setMessage('Image ready. Tap Share image to choose where it goes.');
@@ -281,7 +298,7 @@ function ShareImage({
         }
         // No fetch before this call: preserve the click's transient activation.
         await navigator.share({
-          files: [asset.file],
+          files: [file],
           title: 'UglyDex',
           text: copy,
           ...(!owner ? { url } : {}),
@@ -289,7 +306,7 @@ function ShareImage({
         setMessage('Image shared.');
       } else {
         // The displayed preview is already downloaded. Save those exact bytes.
-        const objectUrl = URL.createObjectURL(asset.file),
+        const objectUrl = URL.createObjectURL(file),
           anchor = document.createElement('a');
         anchor.href = objectUrl;
         anchor.download = filename;
@@ -332,6 +349,9 @@ function ShareImage({
       {asset && trading && (
         <InteractiveCard
           image={asset.url}
+          deck={asset.deck}
+          allowed={asset.allowed}
+          exportUrl={asset.deck ? image + '&download=1' : undefined}
           finish={asset.finish}
           description={asset.description}
           filename={filename}
@@ -381,7 +401,7 @@ function ShareImage({
         <button
           type="button"
           className="button primary"
-          disabled={busy || !asset}
+          disabled={busy || !asset?.allowed}
           onClick={() => download()}
         >
           Download PNG
@@ -389,12 +409,15 @@ function ShareImage({
         <button
           type="button"
           className="button"
-          disabled={busy || !asset}
+          disabled={busy || !asset?.allowed}
           onClick={() => download(true)}
         >
           {prepared ? 'Share image' : 'Prepare image to share'}
         </button>
       </div>
+      {asset && !asset.allowed && (
+        <p>Squig Card downloads are available to the current holder.</p>
+      )}
       {failed && (
         <button
           type="button"

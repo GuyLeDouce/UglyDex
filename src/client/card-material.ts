@@ -238,6 +238,7 @@ export function paintScene(
   ctx: CanvasRenderingContext2D,
   face: HTMLCanvasElement,
   pose: CardPose,
+  spin?: { angle: number; back: HTMLImageElement; holographic: boolean },
 ) {
   const w = ctx.canvas.width,
     h = ctx.canvas.height;
@@ -245,34 +246,77 @@ export function paintScene(
   ctx.fillRect(0, 0, w, h);
   const size = Math.min(w * 0.87, (h * 0.87 * 5) / 7),
     height = (size * 7) / 5;
+  // Project both sides around the vertical axis. Fold the reverse angle so
+  // the printed logo faces the viewer throughout the rear half of the turn.
+  const yaw = spin?.angle ?? pose.x * 0.3;
+  const rear = !!spin && Math.cos(yaw) < 0;
+  const angle = rear ? yaw - Math.PI : yaw;
+  if (rear && spin) {
+    const material = face.getContext('2d')!;
+    material.clearRect(0, 0, face.width, face.height);
+    material.save();
+    material.beginPath();
+    material.roundRect(
+      6,
+      6,
+      face.width - 12,
+      face.height - 12,
+      face.width * 0.045,
+    );
+    material.clip();
+    material.drawImage(spin.back, 0, 0, face.width, face.height);
+    if (spin.holographic) {
+      const center = face.width * (0.5 + 0.8 * Math.sin(angle));
+      const shine = material.createLinearGradient(
+        center - 200,
+        0,
+        center + 200,
+        face.height * 0.18,
+      );
+      shine.addColorStop(0, 'transparent');
+      shine.addColorStop(0.5, 'rgba(255,250,225,.28)');
+      shine.addColorStop(1, 'transparent');
+      material.fillStyle = shine;
+      material.fillRect(0, 0, face.width, face.height);
+    }
+    material.restore();
+  }
   ctx.save();
   ctx.fillStyle = '#06080c';
   ctx.shadowColor = '#0009';
   ctx.shadowBlur = w * 0.035;
   ctx.shadowOffsetY = h * 0.012;
   ctx.beginPath();
-  ctx.roundRect((w - size) / 2, (h - height) / 2, size, height, size * 0.055);
+  const projected = Math.max(1, size * Math.abs(Math.cos(angle)));
+  ctx.roundRect(
+    (w - projected) / 2,
+    (h - height) / 2,
+    projected,
+    height,
+    Math.min(projected / 2, size * 0.055),
+  );
   ctx.fill();
   ctx.restore();
-  if (Math.abs(pose.x) + Math.abs(pose.y) < 0.001) {
+  if (Math.abs(angle) + Math.abs(pose.y) < 0.001) {
     ctx.drawImage(face, (w - size) / 2, (h - height) / 2, size, height);
     return;
   }
   const renderer = projector(ctx.canvas);
   if (!renderer || renderer.gl.isContextLost()) {
-    // Static plane fallback retains all information and moving material.
-    ctx.drawImage(face, (w - size) / 2, (h - height) / 2, size, height);
+    ctx.drawImage(
+      face,
+      (w - projected) / 2,
+      (h - height) / 2,
+      projected,
+      height,
+    );
     return;
   }
   const { gl, program } = renderer;
   gl.viewport(0, 0, w, h);
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.uniform2f(
-    gl.getUniformLocation(program, 'angle'),
-    pose.x * 0.3,
-    pose.y * 0.23,
-  );
+  gl.uniform2f(gl.getUniformLocation(program, 'angle'), angle, pose.y * 0.23);
   gl.uniform2f(gl.getUniformLocation(program, 'size'), size, height);
   gl.uniform2f(gl.getUniformLocation(program, 'viewport'), w, h);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, face);

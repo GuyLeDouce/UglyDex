@@ -46,6 +46,7 @@ export async function animatedCard(
   name: string,
   signal: AbortSignal,
   progress: (value: number) => void,
+  reverse?: { back: HTMLImageElement; holographic: boolean },
 ): Promise<File> {
   signal.throwIfAborted();
   const { canEncodeVideo } = await import('mediabunny');
@@ -60,7 +61,14 @@ export async function animatedCard(
     signal.throwIfAborted();
     if (!(await canEncodeVideo(codec, options))) continue;
     signal.throwIfAborted();
-    const blob = await encodeCard(base, finish, codec, signal, progress);
+    const blob = await encodeCard(
+      base,
+      finish,
+      codec,
+      signal,
+      progress,
+      reverse,
+    );
     signal.throwIfAborted();
     try {
       await validateVideo(blob, signal);
@@ -91,6 +99,7 @@ async function encodeCard(
   codec: 'avc' | 'vp9' | 'vp8',
   signal: AbortSignal,
   progress: (value: number) => void,
+  reverse?: { back: HTMLImageElement; holographic: boolean },
 ): Promise<Blob> {
   const {
     Output,
@@ -126,7 +135,12 @@ async function encodeCard(
         throw new Error('Export timed out. Please retry or download PNG.');
       const pose = loopPose(frame / 180);
       paintCard(face.ctx, base, finish, pose);
-      paintScene(scene.ctx, face.element, pose);
+      paintScene(
+        scene.ctx,
+        face.element,
+        pose,
+        reverse && { ...reverse, angle: (frame / 180) * Math.PI * 2 },
+      );
       await source.add(frame / 30, 1 / 30);
       progress(Math.floor(((frame + 1) / 180) * 95));
       if (frame % 3 === 0)

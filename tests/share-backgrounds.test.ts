@@ -13,11 +13,18 @@ import type { ShareCard } from '../src/domain/sharing';
 
 const mocks = vi.hoisted(() => ({
   currentSession: vi.fn(),
+  owned: vi.fn(),
+  admin: vi.fn(),
   shareCard: vi.fn(),
   shareLimit: vi.fn(),
   sharePng: vi.fn(),
 }));
 vi.mock('@/server/auth', () => ({ currentSession: mocks.currentSession }));
+vi.mock('@/server/collector-card', () => ({
+  collectorCardTokenIds: mocks.owned,
+  cardHolder: async () => null,
+}));
+vi.mock('@/server/admin', () => ({ adminActor: mocks.admin }));
 vi.mock('@/server/sharing', () => ({ shareCard: mocks.shareCard }));
 vi.mock('@/server/share-cache', () => ({
   shareLimit: mocks.shareLimit,
@@ -166,6 +173,13 @@ it('serves a named trading-card download and rejects changed metadata or unavail
     new Request(
       'https://uglydex.test/api/share?kind=passport&entity=312&format=trading-card&download=1',
     );
+  expect((await GET(request())).status).toBe(403);
+  mocks.currentSession.mockResolvedValue({ collectorId: 'holder' });
+  mocks.owned.mockResolvedValue([]);
+  expect((await GET(request())).status).toBe(403);
+  mocks.owned.mockResolvedValueOnce([312]).mockResolvedValueOnce([]);
+  expect((await GET(request())).status).toBe(403);
+  mocks.owned.mockResolvedValue([312]);
   const response = await GET(request());
   expect(response.status).toBe(200);
   expect(response.headers.get('Content-Disposition')).toContain(
