@@ -1,3 +1,5 @@
+import type { CardRarity } from './trading-card';
+
 const supportedRarities = new Set([
   'common',
   'uncommon',
@@ -6,9 +8,13 @@ const supportedRarities = new Set([
   'legendary',
 ]);
 
-export function squigRarityClass(rarity: string | null | undefined) {
+export function squigRarity(rarity: string | null | undefined): CardRarity {
   const normalized = rarity?.trim().toLowerCase();
   return normalized && supportedRarities.has(normalized)
-    ? `rarity-${normalized}`
-    : 'rarity-unclassified';
+    ? (normalized as CardRarity)
+    : 'unclassified';
+}
+
+export function squigRarityClass(rarity: string | null | undefined) {
+  return `rarity-${squigRarity(rarity)}`;
 }
