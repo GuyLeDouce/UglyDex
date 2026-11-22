@@ -150,8 +150,42 @@ export async function interactiveCardTests(
         },
       });
       await page.goto(base + '/work-login');
-      await page.getByLabel('Single-use admin code').fill(code);
-      await page.getByRole('button', { name: 'Sign in' }).click();
+      if (
+        engine === 'webkit' &&
+        new URL(base).hostname === '127.0.0.1' &&
+        new URL(base).protocol === 'http:'
+      ) {
+        // WebKit discards Secure cookies on the fixture's HTTP loopback server.
+        // Redeem the real form and install the issued token for this browser only.
+        const action = await page
+          .locator('form input[name^="$ACTION_ID_"]')
+          .getAttribute('name');
+        const result = await page.request.post(base + '/work-login', {
+          multipart: { [action!]: '', code },
+          headers: { Origin: base },
+          maxRedirects: 0,
+        });
+        const issued = result.headers()['set-cookie'] ?? '';
+        const cookie = issued.match(/uglydex_session=([a-f0-9]{64})/);
+        check(
+          result.status() === 303 && cookie && /;\s*Secure/i.test(issued),
+          'production issues a secure Work cookie',
+        );
+        await page.context().addCookies([
+          {
+            name: 'uglydex_session',
+            value: cookie![1],
+            url: base,
+            httpOnly: true,
+            sameSite: 'Lax',
+            secure: false,
+          },
+        ]);
+        await page.goto(base + '/admin/collection');
+      } else {
+        await page.getByLabel('Single-use admin code').fill(code);
+        await page.getByRole('button', { name: 'Sign in' }).click();
+      }
       await page.getByRole('heading', { name: 'Collection admin' }).waitFor();
       check(
         !(await page.getByText('Create Work code').count()),
