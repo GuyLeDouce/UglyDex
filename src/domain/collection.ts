@@ -95,7 +95,6 @@ export function collectionOrder(
   return [first, { tokenId: 'asc' }];
 }
 export const PAGE_SIZE = 24;
-export const ALBUM_PAGE_SIZE = 6;
 
 function traitFilterValues(type: string, value: string) {
   const values = [

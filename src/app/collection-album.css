@@ -16,18 +16,6 @@
   outline: 3px solid #168bff;
   outline-offset: 5px;
 }
-.collection-grid.album {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 32px 24px;
-  align-items: start;
-  padding-block: 20px 32px;
-  border-block: 1px solid var(--line);
-}
-.collection-grid.album.single-card {
-  grid-template-columns: minmax(0, 420px);
-  justify-content: center;
-}
 .album-page-caption {
   display: flex;
   justify-content: space-between;
@@ -219,11 +207,6 @@
 .album-viewer-info > .button {
   margin-block: 8px;
 }
-@media (max-width: 1000px) and (min-width: 601px) {
-  .collection-grid.album {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 @media (max-width: 700px) {
   .album-viewer-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -246,22 +229,6 @@
   }
 }
 @media (max-width: 600px) {
-  .collection-grid.album:not(.single-card) {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: 8px;
-    overscroll-behavior-x: contain;
-    padding: 16px 8px 24px;
-    scrollbar-color: #168bff #222a35;
-  }
-  .collection-grid.album:not(.single-card) > .album-card {
-    flex: 0 0 90%;
-    min-width: 0;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-  }
   .album-page-caption {
     flex-direction: column;
   }
@@ -283,9 +250,6 @@
   .album-viewer-card .trading-face {
     transition: none !important;
     transform: none;
-  }
-  .collection-grid.album {
-    scroll-behavior: auto;
   }
 }
 
@@ -349,4 +313,44 @@
 #ecosystem,
 #passport {
   scroll-margin-top: 100px;
+}
+
+.collection-grid.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 112px), 1fr));
+  align-items: start;
+  gap: 3px;
+}
+.collection-grid.grid .art-tile {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  cursor: zoom-in;
+}
+.art-tile .artwork {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.art-tile:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--accent, #168bff);
+  outline-offset: -2px;
+}
+@media (max-width: 600px) {
+  .collection-grid.grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2px;
+  }
 }

@@ -71,8 +71,8 @@ export async function collectionAlbumWebTests(
     c.id,
   );
   check(
-    first.total === 300 && first.pages === 50 && first.items.length === 6,
-    '300 holdings use bounded six-card album pages',
+    first.total === 300 && first.pages === 13 && first.items.length === 24,
+    '300 holdings use bounded 24-card album pages',
   );
   check(
     first.items[0].tokenId === 1300,
@@ -92,7 +92,7 @@ export async function collectionAlbumWebTests(
     c.id,
   );
   check(
-    last.page === 1 && clamped.page === 50 && clamped.items.length === 6,
+    last.page === 1 && clamped.page === 13 && clamped.items.length === 12,
     'album page bounds remain safe',
   );
   const grid = await collectionPage({ view: 'compact' }, c.id, false, c.id);
@@ -161,15 +161,31 @@ export async function collectionAlbumWebTests(
     };
     await page.goto(base + '/collection');
     await expect(
-      page.locator('#collection-cards .collection-grid.grid'),
+      page.locator('#collection-cards .collection-grid.album'),
     ).toBeVisible();
+    await page.getByRole('button', { name: '▦ Grid', exact: true }).click();
+    await expect(page).toHaveURL(/view=grid/);
+    await page.goto(base + '/collection');
+    const tiles = page.locator('.collection-grid.grid .art-tile');
+    await expect(tiles).toHaveCount(24);
+    await expect(page.locator('.collection-grid.grid .squig-card')).toHaveCount(
+      0,
+    );
+    const box = await tiles.first().boundingBox();
+    check(
+      box && Math.abs(box.width - box.height) < 1,
+      'grid artwork is square',
+    );
+    await tiles.first().click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.keyboard.press('Escape');
     await page.getByRole('button', { name: '▥ Album', exact: true }).click();
     await expect(page).toHaveURL(/view=album/);
     // A new visit without a view parameter restores the user's selection.
     await page.goto(base + '/collection');
     await expect(
       page.locator('.collection-grid.album .album-card'),
-    ).toHaveCount(6);
+    ).toHaveCount(24);
     await expect(page.locator('[data-open-card]').first()).toHaveAttribute(
       'data-open-card',
       '1300',
@@ -184,22 +200,22 @@ export async function collectionAlbumWebTests(
     await expect(
       viewer.getByRole('button', { name: 'Previous card', exact: false }),
     ).toBeDisabled();
-    for (let n = 0; n < 6; n++)
+    for (let n = 0; n < 24; n++)
       await viewer
         .getByRole('button', { name: 'Next card', exact: false })
         .click();
     await expect(page).toHaveURL(/page=2/);
     await expect(viewer).toBeVisible();
-    await expect(viewer.getByRole('heading')).toHaveText('Squig #1006');
-    await expect(viewer).toContainText('7 of 300 matching Squigs');
+    await expect(viewer.getByRole('heading')).toHaveText('Squig #1024');
+    await expect(viewer).toContainText('25 of 300 matching Squigs');
     await viewer
       .getByRole('button', { name: 'Previous card', exact: false })
       .click();
     await expect(page).not.toHaveURL(/page=2/);
-    await expect(viewer.getByRole('heading')).toHaveText('Squig #1005');
+    await expect(viewer.getByRole('heading')).toHaveText('Squig #1023');
     await viewer.getByRole('button', { name: 'Close', exact: false }).click();
     await expect(viewer).toHaveCount(0);
-    await expect(page.locator('[data-open-card="1005"]')).toBeFocused();
+    await expect(page.locator('[data-open-card="1023"]')).toBeFocused();
     for (const width of [360, 390, 430, 768]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(base + '/collection?view=album&sort=token');
@@ -249,7 +265,7 @@ export async function collectionAlbumWebTests(
         exact: true,
       })
       .click();
-    await expect(page.locator('[data-open-card]')).toHaveCount(6);
+    await expect(page.locator('[data-open-card]')).toHaveCount(24);
     await expect(
       page.getByRole('textbox', { name: 'Token ID', exact: true }),
     ).toHaveValue('');

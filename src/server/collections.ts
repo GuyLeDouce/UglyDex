@@ -18,7 +18,6 @@ import {
   collectionOrder,
   filterSchema,
   PAGE_SIZE,
-  ALBUM_PAGE_SIZE,
 } from '@/domain/collection';
 import { resolveAsset } from '@/domain/assets';
 import type { Prisma } from '@/generated/prisma/client';
@@ -141,7 +140,7 @@ export async function collectionPage(
     : [];
   const filters = filterSchema.parse(params),
     addresses = collectorId ? await collectionAddresses(collectorId) : [];
-  const pageSize = filters.view === 'album' ? ALBUM_PAGE_SIZE : PAGE_SIZE;
+  const pageSize = PAGE_SIZE;
   const searchError = tokenSearch(params.q).invalid;
   const candidates = viewerId ? await personalizedCandidates(viewerId) : null;
   const personalizedScope: Prisma.SquigWhereInput =

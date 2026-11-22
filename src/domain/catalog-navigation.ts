@@ -58,3 +58,11 @@ export type CatalogContext = {
   total: number;
   inspect?: string;
 };
+
+// The former Grid preference selected framed cards. Keep those collectors in Album.
+export function savedCollectionView(
+  value: string | null | undefined,
+): CatalogContext['view'] {
+  if (value === 'art-grid') return 'grid';
+  return value === 'compact' ? 'compact' : 'album';
+}

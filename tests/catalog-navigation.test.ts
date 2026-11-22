@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { catalogLink, tokenSearch } from '../src/domain/catalog-navigation';
 import { SQUIGS_CONTRACT } from '../src/domain/validation';
-import {
-  ALBUM_PAGE_SIZE,
-  filterSchema,
-  PAGE_SIZE,
-} from '../src/domain/collection';
+import { filterSchema, PAGE_SIZE } from '../src/domain/collection';
 
 describe('Squig reference search', () => {
   it.each([
@@ -62,7 +58,6 @@ describe('catalog navigation', () => {
   });
   it('preserves existing page size and supports an entire collection in album pages', () => {
     expect(PAGE_SIZE).toBe(24);
-    expect(ALBUM_PAGE_SIZE).toBe(6);
     expect(filterSchema.parse({ page: '741', view: 'album' })).toMatchObject({
       page: 741,
       view: 'album',
