@@ -10,6 +10,8 @@ import { squigArtwork } from '../../src/domain/assets';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import sharp from 'sharp';
+import { authHash } from '../../src/server/auth';
+import { randomBytes } from 'node:crypto';
 
 export async function interactiveCardTests(
   base: string,
@@ -109,6 +111,15 @@ export async function interactiveCardTests(
       progress: 25,
     },
   });
+  // Exercise the same one-use Work login as an admin review session.
+  await db().externalIdentity.create({
+    data: {
+      collectorId: collector.id,
+      provider: 'DISCORD',
+      externalId: '333333333333333333',
+      authenticatedAt: new Date(),
+    },
+  });
   const evidence: unknown[] = [];
   for (const [engine, type] of [
     ['chromium', chromium],
@@ -121,6 +132,31 @@ export async function interactiveCardTests(
         reducedMotion: 'reduce',
         hasTouch: true,
       });
+      const exportPath =
+        base +
+        '/api/share?kind=passport&format=trading-card&download=1&entity=' +
+        avatar.tokenId;
+      check(
+        (await page.request.get(exportPath)).status() === 403,
+        'anonymous full-resolution export denied',
+      );
+      const code = randomBytes(24).toString('base64url');
+      await db().authChallenge.create({
+        data: {
+          id: authHash('WORK_INVITE' + code),
+          kind: 'WORK_INVITE',
+          subject: collector.id,
+          expiresAt: new Date(Date.now() + 600000),
+        },
+      });
+      await page.goto(base + '/work-login');
+      await page.getByLabel('Single-use admin code').fill(code);
+      await page.getByRole('button', { name: 'Sign in' }).click();
+      await page.getByRole('heading', { name: 'Collection admin' }).waitFor();
+      check(
+        !(await page.getByText('Create Work code').count()),
+        'Work cannot issue further invitations',
+      );
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
       const cases = (engine === 'chromium' ? records : [records[2]]).map(

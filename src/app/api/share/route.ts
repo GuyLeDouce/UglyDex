@@ -1,3 +1,8 @@
+import sharp from 'sharp';
+import { adminActor } from '@/server/admin';
+import { collectorCardTokenIds, cardHolder } from '@/server/collector-card';
+import { dexView } from '@/server/dex';
+import { masteryDeck } from '@/domain/card-decks';
 import { GALLERIES_ENABLED } from '@/domain/features';
 import { shareFilename } from '@/domain/trading-card';
 import { ZodError } from 'zod';
@@ -29,6 +34,22 @@ export async function GET(request: Request) {
     if (owner && !session)
       return new Response('Not available', { status: 404, headers });
     if (session) await shareLimit(session.collectorId, 20);
+    const squigCard = spec.format === 'trading-card';
+    async function mayExport() {
+      if (!session) return false;
+      return (
+        (
+          await collectorCardTokenIds(session.collectorId, [
+            Number(spec.entity),
+          ])
+        ).length > 0 || !!(await adminActor())
+      );
+    }
+    if (squigCard && download && !(await mayExport()))
+      return new Response('Current holder or admin required.', {
+        status: 403,
+        headers,
+      });
     const card = await shareCard(
       spec,
       owner ? session?.collectorId : undefined,
@@ -50,7 +71,21 @@ export async function GET(request: Request) {
         status: 409,
         headers,
       });
-    return new Response(Buffer.from(bytes), {
+    const allowed = squigCard && (await mayExport());
+    if (squigCard && download && !allowed)
+      return new Response('Current holder or admin required.', {
+        status: 403,
+        headers,
+      });
+    const holder = squigCard ? await cardHolder(Number(spec.entity)) : null;
+    const guide = holder
+      ? await dexView(holder.collectorId, holder.observed)
+      : null;
+    const body =
+      squigCard && !download && !allowed
+        ? await sharp(bytes).resize({ width: 450 }).png().toBuffer()
+        : bytes;
+    return new Response(Buffer.from(body), {
       headers: {
         ...headers,
         'Content-Type': 'image/png',
@@ -89,6 +124,10 @@ export async function GET(request: Request) {
                   .filter(Boolean)
                   .join('. '),
               ),
+              'X-Card-Deck': masteryDeck(
+                guide?.status === 'ready' ? guide.score.overall : 0,
+              ),
+              'X-Card-Export': allowed ? '1' : '0',
               'X-Card-OG': card.tradingCard.og ? '1' : '0',
             }
           : {}),

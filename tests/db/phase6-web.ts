@@ -595,8 +595,8 @@ export async function phase6WebTests(
         'trading card downloads named file',
       );
       check(
-        imageRequests === 2,
-        'trading preview and download reuse exact bytes',
+        imageRequests === 3,
+        'trading export rechecks permission on download',
       );
       await page.screenshot({
         path: '.data/trading-card-mobile.png',
