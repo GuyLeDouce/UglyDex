@@ -112,8 +112,8 @@ export async function openSeaWebTests(
       await page.setViewportSize({ width, height: 1000 });
       await page.goto(base + '/squigs?q=4398');
       // Compact mode persists across navigation and hides prices on mobile.
-      // Exercise full price text in Grid, then test Compact separately below.
-      await page.getByRole('button', { name: '▦ Grid', exact: true }).click();
+      // Exercise full price text in Album, then test Compact separately below.
+      await page.getByRole('button', { name: '▥ Album', exact: true }).click();
       const card = page
         .locator('.squig-card')
         .filter({ has: page.locator('a[href="/squig/4398"]') });
@@ -197,7 +197,7 @@ export async function openSeaWebTests(
         `unlisted detail uses the concise label at ${width}px`,
       );
       await page.goto(base + '/squigs?q=4398');
-      await page.getByRole('button', { name: '▦ Grid', exact: true }).click();
+      await page.getByRole('button', { name: '▥ Album', exact: true }).click();
       await card.getByText('Unlisted', { exact: true }).waitFor();
       check(
         (await card.locator('.opensea-price').innerText()) === 'Unlisted',

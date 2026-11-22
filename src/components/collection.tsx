@@ -1,11 +1,17 @@
 'use client';
+import { Artwork } from './artwork';
+import { squigArtwork } from '@/domain/assets';
 import { CollectorCardLink } from './collector-card-link';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import favoriteStyles from './favorite-heart.module.css';
 import { CardDiscovery } from './card-discovery';
 import { CollectionViewer } from './collection-viewer';
-import { catalogLink, type CatalogContext } from '@/domain/catalog-navigation';
+import {
+  catalogLink,
+  savedCollectionView,
+  type CatalogContext,
+} from '@/domain/catalog-navigation';
 import {
   useEffect,
   useState,
@@ -25,11 +31,9 @@ const subscribe = (fn: () => void) => {
 };
 const snapshot = () => {
   try {
-    return localStorage.getItem('uglydex-view') === 'compact'
-      ? 'compact'
-      : 'grid';
+    return savedCollectionView(localStorage.getItem('uglydex-view'));
   } catch {
-    return 'grid';
+    return 'album';
   }
 };
 export function SquigCard(props: Parameters<typeof AlbumSquigCard>[0]) {
@@ -286,7 +290,7 @@ export function CollectionGrid({
       setSaving(false);
     }
   }
-  const savedMode = useSyncExternalStore(subscribe, snapshot, () => 'grid');
+  const savedMode = useSyncExternalStore(subscribe, snapshot, () => 'album');
   const [pendingMode, setPendingMode] = useState<CatalogContext['view'] | null>(
     null,
   );
@@ -311,17 +315,6 @@ export function CollectionGrid({
         `[data-open-card="${token}"]`,
       );
       button?.focus({ preventScroll: true });
-      const album = button?.closest<HTMLElement>('.collection-grid.album');
-      const card = button?.closest<HTMLElement>('article');
-      if (album && card && album.scrollWidth > album.clientWidth) {
-        album.scrollBy({
-          left:
-            card.getBoundingClientRect().left -
-            album.getBoundingClientRect().left -
-            8,
-          behavior: 'auto',
-        });
-      }
     });
   }
   function moveCard(delta: number) {
@@ -360,30 +353,24 @@ export function CollectionGrid({
     return () => query.removeEventListener('change', update);
   }, []);
   function setMode(value: CatalogContext['view']) {
+    const preference = value === 'grid' ? 'art-grid' : value;
+    try {
+      localStorage.setItem('uglydex-view', preference);
+      window.dispatchEvent(new Event('storage'));
+    } catch {}
     if (catalog) {
       setSelected(null);
       setPendingMode(value);
-      document.cookie = `${catalog.preferenceKey}=${value}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
-      if (value !== 'album') {
-        try {
-          localStorage.setItem('uglydex-view', value);
-          window.dispatchEvent(new Event('storage'));
-        } catch {}
-      }
+      document.cookie = `${catalog.preferenceKey}=${preference}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
       router.push(
         catalogLink(catalog.path, catalog.params, { view: value, page: null }),
         { scroll: false },
       );
-      return;
     }
-    try {
-      localStorage.setItem('uglydex-view', value);
-      window.dispatchEvent(new Event('storage'));
-    } catch {}
   }
   return (
     <>
-      {editableFavorites && (
+      {editableFavorites && mode !== 'grid' && (
         <p className={favoriteStyles.status} role="status">
           {favoriteMessage ||
             `♥ ${favorites.length} of 6 favorites · Select a heart to feature a Squig.`}
@@ -391,14 +378,12 @@ export function CollectionGrid({
       )}
       {controls && (
         <div className="view-controls" aria-label="Collection display">
-          {catalog && (
-            <button
-              aria-pressed={mode === 'album'}
-              onClick={() => setMode('album')}
-            >
-              ▥ Album
-            </button>
-          )}
+          <button
+            aria-pressed={mode === 'album'}
+            onClick={() => setMode('album')}
+          >
+            ▥ Album
+          </button>
           <button
             aria-pressed={mode === 'grid'}
             onClick={() => setMode('grid')}
@@ -484,33 +469,51 @@ export function CollectionGrid({
       )}
       {items.length ? (
         <div
-          className={`collection-grid ${controls ? mode : 'grid'} ${items.length === 1 ? 'single-card' : ''}`}
+          className={`collection-grid ${controls ? mode : 'album'} ${items.length === 1 ? 'single-card' : ''}`}
         >
-          {items.map((item, index) => (
-            <SquigCard
-              key={item.tokenId}
-              item={item}
-              viewerOwned={
-                viewerSignedIn
-                  ? collectorCardTokens.includes(item.tokenId)
-                  : undefined
-              }
-              onOpen={catalog ? () => setSelected(index) : undefined}
-              collectorCard={collectorCardTokens.includes(item.tokenId)}
-              favorite={favorites.includes(item.tokenId)}
-              onFavorite={
-                editableFavorites && item.currentlyOwned !== false
-                  ? () => toggleFavorite(item.tokenId)
-                  : undefined
-              }
-              savingFavorite={saving}
-              compact={controls && mode === 'compact'}
-              priority={index < priorityCount}
-              listing={listings.get(item.tokenId)}
-              marketStatus={market?.status}
-              marketComplete={market?.complete}
-            />
-          ))}
+          {items.map((item, index) =>
+            controls && mode === 'grid' ? (
+              <button
+                className="art-tile"
+                type="button"
+                key={item.tokenId}
+                data-open-card={item.tokenId}
+                aria-label={`View Squig #${item.tokenId}`}
+                onClick={() => setSelected(index)}
+              >
+                <Artwork
+                  src={squigArtwork(item.tokenId)}
+                  alt={`Squig #${item.tokenId}`}
+                  priority={index < priorityCount}
+                  sizes="(max-width:600px) 25vw, 140px"
+                />
+              </button>
+            ) : (
+              <SquigCard
+                key={item.tokenId}
+                item={item}
+                viewerOwned={
+                  viewerSignedIn
+                    ? collectorCardTokens.includes(item.tokenId)
+                    : undefined
+                }
+                onOpen={catalog ? () => setSelected(index) : undefined}
+                collectorCard={collectorCardTokens.includes(item.tokenId)}
+                favorite={favorites.includes(item.tokenId)}
+                onFavorite={
+                  editableFavorites && item.currentlyOwned !== false
+                    ? () => toggleFavorite(item.tokenId)
+                    : undefined
+                }
+                savingFavorite={saving}
+                compact={controls && mode === 'compact'}
+                priority={index < priorityCount}
+                listing={listings.get(item.tokenId)}
+                marketStatus={market?.status}
+                marketComplete={market?.complete}
+              />
+            ),
+          )}
         </div>
       ) : (
         <div className="empty-state">

@@ -403,19 +403,19 @@
   box-shadow: none;
   border-width: 1px;
 }
-.collection-grid.grid {
+.collection-grid.album {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 28px 22px;
   margin-top: 24px;
 }
 @media (max-width: 1000px) {
-  .collection-grid.grid {
+  .collection-grid.album {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px 18px;
   }
 }
 @media (max-width: 600px) {
-  .collection-grid.grid {
+  .collection-grid.album {
     grid-template-columns: minmax(0, 1fr);
     max-width: 420px;
     margin: 20px auto;
