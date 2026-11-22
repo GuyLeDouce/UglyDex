@@ -5,8 +5,8 @@ import {
   tradingCardPalettes,
   TRADING_BAR_INK,
 } from '@/domain/trading-card-palette';
-import { tradingCardData, type CardRarity } from '@/domain/trading-card';
-import { squigRarityClass } from '@/domain/squig-rarity';
+import { tradingCardData } from '@/domain/trading-card';
+import { squigRarity } from '@/domain/squig-rarity';
 import { Artwork } from './artwork';
 
 export function TradingCardFace({
@@ -25,10 +25,7 @@ export function TradingCardFace({
   onOpen?: () => void;
 }) {
   const Heading = heading ? 'h3' : 'span';
-  const rarity = squigRarityClass(item.rarity).replace(
-    'rarity-',
-    '',
-  ) as CardRarity;
+  const rarity = squigRarity(item.rarity);
   const palette = tradingCardPalettes[rarity];
   const card = tradingCardData({
     tokenId: item.tokenId,

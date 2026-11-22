@@ -21,7 +21,8 @@ import {
 import { TradingCardFace } from './trading-card-face';
 import { CompactSquigCard } from './compact-squig-card';
 import type { SquigCardData } from '@/server/collections';
-import { squigRarityClass } from '@/domain/squig-rarity';
+import { tradingCardPalettes } from '@/domain/trading-card-palette';
+import { squigRarity, squigRarityClass } from '@/domain/squig-rarity';
 import { AchievementStrip } from './achievement-strip';
 import { OpenSeaLink, useOpenSeaListings } from './opensea';
 import type { OpenSeaListings, SquigListing } from '@/domain/opensea';
@@ -475,10 +476,14 @@ export function CollectionGrid({
             controls && mode === 'grid' ? (
               <button
                 className="art-tile"
+                style={{
+                  borderColor:
+                    tradingCardPalettes[squigRarity(item.rarity)].mid,
+                }}
                 type="button"
                 key={item.tokenId}
                 data-open-card={item.tokenId}
-                aria-label={`View Squig #${item.tokenId}`}
+                aria-label={`View Squig #${item.tokenId}, ${squigRarity(item.rarity)} rarity`}
                 onClick={() => setSelected(index)}
               >
                 <Artwork
