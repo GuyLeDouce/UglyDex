@@ -393,6 +393,7 @@
   animation: squig-full-turn 10s linear infinite;
 }
 @media (prefers-reduced-motion: no-preference) {
+  .passport-spin .squig-spin-rotor,
   .share-spin .squig-spin-rotor {
     animation: squig-full-turn 10s linear infinite;
   }
