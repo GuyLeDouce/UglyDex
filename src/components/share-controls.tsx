@@ -1,5 +1,4 @@
 'use client';
-import { cardDecks, type CardDeck } from '@/domain/card-decks';
 import dynamic from 'next/dynamic';
 import { parseCardFinish, type CardFinish } from '@/domain/card-finish';
 const InteractiveCard = dynamic(
@@ -195,7 +194,7 @@ function ShareImage({
   const [asset, setAsset] = useState<{
       url: string;
       file: File;
-      deck?: CardDeck;
+      squigCard: boolean;
       allowed: boolean;
       finish: CardFinish;
       description: string;
@@ -239,9 +238,7 @@ function ShareImage({
         objectUrl = URL.createObjectURL(blob);
         setAsset({
           url: objectUrl,
-          deck: cardDecks.find(
-            (d) => d === response.headers.get('X-Card-Deck'),
-          ),
+          squigCard: response.headers.get('X-Card-Type') === 'squig',
           allowed: response.headers.get('X-Card-Export') !== '0',
           description: decodeURIComponent(
             response.headers.get('X-Card-Description') ??
@@ -281,7 +278,7 @@ function ShareImage({
     setBusy(true);
     try {
       let file = asset.file;
-      if (asset.deck && !(native && prepared)) {
+      if (asset.squigCard && !(native && prepared)) {
         const response = await fetch(image + '&download=1', {
           cache: 'no-store',
         });
@@ -327,31 +324,37 @@ function ShareImage({
       setBusy(false);
     }
   }
+  const preview = asset && (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className={
+        trading ? 'share-preview share-preview--trading' : 'share-preview'
+      }
+      src={asset.url}
+      data-source={image}
+      alt={
+        trading
+          ? asset.finish.collector
+            ? 'UglyDex collector trading card preview'
+            : 'Squigs Reloaded trading card preview'
+          : 'UglyDex share card preview'
+      }
+    />
+  );
   return (
     <>
-      {asset && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          className={
-            trading ? 'share-preview share-preview--trading' : 'share-preview'
-          }
-          src={asset.url}
-          data-source={image}
-          alt={
-            trading
-              ? asset.finish.collector
-                ? 'UglyDex collector trading card preview'
-                : 'Squigs Reloaded trading card preview'
-              : 'UglyDex share card preview'
-          }
-        />
+      {asset?.squigCard ? (
+        <div className="squig-spin share-spin">
+          <div className="squig-spin-rotor">{preview}</div>
+        </div>
+      ) : (
+        preview
       )}
       {asset && trading && (
         <InteractiveCard
           image={asset.url}
-          deck={asset.deck}
           allowed={asset.allowed}
-          exportUrl={asset.deck ? image + '&download=1' : undefined}
+          exportUrl={asset.squigCard ? image + '&download=1' : undefined}
           finish={asset.finish}
           description={asset.description}
           filename={filename}

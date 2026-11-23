@@ -46,7 +46,7 @@ export async function animatedCard(
   name: string,
   signal: AbortSignal,
   progress: (value: number) => void,
-  reverse?: { back: HTMLImageElement; holographic: boolean },
+  reverse?: HTMLImageElement,
 ): Promise<File> {
   signal.throwIfAborted();
   const { canEncodeVideo } = await import('mediabunny');
@@ -99,7 +99,7 @@ async function encodeCard(
   codec: 'avc' | 'vp9' | 'vp8',
   signal: AbortSignal,
   progress: (value: number) => void,
-  reverse?: { back: HTMLImageElement; holographic: boolean },
+  reverse?: HTMLImageElement,
 ): Promise<Blob> {
   const {
     Output,
@@ -139,7 +139,7 @@ async function encodeCard(
         scene.ctx,
         face.element,
         pose,
-        reverse && { ...reverse, angle: (frame / 180) * Math.PI * 2 },
+        reverse && { back: reverse, angle: (frame / 180) * Math.PI * 2 },
       );
       await source.add(frame / 30, 1 / 30);
       progress(Math.floor(((frame + 1) / 180) * 95));

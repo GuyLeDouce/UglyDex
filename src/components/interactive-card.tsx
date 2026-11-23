@@ -1,5 +1,4 @@
 'use client';
-import { cardDecks, type CardDeck } from '@/domain/card-decks';
 import { useEffect, useRef, useState } from 'react';
 import {
   cardFinishes,
@@ -21,7 +20,6 @@ export function InteractiveCard({
   finish,
   filename,
   description,
-  deck,
   allowed = true,
   exportUrl,
 }: {
@@ -29,7 +27,6 @@ export function InteractiveCard({
   finish: CardFinish;
   filename: string;
   description: string;
-  deck?: CardDeck;
   allowed?: boolean;
   exportUrl?: string;
 }) {
@@ -50,14 +47,13 @@ export function InteractiveCard({
   const [message, setMessage] = useState(''),
     [progress, setProgress] = useState<number | null>(null),
     [video, setVideo] = useState<{ file: File; url: string } | null>(null);
-  const [selected, setSelected] = useState(deck);
+  const [videoMotion, setVideoMotion] = useState<'spin' | 'front'>('spin');
   const [reverse, setReverse] = useState<HTMLImageElement | null>(null);
-  const holographic = !!selected && cardDecks.indexOf(selected) >= 2;
   useEffect(() => {
-    if (!open || !selected) return;
+    if (!open || !exportUrl) return;
     let live = true;
     const img = new Image();
-    img.src = '/card-backs/' + selected + '.webp';
+    img.src = '/card-backs/standard-blue.webp';
     img
       .decode()
       .then(() => {
@@ -69,7 +65,7 @@ export function InteractiveCard({
     return () => {
       live = false;
     };
-  }, [open, selected]);
+  }, [open, exportUrl]);
   const isExporting = progress !== null;
   useEffect(() => {
     const media = matchMedia('(prefers-reduced-motion: reduce)');
@@ -145,7 +141,7 @@ export function InteractiveCard({
           target,
           face.element,
           current,
-          reverse ? { angle, back: reverse, holographic } : undefined,
+          reverse ? { angle, back: reverse } : undefined,
         );
         last = now;
       }
@@ -157,7 +153,7 @@ export function InteractiveCard({
       disposeScene(target.canvas);
       face.element.width = 1;
     };
-  }, [open, ready, motion, finish, isExporting, reverse, holographic]);
+  }, [open, ready, motion, finish, isExporting, reverse]);
   function close() {
     exporting.current?.abort();
     dialog.current?.close();
@@ -194,10 +190,15 @@ export function InteractiveCard({
         ? await animatedCard(
             front,
             finish,
-            filename,
+            exportUrl
+              ? filename.replace(
+                  /\.png$/,
+                  videoMotion === 'spin' ? '-360.png' : '-front.png',
+                )
+              : filename,
             controller.signal,
             setProgress,
-            reverse ? { back: reverse, holographic } : undefined,
+            videoMotion === 'spin' ? (reverse ?? undefined) : undefined,
           )
         : await staticCard(front, finish, filename);
       if (controller.signal.aborted) return;
@@ -330,26 +331,6 @@ export function InteractiveCard({
               }}
             />
             <aside className="card-viewer-tools">
-              {deck && (
-                <label>
-                  Deck back{' '}
-                  <select
-                    value={selected}
-                    onChange={(e) => {
-                      setReverse(null);
-                      setSelected(e.target.value as CardDeck);
-                    }}
-                  >
-                    {cardDecks
-                      .slice(0, cardDecks.indexOf(deck) + 1)
-                      .map((d) => (
-                        <option key={d} value={d}>
-                          {d}
-                        </option>
-                      ))}
-                  </select>
-                </label>
-              )}
               <details className="card-viewer-details">
                 <summary>Card details</summary>
                 <p>{description}</p>
@@ -383,23 +364,37 @@ export function InteractiveCard({
               <button
                 type="button"
                 className="button primary"
-                disabled={
-                  !allowed ||
-                  !ready ||
-                  (!!deck && !reverse) ||
-                  progress !== null
-                }
+                disabled={!allowed || !ready || progress !== null}
                 onClick={() => exportCard(false)}
               >
                 Download finished PNG
               </button>
+              {exportUrl && allowed && (
+                <label>
+                  Video motion
+                  <select
+                    value={videoMotion}
+                    disabled={isExporting}
+                    onChange={(e) => {
+                      setVideoMotion(
+                        e.target.value === 'front' ? 'front' : 'spin',
+                      );
+                      setVideo(null);
+                      setMessage('');
+                    }}
+                  >
+                    <option value="spin">Full 360° rotation</option>
+                    <option value="front">Front-only tilt</option>
+                  </select>
+                </label>
+              )}
               <button
                 type="button"
                 className="button primary"
                 disabled={
                   !allowed ||
                   !ready ||
-                  (!!deck && !reverse) ||
+                  (!!exportUrl && videoMotion === 'spin' && !reverse) ||
                   progress !== null
                 }
                 onClick={() => exportCard(true)}

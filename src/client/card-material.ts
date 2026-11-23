@@ -238,7 +238,7 @@ export function paintScene(
   ctx: CanvasRenderingContext2D,
   face: HTMLCanvasElement,
   pose: CardPose,
-  spin?: { angle: number; back: HTMLImageElement; holographic: boolean },
+  spin?: { angle: number; back: HTMLImageElement },
 ) {
   const w = ctx.canvas.width,
     h = ctx.canvas.height;
@@ -265,20 +265,6 @@ export function paintScene(
     );
     material.clip();
     material.drawImage(spin.back, 0, 0, face.width, face.height);
-    if (spin.holographic) {
-      const center = face.width * (0.5 + 0.8 * Math.sin(angle));
-      const shine = material.createLinearGradient(
-        center - 200,
-        0,
-        center + 200,
-        face.height * 0.18,
-      );
-      shine.addColorStop(0, 'transparent');
-      shine.addColorStop(0.5, 'rgba(255,250,225,.28)');
-      shine.addColorStop(1, 'transparent');
-      material.fillStyle = shine;
-      material.fillRect(0, 0, face.width, face.height);
-    }
     material.restore();
   }
   ctx.save();

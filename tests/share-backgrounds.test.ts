@@ -22,7 +22,6 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/server/auth', () => ({ currentSession: mocks.currentSession }));
 vi.mock('@/server/collector-card', () => ({
   collectorCardTokenIds: mocks.owned,
-  cardHolder: async () => null,
 }));
 vi.mock('@/server/admin', () => ({ adminActor: mocks.admin }));
 vi.mock('@/server/sharing', () => ({ shareCard: mocks.shareCard }));
