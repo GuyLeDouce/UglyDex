@@ -239,12 +239,13 @@ export function paintScene(
   face: HTMLCanvasElement,
   pose: CardPose,
   spin?: { angle: number; back: HTMLImageElement },
+  fill = 0.87,
 ) {
   const w = ctx.canvas.width,
     h = ctx.canvas.height;
   ctx.fillStyle = '#101318';
   ctx.fillRect(0, 0, w, h);
-  const size = Math.min(w * 0.87, (h * 0.87 * 5) / 7),
+  const size = Math.min(w * fill, (h * fill * 5) / 7),
     height = (size * 7) / 5;
   // Project both sides around the vertical axis. Fold the reverse angle so
   // the printed logo faces the viewer throughout the rear half of the turn.

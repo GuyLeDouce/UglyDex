@@ -21,7 +21,9 @@
   max-width: 1120px;
   margin: auto;
   border-bottom: 1px solid #354354;
-  padding-bottom: 16px;
+  height: auto;
+  min-height: 0;
+  padding: 0 0 16px;
 }
 .card-viewer-header h2 {
   margin: 0;
@@ -33,7 +35,7 @@
 }
 .card-viewer-body {
   max-width: 1120px;
-  margin: auto;
+  margin: 12px auto 0;
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
   align-items: center;
@@ -41,8 +43,9 @@
 }
 .interactive-card-canvas {
   display: block;
-  width: 100%;
-  max-height: calc(100dvh - 130px);
+  justify-self: center;
+  width: min(100%, 49dvh);
+  height: auto;
   object-fit: contain;
   aspect-ratio: 5/7;
   touch-action: none;
@@ -90,7 +93,7 @@
     gap: 8px;
   }
   .interactive-card-canvas {
-    max-height: 62dvh;
+    width: min(100%, 39dvh);
   }
   .card-viewer-header {
     padding-bottom: 10px;

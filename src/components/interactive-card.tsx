@@ -142,6 +142,7 @@ export function InteractiveCard({
           face.element,
           current,
           reverse ? { angle, back: reverse } : undefined,
+          0.8,
         );
         last = now;
       }
