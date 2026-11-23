@@ -424,6 +424,7 @@
   transform: rotateY(180deg);
   pointer-events: none;
 }
+.passport-spin,
 .share-spin {
   display: grid;
   place-items: center;
@@ -431,6 +432,7 @@
   aspect-ratio: 5 / 7;
   margin: 12px auto;
 }
+.passport-spin .squig-spin-rotor,
 .share-spin .squig-spin-rotor {
   width: 82%;
   aspect-ratio: 5 / 7;
