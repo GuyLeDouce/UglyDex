@@ -123,3 +123,23 @@
 .badge-options {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
 }
+
+.album-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-top: 4px;
+}
+.album-badges button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 1.25rem;
+  cursor: pointer;
+}

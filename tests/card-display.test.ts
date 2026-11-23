@@ -50,6 +50,36 @@ describe('collection display modes', () => {
     expect(html).not.toContain('None');
     expect(html).toContain('Amphibian');
   });
+  it('renders just the interactive face and favorite heart in My Collection Album', () => {
+    const html = renderToStaticMarkup(
+      createElement(SquigCard, {
+        item: {
+          ...item,
+          achievements: {
+            status: 'ready',
+            badges: Array.from({ length: 6 }, (_, i) => ({
+              key: 'badge-' + i,
+              name: 'Badge ' + i,
+              url: '/badge.png',
+              status: 'earned',
+              subject: 'SQUIG',
+            })),
+          },
+        },
+        faceOnly: true,
+        favorite: true,
+        collectorCard: true,
+        onFavorite: () => {},
+        onOpen: () => {},
+      }),
+    );
+    expect(html).toContain('data-open-card="1"');
+    expect(html).toContain('Remove Squig #1 from favorites');
+    expect(html).not.toContain('trading-tools');
+    expect(html).toContain('Badge 3 · Earned');
+    expect(html).not.toContain('Badge 4 · Earned');
+    expect(html).toContain('Show all 6 badges for Squig #1');
+  });
   it('restores the original compact markup without a trading face or disclosure', () => {
     const html = renderToStaticMarkup(
       createElement(SquigCard, { item, compact: true }),

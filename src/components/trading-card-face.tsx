@@ -15,6 +15,7 @@ export function TradingCardFace({
   heading = true,
   href,
   children,
+  showTools = true,
   onOpen,
 }: {
   item: SquigCardData;
@@ -22,6 +23,7 @@ export function TradingCardFace({
   heading?: boolean;
   href?: string;
   children?: ReactNode;
+  showTools?: boolean;
   onOpen?: () => void;
 }) {
   const Heading = heading ? 'h3' : 'span';
@@ -131,7 +133,7 @@ export function TradingCardFace({
           )}
         </div>
       </div>
-      {children && <div className="trading-tools">{children}</div>}
+      {showTools && children && <div className="trading-tools">{children}</div>}
     </>
   );
 }

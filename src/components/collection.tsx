@@ -23,6 +23,7 @@ import { CompactSquigCard } from './compact-squig-card';
 import type { SquigCardData } from '@/server/collections';
 import { tradingCardPalettes } from '@/domain/trading-card-palette';
 import { squigRarity, squigRarityClass } from '@/domain/squig-rarity';
+import { AchievementBadge } from './achievement-badge';
 import { AchievementStrip } from './achievement-strip';
 import { OpenSeaLink, useOpenSeaListings } from './opensea';
 import type { OpenSeaListings, SquigListing } from '@/domain/opensea';
@@ -44,6 +45,33 @@ export function SquigCard(props: Parameters<typeof AlbumSquigCard>[0]) {
     <AlbumSquigCard {...props} />
   );
 }
+function AlbumBadges({ item }: { item: SquigCardData }) {
+  const [expanded, setExpanded] = useState(false);
+  // The server orders earned Squig badges by rarity, then catalog order.
+  const badges = item.achievements?.badges;
+  if (!badges?.length) return null;
+  return (
+    <div className="album-badges">
+      {(expanded ? badges : badges.slice(0, 4)).map((badge) => (
+        <AchievementBadge key={badge.key} badge={badge} size="small" />
+      ))}
+      {badges.length > 4 && (
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-label={
+            expanded
+              ? `Show fewer badges for Squig #${item.tokenId}`
+              : `Show all ${badges.length} badges for Squig #${item.tokenId}`
+          }
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? '−' : '+'}
+        </button>
+      )}
+    </div>
+  );
+}
 function AlbumSquigCard({
   item,
   priority = false,
@@ -53,6 +81,7 @@ function AlbumSquigCard({
   favorite,
   onFavorite,
   savingFavorite = false,
+  faceOnly = false,
   collectorCard = false,
   onOpen,
   viewerOwned,
@@ -66,6 +95,7 @@ function AlbumSquigCard({
   favorite?: boolean;
   onFavorite?: () => void;
   savingFavorite?: boolean;
+  faceOnly?: boolean;
   collectorCard?: boolean;
   onOpen?: () => void;
   viewerOwned?: boolean;
@@ -100,6 +130,7 @@ function AlbumSquigCard({
         priority={priority}
         href={`/squig/${item.tokenId}`}
         onOpen={onOpen}
+        showTools={!faceOnly}
       >
         <CardDiscovery item={item} viewerOwned={viewerOwned} />
         <nav
@@ -222,6 +253,7 @@ function AlbumSquigCard({
           complete={marketComplete}
         />
       </TradingCardFace>
+      {faceOnly && <AlbumBadges item={item} />}
     </article>
   );
 }
@@ -511,6 +543,7 @@ export function CollectionGrid({
                     : undefined
                 }
                 savingFavorite={saving}
+                faceOnly={catalog?.path === '/collection' && mode === 'album'}
                 compact={controls && mode === 'compact'}
                 priority={index < priorityCount}
                 listing={listings.get(item.tokenId)}
