@@ -49,7 +49,9 @@ export function SquigCard(props: SquigCardProps) {
 function AlbumBadges({ item }: { item: SquigCardData }) {
   const [expanded, setExpanded] = useState(false);
   // The server orders earned Squig badges by rarity, then catalog order.
-  const badges = item.achievements?.badges;
+  const badges = item.achievements?.badges.filter(
+    (badge) => badge.subject === 'SQUIG' && badge.status === 'earned',
+  );
   if (!badges?.length) return null;
   return (
     <div className="album-badges">

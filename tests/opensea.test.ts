@@ -266,9 +266,10 @@ describe('bounded listing reads', () => {
 });
 
 describe('OpenSea card presentation', () => {
-  it('keeps the detail link and external marketplace link as separate keyboard targets', () => {
+  it('keeps compact detail and marketplace links as separate keyboard targets', () => {
     const html = renderToStaticMarkup(
       createElement(SquigCard, {
+        compact: true,
         item: {
           tokenId: 1,
           name: 'Squig #1',
