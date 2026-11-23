@@ -70,62 +70,68 @@ export function TradingCardFace({
         <strong>#{card.mawRank ?? '—'}</strong>
         {card.legendary && card.mawRank === 1 && <small>Shared</small>}
       </div>
-      {card.legend && (
-        <div className="trading-legend">
-          <small>One of a kind</small>
-          <strong>{card.legend}</strong>
+      <div className="trading-notes">
+        {card.legend && (
+          <div className="trading-legend">
+            <small>One of a kind</small>
+            <strong>{card.legend}</strong>
+          </div>
+        )}
+        <div className="trading-traits">
+          {card.traits.map((t) => (
+            <span key={t.traitType}>
+              <small>{t.traitType}</small>
+              {t.value}
+            </span>
+          ))}
+          {!card.traits.length && !card.legend && (
+            <span>Traits not indexed</span>
+          )}
         </div>
-      )}
-      <div className="trading-traits">
-        {card.traits.map((t) => (
-          <span key={t.traitType}>
-            <small>{t.traitType}</small>
-            {t.value}
-          </span>
-        ))}
-        {!card.traits.length && !card.legend && <span>Traits not indexed</span>}
+      </div>
+      <div className="trading-footer">
+        <strong>UGLY LABS</strong>
+        <span>UGLYDEX · #{item.tokenId}</span>
       </div>
     </>
   );
   return (
-    <div
-      className="trading-face"
-      data-finish={rarity}
-      data-og={card.og || undefined}
-      style={
-        {
-          '--card-light': palette.light,
-          '--card-mid': palette.mid,
-          '--card-dark': palette.dark,
-          '--card-bar': palette.bar,
-          '--card-ink': TRADING_BAR_INK,
-        } as CSSProperties
-      }
-    >
-      <div className="trading-face-inner">
-        {onOpen ? (
-          <button
-            type="button"
-            className="squig-card-main card-open"
-            data-open-card={item.tokenId}
-            aria-label={`View Squig #${item.tokenId} card`}
-            onClick={onOpen}
-          >
-            {face}
-          </button>
-        ) : href ? (
-          <Link className="squig-card-main" href={href}>
-            {face}
-          </Link>
-        ) : (
-          face
-        )}
-        {children}
-        <div className="trading-footer">
-          <strong>UGLY LABS</strong>
-          <span>UGLYDEX · #{item.tokenId}</span>
+    <>
+      <div
+        className="trading-face"
+        data-finish={rarity}
+        data-og={card.og || undefined}
+        style={
+          {
+            '--card-light': palette.light,
+            '--card-mid': palette.mid,
+            '--card-dark': palette.dark,
+            '--card-bar': palette.bar,
+            '--card-ink': TRADING_BAR_INK,
+          } as CSSProperties
+        }
+      >
+        <div className="trading-face-inner">
+          {onOpen ? (
+            <button
+              type="button"
+              className="squig-card-main card-open trading-print"
+              data-open-card={item.tokenId}
+              aria-label={`View Squig #${item.tokenId} card`}
+              onClick={onOpen}
+            >
+              {face}
+            </button>
+          ) : href ? (
+            <Link className="squig-card-main trading-print" href={href}>
+              {face}
+            </Link>
+          ) : (
+            <div className="trading-print">{face}</div>
+          )}
         </div>
       </div>
-    </div>
+      {children && <div className="trading-tools">{children}</div>}
+    </>
   );
 }

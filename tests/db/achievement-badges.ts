@@ -508,10 +508,9 @@ export async function achievementBadgeWebTests(
               'mobile grid gives each card readable full-row width',
             );
           check(
-            (await card
-              .locator('.trading-face-inner > .album-progress')
-              .count()) === 1,
-            'discovery context belongs inside the card frame',
+            (await card.locator('.trading-tools > .album-progress').count()) ===
+              1,
+            'discovery context remains available below the fixed-ratio face',
           );
           check(
             (await card.locator('a a, a button, a summary').count()) === 0,

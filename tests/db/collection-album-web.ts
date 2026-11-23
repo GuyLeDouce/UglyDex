@@ -238,6 +238,17 @@ export async function collectionAlbumWebTests(
       await page.locator('[data-open-card]').first().click();
       await expect(viewer).toBeVisible();
       const card = viewer.locator('.album-viewer-card');
+      const trim = await card.locator('.trading-face').evaluate(
+        (face) =>
+          ({
+            width: face.clientWidth + 2 * face.clientLeft,
+            height: (face as HTMLElement).offsetHeight,
+          }) as { width: number; height: number },
+      );
+      check(
+        Math.abs((trim.width * 7) / 5 - trim.height) <= 2,
+        'printed card has 5:7 trim at every viewport',
+      );
       if (width <= 700 || height <= 540) {
         await expect
           .poll(() =>
