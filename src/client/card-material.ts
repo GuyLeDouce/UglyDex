@@ -267,35 +267,23 @@ export function paintScene(
     material.drawImage(spin.back, 0, 0, face.width, face.height);
     material.restore();
   }
-  ctx.save();
-  ctx.fillStyle = '#06080c';
-  ctx.shadowColor = '#0009';
-  ctx.shadowBlur = w * 0.035;
-  ctx.shadowOffsetY = h * 0.012;
-  ctx.beginPath();
-  const projected = Math.max(1, size * Math.abs(Math.cos(angle)));
-  ctx.roundRect(
-    (w - projected) / 2,
-    (h - height) / 2,
-    projected,
-    height,
-    Math.min(projected / 2, size * 0.055),
-  );
-  ctx.fill();
-  ctx.restore();
+  // Cast from the final image alpha so the shadow follows its perspective,
+  // rounded corners and edge-on silhouette on either rendering path.
+  function composite(image: HTMLCanvasElement, width: number, height: number) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.32)';
+    ctx.shadowBlur = w * 0.014;
+    ctx.shadowOffsetY = h * 0.003;
+    ctx.drawImage(image, (w - width) / 2, (h - height) / 2, width, height);
+    ctx.restore();
+  }
   if (Math.abs(angle) + Math.abs(pose.y) < 0.001) {
-    ctx.drawImage(face, (w - size) / 2, (h - height) / 2, size, height);
+    composite(face, size, height);
     return;
   }
   const renderer = projector(ctx.canvas);
   if (!renderer || renderer.gl.isContextLost()) {
-    ctx.drawImage(
-      face,
-      (w - projected) / 2,
-      (h - height) / 2,
-      projected,
-      height,
-    );
+    composite(face, size * Math.abs(Math.cos(angle)), height);
     return;
   }
   const { gl, program } = renderer;
@@ -307,5 +295,5 @@ export function paintScene(
   gl.uniform2f(gl.getUniformLocation(program, 'viewport'), w, h);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, face);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  ctx.drawImage(gl.canvas, 0, 0);
+  composite(gl.canvas as HTMLCanvasElement, w, h);
 }
