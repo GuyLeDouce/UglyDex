@@ -1,6 +1,7 @@
 'use client';
 import { useRef, useState } from 'react';
 import Link from 'next/link';
+import { CardTurn } from './card-turn';
 import { TrophyCardFace } from './trophy-card-face';
 import { ShareControls } from './share-controls';
 import { achievementTiers, type TrophyCardData } from '@/domain/trophy-card';
@@ -129,7 +130,13 @@ export function TrophyAlbum({
             onClick={() => open(card)}
             aria-label={`Inspect ${card.name} collector card`}
           >
-            <TrophyCardFace card={card} />
+            {card.kind === 'achievement' ? (
+              <CardTurn>
+                <TrophyCardFace card={card} />
+              </CardTurn>
+            ) : (
+              <TrophyCardFace card={card} />
+            )}
             <span className="trophy-card-action">
               Inspect · Download · Share ↗
             </span>

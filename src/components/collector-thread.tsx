@@ -1,3 +1,4 @@
+import { CardTurn } from './card-turn';
 import { TrophyCardFace } from './trophy-card-face';
 import { CollectorCardFace } from './collector-card-face';
 import Link from 'next/link';
@@ -160,7 +161,13 @@ export async function CollectorThread({
                 className="thread-card-preview"
                 aria-label={`View ${c.card.trophyCard.name} card`}
               >
-                <TrophyCardFace card={c.card.trophyCard} width={260} />
+                {c.card.trophyCard.kind === 'achievement' ? (
+                  <CardTurn>
+                    <TrophyCardFace card={c.card.trophyCard} width={260} />
+                  </CardTurn>
+                ) : (
+                  <TrophyCardFace card={c.card.trophyCard} width={260} />
+                )}
               </Link>
             )}
             {c.kind === 'welcome' && c.card?.collectorCard && (
@@ -169,14 +176,16 @@ export async function CollectorThread({
                 className="thread-card-preview"
                 aria-label={`View ${c.name}'s profile`}
               >
-                <div className="thread-collector-card">
-                  <div>
-                    <CollectorCardFace
-                      card={c.card}
-                      artwork={c.card.collectorCard.avatar}
-                    />
+                <CardTurn>
+                  <div className="thread-collector-card">
+                    <div>
+                      <CollectorCardFace
+                        card={c.card}
+                        artwork={c.card.collectorCard.avatar}
+                      />
+                    </div>
                   </div>
-                </div>
+                </CardTurn>
               </Link>
             )}
           </article>

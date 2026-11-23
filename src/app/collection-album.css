@@ -450,6 +450,13 @@
   margin: 0;
   box-shadow: none;
 }
+.inline-card-turn {
+  width: max-content;
+  margin-inline: auto;
+}
+.inline-card-turn .squig-spin-rotor {
+  scale: 0.88;
+}
 @keyframes squig-full-turn {
   from {
     transform: rotateY(0deg);
@@ -462,6 +469,7 @@
   animation: squig-full-turn 10s linear infinite;
 }
 @media (prefers-reduced-motion: no-preference) {
+  .inline-card-turn .squig-spin-rotor,
   .passport-spin .squig-spin-rotor,
   .share-spin .squig-spin-rotor {
     animation: squig-full-turn 10s linear infinite;

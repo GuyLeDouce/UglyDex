@@ -160,6 +160,7 @@ export function ShareControls({
             key={image}
             image={image}
             trading={trading}
+            hasBack={trading && (!trophy || spec.kind === 'achievement')}
             filename={shareFilename({
               entity: spec.entity,
               key: spec.key,
@@ -179,6 +180,7 @@ export function ShareControls({
 function ShareImage({
   image,
   trading,
+  hasBack,
   filename,
   url,
   copy,
@@ -186,6 +188,7 @@ function ShareImage({
 }: {
   image: string;
   trading: boolean;
+  hasBack: boolean;
   filename: string;
   url: string;
   copy: string;
@@ -343,7 +346,7 @@ function ShareImage({
   );
   return (
     <>
-      {asset?.squigCard ? (
+      {asset && hasBack ? (
         <div className="squig-spin share-spin">
           <div className="squig-spin-rotor">{preview}</div>
         </div>
@@ -353,6 +356,7 @@ function ShareImage({
       {asset && trading && (
         <InteractiveCard
           image={asset.url}
+          hasBack={hasBack}
           allowed={asset.allowed}
           exportUrl={asset.squigCard ? image + '&download=1' : undefined}
           finish={asset.finish}

@@ -145,6 +145,7 @@
 }
 
 .album-card-icons {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -155,5 +156,15 @@
   display: none;
 }
 .album-card-icons .set-mini-strip {
+  position: static;
   padding: 0;
+}
+
+.album-card-icons .set-mini-tip {
+  width: min(19rem, calc(100% - 16px));
+  box-sizing: border-box;
+  inset-inline: 0;
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+  text-align: left;
 }

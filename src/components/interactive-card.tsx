@@ -21,6 +21,7 @@ export function InteractiveCard({
   filename,
   description,
   allowed = true,
+  hasBack,
   exportUrl,
 }: {
   image: string;
@@ -28,6 +29,7 @@ export function InteractiveCard({
   filename: string;
   description: string;
   allowed?: boolean;
+  hasBack: boolean;
   exportUrl?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null),
@@ -50,7 +52,7 @@ export function InteractiveCard({
   const [videoMotion, setVideoMotion] = useState<'spin' | 'front'>('spin');
   const [reverse, setReverse] = useState<HTMLImageElement | null>(null);
   useEffect(() => {
-    if (!open || !exportUrl) return;
+    if (!open || !hasBack) return;
     let live = true;
     const img = new Image();
     img.src = '/card-backs/standard-blue.webp';
@@ -65,7 +67,7 @@ export function InteractiveCard({
     return () => {
       live = false;
     };
-  }, [open, exportUrl]);
+  }, [open, hasBack]);
   const isExporting = progress !== null;
   useEffect(() => {
     const media = matchMedia('(prefers-reduced-motion: reduce)');
@@ -191,7 +193,7 @@ export function InteractiveCard({
         ? await animatedCard(
             front,
             finish,
-            exportUrl
+            hasBack
               ? filename.replace(
                   /\.png$/,
                   videoMotion === 'spin' ? '-360.png' : '-front.png',
@@ -370,7 +372,7 @@ export function InteractiveCard({
               >
                 Download finished PNG
               </button>
-              {exportUrl && allowed && (
+              {hasBack && allowed && (
                 <label>
                   Video motion
                   <select
@@ -395,7 +397,7 @@ export function InteractiveCard({
                 disabled={
                   !allowed ||
                   !ready ||
-                  (!!exportUrl && videoMotion === 'spin' && !reverse) ||
+                  (hasBack && videoMotion === 'spin' && !reverse) ||
                   progress !== null
                 }
                 onClick={() => exportCard(true)}
