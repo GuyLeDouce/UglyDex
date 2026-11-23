@@ -508,19 +508,16 @@ export async function achievementBadgeWebTests(
               'mobile grid gives each card readable full-row width',
             );
           check(
-            (await card.locator('.trading-tools > .album-progress').count()) ===
-              1,
-            'discovery context remains available below the fixed-ratio face',
+            (await card.locator('.trading-tools').count()) === 0,
+            'album omits the secondary panel',
           );
           check(
             (await card.locator('a a, a button, a summary').count()) === 0,
             'card actions do not nest inside navigation links',
           );
           check(
-            await card
-              .locator('.card-record-links .achievement-strip')
-              .isVisible(),
-            'earned badges remain visible while Details is collapsed',
+            await card.locator('.album-badges').isVisible(),
+            'earned badges remain visible under the card',
           );
           await card.screenshot({ path: `.data/mobile-card-${width}.png` });
         }

@@ -143,3 +143,17 @@
   font-size: 1.25rem;
   cursor: pointer;
 }
+
+.album-card-icons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 8px;
+}
+.album-card-icons:empty {
+  display: none;
+}
+.album-card-icons .set-mini-strip {
+  padding: 0;
+}

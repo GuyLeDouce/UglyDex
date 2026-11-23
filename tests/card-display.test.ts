@@ -50,7 +50,7 @@ describe('collection display modes', () => {
     expect(html).not.toContain('None');
     expect(html).toContain('Amphibian');
   });
-  it('renders just the interactive face and favorite heart in My Collection Album', () => {
+  it('renders just the interactive face and favorite heart in Album', () => {
     const html = renderToStaticMarkup(
       createElement(SquigCard, {
         item: {
@@ -66,7 +66,6 @@ describe('collection display modes', () => {
             })),
           },
         },
-        faceOnly: true,
         favorite: true,
         collectorCard: true,
         onFavorite: () => {},
@@ -91,44 +90,61 @@ describe('collection display modes', () => {
     expect(html).not.toContain('<details');
     expect(html).toContain('Advances 2 sets');
   });
-  it('keeps discovery and set advancement visible outside grid details', () => {
-    const html = renderToStaticMarkup(createElement(SquigCard, { item }));
-    expect(html.indexOf('Advances 2 sets')).toBeLessThan(
-      html.indexOf('<details'),
+  it('keeps set advancement and status icons under the album face', () => {
+    const html = renderToStaticMarkup(
+      createElement(SquigCard, {
+        item: {
+          ...item,
+          statusIcons: [
+            {
+              key: 'advances-set',
+              name: 'Advances a set',
+              description: 'Advances Field Notes',
+            },
+          ],
+          personalization: {
+            ...item.personalization!,
+            sets: [
+              {
+                key: 'field-notes',
+                name: 'Field Notes',
+                icon: '/icons/sets/field-notes.png',
+                description: 'Field Notes',
+              },
+            ],
+          },
+        },
+      }),
     );
-    expect(html.indexOf('album-progress')).toBeGreaterThan(
-      html.indexOf('trading-face-inner'),
-    );
-    expect(html.indexOf('album-progress')).toBeGreaterThan(
-      html.indexOf('</a>'),
-    );
-    expect(html).toContain('Adds 3 missing traits');
+    expect(html).toContain('Advances a set');
+    expect(html).toContain('Field Notes: matching set');
+    expect(html).not.toContain('trading-tools');
+    expect(html).not.toContain('Why this helps your Dex');
   });
 });
 
-for (const compact of [false, true]) {
-  it(`offers the collector-card shortcut only with viewer eligibility (${compact ? 'compact' : 'grid'})`, () => {
-    const publicHtml = renderToStaticMarkup(
-      createElement(SquigCard, {
-        item: { ...item, currentlyOwned: true },
-        compact,
-      }),
-    );
-    expect(publicHtml).not.toContain('/collector-card');
-    const ownerHtml = renderToStaticMarkup(
-      createElement(SquigCard, {
-        item,
-        compact,
-        collectorCard: true,
-      }),
-    );
-    expect(ownerHtml).toContain('href="/squig/1/collector-card"');
-    expect(ownerHtml).toContain('Download Collector Card for Squig #1');
-    expect(ownerHtml).not.toMatch(
-      /<a[^>]*squig-card-main[^>]*>(?:(?!<\/a>)[\s\S])*collector-card-link/,
-    );
-  });
-}
+it('offers the compact collector-card shortcut only with viewer eligibility', () => {
+  const compact = true;
+  const publicHtml = renderToStaticMarkup(
+    createElement(SquigCard, {
+      item: { ...item, currentlyOwned: true },
+      compact,
+    }),
+  );
+  expect(publicHtml).not.toContain('/collector-card');
+  const ownerHtml = renderToStaticMarkup(
+    createElement(SquigCard, {
+      item,
+      compact,
+      collectorCard: true,
+    }),
+  );
+  expect(ownerHtml).toContain('href="/squig/1/collector-card"');
+  expect(ownerHtml).toContain('Download Collector Card for Squig #1');
+  expect(ownerHtml).not.toMatch(
+    /<a[^>]*squig-card-main[^>]*>(?:(?!<\/a>)[\s\S])*collector-card-link/,
+  );
+});
 
 describe('integrated discovery context', () => {
   it('uses current verified ownership ahead of a lagging snapshot', () => {

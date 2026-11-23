@@ -1,11 +1,11 @@
 'use client';
 import { Artwork } from './artwork';
 import { squigArtwork } from '@/domain/assets';
-import { CollectorCardLink } from './collector-card-link';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import favoriteStyles from './favorite-heart.module.css';
-import { CardDiscovery } from './card-discovery';
+import { StatusIconStrip } from './status-icon-strip';
+import { SetIconStrip } from './set-icon-strip';
 import { CollectionViewer } from './collection-viewer';
 import {
   catalogLink,
@@ -24,9 +24,7 @@ import type { SquigCardData } from '@/server/collections';
 import { tradingCardPalettes } from '@/domain/trading-card-palette';
 import { squigRarity, squigRarityClass } from '@/domain/squig-rarity';
 import { AchievementBadge } from './achievement-badge';
-import { AchievementStrip } from './achievement-strip';
-import { OpenSeaLink, useOpenSeaListings } from './opensea';
-import type { OpenSeaListings, SquigListing } from '@/domain/opensea';
+import { useOpenSeaListings } from './opensea';
 const subscribe = (fn: () => void) => {
   window.addEventListener('storage', fn);
   return () => window.removeEventListener('storage', fn);
@@ -38,7 +36,10 @@ const snapshot = () => {
     return 'album';
   }
 };
-export function SquigCard(props: Parameters<typeof AlbumSquigCard>[0]) {
+type SquigCardProps = Parameters<typeof CompactSquigCard>[0] & {
+  onOpen?: () => void;
+};
+export function SquigCard(props: SquigCardProps) {
   return props.compact ? (
     <CompactSquigCard {...props} />
   ) : (
@@ -75,31 +76,11 @@ function AlbumBadges({ item }: { item: SquigCardData }) {
 function AlbumSquigCard({
   item,
   priority = false,
-  listing,
-  marketStatus,
-  marketComplete,
   favorite,
   onFavorite,
   savingFavorite = false,
-  faceOnly = false,
-  collectorCard = false,
   onOpen,
-  viewerOwned,
-}: {
-  item: SquigCardData;
-  priority?: boolean;
-  compact?: boolean;
-  listing?: SquigListing;
-  marketStatus?: OpenSeaListings['status'];
-  marketComplete?: boolean;
-  favorite?: boolean;
-  onFavorite?: () => void;
-  savingFavorite?: boolean;
-  faceOnly?: boolean;
-  collectorCard?: boolean;
-  onOpen?: () => void;
-  viewerOwned?: boolean;
-}) {
+}: SquigCardProps) {
   return (
     <article
       className={`${favoriteStyles.card} squig-card album-card ${squigRarityClass(item.rarity)} ${item.currentlyOwned === false ? 'previous' : ''}`}
@@ -130,130 +111,16 @@ function AlbumSquigCard({
         priority={priority}
         href={`/squig/${item.tokenId}`}
         onOpen={onOpen}
-        showTools={!faceOnly}
-      >
-        <CardDiscovery item={item} viewerOwned={viewerOwned} />
-        <nav
-          className="card-record-links"
-          aria-label={`Squig #${item.tokenId} records`}
-        >
-          <Link href={`/squig/${item.tokenId}#achievements`}>
-            {item.achievements && (
-              <AchievementStrip summary={item.achievements} subject="SQUIG" />
-            )}
-            Achievements & badges →
-          </Link>
-          <Link href={`/squig/${item.tokenId}#passport`}>History →</Link>
-        </nav>
-        <details className="card-details">
-          <summary>
-            Details {item.currentlyOwned === false ? '· Previously owned' : ''}
-          </summary>
-          <div className="card-body">
-            {onOpen && (
-              <Link className="text-link" href={`/squig/${item.tokenId}`}>
-                Open Squig Passport →
-              </Link>
-            )}
-            {item.representation && (
-              <p className="eyebrow">{item.representation}</p>
-            )}
-            <div className="card-title">
-              <h3>
-                Squig <span>#{item.tokenId}</span>
-              </h3>
-              <span className="rarity">{item.rarity ?? 'Unclassified'}</span>
-            </div>
-            <div className="card-numbers">
-              <span>
-                <strong>{item.uglyPoints?.toLocaleString() ?? '—'}</strong> UP
-              </span>
-              <span>Rank {item.mawRank ?? '—'}</span>
-            </div>
-            <div className="tags">
-              {item.og && <span>OG</span>}
-              {item.legendary && <span className="legendary">Legendary</span>}
-              {item.traits
-                .filter(
-                  (t) =>
-                    t.value.trim() && t.value.trim().toLowerCase() !== 'none',
-                )
-                .slice(0, 3)
-                .map((t) => (
-                  <span key={t.traitType} title={t.traitType}>
-                    {t.value}
-                  </span>
-                ))}
-            </div>
-            {item.currentlyOwned !== undefined && (
-              <p className="ownership-label">
-                {item.currentlyOwned ? 'Currently Owned' : 'Previously Owned'}
-                {item.discoveredAt && (
-                  <small>
-                    Discovered{' '}
-                    {new Date(item.discoveredAt).toLocaleDateString('en-US', {
-                      timeZone: 'UTC',
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </small>
-                )}
-              </p>
-            )}
-            {item.history && (
-              <div className="holding-history">
-                <small>
-                  {item.history.firstAcquiredIsChain
-                    ? 'First acquired'
-                    : 'First confirmed holding'}{' '}
-                  {new Date(item.history.firstAcquired).toLocaleDateString(
-                    'en-US',
-                    { timeZone: 'UTC' },
-                  )}
-                </small>
-                <small>
-                  {item.history.lastAcquiredIsChain
-                    ? 'Last acquired'
-                    : 'Latest confirmed holding'}{' '}
-                  {new Date(item.history.lastAcquired).toLocaleDateString(
-                    'en-US',
-                    {
-                      timeZone: 'UTC',
-                    },
-                  )}
-                </small>
-                {item.history.lastLoss && (
-                  <small>
-                    {item.history.lastLossIsChain
-                      ? 'Last held until'
-                      : 'Evidence valid until'}{' '}
-                    {new Date(item.history.lastLoss).toLocaleDateString(
-                      'en-US',
-                      {
-                        timeZone: 'UTC',
-                      },
-                    )}
-                  </small>
-                )}
-                <small>
-                  {Math.floor(item.history.heldSeconds / 86400)} indexed days ·{' '}
-                  {item.history.periods} holding{' '}
-                  {item.history.periods === 1 ? 'period' : 'periods'}
-                </small>
-              </div>
-            )}
-          </div>
-        </details>
-        {collectorCard && <CollectorCardLink tokenId={item.tokenId} />}
-        <OpenSeaLink
-          tokenId={item.tokenId}
-          listing={listing}
-          status={marketStatus}
-          complete={marketComplete}
-        />
-      </TradingCardFace>
-      {faceOnly && <AlbumBadges item={item} />}
+      />
+      <div className="album-card-icons">
+        {!!item.statusIcons?.length && (
+          <StatusIconStrip icons={item.statusIcons} />
+        )}
+        {!!item.personalization?.sets?.length && (
+          <SetIconStrip sets={item.personalization.sets} advances />
+        )}
+        <AlbumBadges item={item} />
+      </div>
     </article>
   );
 }
@@ -529,11 +396,6 @@ export function CollectionGrid({
               <SquigCard
                 key={item.tokenId}
                 item={item}
-                viewerOwned={
-                  viewerSignedIn
-                    ? collectorCardTokens.includes(item.tokenId)
-                    : undefined
-                }
                 onOpen={catalog ? () => setSelected(index) : undefined}
                 collectorCard={collectorCardTokens.includes(item.tokenId)}
                 favorite={favorites.includes(item.tokenId)}
@@ -543,7 +405,6 @@ export function CollectionGrid({
                     : undefined
                 }
                 savingFavorite={saving}
-                faceOnly={catalog?.path === '/collection' && mode === 'album'}
                 compact={controls && mode === 'compact'}
                 priority={index < priorityCount}
                 listing={listings.get(item.tokenId)}

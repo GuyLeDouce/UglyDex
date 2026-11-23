@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import type { SquigCardData } from '@/server/collections';
 import {
@@ -14,16 +14,12 @@ export function TradingCardFace({
   priority = false,
   heading = true,
   href,
-  children,
-  showTools = true,
   onOpen,
 }: {
   item: SquigCardData;
   priority?: boolean;
   heading?: boolean;
   href?: string;
-  children?: ReactNode;
-  showTools?: boolean;
   onOpen?: () => void;
 }) {
   const Heading = heading ? 'h3' : 'span';
@@ -98,42 +94,39 @@ export function TradingCardFace({
     </>
   );
   return (
-    <>
-      <div
-        className="trading-face"
-        data-finish={rarity}
-        data-og={card.og || undefined}
-        style={
-          {
-            '--card-light': palette.light,
-            '--card-mid': palette.mid,
-            '--card-dark': palette.dark,
-            '--card-bar': palette.bar,
-            '--card-ink': TRADING_BAR_INK,
-          } as CSSProperties
-        }
-      >
-        <div className="trading-face-inner">
-          {onOpen ? (
-            <button
-              type="button"
-              className="squig-card-main card-open trading-print"
-              data-open-card={item.tokenId}
-              aria-label={`View Squig #${item.tokenId} card`}
-              onClick={onOpen}
-            >
-              {face}
-            </button>
-          ) : href ? (
-            <Link className="squig-card-main trading-print" href={href}>
-              {face}
-            </Link>
-          ) : (
-            <div className="trading-print">{face}</div>
-          )}
-        </div>
+    <div
+      className="trading-face"
+      data-finish={rarity}
+      data-og={card.og || undefined}
+      style={
+        {
+          '--card-light': palette.light,
+          '--card-mid': palette.mid,
+          '--card-dark': palette.dark,
+          '--card-bar': palette.bar,
+          '--card-ink': TRADING_BAR_INK,
+        } as CSSProperties
+      }
+    >
+      <div className="trading-face-inner">
+        {onOpen ? (
+          <button
+            type="button"
+            className="squig-card-main card-open trading-print"
+            data-open-card={item.tokenId}
+            aria-label={`View Squig #${item.tokenId} card`}
+            onClick={onOpen}
+          >
+            {face}
+          </button>
+        ) : href ? (
+          <Link className="squig-card-main trading-print" href={href}>
+            {face}
+          </Link>
+        ) : (
+          <div className="trading-print">{face}</div>
+        )}
       </div>
-      {showTools && children && <div className="trading-tools">{children}</div>}
-    </>
+    </div>
   );
 }
