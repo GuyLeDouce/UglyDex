@@ -30,6 +30,7 @@ export function CollectionViewer({
 }) {
   const dialog = useRef<HTMLDialogElement>(null),
     surface = useRef<HTMLDivElement>(null);
+  const cardFace = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const [motion, setMotion] = useState(false);
   useEffect(() => {
@@ -47,6 +48,31 @@ export function CollectionViewer({
       d?.close();
     };
   }, []);
+  useEffect(() => {
+    const stage = surface.current;
+    const face = cardFace.current;
+    if (!stage || !face) return;
+    // Observe the untransformed face: legends and wrapped traits vary in height.
+    // Leave room for the near edge to grow during the perspective rotation.
+    function fit() {
+      if (!stage || !face || !face.offsetHeight) return;
+      const perspectiveRoom = 1 - face.offsetWidth / (2 * 1100);
+      stage.style.setProperty(
+        '--viewer-card-scale',
+        String(
+          Math.min(
+            1,
+            (stage.clientHeight * perspectiveRoom) / face.offsetHeight,
+          ),
+        ),
+      );
+    }
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(stage);
+    observer.observe(face);
+    return () => observer.disconnect();
+  }, [item.tokenId]);
   function reset() {
     surface.current?.style.setProperty('--light-x', '50%');
   }
@@ -121,7 +147,7 @@ export function CollectionViewer({
             );
           }}
         >
-          <div className="squig-spin">
+          <div className="squig-spin" ref={cardFace}>
             <div className="squig-spin-rotor">
               <TradingCardFace item={item} priority heading={false} />
             </div>
