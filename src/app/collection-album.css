@@ -225,6 +225,9 @@
       max(16px, env(safe-area-inset-bottom));
   }
   .album-viewer-header {
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 8px;
     height: auto;
     min-height: 0;
     padding: 0 0 6px;
@@ -252,7 +255,11 @@
     flex-wrap: nowrap;
     gap: 8px;
   }
+  .album-viewer-header .eyebrow {
+    display: none;
+  }
   .album-viewer-navigation .button {
+    padding: 8px;
     min-height: 44px;
   }
 }
