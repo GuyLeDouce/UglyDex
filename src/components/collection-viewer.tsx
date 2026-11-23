@@ -48,8 +48,7 @@ export function CollectionViewer({
     };
   }, []);
   function reset() {
-    surface.current?.style.setProperty('--tilt-x', '0deg');
-    surface.current?.style.setProperty('--tilt-y', '0deg');
+    surface.current?.style.setProperty('--light-x', '50%');
   }
   return (
     <dialog
@@ -117,20 +116,16 @@ export function CollectionViewer({
             if (!motion || e.pointerType !== 'mouse') return;
             const r = e.currentTarget.getBoundingClientRect();
             e.currentTarget.style.setProperty(
-              '--tilt-x',
-              `${((e.clientY - r.top) / r.height - 0.5) * -9}deg`,
-            );
-            e.currentTarget.style.setProperty(
-              '--tilt-y',
-              `${((e.clientX - r.left) / r.width - 0.5) * 12}deg`,
-            );
-            e.currentTarget.style.setProperty(
               '--light-x',
               `${((e.clientX - r.left) / r.width) * 100}%`,
             );
           }}
         >
-          <TradingCardFace item={item} priority heading={false} />
+          <div className="squig-spin">
+            <div className="squig-spin-rotor">
+              <TradingCardFace item={item} priority heading={false} />
+            </div>
+          </div>
         </div>
         <aside className="album-viewer-info">
           <nav

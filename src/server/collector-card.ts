@@ -18,22 +18,3 @@ export async function collectorCardTokenIds(
   });
   return rows.map((row) => row.tokenId);
 }
-
-export async function cardHolder(tokenId: number) {
-  const holding = await db().squigOwnership.findFirst({
-    where: { isCurrent: true, squig: { ...catalogScope, tokenId } },
-    select: { walletAddress: true },
-  });
-  if (!holding) return null;
-  const wallet = { chainId: 1, walletAddress: holding.walletAddress };
-  const verified = await db().collectorWallet.findFirst({
-    where: { ...wallet, status: 'ACTIVE', revokedAt: null },
-    select: { collectorId: true },
-  });
-  if (verified) return { ...verified, observed: false };
-  const discovered = await db().discoveredWallet.findUnique({
-    where: { chainId_walletAddress: wallet },
-    select: { collectorId: true },
-  });
-  return discovered ? { ...discovered, observed: true } : null;
-}

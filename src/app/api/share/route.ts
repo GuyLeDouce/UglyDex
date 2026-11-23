@@ -1,8 +1,6 @@
 import sharp from 'sharp';
 import { adminActor } from '@/server/admin';
-import { collectorCardTokenIds, cardHolder } from '@/server/collector-card';
-import { dexView } from '@/server/dex';
-import { masteryDeck } from '@/domain/card-decks';
+import { collectorCardTokenIds } from '@/server/collector-card';
 import { GALLERIES_ENABLED } from '@/domain/features';
 import { shareFilename } from '@/domain/trading-card';
 import { ZodError } from 'zod';
@@ -77,10 +75,6 @@ export async function GET(request: Request) {
         status: 403,
         headers,
       });
-    const holder = squigCard ? await cardHolder(Number(spec.entity)) : null;
-    const guide = holder
-      ? await dexView(holder.collectorId, holder.observed)
-      : null;
     const body =
       squigCard && !download && !allowed
         ? await sharp(bytes).resize({ width: 450 }).png().toBuffer()
@@ -124,9 +118,7 @@ export async function GET(request: Request) {
                   .filter(Boolean)
                   .join('. '),
               ),
-              'X-Card-Deck': masteryDeck(
-                guide?.status === 'ready' ? guide.score.overall : 0,
-              ),
+              'X-Card-Type': 'squig',
               'X-Card-Export': allowed ? '1' : '0',
               'X-Card-OG': card.tradingCard.og ? '1' : '0',
             }

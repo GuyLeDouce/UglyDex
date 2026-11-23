@@ -296,6 +296,16 @@ export async function interactiveCardTests(
           metadata.width === 1500 && metadata.height === 2100,
           'finished PNG stays 5:7 high resolution',
         );
+        const frontOnly =
+          !collectorCard && !trophyCard && record.rarityTier === 'common';
+        if (!collectorCard && !trophyCard) {
+          const choice = viewer.getByRole('combobox', { name: 'Video motion' });
+          check(
+            (await choice.inputValue()) === 'spin',
+            '360 is the default video motion',
+          );
+          if (frontOnly) await choice.selectOption('front');
+        }
         await viewer
           .getByRole('button', { name: 'Download Animated Card' })
           .click();
@@ -316,6 +326,11 @@ export async function interactiveCardTests(
         const videoDownload = page.waitForEvent('download');
         await save.click();
         const movie = await videoDownload;
+        if (!collectorCard && !trophyCard)
+          check(
+            movie.suggestedFilename().includes(frontOnly ? '-front.' : '-360.'),
+            'download matches selected motion',
+          );
         const path = `.data/interactive-cards/${name}.${label?.includes('MP4') ? 'mp4' : 'webm'}`;
         await movie.saveAs(path);
         const probe = JSON.parse(

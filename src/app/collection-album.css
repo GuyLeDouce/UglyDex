@@ -140,18 +140,13 @@
   margin: auto;
 }
 .album-viewer-card {
-  --tilt-x: 0deg;
-  --tilt-y: 0deg;
   --light-x: 50%;
   touch-action: pan-y pinch-zoom;
   min-width: 0;
   padding: 8px;
 }
 .album-viewer-card .trading-face {
-  transform: perspective(1100px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
-}
-.album-viewer-card.has-motion .trading-face {
-  transition: transform 160ms ease-out;
+  backface-visibility: hidden;
 }
 /* Light is confined to the printed bars. Original character pixels and trait
    text are never covered by a reflective overlay. No animation runs in grids. */
@@ -353,5 +348,52 @@
   .collection-grid.grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 2px;
+  }
+}
+
+.squig-spin {
+  perspective: 1100px;
+}
+.squig-spin-rotor {
+  position: relative;
+  transform-style: preserve-3d;
+}
+.squig-spin-rotor > :first-child,
+.squig-spin-rotor::after {
+  backface-visibility: hidden;
+}
+.squig-spin-rotor::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4%;
+  background: #080d37 url('/card-backs/standard-blue.webp') center / 100% 100%
+    no-repeat;
+  transform: rotateY(180deg);
+  pointer-events: none;
+}
+.share-spin {
+  width: min(100%, 420px);
+  margin: 20px auto;
+}
+.share-panel .share-spin .share-preview {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+@keyframes squig-full-turn {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+.album-viewer-card.has-motion .squig-spin-rotor {
+  animation: squig-full-turn 10s linear infinite;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .share-spin .squig-spin-rotor {
+    animation: squig-full-turn 10s linear infinite;
   }
 }
