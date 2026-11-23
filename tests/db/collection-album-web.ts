@@ -216,8 +216,15 @@ export async function collectionAlbumWebTests(
     await viewer.getByRole('button', { name: 'Close', exact: false }).click();
     await expect(viewer).toHaveCount(0);
     await expect(page.locator('[data-open-card="1023"]')).toBeFocused();
-    for (const width of [360, 390, 430, 768]) {
-      await page.setViewportSize({ width, height: 900 });
+    for (const [width, height] of [
+      [320, 568],
+      [360, 640],
+      [390, 844],
+      [430, 900],
+      [844, 390],
+      [768, 900],
+    ]) {
+      await page.setViewportSize({ width, height });
       await page.goto(base + '/collection?view=album&sort=token');
       await page.locator('.view-controls').scrollIntoViewIfNeeded();
       await artworkReady();
@@ -231,6 +238,32 @@ export async function collectionAlbumWebTests(
       await page.locator('[data-open-card]').first().click();
       await expect(viewer).toBeVisible();
       const card = viewer.locator('.album-viewer-card');
+      if (width <= 700 || height <= 540) {
+        await expect
+          .poll(() =>
+            viewer.evaluate((el) => {
+              const header = el
+                .querySelector('.album-viewer-header')!
+                .getBoundingClientRect();
+              const bounds = [
+                '.squig-spin',
+                ...['first', 'last'].map(
+                  (n) => '.album-viewer-navigation button:' + n + '-child',
+                ),
+              ].map((selector) =>
+                el.querySelector(selector)!.getBoundingClientRect(),
+              );
+              return bounds.every(
+                (r) =>
+                  r.top >= header.bottom - 1 &&
+                  r.bottom <= innerHeight &&
+                  r.left >= 0 &&
+                  r.right <= innerWidth,
+              );
+            }),
+          )
+          .toBe(true);
+      }
       await card.dispatchEvent('pointerdown', {
         pointerType: 'touch',
         clientX: 260,
