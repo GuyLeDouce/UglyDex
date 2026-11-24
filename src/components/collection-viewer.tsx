@@ -6,6 +6,8 @@ import { TradingCardFace } from './trading-card-face';
 import { AchievementStrip } from './achievement-strip';
 import { CardDiscovery } from './card-discovery';
 import { CollectorCardLink } from './collector-card-link';
+import { shareQuery } from '@/domain/sharing';
+import { shareFilename } from '@/domain/trading-card';
 
 export function CollectionViewer({
   item,
@@ -33,18 +35,16 @@ export function CollectionViewer({
   const cardFace = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const [motion, setMotion] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadMessage, setDownloadMessage] = useState('');
+  const downloadAbort = useRef<AbortController | null>(null);
   useEffect(() => {
     const d = dialog.current;
     d?.showModal();
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const media = matchMedia('(prefers-reduced-motion: reduce)');
-    const sync = () => setMotion(!media.matches);
-    sync();
-    media.addEventListener('change', sync);
     return () => {
       document.body.style.overflow = previous;
-      media.removeEventListener('change', sync);
       d?.close();
     };
   }, []);
@@ -73,6 +73,71 @@ export function CollectionViewer({
     observer.observe(face);
     return () => observer.disconnect();
   }, [item.tokenId]);
+  useEffect(() => {
+    setDownloadMessage('');
+    setDownloading(false);
+    return () => {
+      const request = downloadAbort.current;
+      downloadAbort.current = null;
+      request?.abort();
+    };
+  }, [item.tokenId]);
+
+  async function downloadFront() {
+    if (downloadAbort.current || busy) return;
+    const controller = new AbortController();
+    downloadAbort.current = controller;
+    setDownloading(true);
+    setDownloadMessage('');
+    try {
+      const entity = String(item.tokenId);
+      const url =
+        '/api/share?' +
+        shareQuery({ kind: 'passport', entity, format: 'trading-card' }) +
+        '&download=1';
+      const response = await fetch(url, {
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      if (response.status === 403)
+        throw new Error('Front PNG downloads require the current holder or an admin.');
+      if (!response.ok)
+        throw new Error(
+          response.status === 429
+            ? 'The image service is busy. Please retry shortly.'
+            : 'The card could not be downloaded. Please retry.',
+        );
+      const blob = await response.blob();
+      if (blob.type.split(';')[0] !== 'image/png' || !blob.size)
+        throw new Error('The PNG was unavailable. Please retry.');
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = shareFilename({
+        entity,
+        format: 'trading-card',
+      });
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      // Keep the blob alive until the browser accepts the download.
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+      setDownloadMessage('Front-facing PNG downloaded.');
+    } catch (error) {
+      if (!controller.signal.aborted)
+        setDownloadMessage(
+          error instanceof Error
+            ? error.message
+            : 'The card could not be downloaded. Please retry.',
+        );
+    } finally {
+      if (downloadAbort.current === controller) {
+        downloadAbort.current = null;
+        setDownloading(false);
+      }
+    }
+  }
+
   function reset() {
     surface.current?.style.setProperty('--light-x', '50%');
   }
@@ -205,6 +270,14 @@ export function CollectionViewer({
             <Link className="button primary" href={`/squig/${item.tokenId}`}>
               View Passport →
             </Link>
+            <button
+              className="button"
+              type="button"
+              disabled={downloading || busy}
+              onClick={() => void downloadFront()}
+            >
+              {downloading ? 'Preparing front PNG…' : 'Download front PNG'}
+            </button>
             <Link
               className="button"
               href={`/share?kind=passport&entity=${item.tokenId}&format=trading-card#interactive-card`}
@@ -212,6 +285,14 @@ export function CollectionViewer({
               Holographic viewer & exports
             </Link>
           </div>
+          <p className="muted">
+            Front-facing PNG · 1500 × 2100 · current holder or admin only.
+          </p>
+          {downloadMessage && (
+            <p className="muted" role="status" aria-live="polite">
+              {downloadMessage}
+            </p>
+          )}
           {collectorCard && <CollectorCardLink tokenId={item.tokenId} />}
           <button
             className="button"
