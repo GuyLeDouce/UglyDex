@@ -415,6 +415,42 @@ export async function phase6WebTests(
         }
       }
       await page.goto(base + '/collection?q=4202');
+      // Album view opens the Field Guide viewer; owned-card shortcut lives
+      // in Compact view. Verify both entry points independently.
+      const openFieldGuide = page.locator('[data-open-card="4202"]').first();
+      await openFieldGuide.waitFor();
+      await page.screenshot({
+        path: '.data/collector-card-grid-mobile.png',
+        fullPage: true,
+      });
+      await openFieldGuide.click();
+      const fieldGuide = page.getByRole('dialog', { name: 'Squig #4202' });
+      await fieldGuide.waitFor();
+      check(
+        await fieldGuide
+          .getByRole('button', { name: 'Card motion off', exact: true })
+          .isVisible(),
+        'Field Guide card motion is off by default',
+      );
+      check(
+        (await fieldGuide
+          .locator('.album-viewer-card .squig-spin-rotor')
+          .evaluate((el) => getComputedStyle(el).animationName)) === 'none',
+        'Field Guide card has no automatic 360 rotation',
+      );
+      const frontDownload = page.waitForEvent('download');
+      await fieldGuide
+        .getByRole('button', { name: 'Download front PNG', exact: true })
+        .click();
+      check(
+        (await frontDownload).suggestedFilename() ===
+          'squigs-reloaded-4202-trading-card.png',
+        'Field Guide downloads the owner-authorized front PNG directly',
+      );
+      await fieldGuide.getByRole('button', { name: 'Close ×' }).click();
+      await page
+        .getByRole('button', { name: '▤ Compact', exact: true })
+        .click();
       const ownerCard = page
         .getByRole('link', {
           name: 'Download Collector Card for Squig #4202',
@@ -422,13 +458,6 @@ export async function phase6WebTests(
         })
         .first();
       await ownerCard.waitFor();
-      await page.screenshot({
-        path: '.data/collector-card-grid-mobile.png',
-        fullPage: true,
-      });
-      await page
-        .getByRole('button', { name: '▤ Compact', exact: true })
-        .click();
       check(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,
