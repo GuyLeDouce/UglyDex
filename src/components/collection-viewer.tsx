@@ -35,8 +35,15 @@ export function CollectionViewer({
   const cardFace = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const [motion, setMotion] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-  const [downloadMessage, setDownloadMessage] = useState('');
+  const [downloadState, setDownloadState] = useState({
+    tokenId: item.tokenId,
+    busy: false,
+    message: '',
+  });
+  const downloading =
+    downloadState.tokenId === item.tokenId && downloadState.busy;
+  const downloadMessage =
+    downloadState.tokenId === item.tokenId ? downloadState.message : '';
   const downloadAbort = useRef<AbortController | null>(null);
   useEffect(() => {
     const d = dialog.current;
@@ -73,24 +80,23 @@ export function CollectionViewer({
     observer.observe(face);
     return () => observer.disconnect();
   }, [item.tokenId]);
-  useEffect(() => {
-    setDownloadMessage('');
-    setDownloading(false);
-    return () => {
+  useEffect(
+    () => () => {
       const request = downloadAbort.current;
       downloadAbort.current = null;
       request?.abort();
-    };
-  }, [item.tokenId]);
+    },
+    [item.tokenId],
+  );
 
   async function downloadFront() {
     if (downloadAbort.current || busy) return;
     const controller = new AbortController();
     downloadAbort.current = controller;
-    setDownloading(true);
-    setDownloadMessage('');
+    const tokenId = item.tokenId;
+    setDownloadState({ tokenId, busy: true, message: '' });
     try {
-      const entity = String(item.tokenId);
+      const entity = String(tokenId);
       const url =
         '/api/share?' +
         shareQuery({ kind: 'passport', entity, format: 'trading-card' }) +
@@ -100,7 +106,9 @@ export function CollectionViewer({
         signal: controller.signal,
       });
       if (response.status === 403)
-        throw new Error('Front PNG downloads require the current holder or an admin.');
+        throw new Error(
+          'Front PNG downloads require the current holder or an admin.',
+        );
       if (!response.ok)
         throw new Error(
           response.status === 429
@@ -122,19 +130,27 @@ export function CollectionViewer({
       anchor.remove();
       // Keep the blob alive until the browser accepts the download.
       setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-      setDownloadMessage('Front-facing PNG downloaded.');
+      setDownloadState({
+        tokenId,
+        busy: true,
+        message: 'Front PNG download started.',
+      });
     } catch (error) {
       if (!controller.signal.aborted)
-        setDownloadMessage(
-          error instanceof Error
-            ? error.message
-            : 'The card could not be downloaded. Please retry.',
-        );
+        setDownloadState({
+          tokenId,
+          busy: true,
+          message:
+            error instanceof Error
+              ? error.message
+              : 'The card could not be downloaded. Please retry.',
+        });
     } finally {
-      if (downloadAbort.current === controller) {
+      if (downloadAbort.current === controller)
         downloadAbort.current = null;
-        setDownloading(false);
-      }
+      setDownloadState((current) =>
+        current.tokenId === tokenId ? { ...current, busy: false } : current,
+      );
     }
   }
 
