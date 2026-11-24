@@ -468,10 +468,3 @@
 .album-viewer-card.has-motion .squig-spin-rotor {
   animation: squig-full-turn 10s linear infinite;
 }
-@media (prefers-reduced-motion: no-preference) {
-  .inline-card-turn .squig-spin-rotor,
-  .passport-spin .squig-spin-rotor,
-  .share-spin .squig-spin-rotor {
-    animation: squig-full-turn 10s linear infinite;
-  }
-}
