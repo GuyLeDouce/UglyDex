@@ -80,14 +80,13 @@ export function CollectionViewer({
     observer.observe(face);
     return () => observer.disconnect();
   }, [item.tokenId]);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    return () => {
       const request = downloadAbort.current;
       downloadAbort.current = null;
       request?.abort();
-    },
-    [item.tokenId],
-  );
+    };
+  }, [item.tokenId]);
 
   async function downloadFront() {
     if (downloadAbort.current || busy) return;
@@ -121,10 +120,7 @@ export function CollectionViewer({
       const objectUrl = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = objectUrl;
-      anchor.download = shareFilename({
-        entity,
-        format: 'trading-card',
-      });
+      anchor.download = shareFilename({ entity, format: 'trading-card' });
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
