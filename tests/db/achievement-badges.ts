@@ -614,10 +614,37 @@ export async function achievementBadgeWebTests(
           const card = page
             .locator('.squig-card')
             .filter({ has: page.locator('a[href="/squig/4398"]') });
+          const albumBadges = card.locator('.album-badges');
+          const expandBadges = albumBadges.getByRole('button', {
+            name: 'Show all 7 badges for Squig #4398',
+            exact: true,
+          });
           check(
-            (await card.locator('.achievement-badge').count()) === 3 &&
-              (await card.innerText()).includes('+4'),
-            'Squig card renders three earned badges and accurate +4',
+            (await albumBadges.locator('.achievement-badge').count()) === 4 &&
+              (await expandBadges.count()) === 1,
+            'Squig album shows four badges and an expand button',
+          );
+          await expandBadges.click();
+          check(
+            (await albumBadges.locator('.achievement-badge').count()) === 7 &&
+              (await albumBadges
+                .getByRole('button', {
+                  name: 'Show fewer badges for Squig #4398',
+                  exact: true,
+                })
+                .getAttribute('aria-expanded')) === 'true',
+            'Squig album expands to display all seven earned badges',
+          );
+          await albumBadges
+            .getByRole('button', {
+              name: 'Show fewer badges for Squig #4398',
+              exact: true,
+            })
+            .click();
+          check(
+            (await albumBadges.locator('.achievement-badge').count()) === 4 &&
+              (await expandBadges.getAttribute('aria-expanded')) === 'false',
+            'Squig album collapses back to four visible badges',
           );
           check(
             await card
