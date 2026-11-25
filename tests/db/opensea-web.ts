@@ -173,7 +173,6 @@ export async function openSeaWebTests(
       );
       await external.focus();
       await expect(external).toBeFocused();
-      check(true, 'marketplace link is keyboard accessible');
       check(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= window.innerWidth,
