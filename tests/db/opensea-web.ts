@@ -114,9 +114,7 @@ export async function openSeaWebTests(
       // Album cards deliberately contain artwork and badges only. Marketplace
       // details remain in Compact view and on the token Passport.
       await page.getByRole('button', { name: '▥ Album', exact: true }).click();
-      await page.waitForURL(
-        (url) => url.searchParams.get('view') === 'album',
-      );
+      await page.waitForURL((url) => url.searchParams.get('view') === 'album');
       const albumCard = page
         .locator('.collection-grid.album .album-card')
         .filter({
