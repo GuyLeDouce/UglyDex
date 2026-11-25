@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import sharp from 'sharp';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import {
   achievementTrophy,
   achievementTiers,
@@ -10,6 +10,7 @@ import {
 } from '../src/domain/trophy-card';
 import { shareSchema } from '../src/domain/sharing';
 import { TrophyCardFace } from '../src/components/trophy-card-face';
+import { TrophyAlbum } from '../src/components/trophy-album';
 import { renderTrophyCard } from '../src/server/trophy-card-render';
 const identity = { collector: 'GuyLeDouce', avatarTokenId: null };
 const earned = {
@@ -101,6 +102,47 @@ it('maps set difficulty to card finish while preserving completion mode', () => 
     'CURRENT HOLDING COMPLETE',
   );
 });
+it('uses the common blue card back for Achievements and Completed Sets in the album', () => {
+  const achievement = achievementTrophy(earned, identity)!;
+  const completedSet = setTrophy(
+    {
+      key: 'og-curious',
+      name: 'OG Curious',
+      description: 'Discover an OG Squig.',
+      difficulty: 'Easy',
+      complete: true,
+      revealed: true,
+      mode: 'CURRENT_HOLDING',
+    },
+    identity,
+  )!;
+  const html = renderToStaticMarkup(
+    createElement(TrophyAlbum, {
+      cards: [achievement, completedSet],
+      locked: [],
+      slug: 'guyledouce',
+      pendingAchievements: false,
+      pendingSets: false,
+    }),
+  );
+  const cards =
+    html.match(
+      /<button[^>]*class="trophy-album-card"[\s\S]*?<\/button>/g,
+    ) ?? [];
+  expect(cards).toHaveLength(2);
+  for (const card of cards) {
+    expect(card).toContain('squig-spin inline-card-turn');
+    expect(card).toContain('squig-spin-rotor');
+    expect(card).toContain('trophy-card-face');
+  }
+  expect(cards[0]).toContain('Certified Menace');
+  expect(cards[1]).toContain('OG Curious');
+  expect(existsSync('public/card-backs/standard-blue.webp')).toBe(true);
+  const style = readFileSync('src/app/collection-album.css', 'utf8');
+  expect(style).toContain(".squig-spin-rotor::after {");
+  expect(style).toContain("url('/card-backs/standard-blue.webp')");
+});
+
 it('renders every existing rarity to a real, full-resolution PNG with no earned date', async () => {
   mkdirSync('.data/design', { recursive: true });
   for (const tier of achievementTiers) {
