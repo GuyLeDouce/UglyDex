@@ -160,7 +160,7 @@ export function ShareControls({
             key={image}
             image={image}
             trading={trading}
-            hasBack={trading && (!trophy || spec.kind === 'achievement')}
+            hasBack={trading}
             filename={shareFilename({
               entity: spec.entity,
               key: spec.key,
