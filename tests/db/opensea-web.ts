@@ -1,4 +1,4 @@
-import { chromium } from '@playwright/test';
+import { chromium, expect } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import { squigOpenSeaUrl } from '../../src/domain/opensea';
 import { openSeaSortTests } from './opensea-sort';
@@ -114,6 +114,9 @@ export async function openSeaWebTests(
       // Album cards deliberately contain artwork and badges only. Marketplace
       // details remain in Compact view and on the token Passport.
       await page.getByRole('button', { name: '▥ Album', exact: true }).click();
+      await page.waitForURL(
+        (url) => url.searchParams.get('view') === 'album',
+      );
       const albumCard = page
         .locator('.collection-grid.album .album-card')
         .filter({
@@ -130,6 +133,9 @@ export async function openSeaWebTests(
       await page
         .getByRole('button', { name: '▤ Compact', exact: true })
         .click();
+      await page.waitForURL(
+        (url) => url.searchParams.get('view') === 'compact',
+      );
       const card = page
         .locator('.collection-grid.compact .squig-card')
         .filter({ has: page.locator('a[href="/squig/4398"]') });
@@ -166,10 +172,8 @@ export async function openSeaWebTests(
         'marketplace links never nest inside card links',
       );
       await external.focus();
-      check(
-        await external.evaluate((el) => el === document.activeElement),
-        'marketplace link is keyboard accessible',
-      );
+      await expect(external).toBeFocused();
+      check(true, 'marketplace link is keyboard accessible');
       check(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -226,6 +230,9 @@ export async function openSeaWebTests(
       await page
         .getByRole('button', { name: '▤ Compact', exact: true })
         .click();
+      await page.waitForURL(
+        (url) => url.searchParams.get('view') === 'compact',
+      );
       await page.locator('.collection-grid.compact .squig-card').waitFor();
       await page.waitForFunction(
         () =>
