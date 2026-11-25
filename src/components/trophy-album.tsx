@@ -130,13 +130,9 @@ export function TrophyAlbum({
             onClick={() => open(card)}
             aria-label={`Inspect ${card.name} collector card`}
           >
-            {card.kind === 'achievement' ? (
-              <CardTurn>
-                <TrophyCardFace card={card} />
-              </CardTurn>
-            ) : (
+            <CardTurn>
               <TrophyCardFace card={card} />
-            )}
+            </CardTurn>
             <span className="trophy-card-action">
               Inspect · Download · Share ↗
             </span>
