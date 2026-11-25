@@ -1,4 +1,4 @@
-import { chromium } from '@playwright/test';
+import { chromium, expect } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import { squigOpenSeaUrl } from '../../src/domain/opensea';
 import { openSeaSortTests } from './opensea-sort';
@@ -111,19 +111,52 @@ export async function openSeaWebTests(
       listed = true;
       await page.setViewportSize({ width, height: 1000 });
       await page.goto(base + '/squigs?q=4398');
-      // Compact mode persists across navigation and hides prices on mobile.
-      // Exercise full price text in Album, then test Compact separately below.
+      // Album cards deliberately contain artwork and badges only. Marketplace
+      // details remain in Compact view and on the token Passport.
       await page.getByRole('button', { name: '▥ Album', exact: true }).click();
-      const card = page
-        .locator('.squig-card')
-        .filter({ has: page.locator('a[href="/squig/4398"]') });
-      await card.locator('.opensea-price strong').waitFor();
+      await page.waitForURL((url) => url.searchParams.get('view') === 'album');
+      const albumCard = page
+        .locator('.collection-grid.album .album-card')
+        .filter({
+          has: page.getByRole('button', {
+            name: 'View Squig #4398 card',
+            exact: true,
+          }),
+        });
+      await albumCard.waitFor();
       check(
-        (await card.locator('.opensea-price').innerText()).includes(
-          '0.0014 ETH',
-        ),
-        `listed card displays API asking price at ${width}px`,
+        (await albumCard.locator('.opensea-listing').count()) === 0,
+        `Album cards omit marketplace panels at ${width}px`,
       );
+      await page
+        .getByRole('button', { name: '▤ Compact', exact: true })
+        .click();
+      await page.waitForURL(
+        (url) => url.searchParams.get('view') === 'compact',
+      );
+      const card = page
+        .locator('.collection-grid.compact .squig-card')
+        .filter({ has: page.locator('a[href="/squig/4398"]') });
+      await card.waitFor();
+      const price = card.locator('.opensea-price');
+      if (width > 640) {
+        await price.locator('strong').waitFor();
+        check(
+          (await price.innerText()).includes('0.0014 ETH'),
+          `listed Compact card displays asking price at ${width}px`,
+        );
+      } else {
+        await page.waitForFunction(() =>
+          document
+            .querySelector('.collection-grid.compact .opensea-price strong')
+            ?.textContent?.includes('0.0014 ETH'),
+        );
+        check(
+          (await price.isHidden()) &&
+            (await price.textContent())?.includes('0.0014 ETH'),
+          `Compact hides asking price on mobile at ${width}px`,
+        );
+      }
       const external = card.getByRole('link', {
         name: 'View Squig #4398 on OpenSea (opens in a new tab)',
         exact: true,
@@ -137,10 +170,7 @@ export async function openSeaWebTests(
         'marketplace links never nest inside card links',
       );
       await external.focus();
-      check(
-        await external.evaluate((el) => el === document.activeElement),
-        'marketplace link is keyboard accessible',
-      );
+      await expect(external).toBeFocused();
       check(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -148,9 +178,6 @@ export async function openSeaWebTests(
         `marketplace card fits ${width}px`,
       );
       await card.screenshot({ path: `.data/opensea/listed-card-${width}.png` });
-      await page
-        .getByRole('button', { name: '▤ Compact', exact: true })
-        .click();
       check(
         (await external.isVisible()) &&
           (await page.evaluate(
@@ -197,11 +224,26 @@ export async function openSeaWebTests(
         `unlisted detail uses the concise label at ${width}px`,
       );
       await page.goto(base + '/squigs?q=4398');
-      await page.getByRole('button', { name: '▥ Album', exact: true }).click();
-      await card.getByText('Unlisted', { exact: true }).waitFor();
+      await page
+        .getByRole('button', { name: '▤ Compact', exact: true })
+        .click();
+      await page.waitForURL(
+        (url) => url.searchParams.get('view') === 'compact',
+      );
+      await page.locator('.collection-grid.compact .squig-card').waitFor();
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector('.collection-grid.compact .opensea-price')
+            ?.textContent?.trim() === 'Unlisted',
+      );
+      const unlistedPrice = card.locator('.opensea-price');
       check(
-        (await card.locator('.opensea-price').innerText()) === 'Unlisted',
-        `unlisted card uses the concise label at ${width}px`,
+        (await unlistedPrice.textContent())?.trim() === 'Unlisted' &&
+          (width > 640
+            ? await unlistedPrice.isVisible()
+            : await unlistedPrice.isHidden()),
+        `unlisted Compact card uses the concise label at ${width}px`,
       );
     }
     available = false;

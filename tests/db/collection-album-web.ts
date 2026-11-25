@@ -184,7 +184,7 @@ export async function collectionAlbumWebTests(
     // A new visit without a view parameter restores the user's selection.
     await page.goto(base + '/collection');
     await expect(
-      page.locator('.collection-grid.album .album-card'),
+      page.locator('#collection-cards .collection-grid.album .album-card'),
     ).toHaveCount(24);
     await expect(page.locator('[data-open-card]').first()).toHaveAttribute(
       'data-open-card',

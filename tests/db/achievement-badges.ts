@@ -612,8 +612,13 @@ export async function achievementBadgeWebTests(
         }
         if (name === 'squig-card') {
           const card = page
-            .locator('.squig-card')
-            .filter({ has: page.locator('a[href="/squig/4398"]') });
+            .locator('.album-card')
+            .filter({
+              has: page.getByRole('button', {
+                name: 'View Squig #4398 card',
+                exact: true,
+              }),
+            });
           const albumBadges = card.locator('.album-badges');
           const expandBadges = albumBadges.getByRole('button', {
             name: 'Show all 7 badges for Squig #4398',
@@ -679,8 +684,13 @@ export async function achievementBadgeWebTests(
           });
         if (width === 1440 && name === 'squig-card')
           await page
-            .locator('.squig-card')
-            .filter({ has: page.locator('a[href="/squig/4398"]') })
+            .locator('.album-card')
+            .filter({
+              has: page.getByRole('button', {
+                name: 'View Squig #4398 card',
+                exact: true,
+              }),
+            })
             .screenshot({ path: '.data/badges/squig-card-closeup.png' });
         console.log(JSON.stringify({ event: 'test.badges.page', path, width }));
         evidence.push({
