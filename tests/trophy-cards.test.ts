@@ -125,7 +125,10 @@ it('uses the common blue card back for Achievements and Completed Sets in the al
       pendingSets: false,
     }),
   );
-  const cards = html.match(/<button[^>]*class="trophy-album-card"[\\s\\S]*?<\\/button>/g) ?? [];
+  const cards =
+    html.match(
+      /<button[^>]*class="trophy-album-card"[\s\S]*?<\/button>/g,
+    ) ?? [];
   expect(cards).toHaveLength(2);
   for (const card of cards) {
     expect(card).toContain('squig-spin inline-card-turn');
