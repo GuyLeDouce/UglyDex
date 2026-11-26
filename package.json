@@ -97,7 +97,7 @@
     "csv-parse": "^7.0.3",
     "dotenv": "^18.0.4",
     "mediabunny": "1.65.2",
-    "next": "^16.4.3",
+    "next": "^16.4.6",
     "pg": "^8.23.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -125,6 +125,9 @@
   },
   "overrides": {
     "deepmerge-ts": "^8.0.2",
-    "mysql2": "^3.24.4"
+    "mysql2": "^3.24.4",
+    "@prisma/config": {
+      "effect": "3.22.5"
+    }
   }
 }

@@ -84,7 +84,9 @@ export default async function RootLayout({
         <main id="main">{children}</main>
         <footer>
           <span>UGLY LABS · BEAUTIFULLY MALFORMED</span>
-          <span>One ecosystem. Every strange little story.</span>
+          <a href="mailto:UglyLabs@gmail.com?subject=UglyDex%20early%20access%20feedback">
+            Send early access feedback
+          </a>
           <nav aria-label="Legal">
             <Link href="/privacy">Privacy Policy</Link>
             {' · '}

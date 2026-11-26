@@ -27,8 +27,8 @@ export default async function ConnectPage({
         <p className="eyebrow">YOUR COLLECTION STARTS HERE</p>
         <h1>Enter the UglyDex.</h1>
         <p>
-          Sign a message to prove your wallet belongs to you. No transaction. No
-          gas.
+          First time here? Connect the wallet that holds your Squigs and sign a
+          message to verify ownership. No transaction or gas fees.
         </p>
         <Connect
           initialMessage={
@@ -43,7 +43,10 @@ export default async function ConnectPage({
                     : ''
           }
         />
-        <small>One identity at a time. Your collection stays yours.</small>
+        <small>
+          Use Discord sign-in once you’ve linked Discord to your collector
+          profile.
+        </small>
       </div>
       <div className="connect-art">
         <Artwork

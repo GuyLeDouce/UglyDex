@@ -46,22 +46,22 @@ export default async function Home() {
     <div className="field-home">
       <section className="field-hero">
         <div className="field-hero-copy">
-          <p className="eyebrow">UGLYDEX · SQUIGS HOLDER ZONE</p>
+          <p className="eyebrow">UGLYDEX · EARLY ACCESS</p>
           <h1>
             Every Squig
             <br />
             has a <em>story.</em>
           </h1>
           <p>
-            Open your field guide to see your Squigs, discoveries, and sets.
-            Visiting for the first time? Explore any Squig’s story.
+            Explore any Squig’s story without signing in. Hold Squigs? Connect
+            your wallet to see your collection, discoveries, and sets.
           </p>
           <div className="actions">
             <Link className="button primary" href="/squigs">
               Explore the Squigs <span aria-hidden>↗</span>
             </Link>
             <Link className="text-link" href="/connect">
-              Open your field guide
+              Connect your wallet
             </Link>
           </div>
         </div>

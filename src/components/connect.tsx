@@ -4,6 +4,31 @@ import { useRouter } from 'next/navigation';
 type Provider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
 };
+
+function walletErrorMessage(error: unknown) {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === 4001
+  ) {
+    return 'You cancelled the wallet request. Select Connect Wallet when you’re ready to try again.';
+  }
+
+  switch (error instanceof Error ? error.message : '') {
+    case 'USERNAME_REQUIRED':
+      return 'Choose a username in Profile & privacy settings before linking a second wallet.';
+    case 'IDENTITY_REVIEW_REQUIRED':
+      return 'This credential belongs to a different Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.';
+    case 'RATE_LIMITED':
+      return 'Too many sign-in attempts. Wait a minute, then select Connect Wallet and try again.';
+    case 'INVALID_CHALLENGE':
+      return 'The sign-in request expired or was already used. Select Connect Wallet to start again.';
+    default:
+      return 'Wallet connection could not be completed. Check your wallet and try again.';
+  }
+}
+
 export function Connect({
   initialMessage = '',
   showDiscord = true,
@@ -66,14 +91,7 @@ export function Connect({
       router.push(result.next || '/onboarding');
       router.refresh();
     } catch (error) {
-      setMessage(
-        error instanceof Error && error.message === 'USERNAME_REQUIRED'
-          ? 'Choose a username in Profile & privacy settings before linking a second wallet.'
-          : error instanceof Error &&
-              error.message === 'IDENTITY_REVIEW_REQUIRED'
-            ? 'This credential belongs to a different Collector. Sign in again to the Collector you want to keep, then reconnect the other identity within five minutes.'
-            : 'Wallet connection could not be completed. Check your wallet and try again.',
-      );
+      setMessage(walletErrorMessage(error));
     } finally {
       setBusy(false);
     }
