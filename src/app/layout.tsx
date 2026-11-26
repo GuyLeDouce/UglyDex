@@ -40,6 +40,9 @@ export const metadata: Metadata = {
   description:
     'A living field guide to Squigs Reloaded. Every Squig has a story.',
 };
+// Restore the Squigs.io bar once UglyDex is linked from the main site.
+const showSquigsEcosystemNav = false;
+
 export default async function RootLayout({
   children,
 }: {
@@ -64,22 +67,24 @@ export default async function RootLayout({
         <a className="skip" href="#main">
           Skip to content
         </a>
-        <nav className="holder-zone-bar" aria-label="Squigs ecosystem">
-          <a href="https://squigs.io/" aria-label="Back to squigs.io">
-            <Image
-              src="/brand/squigs-reloaded.webp"
-              width={55}
-              height={32}
-              alt=""
-            />
-          </a>
-          <a href="https://squigs.io/collection.html">Collection</a>
-          <a href="https://squigs.io/studio.html">Studio</a>
-          <a href="https://squigs.io/uglyboard.html">UglyBoard</a>
-          <a href="https://imagesubmit-production.up.railway.app/">
-            Image Factory
-          </a>
-        </nav>
+        {showSquigsEcosystemNav && (
+          <nav className="holder-zone-bar" aria-label="Squigs ecosystem">
+            <a href="https://squigs.io/" aria-label="Back to squigs.io">
+              <Image
+                src="/brand/squigs-reloaded.webp"
+                width={55}
+                height={32}
+                alt=""
+              />
+            </a>
+            <a href="https://squigs.io/collection.html">Collection</a>
+            <a href="https://squigs.io/studio.html">Studio</a>
+            <a href="https://squigs.io/uglyboard.html">UglyBoard</a>
+            <a href="https://imagesubmit-production.up.railway.app/">
+              Image Factory
+            </a>
+          </nav>
+        )}
         <SiteHeader slug={slug} isPublic={isPublic} />
         <main id="main">{children}</main>
         <footer>
