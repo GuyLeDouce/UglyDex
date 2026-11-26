@@ -24,11 +24,6 @@
   font-weight: 700;
   min-height: 44px;
 }
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .squig-card-main:hover .trading-face:after {
-    opacity: 1;
-  }
-}
 @media (max-width: 700px) {
   .header-signout {
     margin-left: auto;
@@ -96,6 +91,37 @@
     var(--card-mid) 65%,
     var(--card-dark)
   );
+}
+.trading-face:is([data-og], [data-finish='epic'], [data-finish='legendary']) {
+  --foil-colors: #72edff, #b693ff, #ff99dc, #fff6b9, #72edff;
+  background-image: linear-gradient(115deg, var(--foil-colors));
+  background-size: 230% 100%;
+  background-position: 45% 50%;
+}
+.trading-face[data-og] {
+  --foil-colors: #bc8135, #fff4aa, #99e5d4, #ffadcf, #bc8135;
+}
+.trading-face[data-finish='legendary'] {
+  --foil-colors: #f7b83a, #fffadc, #7af2ff, #d5a6ff, #ffb2b8, #f7b83a;
+}
+@keyframes trading-foil-sweep {
+  0%,
+  100% {
+    background-position: 45% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .album-viewer-card.has-motion
+    .trading-face:is(
+      [data-og],
+      [data-finish='epic'],
+      [data-finish='legendary']
+    ) {
+    animation: trading-foil-sweep 5s ease-in-out infinite;
+  }
 }
 .trading-face[data-og] .trading-og {
   background: linear-gradient(

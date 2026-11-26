@@ -17,6 +17,13 @@ export type CardFinish = {
   og: boolean;
   collector?: boolean;
 };
+export function cardMaterial({ rarity, og, collector }: CardFinish) {
+  const material = cardFinishes[rarity];
+  if (collector) return cardFinishes.epic;
+  return og && material.foil < cardFinishes.rare.foil
+    ? cardFinishes.rare
+    : material;
+}
 export function parseCardFinish(
   rarity: string | null,
   og: string | null,
