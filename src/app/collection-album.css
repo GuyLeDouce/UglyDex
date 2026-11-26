@@ -152,6 +152,7 @@
    text are never covered by a reflective overlay. No animation runs in grids. */
 .album-viewer-card.has-motion
   .trading-face:is(
+    [data-og],
     [data-finish='rare'],
     [data-finish='epic'],
     [data-finish='legendary']

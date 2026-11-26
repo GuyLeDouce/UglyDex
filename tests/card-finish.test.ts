@@ -5,6 +5,7 @@ import {
 import { expect, it } from 'vitest';
 import {
   cardFinishes,
+  cardMaterial,
   clampPose,
   loopPose,
   parseCardFinish,
@@ -23,6 +24,16 @@ it('keeps OG independent and defaults missing metadata safely', () => {
   expect(cardFinishes.uncommon.foil).toBe(0);
   expect(cardFinishes.rare.foil).toBeLessThan(cardFinishes.epic.foil);
   expect(cardFinishes.epic.foil).toBeLessThan(cardFinishes.legendary.foil);
+});
+it('gives any OG a foil finish while keeping stronger rarity finishes', () => {
+  for (const rarity of ['unclassified', 'common', 'uncommon'] as const) {
+    expect(cardMaterial({ rarity, og: true })).toBe(cardFinishes.rare);
+    expect(cardMaterial({ rarity, og: false })).toBe(cardFinishes[rarity]);
+  }
+  for (const rarity of ['rare', 'epic', 'legendary'] as const) {
+    expect(cardMaterial({ rarity, og: true })).toBe(cardFinishes[rarity]);
+    expect(cardMaterial({ rarity, og: false })).toBe(cardFinishes[rarity]);
+  }
 });
 it('clamps interaction and produces a continuous restrained loop', () => {
   expect(clampPose(2)).toBe(1);

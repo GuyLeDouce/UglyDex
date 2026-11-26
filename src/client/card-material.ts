@@ -1,5 +1,5 @@
 import {
-  cardFinishes,
+  cardMaterial,
   type CardFinish,
   type CardPose,
 } from '@/domain/card-finish';
@@ -21,9 +21,7 @@ export function paintCard(
   ctx.roundRect(12, 12, 1476, 2076, 80);
   ctx.clip();
   ctx.drawImage(base, 0, 0, 1500, 2100);
-  const material = finish.collector
-    ? cardFinishes.epic
-    : cardFinishes[finish.rarity];
+  const material = cardMaterial(finish);
   ctx.save();
   ctx.beginPath();
   ctx.roundRect(14, 14, 1472, 2072, 78);
